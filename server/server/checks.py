@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+
+'''checks'''
+
+from __future__ import absolute_import, division, print_function, unicode_literals, with_statement
+
 from django.core.checks import Error
 from django.conf import settings
 from django import VERSION

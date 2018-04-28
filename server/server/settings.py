@@ -1,23 +1,18 @@
-"""
-Django settings for server project.
+# -*- coding: utf-8 -*-
 
-For more information on this file, see
-https://docs.djangoproject.com/en/1.8/topics/settings/
+'''settings'''
 
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/1.8/ref/settings/
-"""
+from __future__ import absolute_import, division, print_function, unicode_literals, with_statement
+
+import os
+
+from datetime import timedelta
 
 from djangae.settings_base import * #Set up some AppEngine specific stuff
 from django.core.urlresolvers import reverse_lazy
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 
 from .boot import get_app_config
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -41,8 +36,9 @@ INSTALLED_APPS = (
     'cspreports',
     'djangae.contrib.gauth.datastore',
     'djangae.contrib.security',
+    'djangae.contrib.consistency',
     'server',
-    # 'djangae.contrib.uniquetool',
+    'rest_framework',
 )
 
 MIDDLEWARE = (
@@ -50,6 +46,7 @@ MIDDLEWARE = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'djangae.contrib.gauth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'csp.middleware.CSPMiddleware',
     'session_csrf.CsrfMiddleware',
@@ -96,6 +93,14 @@ ROOT_URLCONF = 'server.urls'
 
 WSGI_APPLICATION = 'server.wsgi.application'
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'djangae.db.backends.appengine'
+    }
+}
+
+DJANGAE_DISABLE_CONSTRAINT_CHECKS = True
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
@@ -129,5 +134,37 @@ CSP_SCRIPT_SRC = ("'self'", "*.googleanalytics.com", "*.google-analytics.com", "
 CSP_IMG_SRC = ("'self'", "data:", "s.ytimg.com", "*.googleusercontent.com", "*.gstatic.com", "www.google-analytics.com")
 CSP_CONNECT_SRC = ("'self'", "plus.google.com", "www.google-analytics.com")
 
-
 from djangae.contrib.gauth.settings import *
+
+REST_FRAMEWORK = {
+    # 'DEFAULT_PAGINATION_CLASS': 'matches.pagination.GaePageNumberPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
+}
+
+# AUTH_USER_MODEL = 'djangae.contrib.gauth.datastore.models.GaeDatastoreUser'
+AUTH_USER_MODEL = 'gauth_datastore.GaeDatastoreUser'
+# DJANGAE_CREATE_UNKNOWN_USER = True
+
+AUTHENTICATION_BACKENDS = (
+    'djangae.contrib.gauth_datastore.backends.AppEngineUserAPIBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+CONSISTENCY_CONFIG = {
+    'defaults': {'cache_on_modification': True}
+}
+
+JWT_AUTH = {
+    'JWT_LEEWAY': 120,
+    'JWT_EXPIRATION_DELTA': timedelta(hours=24),
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=30),
+    # 'JWT_PAYLOAD_HANDLER': 'matches.utils.jwt_payload',
+}

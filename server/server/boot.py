@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+
+'''boot functionality'''
+
+from __future__ import absolute_import, division, print_function, unicode_literals, with_statement
+
 import sys
 from os.path import dirname, abspath, join, exists
 
@@ -24,6 +30,7 @@ def fix_path(include_dev_libs_path=False):
 def get_app_config():
     """Returns the application configuration, creating it if necessary."""
     from django.utils.crypto import get_random_string
+    # pylint: disable=import-error
     from google.appengine.ext import ndb
 
     class Config(ndb.Model):

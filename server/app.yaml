@@ -1,11 +1,10 @@
-application: server
+application: ludoj-games
 version: 1
 runtime: python27
 api_version: 1
 threadsafe: true
 
 handlers:
-
 - url: /_ah/(mapreduce|queue|warmup|start|stop).*
   script: server.wsgi.application
   login: admin
@@ -28,6 +27,12 @@ handlers:
 - url: /.*
   script: server.wsgi.application
   secure: always
+
+libraries:
+- name: django
+  version: '1.11'
+- name: ssl
+  version: '2.7.11'
 
 skip_files:
   - ^manage\.py$

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 import os
 import subprocess
 import shutil
@@ -9,6 +11,8 @@ import platform
 from StringIO import StringIO
 from zipfile import ZipFile
 from urllib import urlopen
+
+from six import iteritems
 
 REQUIREMENTS = ["pip", "git"]
 
@@ -34,6 +38,9 @@ FEATURED_SDK_REPO = "https://storage.googleapis.com/appengine-sdks/featured/"
 DEPRECATED_SDK_REPO = "https://storage.googleapis.com/appengine-sdks/deprecated/{}/".format(
     APPENGINE_SDK_VERSION.replace('.', '')
 )
+
+COPY_DIR = {}
+RM_FILES = ()
 
 
 def check_commands_installed():
@@ -111,6 +118,18 @@ def install_requirements():
         args = ["pip", "install", "-r", requirements, "-t", target, "-I"]
         p = subprocess.Popen(args)
         p.wait()
+
+    for path in RM_FILES:
+        print('removing "{}"'.format(path))
+        if os.path.isdir(path) and not os.path.islink(path):
+            shutil.rmtree(path, ignore_errors=True)
+        elif os.path.isfile(path):
+            os.remove(path)
+
+    for src, dst in iteritems(COPY_DIR):
+        if not os.path.exists(dst):
+            print('copying from "{}" to "{}"'.format(src, dst))
+            shutil.copytree(src, dst)
 
 
 if __name__ == "__main__":

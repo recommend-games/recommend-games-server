@@ -7,6 +7,7 @@ __pycache__/
 /.*
 !/.gitignore
 !/.gitmodules
+!/.pylintrc
 
 # C extensions
 *.so
