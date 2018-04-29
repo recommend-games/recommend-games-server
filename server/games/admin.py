@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-'''admin settings'''
+''' admin settings '''
 
-from __future__ import absolute_import
+from __future__ import absolute_import, division, print_function, unicode_literals, with_statement
 
 from django.contrib import admin
 

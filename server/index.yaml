@@ -32,3 +32,9 @@ indexes:
   properties:
   - name: app
   - name: name
+
+- kind: games_game
+  properties:
+  - name: rank
+  - name: __key__
+    direction: desc
