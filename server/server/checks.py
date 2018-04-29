@@ -9,7 +9,10 @@ from django.conf import settings
 from django import VERSION
 
 
+# pylint: disable=unused-argument
 def check_session_csrf_enabled(app_configs, **kwargs):
+    ''' check session csrf enabled '''
+
     errors = []
 
     # Django 1.11 has built-in session-based CSRF tokens, so if that's enabled
@@ -31,7 +34,10 @@ def check_session_csrf_enabled(app_configs, **kwargs):
     return errors
 
 
+# pylint: disable=unused-argument
 def check_csp_is_not_report_only(app_configs, **kwargs):
+    ''' check csp is not report only '''
+
     errors = []
     if getattr(settings, "CSP_REPORT_ONLY", False):
         errors.append(Error(
@@ -54,7 +60,10 @@ CSP_SOURCE_NAMES = [
 ]
 
 
+# pylint: disable=unused-argument
 def check_csp_sources_not_unsafe(app_configs, **kwargs):
+    ''' check csp sources not unsafe '''
+
     errors = []
     for csp_src_name in CSP_SOURCE_NAMES:
         csp_src_values = getattr(settings, csp_src_name, [])
@@ -66,6 +75,7 @@ def check_csp_sources_not_unsafe(app_configs, **kwargs):
     return errors
 
 
+# pylint: disable=invalid-name,unused-argument
 def check_cached_template_loader_used(app_configs, **kwargs):
     """ Ensure that the cached template loader is used for Django's template system. """
     for template in settings.TEMPLATES:

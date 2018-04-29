@@ -15,12 +15,14 @@ from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 import session_csrf
 session_csrf.monkeypatch()
 
+# pylint: disable=ungrouped-imports,wrong-import-position
 from django.contrib import admin
 admin.autodiscover()
 
+# pylint: disable=invalid-name
 urlpatterns = (
     # Examples:
-    # url(r'^$', 'server.views.home', name='home'),
+    url(r'^', include('games.urls')),
     url(r'^_ah/', include('djangae.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^csp/', include('cspreports.urls')),

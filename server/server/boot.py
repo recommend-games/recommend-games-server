@@ -41,7 +41,7 @@ def get_app_config():
     chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
 
     @ndb.transactional()
-    def txn():
+    def _txn():
         # Get or create the Config in a transaction, so that if it doesn't exist we don't get 2
         # threads creating a Config object and one overwriting the other
         key = ndb.Key(Config, 'config')
@@ -51,10 +51,11 @@ def get_app_config():
             entity.secret_key = get_random_string(50, chars)
             entity.put()
         return entity
-    return txn()
+    return _txn()
 
 
 def register_custom_checks():
+    ''' register custom checks '''
     from . import checks
     from django.core.checks import register, Tags
     register(checks.check_csp_sources_not_unsafe, Tags.security, deploy=True)

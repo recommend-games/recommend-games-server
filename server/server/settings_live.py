@@ -4,6 +4,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals, with_statement
 
+# pylint: disable=wildcard-import,unused-wildcard-import
 from server.settings import *
 
 SESSION_COOKIE_SECURE = True
@@ -26,12 +27,12 @@ SECURE_REDIRECT_EXEMPT = [
 
 DEBUG = False
 
-MIDDLEWARE_CLASSES = list(MIDDLEWARE_CLASSES)
-if 'google.appengine.ext.appstats.recording.AppStatsDjangoMiddleware' in MIDDLEWARE_CLASSES:
-    MIDDLEWARE_CLASSES.remove('google.appengine.ext.appstats.recording.AppStatsDjangoMiddleware')
-if 'matches.middleware.ProfileMiddleware' in MIDDLEWARE_CLASSES:
-    MIDDLEWARE_CLASSES.remove('matches.middleware.ProfileMiddleware')
-MIDDLEWARE_CLASSES = tuple(MIDDLEWARE_CLASSES)
+MIDDLEWARE = list(MIDDLEWARE)
+if 'google.appengine.ext.appstats.recording.AppStatsDjangoMiddleware' in MIDDLEWARE:
+    MIDDLEWARE.remove('google.appengine.ext.appstats.recording.AppStatsDjangoMiddleware')
+if 'matches.middleware.ProfileMiddleware' in MIDDLEWARE:
+    MIDDLEWARE.remove('matches.middleware.ProfileMiddleware')
+MIDDLEWARE = tuple(MIDDLEWARE)
 
 # Remove unsafe-inline from CSP_STYLE_SRC. It's there in default to allow
 # Django error pages in DEBUG mode render necessary styles

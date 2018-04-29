@@ -1,11 +1,18 @@
-https://github.com/potatolondon/djangae/archive/e5a86b77140e2ce0fbe464eb2afd18fe3d977a5e.zip
-git+https://github.com/mozilla/django-csp.git#egg=djangocsp
-git+https://github.com/adamalton/django-csp-reports.git#egg=cspreports
+# https://github.com/potatolondon/djangae/archive/e5a86b77140e2ce0fbe464eb2afd18fe3d977a5e.zip
+# git+https://github.com/mozilla/django-csp.git#egg=djangocsp
+# git+https://github.com/adamalton/django-csp-reports.git#egg=cspreports
 
+djangae
+django-csp
+django-csp-reports
 django-crispy-forms
 django-filter
 django-session-csrf
 djangorestframework
 djangorestframework-jwt
 
+PyJWT
+
+coreapi
+future
 six

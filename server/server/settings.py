@@ -8,12 +8,14 @@ import os
 
 from datetime import timedelta
 
+# pylint: disable=wildcard-import,unused-wildcard-import
 from djangae.settings_base import * #Set up some AppEngine specific stuff
 from django.core.urlresolvers import reverse_lazy
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+# pylint: disable=wrong-import-position
 from .boot import get_app_config
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_app_config().secret_key
@@ -39,6 +41,9 @@ INSTALLED_APPS = (
     'djangae.contrib.consistency',
     'server',
     'rest_framework',
+    'games.apps.GamesConfig',
+    'django_filters',
+    'crispy_forms',
 )
 
 MIDDLEWARE = (
@@ -129,15 +134,21 @@ CSP_DEFAULT_SRC = ("'self'", "*.gstatic.com")
 # `unsafe-inline` in settings_live.py
 CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "fonts.googleapis.com", "*.gstatic.com")
 CSP_FONT_SRC = ("'self'", "themes.googleusercontent.com", "*.gstatic.com")
-CSP_FRAME_SRC = ("'self'", "www.google.com", "www.youtube.com", "accounts.google.com", "apis.google.com", "plus.google.com")
-CSP_SCRIPT_SRC = ("'self'", "*.googleanalytics.com", "*.google-analytics.com", "ajax.googleapis.com")
-CSP_IMG_SRC = ("'self'", "data:", "s.ytimg.com", "*.googleusercontent.com", "*.gstatic.com", "www.google-analytics.com")
+CSP_FRAME_SRC = (
+    "'self'", "www.google.com", "www.youtube.com",
+    "accounts.google.com", "apis.google.com", "plus.google.com")
+CSP_SCRIPT_SRC = (
+    "'self'", "*.googleanalytics.com", "*.google-analytics.com", "ajax.googleapis.com")
+CSP_IMG_SRC = (
+    "'self'", "data:", "s.ytimg.com", "*.googleusercontent.com",
+    "*.gstatic.com", "www.google-analytics.com")
 CSP_CONNECT_SRC = ("'self'", "plus.google.com", "www.google-analytics.com")
 
+# pylint: disable=ungrouped-imports,wrong-import-order
 from djangae.contrib.gauth.settings import *
 
 REST_FRAMEWORK = {
-    # 'DEFAULT_PAGINATION_CLASS': 'matches.pagination.GaePageNumberPagination',
+    'DEFAULT_PAGINATION_CLASS': 'games.pagination.GaePageNumberPagination',
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
