@@ -2,10 +2,13 @@
 
 ''' Scrapy item pipelines '''
 
+from __future__ import absolute_import, division, print_function, unicode_literals, with_statement
+
+from future.utils import raise_from
 from scrapy.exceptions import DropItem
 
 
-class ValidatePipeline:
+class ValidatePipeline(object):
     ''' validate items '''
 
     # pylint: disable=no-self-use,unused-argument
@@ -18,7 +21,7 @@ class ValidatePipeline:
         raise DropItem('Missing required field in {}'.format(item))
 
 
-class DataTypePipeline:
+class DataTypePipeline(object):
     ''' convert fields to their required data type '''
 
     # pylint: disable=no-self-use,unused-argument
@@ -39,9 +42,9 @@ class DataTypePipeline:
                 item[field] = dtype(item[field])
             except Exception as exc:
                 if default is NotImplemented:
-                    raise DropItem(
+                    raise_from(DropItem(
                         'Could not convert field "{}" to datatype "{}" in item "{}"'
-                        .format(field, dtype, item)) from exc
+                        .format(field, dtype, item)), exc)
 
                 item[field] = default() if callable(default) else default
 

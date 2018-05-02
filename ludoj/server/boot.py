@@ -4,14 +4,39 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals, with_statement
 
+import logging
 import sys
+
 from os.path import dirname, abspath, join, exists
+
+LOGGER = logging.getLogger(__name__)
 
 PROJECT_DIR = dirname(dirname(abspath(__file__)))
 SITEPACKAGES_DIR = join(PROJECT_DIR, "sitepackages")
 DEV_SITEPACKAGES_DIR = join(SITEPACKAGES_DIR, "dev")
 PROD_SITEPACKAGES_DIR = join(SITEPACKAGES_DIR, "prod")
 APPENGINE_DIR = join(DEV_SITEPACKAGES_DIR, "google_appengine")
+
+
+def _check_import():
+    try:
+        # pylint: disable=unused-variable
+        import google.appengine
+        return
+    except ImportError:
+        pass
+
+    import imp
+
+    file_pointer, path_name, description = imp.find_module('google', [APPENGINE_DIR])
+    imp.load_module('google', file_pointer, path_name, description)
+
+    try:
+        import google.appengine
+    except ImportError as exc:
+        LOGGER.error('could not import path <%s>', APPENGINE_DIR)
+        LOGGER.exception(exc)
+        raise
 
 
 def fix_path(include_dev_libs_path=False):
@@ -23,6 +48,8 @@ def fix_path(include_dev_libs_path=False):
         if DEV_SITEPACKAGES_DIR not in sys.path:
             sys.path.insert(1, DEV_SITEPACKAGES_DIR)
 
+        _check_import()
+
     if SITEPACKAGES_DIR not in sys.path:
         sys.path.insert(1, PROD_SITEPACKAGES_DIR)
 
@@ -30,8 +57,11 @@ def fix_path(include_dev_libs_path=False):
 def get_app_config():
     """Returns the application configuration, creating it if necessary."""
     from django.utils.crypto import get_random_string
-    # pylint: disable=import-error
-    from google.appengine.ext import ndb
+    try:
+        from google.appengine.ext import ndb
+    except ImportError:
+        _check_import()
+        from google.appengine.ext import ndb
 
     class Config(ndb.Model):
         """A simple key-value store for application configuration settings."""

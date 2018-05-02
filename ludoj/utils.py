@@ -2,17 +2,27 @@
 
 ''' util functions '''
 
+from __future__ import absolute_import, division, print_function, unicode_literals, with_statement
+
 import csv
 import json
 import logging
 import os
 import sys
 
+# pylint: disable=redefined-builtin
+from builtins import bytes, int, range, str
 from collections import OrderedDict
-from datetime import datetime, timezone
+
+from datetime import datetime
+try:
+    from datetime.timezone import utc
+except ImportError:
+    from pytz import utc
+
 from itertools import groupby
 from types import GeneratorType
-from urllib.parse import parse_qs, urlparse
+from six.moves.urllib.parse import parse_qs, urlparse
 
 import dateutil.parser
 import turicreate as tc
@@ -20,6 +30,7 @@ import turicreate as tc
 csv.field_size_limit(sys.maxsize)
 
 LOGGER = logging.getLogger(__name__)
+ITERABLE_SINGLE_VALUES = (dict, str, bytes)
 
 
 def identity(obj):
@@ -104,7 +115,7 @@ def extract_query_param(url, field):
 def now(tzinfo=None):
     ''' current time in UTC or given timezone '''
 
-    result = datetime.utcnow().replace(microsecond=0, tzinfo=timezone.utc)
+    result = datetime.utcnow().replace(microsecond=0, tzinfo=utc)
     return result if tzinfo is None else result.astimezone(tzinfo)
 
 
@@ -125,7 +136,7 @@ def parse_date(date, tzinfo=None, format_str=None):
     # parse as epoch time
     timestamp = parse_float(date)
     if timestamp is not None:
-        return datetime.fromtimestamp(timestamp, tzinfo or timezone.utc)
+        return datetime.fromtimestamp(timestamp, tzinfo or utc)
 
     if format_str:
         try:
@@ -148,7 +159,7 @@ def parse_date(date, tzinfo=None, format_str=None):
 
     try:
         # parse as time.struct_time
-        return datetime(*date[:6], tzinfo=tzinfo or timezone.utc)
+        return datetime(*date[:6], tzinfo=tzinfo or utc)
     except Exception:
         pass
 
@@ -182,7 +193,10 @@ def serialize_json(obj, file=None, **kwargs):
         LOGGER.info('opening file <%s> and writing JSON content', file)
 
         path_dir = os.path.abspath(os.path.split(file)[0])
-        os.makedirs(path_dir, exist_ok=True)
+        try:
+            os.makedirs(path_dir)
+        except Exception:
+            pass
 
         with open(file, 'w') as json_file:
             return json.dump(obj, json_file, **kwargs)
@@ -267,3 +281,15 @@ def filter_sframe(sframe, **params):
             raise ValueError('unknown operation <{}>'.format(operation))
 
     return sframe[ind]
+
+
+def arg_to_iter(arg):
+    ''' convert an argument to an iterable '''
+
+    if arg is None:
+        return ()
+
+    if not isinstance(arg, ITERABLE_SINGLE_VALUES) and hasattr(arg, '__iter__'):
+        return arg
+
+    return (arg,)

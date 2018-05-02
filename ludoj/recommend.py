@@ -3,6 +3,8 @@
 
 ''' recommend games '''
 
+from __future__ import absolute_import, division, print_function, unicode_literals, with_statement
+
 import argparse
 import csv
 import logging
@@ -10,13 +12,16 @@ import os
 import tempfile
 import sys
 
+# pylint: disable=redefined-builtin
+from builtins import int, map, str
 from datetime import date
 
 import turicreate as tc
 
-from scrapy.utils.misc import arg_to_iter
+from future.utils import python_2_unicode_compatible
+from six import iteritems
 
-from .utils import condense_csv, filter_sframe
+from .utils import arg_to_iter, condense_csv, filter_sframe
 
 csv.field_size_limit(sys.maxsize)
 
@@ -65,6 +70,7 @@ def make_cluster(data, item_id, target, target_dtype=str):
     return clusters.filter(lambda x: x is not None and len(x) > 1)
 
 
+@python_2_unicode_compatible
 class GamesRecommender(object):
     ''' games recommender '''
 
@@ -422,12 +428,12 @@ class GamesRecommender(object):
             ratings,
             max_iterations=100,
             defaults=True,
-            **min_max,
+            **min_max
         ):
         ''' train recommender from data '''
 
         if defaults:
-            for column, values in cls.default_limits.items():
+            for column, values in iteritems(cls.default_limits):
                 min_max.setdefault(column, values)
 
         columns = list(min_max.keys())
@@ -438,7 +444,7 @@ class GamesRecommender(object):
         games = games[columns].dropna()
         ind = games['bgg_id'].apply(bool, skip_na=False)
 
-        for column, values in min_max.items():
+        for column, values in iteritems(min_max):
             values = tuple(arg_to_iter(values)) + (None, None)
             lower, upper = values[:2]
 
@@ -518,7 +524,7 @@ class GamesRecommender(object):
             ratings_columns=None,
             max_iterations=100,
             defaults=True,
-            **min_max,
+            **min_max
         ):
         ''' load data from CSV and train recommender '''
 
@@ -600,36 +606,3 @@ def _main():
 
 if __name__ == '__main__':
     _main()
-
-# ids = set(games['bgg_id'])
-
-# with open('clusters.csv', 'w') as f:
-#     writer = csv.DictWriter(f, ('bgg_id', 'bgg_id_impl'))
-#     writer.writeheader()
-
-#     for cluster in clusters:
-#         if len(cluster) == 1:
-#             # writer.writerow({'bgg_id': cluster[0], 'bgg_id_impl': cluster[0]})
-#             continue
-
-#         cluster_rec = set(cluster) & ids
-
-#         if not cluster_rec:
-#             # TODO handle empty cluster
-#             continue
-
-#         recommendations = model.recommend([None], items=list(cluster_rec))
-
-#         recommendations.print_rows(num_rows=3)
-
-#         if not recommendations:
-#             # TODO handle empty recommendations
-#             continue
-
-#         bgg_id_impl = recommendations[0]['bgg_id']
-
-#         # print(bgg_id_impl, cluster)
-
-#         for bgg_id in sorted(cluster):
-
-#             writer.writerow({'bgg_id': bgg_id, 'bgg_id_impl': bgg_id_impl})

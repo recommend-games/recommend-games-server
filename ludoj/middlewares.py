@@ -2,6 +2,8 @@
 
 ''' Scrapy downloader middleware '''
 
+from __future__ import absolute_import, division, print_function, unicode_literals, with_statement
+
 import logging
 
 from scrapy.exceptions import NotConfigured
@@ -12,7 +14,7 @@ from .utils import identity
 LOGGER = logging.getLogger(__name__)
 
 
-class DelayedRetry:
+class DelayedRetry(object):
     ''' retry requests with a delay '''
 
     @classmethod

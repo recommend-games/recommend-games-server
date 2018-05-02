@@ -12,7 +12,9 @@ djangorestframework
 djangorestframework-jwt
 
 PyJWT
+python-dateutil
 
 coreapi
 future
 six
+turicreate

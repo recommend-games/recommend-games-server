@@ -8,9 +8,14 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import sys
 
-from server.boot import fix_path
-fix_path(include_dev_libs_path=True)
+try:
+    from server.boot import fix_path
+    fix_path(include_dev_libs_path=True)
+except ImportError as exc:
+    print('unable to fix import path', exc)
+    raise
 
+# pylint: disable=wrong-import-position,wrong-import-order
 from djangae.contrib.consistency.signals import connect_signals
 connect_signals()
 

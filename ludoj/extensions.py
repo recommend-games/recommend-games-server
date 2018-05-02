@@ -2,6 +2,8 @@
 
 ''' Scrapy extensions '''
 
+from __future__ import absolute_import, division, print_function, unicode_literals, with_statement
+
 import logging
 import pprint
 
@@ -20,7 +22,7 @@ def _safe_load_object(obj):
     return load_object(obj) if isinstance(obj, str) else obj
 
 
-class MultiFeedExporter:
+class MultiFeedExporter(object):
     ''' allows exporting several types of items in the same spider '''
 
     @classmethod
@@ -61,7 +63,7 @@ class MultiFeedExporter:
 
         for item_cls in self.item_classes:
             # pylint: disable=cell-var-from-loop
-            def _uripar(params, spider, *, cls_name=item_cls.__name__):
+            def _uripar(params, spider, cls_name=item_cls.__name__):
                 params['class'] = cls_name
                 LOGGER.info('_uripar(%r, %r, %r)', params, spider, cls_name)
                 return params
@@ -100,13 +102,13 @@ class NicerAutoThrottle(AutoThrottle):
     ''' autothrottling with exponential backoff depending on status codes '''
 
     def __init__(self, crawler):
-        super().__init__(crawler)
+        super(NicerAutoThrottle, self).__init__(crawler)
         self.http_codes = frozenset(
             int(x) for x in crawler.settings.getlist('AUTOTHROTTLE_HTTP_CODES'))
         LOGGER.info('throttle requests on status codes: %s', sorted(self.http_codes))
 
     def _adjust_delay(self, slot, latency, response):
-        super()._adjust_delay(slot, latency, response)
+        super(NicerAutoThrottle, self)._adjust_delay(slot, latency, response)
 
         if response.status not in self.http_codes:
             return
@@ -122,7 +124,7 @@ class NicerAutoThrottle(AutoThrottle):
 
 
 # see https://github.com/scrapy/scrapy/issues/2173
-class _LoopingExtension:
+class _LoopingExtension(object):
     _interval = None
     _task = None
 

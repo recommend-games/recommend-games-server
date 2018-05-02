@@ -31,6 +31,8 @@ handlers:
 libraries:
 - name: django
   version: '1.11'
+- name: pytz
+  version: '2016.4'
 - name: ssl
   version: '2.7.11'
 
