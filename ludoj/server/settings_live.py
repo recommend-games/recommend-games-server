@@ -5,7 +5,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals, with_statement
 
 # pylint: disable=wildcard-import,unused-wildcard-import
-from server.settings import *
+from .settings import *
 
 SESSION_COOKIE_SECURE = True
 SECURE_HSTS_SECONDS = 2592000 #30 days

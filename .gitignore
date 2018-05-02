@@ -83,6 +83,7 @@ celerybeat-schedule
 .venv/
 venv/
 ENV/
+sitepackages/
 
 # Spyder project settings
 .spyderproject
@@ -99,7 +100,8 @@ include/
 share/
 pip-selfcheck.json
 
-/feeds
-/recommender
-/.tc
+feeds/
+recommender/
+.tc/
+.storage/
 
