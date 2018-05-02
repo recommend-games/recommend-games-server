@@ -7,13 +7,18 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 import pprint
 
-from scrapy import signals
+# pylint: disable=redefined-builtin
+from builtins import dict, int, map, object, str
+
+from scrapy import Request, signals
 from scrapy.exceptions import NotConfigured
 from scrapy.extensions.feedexport import FeedExporter
 from scrapy.extensions.throttle import AutoThrottle
 from scrapy.utils.misc import load_object
 from twisted.internet.defer import DeferredList, maybeDeferred
 from twisted.internet.task import LoopingCall
+
+from .utils import clip_bytes, serialize_json
 
 LOGGER = logging.getLogger(__name__)
 
@@ -95,6 +100,65 @@ class MultiFeedExporter(object):
         else:
             item = exporter.item_scraped(item, spider)
 
+        return item
+
+
+class HttpRequestExtension(object):
+    ''' send HTTP request with scraped item as body '''
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        ''' init from crawler '''
+
+        enabled = crawler.settings.getbool('HTTP_REQUEST_EXTENSION_ENABLED')
+        url = crawler.settings.get('HTTP_REQUEST_EXTENSION_URL')
+
+        if not enabled or not url:
+            raise NotConfigured
+
+        method = crawler.settings.get('HTTP_REQUEST_EXTENSION_METHOD') or 'POST'
+        serializer = crawler.settings.get('HTTP_REQUEST_EXTENSION_SERIALIZER') or None
+        serializer = _safe_load_object(serializer)
+
+        obj = cls(url, method, serializer)
+
+        crawler.signals.connect(obj._item_scraped, signals.item_scraped)
+
+        return obj
+
+    def __init__(self, url, method='POST', serializer=None, headers=None):
+        self.url = url
+        self.method = method
+        self.serializer = serializer if callable(serializer) else serialize_json
+        self.headers = headers or {}
+
+        self.headers.setdefault('Accept', 'application/json')
+        if self.serializer is serialize_json:
+            self.headers.setdefault('Content-Type', 'application/json')
+
+    def _item_scraped(self, item, spider):
+        # TODO filter item types
+
+        item = dict(item)
+        item.pop('implementation', None)
+        item['description'] = clip_bytes(item.get('description'), 1500)
+
+        request = Request(
+            url=self.url,
+            method=self.method,
+            body=self.serializer(item),
+            headers=self.headers,
+            priority=1,
+        )
+
+        deferred = spider.crawler.engine.download(request, spider)
+        deferred.addBoth(self._log_response, item)
+        return deferred
+
+    def _log_response(self, response, item):
+        # TODO handle non 2XX response
+        LOGGER.info(response)
+        LOGGER.info(response.text)
         return item
 
 

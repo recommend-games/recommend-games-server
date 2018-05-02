@@ -293,3 +293,27 @@ def arg_to_iter(arg):
         return arg
 
     return (arg,)
+
+
+def clip_bytes(string, size, encoding='utf-8', step=10):
+    ''' returns a string whose size in bytes does not exceed size '''
+
+    if not string:
+        return None
+
+    if isinstance(string, bytes):
+        string = string.decode(encoding)
+
+    end = size
+
+    while True:
+        string = string[:end]
+        b_string = string.encode(encoding)
+
+        if len(b_string) <= size:
+            return string
+
+        end -= step
+
+        if end <= 0:
+            return None

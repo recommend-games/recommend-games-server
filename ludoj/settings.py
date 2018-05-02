@@ -93,6 +93,7 @@ EXTENSIONS = {
     'ludoj.extensions.MultiFeedExporter': 0,
     'scrapy.extensions.throttle.AutoThrottle': None,
     'ludoj.extensions.NicerAutoThrottle': 0,
+    'ludoj.extensions.HttpRequestExtension': 300,
     'ludoj.extensions.MonitorDownloadsExtension': 500,
     'ludoj.extensions.DumpStatsExtension': 500,
 }
