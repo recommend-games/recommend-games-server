@@ -101,6 +101,7 @@ class BggSpider(Spider):
     page_size = 100
 
     custom_settings = {
+        'SCRAPE_BGG_RATINGS': True,
         'DOWNLOAD_DELAY': .5,
         'CONCURRENT_REQUESTS_PER_DOMAIN': 8,
         'AUTOTHROTTLE_TARGET_CONCURRENCY': 4,
@@ -109,7 +110,19 @@ class BggSpider(Spider):
         'DELAYED_RETRY_DELAY': 5.0,
         'AUTOTHROTTLE_HTTP_CODES': (429, 503, 504),
         'HTTP_REQUEST_EXTENSION_ENABLED': True,
-        # 'HTTP_REQUEST_EXTENSION_URL': 'http://localhost:8000/games/',
+        'HTTP_REQUEST_EXTENSION_METHODS': {
+            'exists': 'HEAD',
+            'create': 'POST',
+            'update': 'PUT',
+        },
+        'HTTP_REQUEST_EXTENSION_URLS': {
+            'exists': 'http://localhost:8000/games/{item_id}/',
+            'create': 'http://localhost:8000/games/',
+            'update': 'http://localhost:8000/games/{item_id}/',
+        },
+        'HTTP_REQUEST_EXTENSION_ITEM_CLASSES': (GameItem,),
+        'HTTP_REQUEST_EXTENSION_ID_FIELD': 'bgg_id',
+        # 'LOG_LEVEL': 'DEBUG',
     }
 
     scrape_ratings = False

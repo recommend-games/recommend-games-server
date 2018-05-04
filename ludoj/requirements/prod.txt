@@ -16,5 +16,6 @@ python-dateutil
 
 coreapi
 future
+requests
 six
 turicreate

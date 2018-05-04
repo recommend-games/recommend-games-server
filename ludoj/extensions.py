@@ -9,14 +9,17 @@ import pprint
 
 # pylint: disable=redefined-builtin
 from builtins import dict, int, map, object, str
+from itertools import chain
 
-from scrapy import Request, signals
+from scrapy import signals
 from scrapy.exceptions import NotConfigured
 from scrapy.extensions.feedexport import FeedExporter
 from scrapy.extensions.throttle import AutoThrottle
-from scrapy.utils.misc import load_object
+from scrapy.utils.misc import arg_to_iter, load_object
 from twisted.internet.defer import DeferredList, maybeDeferred
 from twisted.internet.task import LoopingCall
+
+import requests
 
 from .utils import clip_bytes, serialize_json
 
@@ -106,59 +109,126 @@ class MultiFeedExporter(object):
 class HttpRequestExtension(object):
     ''' send HTTP request with scraped item as body '''
 
+    logger = logging.getLogger('HttpRequestExtension')
+
     @classmethod
     def from_crawler(cls, crawler):
         ''' init from crawler '''
 
         enabled = crawler.settings.getbool('HTTP_REQUEST_EXTENSION_ENABLED')
-        url = crawler.settings.get('HTTP_REQUEST_EXTENSION_URL')
+        urls = crawler.settings.getdict('HTTP_REQUEST_EXTENSION_URLS')
 
-        if not enabled or not url:
+        if not enabled or not urls:
             raise NotConfigured
 
-        method = crawler.settings.get('HTTP_REQUEST_EXTENSION_METHOD') or 'POST'
+        methods = crawler.settings.getdict('HTTP_REQUEST_EXTENSION_METHODS')
         serializer = crawler.settings.get('HTTP_REQUEST_EXTENSION_SERIALIZER') or None
         serializer = _safe_load_object(serializer)
+        item_classes = crawler.settings.getlist('HTTP_REQUEST_EXTENSION_ITEM_CLASSES')
+        id_field = crawler.settings.get('HTTP_REQUEST_EXTENSION_ID_FIELD') or 'id'
 
-        obj = cls(url, method, serializer)
+        obj = cls(
+            urls=urls,
+            methods=methods,
+            serializer=serializer,
+            item_classes=item_classes,
+            id_field=id_field,
+        )
 
         crawler.signals.connect(obj._item_scraped, signals.item_scraped)
 
         return obj
 
-    def __init__(self, url, method='POST', serializer=None, headers=None):
-        self.url = url
-        self.method = method
-        self.serializer = serializer if callable(serializer) else serialize_json
-        self.headers = headers or {}
+    def __init__(
+            self,
+            urls,
+            methods=None,
+            serializer=None,
+            headers=None,
+            item_classes=None,
+            id_field='id',
+        ):
+        methods = methods or {}
+        methods.setdefault('create', 'POST')
 
-        self.headers.setdefault('Accept', 'application/json')
-        if self.serializer is serialize_json:
-            self.headers.setdefault('Content-Type', 'application/json')
+        serializer = serializer if callable(serializer) else serialize_json
 
-    def _item_scraped(self, item, spider):
-        # TODO filter item types
+        headers = headers or {}
+        headers.setdefault('Accept', 'application/json')
+        headers.setdefault('Content-Type', 'application/json')
+
+        item_classes = chain.from_iterable(
+            item_class.split(',') if isinstance(item_class, str) else (item_class,)
+            for item_class in arg_to_iter(item_classes))
+        item_classes = tuple(map(_safe_load_object, item_classes))
+
+        self.urls = urls
+        self.methods = methods
+        self.serializer = serializer
+        self.headers = headers
+        self.item_classes = item_classes
+        self.id_field = id_field
+
+        self.logger.info(
+            'send %s requests to %s for item classes %s',
+            self.methods, self.urls, self.item_classes or '<all>')
+
+    def _exists(self, item_id):
+        if not self.urls.get('exists') or not self.methods.get('exists'):
+            return False
+
+        response = requests.request(
+            url=self.urls['exists'].format(item_id=item_id),
+            method=self.methods['exists'],
+            headers=self.headers,
+        )
+
+        self.logger.debug(
+            'reponse <%d> to <%s>: "%s"', response.status_code,
+            response.url, getattr(response, 'text', None))
+
+        return 200 <= response.status_code < 300
+
+    def _request(self, action, item):
+        item_id = item.get(self.id_field)
+
+        if not item_id or not self.urls.get(action) or not self.methods.get(action):
+            return False
 
         item = dict(item)
+        # TODO make part of serializer
         item.pop('implementation', None)
         item['description'] = clip_bytes(item.get('description'), 1500)
 
-        request = Request(
-            url=self.url,
-            method=self.method,
-            body=self.serializer(item),
+        response = requests.request(
+            url=self.urls[action].format(item_id=item_id),
+            method=self.methods[action],
+            data=self.serializer(item),
             headers=self.headers,
-            priority=1,
         )
 
-        deferred = spider.crawler.engine.download(request, spider)
-        deferred.addBoth(self._log_response, item)
-        return deferred
+        self.logger.debug('reponse <%d> to <%s>', response.status_code, response.url)
 
-    def _log_response(self, response, item):
-        # TODO handle non 2XX response
-        LOGGER.info(response)
-        LOGGER.info(response.text)
+        if 200 <= response.status_code < 300:
+            self.logger.debug('successful request %r', response)
+            return True
+
+        self.logger.warning('unsuccessful request %r', response)
+        self.logger.info(getattr(response, 'text', None))
+        return False
+
+    # pylint: disable=unused-argument
+    def _item_scraped(self, item, spider):
+        item_id = item.get(self.id_field)
+
+        if not item_id or (self.item_classes and not isinstance(item, self.item_classes)):
+            return item
+
+        exists = self._exists(item_id)
+
+        if not self._request('update' if exists else 'create', item):
+            self.logger.warning('could not complete request')
+
         return item
 
 
