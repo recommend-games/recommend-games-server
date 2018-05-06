@@ -179,3 +179,6 @@ JWT_AUTH = {
     'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=30),
     # 'JWT_PAYLOAD_HANDLER': 'matches.utils.jwt_payload',
 }
+
+RECOMMENDER_PATH = os.path.join(
+    os.path.dirname(__file__), '..', 'recommender')
