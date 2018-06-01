@@ -18,4 +18,4 @@ coreapi
 future
 requests
 six
-turicreate
+# turicreate
