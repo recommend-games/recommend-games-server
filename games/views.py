@@ -4,8 +4,8 @@
 
 from rest_framework.viewsets import ModelViewSet
 
-from .models import Game
-from .serializers import GameSerializer
+from .models import Game, Person
+from .serializers import GameSerializer, PersonSerializer
 
 
 class GameViewSet(ModelViewSet):
@@ -14,3 +14,11 @@ class GameViewSet(ModelViewSet):
     # pylint: disable=no-member
     queryset = Game.objects.all()
     serializer_class = GameSerializer
+
+
+class PersonViewSet(ModelViewSet):
+    ''' person view set '''
+
+    # pylint: disable=no-member
+    queryset = Person.objects.all()
+    serializer_class = PersonSerializer

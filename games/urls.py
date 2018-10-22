@@ -5,10 +5,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views import GameViewSet
+from .views import GameViewSet, PersonViewSet
 
 ROUTER = DefaultRouter()
-ROUTER.register(r'games', GameViewSet)
+ROUTER.register('games', GameViewSet)
+ROUTER.register('persons', PersonViewSet)
 
 # pylint: disable=invalid-name
 urlpatterns = [
