@@ -104,3 +104,6 @@ feeds/
 recommender/
 .tc/
 .storage/
+
+*.sqlite3
+
