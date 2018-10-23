@@ -15,7 +15,7 @@ class PersonSerializer(ModelSerializer):
     class Meta:
         ''' meta '''
         model = Person
-        fields = '__all__'
+        exclude = ('created_at', 'modified_at')
 
 
 class GameSerializer(ModelSerializer):
@@ -27,4 +27,4 @@ class GameSerializer(ModelSerializer):
     class Meta:
         ''' meta '''
         model = Game
-        fields = '__all__'
+        exclude = ('scraped_at', 'created_at', 'modified_at')

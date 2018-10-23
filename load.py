@@ -60,28 +60,28 @@ def _parse_item(item, fields=FIELDS, fields_mapping=FIELDS_MAPPING):
 
     for map_from, map_to in fields_mapping.items():
         if item.get(map_from):
-            result[map_to] = item[map_from]
+            result.setdefault(map_to, item[map_from])
 
     return result
 
 
-def _post(items, url):
+def _upload(items, url, id_field='id'):
     count = -1
     for count, data in enumerate(map(_parse_item, items)):
-        requests.post(url=url, data=data)
-        if count % 1000 == 999:
-            LOGGER.info('uploaded %d items so far', count + 1)
-    return count + 1
+        if count and count % 1000 == 0:
+            LOGGER.info('uploaded %d items so far', count)
 
-
-def _put(items, url, id_field='id'):
-    count = -1
-    for count, data in enumerate(map(_parse_item, items)):
         id_ = data.get(id_field)
-        if id_ is not None:
-            requests.put(url=url.format(id_), data=data)
-        if count % 1000 == 999:
-            LOGGER.info('uploaded %d items so far', count + 1)
+        if id_ is None:
+            continue
+
+        url_item = os.path.join(url, str(id_), '')
+        response = requests.head(url_item)
+
+        if response.ok:
+            requests.put(url=url_item, data=data)
+        else:
+            requests.post(url=url, data=data)
     return count + 1
 
 
@@ -113,7 +113,6 @@ def _parse_args():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('paths', nargs='+', help='')
     parser.add_argument('--url', '-u', required=True, help='')
-    parser.add_argument('--method', '-m', choices=('put', 'post'), help='')
     parser.add_argument('--id-field', '-i', default='id', help='')
     parser.add_argument(
         '--verbose', '-v', action='count', default=0, help='log level (repeat for more verbosity)')
@@ -134,10 +133,7 @@ def _main():
     LOGGER.info('uploading items to <%s>...', args.url)
 
     items = _load(*args.paths)
-    count = _post(
-        items=items,
-        url=args.url,
-    ) if args.method == 'post' else _put(
+    count = _upload(
         items=items,
         url=args.url,
         id_field=args.id_field,
