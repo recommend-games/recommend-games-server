@@ -17,8 +17,8 @@ class Game(Model):
     year = SmallIntegerField(blank=True, null=True)
     description = TextField(blank=True, null=True)
 
-    designer = ManyToManyField('Person', blank=True, related_name='designer_for')
-    artist = ManyToManyField('Person', blank=True, related_name='artist_for')
+    designer = ManyToManyField('Person', blank=True, related_name='designer_of')
+    artist = ManyToManyField('Person', blank=True, related_name='artist_of')
     # publisher = ListField(CharField(), blank=True)
 
     url = URLField(blank=True, null=True)
@@ -46,25 +46,28 @@ class Game(Model):
     compilation = BooleanField(default=False)
     # family = ListField(CharField(), blank=True)
     # expansion = ListField(CharField(), blank=True)
-    implementation = ManyToManyField(
+    implementation_of = ManyToManyField(
         'self', symmetrical=False, blank=True, related_name='implemented_by')
 
-    rank = PositiveIntegerField(blank=True, null=True)
+    bgg_rank = PositiveIntegerField(blank=True, null=True)
     num_votes = PositiveIntegerField(default=0)
     avg_rating = FloatField(blank=True, null=True)
     stddev_rating = FloatField(blank=True, null=True)
     bayes_rating = FloatField(blank=True, null=True)
 
+    rec_rank = PositiveIntegerField(blank=True, null=True)
+    rec_rating = FloatField(blank=True, null=True)
+
     complexity = FloatField(blank=True, null=True)
     language_dependency = FloatField(blank=True, null=True)
 
     scraped_at = DateTimeField(default=timezone.now)
-    created_at = DateTimeField(auto_now_add=True)
-    modified_at = DateTimeField(auto_now=True)
+    created_at = DateTimeField(auto_now_add=True, editable=False)
+    modified_at = DateTimeField(auto_now=True, editable=False)
 
     class Meta:
         ''' meta '''
-        ordering = ('rank',)
+        ordering = ('-rec_rating', '-bayes_rating')
 
     def __str__(self):
         return self.name
@@ -75,5 +78,8 @@ class Person(Model):
 
     name = CharField(max_length=255)
 
-    created_at = DateTimeField(auto_now_add=True)
-    modified_at = DateTimeField(auto_now=True)
+    created_at = DateTimeField(auto_now_add=True, editable=False)
+    modified_at = DateTimeField(auto_now=True, editable=False)
+
+    def __str__(self):
+        return self.name
