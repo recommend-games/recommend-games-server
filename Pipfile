@@ -13,6 +13,7 @@ django-filter = "*"
 pylint = "*"
 mypy = "*"
 pytest = "*"
+requests = "*"
 
 [requires]
 python_version = "3.7"
