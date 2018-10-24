@@ -1,19 +1,19 @@
 [[source]]
+name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-name = "pypi"
+
+[requires]
+python_version = "3.7"
 
 [packages]
 django = "*"
 djangorestframework = "*"
-markdown = "*"
 django-filter = "*"
+markdown = "*"
 
 [dev-packages]
 pylint = "*"
 mypy = "*"
 pytest = "*"
-requests = "*"
-
-[requires]
-python_version = "3.7"
+ipython = "*"
