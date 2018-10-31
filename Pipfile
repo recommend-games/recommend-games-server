@@ -4,13 +4,14 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [requires]
-python_version = "3.7"
+python_version = "3.6"
 
 [packages]
 django = "*"
 djangorestframework = "*"
 django-filter = "*"
 markdown = "*"
+ludoj-recommender = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-recommender.git"}
 
 [dev-packages]
 pylint = "*"

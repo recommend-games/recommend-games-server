@@ -102,7 +102,7 @@ pip-selfcheck.json
 
 feeds/
 recommender/
-.tc/
+.tc
 .storage/
 
 *.sqlite3

@@ -125,3 +125,7 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
 }
+
+# Recommender
+
+RECOMMENDER_PATH = os.path.join(BASE_DIR, '.tc')
