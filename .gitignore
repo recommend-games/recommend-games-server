@@ -106,4 +106,5 @@ recommender/
 .storage/
 
 *.sqlite3
+requirements.txt
 
