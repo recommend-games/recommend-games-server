@@ -1,3 +1,0 @@
-django>=1.11,<2.0
-nose
-pytz
