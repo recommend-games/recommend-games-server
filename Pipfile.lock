@@ -95,7 +95,7 @@
         "ludoj-recommender": {
             "editable": true,
             "git": "https://gitlab.com/mshepherd/ludoj-recommender.git",
-            "ref": "dc8492a392ed9559a048ee1380d412d52b40b796"
+            "ref": "e6fde33fba912969dfe47c85f6077cf9df825496"
         },
         "markdown": {
             "hashes": [
