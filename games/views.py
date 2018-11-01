@@ -2,6 +2,8 @@
 
 ''' views '''
 
+from functools import lru_cache
+
 from django.conf import settings
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -11,33 +13,33 @@ from .models import Game, Person
 from .serializers import GameSerializer, PersonSerializer
 
 
+@lru_cache(maxsize=32)
+def _load_model(path):
+    if not path:
+        return None
+
+    try:
+        from ludoj_recommender import GamesRecommender
+        return GamesRecommender.load(
+            path=path,
+            # dir_model='.',
+            # dir_games=None,
+            # dir_ratings=None,
+            # dir_clusters=None,
+        )
+
+    except Exception:
+        pass
+
+    return None
+
+
 class GameViewSet(ModelViewSet):
     ''' game view set '''
 
     # pylint: disable=no-member
     queryset = Game.objects.all()
     serializer_class = GameSerializer
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        recommender_path = getattr(settings, 'RECOMMENDER_PATH', None)
-
-        if recommender_path:
-            try:
-                from ludoj_recommender import GamesRecommender
-                self.recommender = GamesRecommender.load(
-                    path=recommender_path,
-                    # dir_model='.',
-                    # dir_games=None,
-                    # dir_ratings=None,
-                    # dir_clusters=None,
-                )
-            except Exception:
-                self.recommender = None
-
-        else:
-            self.recommender = None
 
     @action(detail=False)
     def recommend(self, request):
@@ -48,13 +50,16 @@ class GameViewSet(ModelViewSet):
         if not user:
             return self.list(request)
 
-        if self.recommender is None:
+        path = getattr(settings, 'RECOMMENDER_PATH', None)
+        recommender = _load_model(path)
+
+        if recommender is None:
             return Response([])
 
         # TODO handle case that user is unknown
         # TODO speed up recommendation by pre-computing known games, clusters etc
 
-        recommendation = self.recommender.recommend(
+        recommendation = recommender.recommend(
             users=(user,),
             num_games=10,
             ascending=True,
