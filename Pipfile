@@ -12,6 +12,7 @@ djangorestframework = "*"
 django-filter = "*"
 markdown = "*"
 ludoj-recommender = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-recommender.git"}
+gunicorn = "*"
 
 [dev-packages]
 pylint = "*"
