@@ -13,6 +13,7 @@ django-filter = "*"
 markdown = "*"
 ludoj-recommender = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-recommender.git"}
 gunicorn = "*"
+whitenoise = "*"
 
 [dev-packages]
 pylint = "*"
