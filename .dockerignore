@@ -111,3 +111,5 @@
 **/docker-compose.yaml
 **/requirements*
 **/tox.ini
+app/
+
