@@ -15,9 +15,13 @@ RUN apt-get -y update && \
     rm -rf /var/lib/apt/lists/* && \
     pip3 install --upgrade pip pipenv
 COPY Pipfile* ./
-RUN pipenv install --deploy --system
+RUN pipenv install --deploy --system --verbose
 
-COPY . ./
+COPY db.sqlite3 ./
+RUN chmod 0444 db.sqlite3
+COPY games games
+COPY ludoj ludoj
+COPY static static
 
 RUN useradd -m ludoj
 USER ludoj
