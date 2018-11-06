@@ -46,6 +46,44 @@
 		<h1 class="display-1">Ludoj</h1>
 		<p class="lead">Top-rated games as evaluated by our <a href="https://gitlab.com/mshepherd/ludoj-recommender" target="_blank">recommendation engine</a>.</p>
 
+		<form ng-submit="fetchGames(1, false, user)"
+				id="fetchGameForm"
+				name="fetchGameForm"
+				novalidate="novalidate"
+				role="form"
+				class="form">
+			<div class="input-group mb-3">
+				<div class="input-group-prepend">
+					<span class="input-group-text"
+						id="bgg-user-label">
+						Personal recommendations for:
+					</span>
+				</div>
+				<input type="text"
+					id="user"
+					name="user"
+					ng-model="user"
+					ng-required="true"
+					class="form-control"
+					placeholder="BGG user name"
+					aria-describedby="bgg-user-label" />
+				<div class="input-group-append">
+					<button type="submit"
+						ng-disabled="!user"
+						class="btn btn-primary">
+						GO!
+					</button>
+				</div>
+			</div>
+		</form>
+
+		<h2 ng-if="currUser">
+			Recommended games for <strong>
+				<a ng-href="https://boardgamegeek.com/user/{{ currUser }}" target="_blank">{{ currUser }}</a>
+			</strong>
+		</h2>
+		<p ng-if="currUser">See recommendations <a href="#" ng-click="fetchGames(1, false, null)">for all users</a> instead</p>
+
 		<div class="row">
 			<div ng-repeat="game in games"
 				ng-click="open(game.url)"
@@ -72,7 +110,7 @@
 				</div>
 			</div>
 			<div ng-if="nextPage"
-				ng-click="fetchGames(nextPage, true)"
+				ng-click="fetchGames(nextPage, true, currUser)"
 				class="col-lg-3 col-md-4 col-sm-6 col-12">
 				<div class="game game-more">
 					<div>

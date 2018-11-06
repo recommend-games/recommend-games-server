@@ -91,6 +91,9 @@ sitepackages/
 # Rope project settings
 .ropeproject
 
+# MyPy
+.mypy*
+
 # others
 .DS_Store
 .~*

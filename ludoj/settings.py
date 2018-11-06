@@ -15,7 +15,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.getenv('SECRET_KEY', '+*6x!0^!j^&h4+l-w7h!)pk=1m7gie&@&0cjq7)19%d6v2xu=y')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.getenv('DEBUG', False))
+DEBUG = bool(os.getenv('DEBUG'))
 
 ALLOWED_HOSTS = [
     '0.0.0.0',
@@ -135,7 +135,7 @@ WHITENOISE_INDEX_FILE = True
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    'PAGE_SIZE': 25,
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
     ),

@@ -53,17 +53,24 @@ class GameViewSet(ModelViewSet):
         path = getattr(settings, 'RECOMMENDER_PATH', None)
         recommender = _load_model(path)
 
-        if recommender is None:
-            return Response([])
+        if recommender is None or user not in recommender.known_users:
+            return self.list(request)
 
-        # TODO handle case that user is unknown
         # TODO speed up recommendation by pre-computing known games, clusters etc
 
         recommendation = recommender.recommend(
             users=(user,),
-            num_games=10,
             ascending=True,
         )
+
+        page = self.paginate_queryset(recommendation)
+        if page is None:
+            recommendation = recommendation[:10]
+            paginate = False
+        else:
+            recommendation = page
+            paginate = True
+
         recommendation = {game['bgg_id']: game for game in recommendation}
 
         games = self.get_queryset().filter(bgg_id__in=recommendation)
@@ -74,9 +81,14 @@ class GameViewSet(ModelViewSet):
             game.rec_rating = rec['score']
 
         serializer = self.get_serializer(
-            instance=sorted(games, key=lambda game: (game.rec_rank, -game.rec_rating)), many=True)
+            instance=sorted(games, key=lambda game: (game.rec_rank, -game.rec_rating)),
+            many=True,
+        )
 
-        return Response(serializer.data)
+        return (
+            self.get_paginated_response(serializer.data) if paginate
+            else Response(serializer.data)
+        )
 
 
 class PersonViewSet(ModelViewSet):

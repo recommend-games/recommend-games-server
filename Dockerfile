@@ -18,7 +18,8 @@ COPY Pipfile* ./
 RUN pipenv install --deploy --system --verbose
 
 COPY db.sqlite3 ./
-RUN chmod 0444 db.sqlite3
+COPY .tc .tc
+RUN chmod --recursive 0444 db.sqlite3 .tc
 COPY games games
 COPY ludoj ludoj
 COPY static static

@@ -11,10 +11,15 @@ ludojApp.controller('GamesController', function GamesController(
     $scope,
     $window
 ) {
-    function fetchGames(page) {
+    function fetchGames(page, user) {
         page = page || $scope.page || $scope.nextPage;
         var url = '/api/games/',
             params = {'page': page};
+
+        if (user) {
+            url += 'recommend/';
+            params.user = user;
+        }
 
         return $http.get(url, {'params': params})
             .then(function (response) {
@@ -26,12 +31,15 @@ ludojApp.controller('GamesController', function GamesController(
                     $scope.nextPage = page + 1;
                 }
 
+                $scope.user = user;
+                $scope.currUser = user;
+
                 return _.get(response, 'data.results');
             });
     }
 
-    function fetchAndUpdateGames(page, append) {
-        return fetchGames(page)
+    function fetchAndUpdateGames(page, append, user) {
+        return fetchGames(page, user)
             .then(function (games) {
                 $scope.games = append && !_.isEmpty($scope.games) ? _.concat($scope.games, games) : games;
                 return games;
@@ -42,10 +50,7 @@ ludojApp.controller('GamesController', function GamesController(
             });
     }
 
-    fetchAndUpdateGames(1, false)
-        .then(function () {
-            return fetchAndUpdateGames(2, true);
-        });
+    fetchAndUpdateGames(1, false);
 
     $scope.fetchGames = fetchAndUpdateGames;
 
