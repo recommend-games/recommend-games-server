@@ -53,7 +53,9 @@
 <body ng-controller="GamesController">
 	<div class="container">
 		<h1 class="display-1">Ludoj</h1>
-		<p class="lead">Top-rated games as evaluated by our <a href="https://gitlab.com/mshepherd/ludoj-recommender" target="_blank">recommendation engine</a>.</p>
+		<p class="lead">
+			Top-rated games as evaluated by our <a href="https://gitlab.com/mshepherd/ludoj-recommender" target="_blank">recommendation engine</a>.
+		</p>
 
 		<form ng-submit="fetchGames(1, false, user)"
 				id="fetchGameForm"
@@ -61,13 +63,8 @@
 				novalidate="novalidate"
 				role="form"
 				class="form">
+			<label for="user">Personal recommendations for:</label>
 			<div class="input-group mb-3">
-				<div class="input-group-prepend">
-					<span class="input-group-text"
-						id="bgg-user-label">
-						Personal recommendations for:
-					</span>
-				</div>
 				<input type="text"
 					id="user"
 					name="user"
@@ -78,8 +75,8 @@
 					aria-describedby="bgg-user-label" />
 				<div class="input-group-append">
 					<button type="submit"
-						ng-disabled="!user"
-						class="btn btn-primary">
+							ng-disabled="!user"
+							class="btn btn-primary">
 						GO!
 					</button>
 				</div>
@@ -91,27 +88,29 @@
 				<a ng-href="https://boardgamegeek.com/user/{{ currUser }}" target="_blank">{{ currUser }}</a>
 			</strong>
 		</h2>
-		<p ng-if="currUser">See recommendations <a href="#" ng-click="fetchGames(1, false, null)">for all users</a> instead</p>
+		<p ng-if="currUser">
+			See recommendations <a href="#" ng-click="fetchGames(1, false, null)">for all users</a> instead
+		</p>
 
 		<div class="row">
 			<div ng-repeat="game in games"
-				ng-click="open(game.url)"
-				class="col-lg-3 col-md-4 col-sm-6 col-12">
+					ng-click="open(game.url)"
+					class="col-lg-3 col-md-4 col-sm-6 col-12">
 				<div class="game"
-					ng-style="bgImage(game.image_url)">
+						ng-style="bgImage(game.image_url)">
 					<div>
 						<span ng-if="game.rec_rank"
-							class="game-rank badge badge-pill badge-success">
+								class="game-rank badge badge-pill badge-success">
 							#{{ game.rec_rank }}
 						</span>
 						<h2 class="game-title">
 							{{ game.name }}
 							<small ng-if="game.year"
-								class="text-muted">
+									class="text-muted">
 								({{ game.year }})
 							</small>
 							<span ng-if="game.rec_rating"
-								class="game-score badge badge-info">
+									class="game-score badge badge-info">
 								{{ game.rec_rating | number:1 }}
 							</span>
 						</h2>
@@ -119,8 +118,8 @@
 				</div>
 			</div>
 			<div ng-if="nextPage"
-				ng-click="fetchGames(nextPage, true, currUser)"
-				class="col-lg-3 col-md-4 col-sm-6 col-12">
+					ng-click="fetchGames(nextPage, true, currUser)"
+					class="col-lg-3 col-md-4 col-sm-6 col-12">
 				<div class="game game-more">
 					<div>
 						<h2 class="game-title">More...</h2>
@@ -134,8 +133,8 @@
 	<footer class="navbar navbar-expand-lg navbar-dark bg-dark">
 		<div class="container">
 			<a class="navbar-brand"
-				href="http://www.riemannhypothesis.info/"
-				target="_blank">
+					href="http://www.riemannhypothesis.info/"
+					target="_blank">
 				Markus Shepherd &copy; {{ now | date:'yyyy' }}
 			</a>
 		</div>
