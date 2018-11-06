@@ -22,9 +22,9 @@ class Game(Model):
     # publisher = ListField(CharField(), blank=True)
 
     url = URLField(blank=True, null=True)
-    # image_url = ListField(URLField(), blank=True)
-    # video_url = ListField(URLField(), blank=True)
-    # external_link = ListField(URLField(), blank=True)
+    image_url = URLField(blank=True, null=True) # should be list
+    video_url = URLField(blank=True, null=True) # should be list
+    external_link = URLField(blank=True, null=True) # should be list
     # list_price = CharField(max_length=100, blank=True, null=True)
 
     min_players = PositiveSmallIntegerField(blank=True, null=True, db_index=True)

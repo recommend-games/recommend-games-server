@@ -50,8 +50,8 @@
 			<div ng-repeat="game in games"
 				ng-click="open(game.url)"
 				class="col-lg-3 col-md-4 col-sm-6 col-12">
-				<div class="game">
-					<!-- TODO add background-image -->
+				<div class="game"
+					ng-style="bgImage(game.image_url)">
 					<div>
 						<span class="game-rank badge badge-pill badge-success">{{ game.rec_rank }}</span>
 						<h2 class="game-title">

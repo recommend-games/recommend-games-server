@@ -106,6 +106,7 @@
 
 # other
 **/tests/
+**/.htmllintrc
 
 **/Dockerfile
 **/docker-compose.yaml

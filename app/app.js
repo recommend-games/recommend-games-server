@@ -52,4 +52,8 @@ ludojApp.controller('GamesController', function GamesController(
     $scope.open = function open(url) {
         $window.open(url, '_blank');
     };
+
+    $scope.bgImage = function bgImage(url) {
+        return url ? {'background-image': 'url("' + url + '")'} : null;
+    };
 });
