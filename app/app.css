@@ -1,0 +1,43 @@
+.game {
+    padding-bottom: 100%;
+    position: relative;
+    margin: 5px 0;
+    /*background-image: url("https://cf.geekdo-images.com/itemrep/img/fR5_q-7pMDmhLP8SPLOwPcUeLVo=/fit-in/246x300/pic860217.jpg");*/
+    background-color: #0C6;
+    background-position: top;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 5px;
+}
+
+.game > div {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(255,255,255,0.2),
+        white);
+    border-radius: 5px;
+}
+
+.game-rank {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    font-size: 1.2rem;
+}
+
+.game-title {
+    position: absolute;
+    bottom: 0;
+    font-size: 1.5rem;
+    padding: 0 10px;
+    text-shadow: 0 0 3px white;
+}
+
+.game-score {
+    text-shadow: none;
+    font-size: 0.8rem;
+}
