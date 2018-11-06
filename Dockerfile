@@ -9,7 +9,9 @@ RUN mkdir -p /app
 WORKDIR /app
 
 RUN apt-get -y update && \
-    apt-get -y install --no-install-recommends git && \
+    apt-get -y install --no-install-recommends \
+        git \
+        libatlas3-base && \
     apt-get -y autoremove && \
     apt-get -y clean && \
     rm -rf /var/lib/apt/lists/* && \
@@ -19,7 +21,7 @@ RUN pipenv install --deploy --system --verbose
 
 COPY db.sqlite3 ./
 COPY .tc .tc
-RUN chmod --recursive 0444 db.sqlite3 .tc
+RUN chmod --recursive 0555 db.sqlite3 .tc
 COPY games games
 COPY ludoj ludoj
 COPY static static
