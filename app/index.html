@@ -43,8 +43,8 @@
 
 <body ng-controller="GamesController">
 	<div class="container">
-		<h1>Ludoj</h1>
-		<h2>Top-rated games</h2>
+		<h1 class="display-1">Ludoj</h1>
+		<p class="lead">Top-rated games as evaluated by our <a href="https://gitlab.com/mshepherd/ludoj-recommender" target="_blank">recommendation engine</a>.</p>
 
 		<div class="row">
 			<div ng-repeat="game in games"
@@ -56,6 +56,7 @@
 						<span class="game-rank badge badge-pill badge-success">{{ game.rec_rank }}</span>
 						<h2 class="game-title">
 							{{ game.name }}
+							<small ng-if="game.year" class="text-muted">({{ game.year }})</small>
 							<span class="game-score badge badge-info">{{ game.rec_rating | number:1 }}</span>
 						</h2>
 					</div>

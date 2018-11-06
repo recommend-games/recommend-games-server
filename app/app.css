@@ -21,8 +21,8 @@
     background-image: linear-gradient(
         to bottom,
         transparent,
-        rgba(255,255,255,0.2),
-        white);
+        rgba(0, 0, 0, 0.2),
+        black);
     border-radius: 5px;
 }
 
@@ -36,9 +36,10 @@
 .game-title {
     position: absolute;
     bottom: 0;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     padding: 0 10px;
-    text-shadow: 0 0 3px white;
+    color: white;
+    text-shadow: 0 0 3px black;
 }
 
 .game-score {
