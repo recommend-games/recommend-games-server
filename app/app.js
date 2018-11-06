@@ -8,29 +8,32 @@ var ludojApp = angular.module('ludojApp', []);
 ludojApp.controller('GamesController', function GamesController(
     $http,
     $log,
-    $q,
-    $scope
+    $scope,
+    $window
 ) {
     function fetchGames(page) {
-        page = page || $scope.page;
+        page = page || $scope.page || $scope.nextPage;
         var url = '/api/games/',
             params = {'page': page};
 
         return $http.get(url, {'params': params})
             .then(function (response) {
-                return _.get(response, 'data.results');
-            })
-            .catch(function (response) {
-                $log.error(response);
+                $scope.currPage = page;
+                if (_.get(response, 'data.previous')) {
+                    $scope.prevPage = page - 1;
+                }
+                if (_.get(response, 'data.next')) {
+                    $scope.nextPage = page + 1;
+                }
 
-                return $q.reject(response);
+                return _.get(response, 'data.results');
             });
     }
 
-    function fetchAndUpdateGames(page) {
+    function fetchAndUpdateGames(page, append) {
         return fetchGames(page)
             .then(function (games) {
-                $scope.games = games;
+                $scope.games = append && !_.isEmpty($scope.games) ? _.concat($scope.games, games) : games;
                 return games;
             })
             .catch(function (reason) {
@@ -39,7 +42,14 @@ ludojApp.controller('GamesController', function GamesController(
             });
     }
 
-    fetchAndUpdateGames(1);
+    fetchAndUpdateGames(1, false)
+        .then(function () {
+            return fetchAndUpdateGames(2, true);
+        });
 
     $scope.fetchGames = fetchAndUpdateGames;
+
+    $scope.open = function open(url) {
+        $window.open(url, '_blank');
+    };
 });

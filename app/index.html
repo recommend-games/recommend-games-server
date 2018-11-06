@@ -48,6 +48,7 @@
 
 		<div class="row">
 			<div ng-repeat="game in games"
+				ng-click="open(game.url)"
 				class="col-lg-3 col-md-4 col-sm-6 col-12">
 				<div class="game">
 					<!-- TODO add background-image -->
@@ -57,6 +58,15 @@
 							{{ game.name }}
 							<span class="game-score badge badge-info">{{ game.rec_rating | number:1 }}</span>
 						</h2>
+					</div>
+				</div>
+			</div>
+			<div ng-if="nextPage"
+				ng-click="fetchGames(nextPage, true)"
+				class="col-lg-3 col-md-4 col-sm-6 col-12">
+				<div class="game game-more">
+					<div>
+						<h2 class="game-title">More...</h2>
 					</div>
 				</div>
 			</div>

@@ -8,6 +8,11 @@
     background-repeat: no-repeat;
     background-size: cover;
     border-radius: 5px;
+    cursor: pointer;
+}
+
+.game-more {
+    background-color: #C06;
 }
 
 .game > div {
@@ -40,4 +45,11 @@
 .game-score {
     text-shadow: none;
     font-size: 0.8rem;
+}
+
+.btn-more {
+    position: absolute;
+    top: 40%;
+    left: 23%;
+    font-size: 1.8rem;
 }
