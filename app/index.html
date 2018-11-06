@@ -53,11 +53,20 @@
 				<div class="game"
 					ng-style="bgImage(game.image_url)">
 					<div>
-						<span class="game-rank badge badge-pill badge-success">{{ game.rec_rank }}</span>
+						<span ng-if="game.rec_rank"
+							class="game-rank badge badge-pill badge-success">
+							#{{ game.rec_rank }}
+						</span>
 						<h2 class="game-title">
 							{{ game.name }}
-							<small ng-if="game.year" class="text-muted">({{ game.year }})</small>
-							<span class="game-score badge badge-info">{{ game.rec_rating | number:1 }}</span>
+							<small ng-if="game.year"
+								class="text-muted">
+								({{ game.year }})
+							</small>
+							<span ng-if="game.rec_rating"
+								class="game-score badge badge-info">
+								{{ game.rec_rating | number:1 }}
+							</span>
 						</h2>
 					</div>
 				</div>
@@ -72,7 +81,18 @@
 				</div>
 			</div>
 		</div>
+
 	</div>
+
+	<footer class="navbar navbar-expand-lg navbar-dark bg-dark">
+		<div class="container">
+			<a class="navbar-brand"
+				href="http://www.riemannhypothesis.info/"
+				target="_blank">
+				Markus Shepherd &copy; {{ now | date:'yyyy' }}
+			</a>
+		</div>
+	</footer>
 </body>
 
 </html>

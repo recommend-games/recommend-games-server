@@ -56,4 +56,6 @@ ludojApp.controller('GamesController', function GamesController(
     $scope.bgImage = function bgImage(url) {
         return url ? {'background-image': 'url("' + url + '")'} : null;
     };
+
+    $scope.now = _.now();
 });
