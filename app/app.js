@@ -3,7 +3,7 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*global _, URL, angular */ // moment, showdown
 
-var ludojApp = angular.module('ludojApp', []);
+var ludojApp = angular.module('ludojApp', ['blockUI']);
 
 ludojApp.controller('GamesController', function GamesController(
     $http,
