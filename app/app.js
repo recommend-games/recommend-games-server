@@ -5,6 +5,11 @@
 
 var ludojApp = angular.module('ludojApp', ['blockUI']);
 
+ludojApp.config(function(blockUIConfig) {
+    blockUIConfig.autoBlock = true;
+    blockUIConfig.delay = 0;
+});
+
 ludojApp.controller('GamesController', function GamesController(
     $http,
     $log,
