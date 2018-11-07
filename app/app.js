@@ -26,11 +26,15 @@ ludojApp.controller('GamesController', function GamesController(
     $window
 ) {
     function filters() {
-        var result = {};
+        var result = {},
+            playerSuffix = '';
 
         if ($scope.playerCountEnabled && $scope.playerCount) {
-            result.min_players__lte = $scope.playerCount;
-            result.max_players__gte = $scope.playerCount;
+            playerSuffix = $scope.playerCountType === 'recommended' ? '_rec'
+                    : $scope.playerCountType === 'best' ? '_best'
+                    : '';
+            result['min_players' + playerSuffix + '__lte'] = $scope.playerCount;
+            result['max_players' + playerSuffix + '__gte'] = $scope.playerCount;
         }
 
         if ($scope.playTimeEnabled && $scope.playTime) {
@@ -97,5 +101,6 @@ ludojApp.controller('GamesController', function GamesController(
     $scope.now = _.now();
 
     $scope.playerCount = 4;
+    $scope.playerCountType = 'box';
     $scope.playTime = 60;
 });
