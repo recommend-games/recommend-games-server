@@ -5,6 +5,7 @@
 from functools import lru_cache
 
 from django.conf import settings
+from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -27,6 +28,43 @@ def _load_model(path):
     return None
 
 
+class GameFilter(FilterSet):
+    ''' game filter '''
+    class Meta:
+        ''' meta '''
+        model = Game
+        fields = {
+            'year': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'designer': ['exact',],
+            'designer__name': ['exact', 'iexact'],
+            'artist': ['exact',],
+            'artist__name': ['exact', 'iexact'],
+            'min_players': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'max_players': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'min_players_rec': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'max_players_rec': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'min_players_best': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'max_players_best': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'min_age': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'max_age': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'min_age_rec': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'max_age_rec': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'min_time': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'max_time': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'cooperative': ['exact',],
+            'compilation': ['exact',],
+            'implementation_of': ['exact',],
+            'bgg_rank': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'num_votes': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'avg_rating': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'bayes_rating': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'rec_rank': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'rec_rating': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'complexity': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'language_dependency': ['exact', 'gt', 'gte', 'lt', 'lte'],
+        }
+
+
 class GameViewSet(ModelViewSet):
     ''' game view set '''
 
@@ -42,34 +80,7 @@ class GameViewSet(ModelViewSet):
         OrderingFilter,
         SearchFilter,
     )
-    filterset_fields = (
-        'year',
-        'designer',
-        'artist',
-        'min_players',
-        'max_players',
-        'min_players_rec',
-        'max_players_rec',
-        'min_players_best',
-        'max_players_best',
-        'min_age',
-        'max_age',
-        'min_age_rec',
-        'max_age_rec',
-        'min_time',
-        'max_time',
-        'cooperative',
-        'compilation',
-        'implementation_of',
-        'bgg_rank',
-        'num_votes',
-        'avg_rating',
-        'bayes_rating',
-        'rec_rank',
-        'rec_rating',
-        'complexity',
-        'language_dependency',
-    )
+    filterset_class = GameFilter
     ordering_fields = (
         'year',
         'min_players',
