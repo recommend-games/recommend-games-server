@@ -58,8 +58,8 @@
 		</p>
 
 		<form ng-submit="fetchGames(1, false, user)"
-				id="fetchGameForm"
-				name="fetchGameForm"
+				id="fetch-game-form"
+				name="fetch-game-form"
 				novalidate="novalidate"
 				role="form"
 				class="form">
@@ -130,13 +130,27 @@
 
 	</div>
 
-	<footer class="navbar navbar-expand-lg navbar-dark bg-dark">
+	<footer class="navbar navbar-expand-sm navbar-dark bg-dark">
 		<div class="container">
-			<a class="navbar-brand"
-					href="http://www.riemannhypothesis.info/"
-					target="_blank">
-				Markus Shepherd &copy; {{ now | date:'yyyy' }}
-			</a>
+			<ul class="nav navbar-nav">
+				<li class="nav-item">
+					<a class="nav-link"
+							href="http://www.riemannhypothesis.info/"
+							target="_blank">
+						Markus Shepherd &copy; {{ now | date:'yyyy' }}
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link nav-link-icon"
+							href="https://twitter.com/MarkusRShepherd"
+							target="_blank">
+						<img src="twitter.svg"
+							alt="Follow me @MarkusRShepherd"
+							class="img-fluid img-icon d-inline-block align-middle" />
+						@MarkusRShepherd
+					</a>
+				</li>
+			</ul>
 		</div>
 	</footer>
 </body>

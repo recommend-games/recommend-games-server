@@ -53,3 +53,11 @@
     left: 23%;
     font-size: 1.8rem;
 }
+
+img.img-icon {
+    max-width: 1.6rem;
+}
+
+.nav-link-icon {
+    white-space: nowrap;
+}

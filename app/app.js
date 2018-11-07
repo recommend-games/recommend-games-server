@@ -5,7 +5,7 @@
 
 var ludojApp = angular.module('ludojApp', ['blockUI']);
 
-ludojApp.config(function(blockUIConfig) {
+ludojApp.config(function (blockUIConfig) {
     blockUIConfig.autoBlock = true;
     blockUIConfig.delay = 0;
 });
