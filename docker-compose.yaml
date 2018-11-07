@@ -11,9 +11,9 @@ services:
         #     - db
         environment:
             - DEBUG=true
-            - PORT=5000
+            - PORT=8000
         ports:
-            - '5000:5000'
+            - '8000:8000'
         # volumes:
         #     - ./output:/root/output
         restart: always

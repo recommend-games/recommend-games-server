@@ -5,19 +5,30 @@
 
 var ludojApp = angular.module('ludojApp', ['blockUI']);
 
-ludojApp.config(function (blockUIConfig) {
+ludojApp.config(function (
+    $locationProvider,
+    blockUIConfig
+) {
+    $locationProvider.html5Mode({
+        enabled: true,
+        requireBase: false
+    });
+
     blockUIConfig.autoBlock = true;
     blockUIConfig.delay = 0;
 });
 
 ludojApp.controller('GamesController', function GamesController(
     $http,
+    $location,
     $log,
     $scope,
     $window
 ) {
     function fetchGames(page, user) {
-        page = page || $scope.page || $scope.nextPage;
+        page = page || $scope.page || $scope.nextPage || 1;
+        user = user || null;
+
         var url = '/api/games/',
             params = {'page': page};
 
@@ -29,13 +40,10 @@ ludojApp.controller('GamesController', function GamesController(
         return $http.get(url, {'params': params})
             .then(function (response) {
                 $scope.currPage = page;
-                if (_.get(response, 'data.previous')) {
-                    $scope.prevPage = page - 1;
-                }
-                if (_.get(response, 'data.next')) {
-                    $scope.nextPage = page + 1;
-                }
+                $scope.prevPage = _.get(response, 'data.previous') ? page - 1 : null;
+                $scope.nextPage = _.get(response, 'data.next') ? page + 1 : null;
 
+                $location.search('user', user);
                 $scope.user = user;
                 $scope.currUser = user;
 
@@ -55,7 +63,7 @@ ludojApp.controller('GamesController', function GamesController(
             });
     }
 
-    fetchAndUpdateGames(1, false);
+    fetchAndUpdateGames(1, false, $location.search().user);
 
     $scope.fetchGames = fetchAndUpdateGames;
 
