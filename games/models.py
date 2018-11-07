@@ -67,8 +67,13 @@ class Game(Model):
 
     class Meta:
         ''' meta '''
-        ordering = ('-rec_rating', '-bayes_rating')
-        indexes = (Index(fields=('-rec_rating', '-bayes_rating')),)
+        ordering = (
+            '-rec_rating',
+            '-bayes_rating',
+        )
+        indexes = (
+            Index(fields=('-rec_rating', '-bayes_rating')),
+        )
 
     def __str__(self):
         return self.name

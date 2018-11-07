@@ -5,7 +5,9 @@
 from functools import lru_cache
 
 from django.conf import settings
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -17,20 +19,11 @@ from .serializers import GameSerializer, PersonSerializer
 def _load_model(path):
     if not path:
         return None
-
     try:
         from ludoj_recommender import GamesRecommender
-        return GamesRecommender.load(
-            path=path,
-            # dir_model='.',
-            # dir_games=None,
-            # dir_ratings=None,
-            # dir_clusters=None,
-        )
-
+        return GamesRecommender.load(path=path)
     except Exception:
         pass
-
     return None
 
 
@@ -39,7 +32,70 @@ class GameViewSet(ModelViewSet):
 
     # pylint: disable=no-member
     queryset = Game.objects.all()
+    ordering = (
+        '-rec_rating',
+        '-bayes_rating',
+    )
     serializer_class = GameSerializer
+    filter_backends = (
+        DjangoFilterBackend,
+        OrderingFilter,
+        SearchFilter,
+    )
+    filterset_fields = (
+        'year',
+        'designer',
+        'artist',
+        'min_players',
+        'max_players',
+        'min_players_rec',
+        'max_players_rec',
+        'min_players_best',
+        'max_players_best',
+        'min_age',
+        'max_age',
+        'min_age_rec',
+        'max_age_rec',
+        'min_time',
+        'max_time',
+        'cooperative',
+        'compilation',
+        'implementation_of',
+        'bgg_rank',
+        'num_votes',
+        'avg_rating',
+        'bayes_rating',
+        'rec_rank',
+        'rec_rating',
+        'complexity',
+        'language_dependency',
+    )
+    ordering_fields = (
+        'year',
+        'min_players',
+        'max_players',
+        'min_players_rec',
+        'max_players_rec',
+        'min_players_best',
+        'max_players_best',
+        'min_age',
+        'max_age',
+        'min_age_rec',
+        'max_age_rec',
+        'min_time',
+        'max_time',
+        'bgg_rank',
+        'num_votes',
+        'avg_rating',
+        'bayes_rating',
+        'rec_rank',
+        'rec_rating',
+        'complexity',
+        'language_dependency',
+    )
+    search_fields = (
+        'name',
+    )
 
     @action(detail=False)
     def recommend(self, request):
@@ -58,11 +114,9 @@ class GameViewSet(ModelViewSet):
 
         # TODO speed up recommendation by pre-computing known games, clusters etc
 
-        recommendation = recommender.recommend(
-            users=(user,),
-            ascending=True,
-        )
+        recommendation = recommender.recommend(users=(user,))
 
+        # TODO make filtering and pagination work together
         page = self.paginate_queryset(recommendation)
         if page is None:
             recommendation = recommendation[:10]
@@ -73,7 +127,7 @@ class GameViewSet(ModelViewSet):
 
         recommendation = {game['bgg_id']: game for game in recommendation}
 
-        games = self.get_queryset().filter(bgg_id__in=recommendation)
+        games = self.filter_queryset(self.get_queryset()).filter(bgg_id__in=recommendation)
 
         for game in games:
             rec = recommendation[game.bgg_id]
