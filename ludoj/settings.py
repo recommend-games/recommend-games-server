@@ -24,7 +24,6 @@ ALLOWED_HOSTS = [
     'ludoj.herokuapp.com',
 ]
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -71,6 +70,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ludoj.wsgi.application'
 
+SECURE_SSL_REDIRECT = bool(os.getenv('SECURE_SSL_REDIRECT'))
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
@@ -81,7 +82,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -101,7 +101,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
@@ -114,7 +113,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
@@ -129,7 +127,6 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # WhiteNoise
 
 WHITENOISE_INDEX_FILE = True
-
 
 # REST framework
 
