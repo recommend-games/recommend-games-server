@@ -25,17 +25,36 @@ ludojApp.controller('GamesController', function GamesController(
     $scope,
     $window
 ) {
+    function filters() {
+        var result = {};
+
+        if ($scope.playerCountEnabled && $scope.playerCount) {
+            result.min_players__lte = $scope.playerCount;
+            result.max_players__gte = $scope.playerCount;
+        }
+
+        if ($scope.playTimeEnabled && $scope.playTime) {
+            result.min_time__lte = $scope.playTime;
+        }
+
+        return result;
+    }
+
     function fetchGames(page, user) {
         page = page || $scope.page || $scope.nextPage || 1;
         user = user || null;
 
         var url = '/api/games/',
-            params = {'page': page};
+            params = filters();
+
+        params.page = page;
 
         if (user) {
             url += 'recommend/';
             params.user = user;
         }
+
+        $log.info(params);
 
         return $http.get(url, {'params': params})
             .then(function (response) {
@@ -76,4 +95,7 @@ ludojApp.controller('GamesController', function GamesController(
     };
 
     $scope.now = _.now();
+
+    $scope.playerCount = 4;
+    $scope.playTime = 60;
 });
