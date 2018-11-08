@@ -306,7 +306,42 @@
 				</div>
 			</div>
 
-			<!-- TODO year filter -->
+			<div class="form-row mb-3">
+				<div class="col-xl-4 col-lg-5 col-md-6">
+					<div class="input-group">
+						<div class="input-group-prepend">
+							<div class="input-group-text">
+								<input type="checkbox"
+									class="form-check"
+									id="filter-year-enable"
+									name="filter-year-enable"
+									ng-model="year.enabled" />
+							</div>
+						</div>
+						<div class="input-group-append">
+							<div class="input-group-text">
+								<label for="filter-year"
+										class="form-check-label {{ year.enabled ? 'text-success' : 'text-muted' }}">
+									Year:
+									<span class="{{ year.enabled ? '' : 'invisible' }}">
+										<strong class="text-monospace">{{ year.min == year.options.floor ? '&le;' : '&nbsp;' }}{{ year.min }}</strong>
+										to
+										<strong class="text-monospace">{{ year.max == year.options.ceil ? '&ge;' : '&nbsp;' }}{{ year.max }}</strong>
+									</span>
+								</label>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-xl-8 col-lg-7 col-md-6">
+					<rzslider id="filter-year"
+						name="filter-year"
+						ng-disabled="!year.enabled"
+						rz-slider-model="year.min"
+						rz-slider-high="year.max"
+						rz-slider-options="year.options"></rzslider>
+				</div>
+			</div>
 
 			<div class="form-row">
 				<div class="col-md-6 mb-3">
@@ -399,7 +434,7 @@
 					<a class="nav-link"
 							href="http://www.riemannhypothesis.info/"
 							target="_blank">
-						Markus Shepherd &copy; {{ now | date:'yyyy' }}
+						Markus Shepherd &copy; {{ yearNow }}
 					</a>
 				</li>
 				<li class="nav-item">

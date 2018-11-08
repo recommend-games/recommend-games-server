@@ -29,6 +29,17 @@ ludojApp.controller('GamesController', function GamesController(
     $timeout,
     $window
 ) {
+    var search = $location.search(),
+        playerCount = _.parseInt(search.playerCount),
+        playerAge = _.parseInt(search.playerAge),
+        playTime = _.parseInt(search.playTime),
+        complexityMin = parseFloat(search.complexityMin),
+        complexityMax = parseFloat(search.complexityMax),
+        yearMin = _.parseInt(search.complexityMin),
+        yearMax = _.parseInt(search.complexityMax),
+        yearFloor = 1970,
+        yearNow = new Date().getFullYear();
+
     function validateCountType(playerCountType) {
         var playerCountTypes = {'box': true, 'recommended': true, 'best': true};
         return playerCountTypes[playerCountType] ? playerCountType : 'box';
@@ -54,6 +65,7 @@ ludojApp.controller('GamesController', function GamesController(
             $scope.time.enabled ||
             $scope.age.enabled ||
             $scope.complexity.enabled ||
+            $scope.year.enabled ||
             $scope.cooperative);
     }
 
@@ -94,6 +106,14 @@ ludojApp.controller('GamesController', function GamesController(
             result.complexityMax = null;
         }
 
+        if ($scope.year.enabled && $scope.year.min && $scope.year.max) {
+            result.yearMin = $scope.year.min;
+            result.yearMax = $scope.year.max;
+        } else {
+            result.yearMin = null;
+            result.yearMax = null;
+        }
+
         result.cooperative = validateBoolean($scope.cooperative);
 
         return result;
@@ -132,6 +152,14 @@ ludojApp.controller('GamesController', function GamesController(
         if (values.complexityMin && values.complexityMax) {
             result.complexity__gte = values.complexityMin;
             result.complexity__lte = values.complexityMax;
+        }
+
+        if (values.yearMin && values.yearMin > yearFloor) {
+            result.year__gte = values.yearMin;
+        }
+
+        if (values.yearMax && values.yearMax <= yearNow) {
+            result.year__lte = values.yearMax;
         }
 
         if (values.cooperative) {
@@ -189,18 +217,12 @@ ludojApp.controller('GamesController', function GamesController(
         $timeout(function () {
             $scope.count.options.disabled = !$scope.count.enabled;
             $scope.time.options.disabled = !$scope.time.enabled;
-            $scope.complexity.options.disabled = !$scope.complexity.enabled;
             $scope.age.options.disabled = !$scope.age.enabled;
+            $scope.complexity.options.disabled = !$scope.complexity.enabled;
+            $scope.year.options.disabled = !$scope.year.enabled;
             $scope.$broadcast('rzSliderForceRender');
         });
     }
-
-    var search = $location.search(),
-        playerCount = _.parseInt(search.playerCount),
-        playerAge = _.parseInt(search.playerAge),
-        playTime = _.parseInt(search.playTime),
-        complexityMin = parseFloat(search.complexityMin),
-        complexityMax = parseFloat(search.complexityMax);
 
     $scope.user = search.user || null;
 
@@ -218,7 +240,6 @@ ludojApp.controller('GamesController', function GamesController(
             'hidePointerLabels': true,
             'hideLimitLabels': true,
             'showTicks': 1,
-            'draggableRange': true,
             'showSelectionBar': false
         }
     };
@@ -235,7 +256,6 @@ ludojApp.controller('GamesController', function GamesController(
             'hidePointerLabels': true,
             'hideLimitLabels': true,
             'ticksArray': _.concat(5, _.range(15, 241, 15)),
-            'draggableRange': true,
             'showSelectionBar': true
         }
     };
@@ -252,7 +272,6 @@ ludojApp.controller('GamesController', function GamesController(
             'hidePointerLabels': true,
             'hideLimitLabels': true,
             'ticksArray': _.concat(1, _.range(4, 19, 2), 21),
-            'draggableRange': true,
             'showSelectionBar': true
         }
     };
@@ -274,10 +293,26 @@ ludojApp.controller('GamesController', function GamesController(
         }
     };
 
+    $scope.year = {
+        'enabled': !!(yearMin || yearMax),
+        'min': yearMin || yearFloor,
+        'max': yearMax || yearNow + 1,
+        'options': {
+            'disabled': !(complexityMin || complexityMax),
+            'floor': yearFloor,
+            'ceil': yearNow + 1,
+            'step': 1,
+            'hidePointerLabels': true,
+            'hideLimitLabels': true,
+            'ticksArray': _.concat(_.range(yearFloor, yearNow + 1, 5), yearNow + 1),
+            'draggableRange': true
+        }
+    };
+
     $scope.cooperative = validateBoolean(search.cooperative);
 
     $scope.fetchGames = fetchAndUpdateGames;
-    $scope.now = _.now();
+    $scope.yearNow = yearNow;
     $scope.pad = _.padStart;
     $scope.renderSlider = renderSlider;
 
@@ -294,16 +329,18 @@ ludojApp.controller('GamesController', function GamesController(
         $scope.search = null;
         $scope.count.enabled = false;
         $scope.time.enabled = false;
-        $scope.complexity.enabled = false;
         $scope.age.enabled = false;
+        $scope.complexity.enabled = false;
+        $scope.year.enabled = false;
         $scope.cooperative = null;
         return fetchAndUpdateGames(1, false);
     };
 
     $scope.$watch('count.enabled', renderSlider);
     $scope.$watch('time.enabled', renderSlider);
-    $scope.$watch('complexity.enabled', renderSlider);
     $scope.$watch('age.enabled', renderSlider);
+    $scope.$watch('complexity.enabled', renderSlider);
+    $scope.$watch('year.enabled', renderSlider);
 
     fetchAndUpdateGames(1, false, search.user);
 
