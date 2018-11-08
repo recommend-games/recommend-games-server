@@ -207,6 +207,46 @@
 							<div class="input-group-text">
 								<input type="checkbox"
 									class="form-check"
+									id="filter-age-enable"
+									name="filter-age-enable"
+									ng-model="age.enabled" />
+							</div>
+							<div class="input-group-text">
+								<label for="filter-age"
+										class="form-check-label {{ age.enabled ? 'text-success' : 'text-muted' }}">
+									Player age:
+									<span class="{{ age.enabled ? '' : 'invisible' }}">
+										<strong class="text-monospace">{{ pad(age.value, 2, '&nbsp;') }}</strong> years
+									</span>
+								</label>
+							</div>
+						</div>
+						<select name="filter-age-type"
+								ng-disabled="!age.enabled"
+								ng-model="age.type"
+								class="custom-select"
+								id="filter-age-type">
+							<option selected="selected">box</option>
+							<option>recommended</option>
+						</select>
+					</div>
+				</div>
+				<div class="col-xl-8 col-lg-7 col-md-6">
+					<rzslider id="filter-age"
+						name="filter-age"
+						ng-disabled="!age.enabled"
+						rz-slider-model="age.value"
+						rz-slider-options="age.options"></rzslider>
+				</div>
+			</div>
+
+			<div class="form-row mb-3">
+				<div class="col-xl-4 col-lg-5 col-md-6">
+					<div class="input-group">
+						<div class="input-group-prepend">
+							<div class="input-group-text">
+								<input type="checkbox"
+									class="form-check"
 									id="filter-complexity-enable"
 									name="filter-complexity-enable"
 									ng-model="complexity.enabled" />
@@ -236,7 +276,7 @@
 			</div>
 
 			<div class="form-row">
-				<div class="col-md-9 col-sm-6 mb-3">
+				<div class="col-md-6 mb-3">
 					<div class="input-group">
 						<div class="input-group-prepend">
 							<div class="input-group-text">
@@ -256,7 +296,14 @@
 						</select>
 					</div>
 				</div>
-				<div class="col-md-3 col-sm-6 mb-3">
+				<div class="col-md-3 mb-3">
+					<button type="button"
+							ng-click="clearFilters()"
+							class="btn btn-outline-secondary d-block w-100">
+						Clear
+					</button>
+				</div>
+				<div class="col-md-3 mb-3">
 					<button type="submit"
 							class="btn btn-primary d-block w-100">
 						Filter

@@ -39,6 +39,11 @@ ludojApp.controller('GamesController', function GamesController(
         return playTimeTypes[playTimeType] ? playTimeType : 'min';
     }
 
+    function validateAgeType(playerAgeType) {
+        var playerAgeTypes = {'box': true, 'recommended': true};
+        return playerAgeTypes[playerAgeType] ? playerAgeType : 'box';
+    }
+
     function validateBoolean(input) {
         var booleans = {'True': true, 'False': true};
         return booleans[input] ? input : null;
@@ -47,6 +52,7 @@ ludojApp.controller('GamesController', function GamesController(
     function filtersActive() {
         return !!($scope.playerCountEnabled ||
             $scope.playTimeEnabled ||
+            $scope.age.enabled ||
             $scope.complexity.enabled ||
             $scope.cooperative);
     }
@@ -70,9 +76,20 @@ ludojApp.controller('GamesController', function GamesController(
             result.playTimeType = null;
         }
 
+        if ($scope.age.enabled && $scope.age.value) {
+            result.playerAge = $scope.age.value;
+            result.playerAgeType = validateAgeType($scope.age.type);
+        } else {
+            result.playerAge = null;
+            result.playerAgeType = null;
+        }
+
         if ($scope.complexity.enabled && $scope.complexity.min && $scope.complexity.max) {
             result.complexityMin = $scope.complexity.min;
             result.complexityMax = $scope.complexity.max;
+        } else {
+            result.complexityMin = null;
+            result.complexityMax = null;
         }
 
         result.cooperative = validateBoolean($scope.cooperative);
@@ -83,7 +100,8 @@ ludojApp.controller('GamesController', function GamesController(
     function filters() {
         var result = {},
             values = filterValues(),
-            playerSuffix = '';
+            playerSuffix = '',
+            ageSuffix = '';
 
         if (values.playerCount) {
             playerSuffix = values.playerCountType === 'recommended' ? '_rec'
@@ -94,7 +112,15 @@ ludojApp.controller('GamesController', function GamesController(
         }
 
         if (values.playTime) {
+            result[values.playTimeType + '_time__gt'] = 0;
             result[values.playTimeType + '_time__lte'] = values.playTime;
+        }
+
+        if (values.playerAge) {
+            ageSuffix = values.playerAgeType === 'recommended' ? '_rec'
+                    : '';
+            result['min_age' + ageSuffix + '__gt'] = 0;
+            result['min_age' + ageSuffix + '__lte'] = values.playerAge;
         }
 
         if (values.complexityMin && values.complexityMax) {
@@ -156,12 +182,14 @@ ludojApp.controller('GamesController', function GamesController(
     function renderSlider() {
         $timeout(function () {
             $scope.complexity.options.disabled = !$scope.complexity.enabled;
+            $scope.age.options.disabled = !$scope.age.enabled;
             $scope.$broadcast('rzSliderForceRender');
         });
     }
 
     var search = $location.search(),
         playerCount = _.parseInt(search.playerCount),
+        playerAge = _.parseInt(search.playerAge),
         playTime = _.parseInt(search.playTime),
         complexityMin = parseFloat(search.complexityMin),
         complexityMax = parseFloat(search.complexityMax);
@@ -193,6 +221,22 @@ ludojApp.controller('GamesController', function GamesController(
         }
     };
 
+    $scope.age = {
+        'enabled': !!playerAge,
+        'value': playerAge || 10,
+        'type': validateAgeType(search.playerAgeType),
+        'options': {
+            'disabled': !playerAge,
+            'floor': 1,
+            'ceil': 21,
+            'step': 1,
+            'hidePointerLabels': true,
+            'hideLimitLabels': true,
+            'showTicks': 1,
+            'draggableRange': true
+        }
+    };
+
     $scope.cooperative = validateBoolean(search.cooperative);
 
     $scope.fetchGames = fetchAndUpdateGames;
@@ -208,7 +252,18 @@ ludojApp.controller('GamesController', function GamesController(
         return url ? {'background-image': 'url("' + url + '")'} : null;
     };
 
+    $scope.clearFilters = function clearFilters() {
+        $scope.playerCountEnabled = false;
+        $scope.playTimeEnabled = false;
+        $scope.complexity.enabled = false;
+        $scope.age.enabled = false;
+        $scope.cooperative = null;
+        $scope.user = null;
+        return fetchAndUpdateGames(1, false);
+    };
+
     $scope.$watch('complexity.enabled', renderSlider);
+    $scope.$watch('age.enabled', renderSlider);
 
     fetchAndUpdateGames(1, false, search.user);
 
