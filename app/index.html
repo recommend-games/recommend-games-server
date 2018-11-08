@@ -18,6 +18,8 @@
 	<link rel="stylesheet"
 		href="https://cdnjs.cloudflare.com/ajax/libs/angular-block-ui/0.2.2/angular-block-ui.min.css" />
 	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/angularjs-slider/6.6.0/rzslider.min.css" />
+	<link rel="stylesheet"
 		href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
 		integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
 		crossorigin="anonymous" />
@@ -42,6 +44,8 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular.min.js"
 		type="text/javascript"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-block-ui/0.2.2/angular-block-ui.min.js"
+		type="text/javascript"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/angularjs-slider/6.6.0/rzslider.min.js"
 		type="text/javascript"></script>
 	<script src="app.js" type="text/javascript"></script>
 
@@ -90,6 +94,7 @@
 		<p class="text-right">
 			<button type="button"
 					class="btn btn-link"
+					ng-click="renderSlider()"
 					data-toggle="collapse"
 					data-target="#filter-game-form"
 					aria-expanded="false"
@@ -192,6 +197,41 @@
 						min="5"
 						max="240"
 						step="5" />
+				</div>
+			</div>
+
+			<div class="form-row mb-3">
+				<div class="col-xl-4 col-lg-5 col-md-6 col-sm-12">
+					<div class="input-group">
+						<div class="input-group-prepend">
+							<div class="input-group-text">
+								<input type="checkbox"
+									class="form-check"
+									id="filter-complexity-enable"
+									name="filter-complexity-enable"
+									ng-model="complexity.enabled" />
+							</div>
+						</div>
+						<div class="input-group-append">
+							<div class="input-group-text">
+								<label for="filter-complexity"
+										class="form-check-label {{ complexity.enabled ? '' : 'text-muted' }}">
+									Complexity:
+									<strong class="text-monospace {{ complexity.enabled ? '' : 'invisible' }}">
+										{{ complexity.min | number:1 }}&mdash;{{ complexity.max | number:1 }}
+									</strong>
+								</label>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-xl-8 col-lg-7 col-md-6 col-sm-12">
+					<rzslider id="filter-complexity"
+						name="filter-complexity"
+						ng-disabled="!complexity.enabled"
+						rz-slider-model="complexity.min"
+						rz-slider-high="complexity.max"
+						rz-slider-options="complexity.options"></rzslider>
 				</div>
 			</div>
 

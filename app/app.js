@@ -1,9 +1,12 @@
 'use strict';
 
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
-/*global _, URL, angular */ // moment, showdown
+/*global _, $, URL, angular */ // moment, showdown
 
-var ludojApp = angular.module('ludojApp', ['blockUI']);
+var ludojApp = angular.module('ludojApp', [
+    'blockUI',
+    'rzModule'
+]);
 
 ludojApp.config(function (
     $locationProvider,
@@ -23,23 +26,29 @@ ludojApp.controller('GamesController', function GamesController(
     $location,
     $log,
     $scope,
+    $timeout,
     $window
 ) {
+    function validateCountType(playerCountType) {
+        var playerCountTypes = {'box': true, 'recommended': true, 'best': true};
+        return playerCountTypes[playerCountType] ? playerCountType : 'box';
+    }
+
+    function validateTimeType(playTimeType) {
+        var playTimeTypes = {'min': true, 'max': true};
+        return playTimeTypes[playTimeType] ? playTimeType : 'min';
+    }
+
+    function filtersActive() {
+        return $scope.playerCountEnabled || $scope.playTimeEnabled || $scope.complexity.enabled;
+    }
+
     function filterValues() {
-        var result = {},
-            playerCountTypes = {
-                'box': true,
-                'recommended': true,
-                'best': true
-            },
-            playTimeTypes = {
-                'min': true,
-                'max': true
-            };
+        var result = {};
 
         if ($scope.playerCountEnabled && $scope.playerCount) {
             result.playerCount = $scope.playerCount;
-            result.playerCountType = playerCountTypes[$scope.playerCountType] ? $scope.playerCountType : 'box';
+            result.playerCountType = validateCountType($scope.playerCountType);
         } else {
             result.playerCount = null;
             result.playerCountType = null;
@@ -47,10 +56,15 @@ ludojApp.controller('GamesController', function GamesController(
 
         if ($scope.playTimeEnabled && $scope.playTime) {
             result.playTime = $scope.playTime;
-            result.playTimeType = playTimeTypes[$scope.playTimeType] ? $scope.playTimeType : 'min';
+            result.playTimeType = validateTimeType($scope.playTimeType);
         } else {
             result.playTime = null;
             result.playTimeType = null;
+        }
+
+        if ($scope.complexity.enabled && $scope.complexity.min && $scope.complexity.max) {
+            result.complexityMin = $scope.complexity.min;
+            result.complexityMax = $scope.complexity.max;
         }
 
         return result;
@@ -71,6 +85,11 @@ ludojApp.controller('GamesController', function GamesController(
 
         if (values.playTime) {
             result[values.playTimeType + '_time__lte'] = values.playTime;
+        }
+
+        if (values.complexityMin && values.complexityMax) {
+            result.complexity__gte = values.complexityMin;
+            result.complexity__lte = values.complexityMax;
         }
 
         return result;
@@ -120,23 +139,50 @@ ludojApp.controller('GamesController', function GamesController(
             });
     }
 
+    function renderSlider() {
+        $timeout(function () {
+            $scope.complexity.options.disabled = !$scope.complexity.enabled;
+            $scope.$broadcast('rzSliderForceRender');
+        });
+    }
+
     var search = $location.search(),
         playerCount = _.parseInt(search.playerCount),
-        playTime = _.parseInt(search.playTime);
+        playTime = _.parseInt(search.playTime),
+        complexityMin = parseFloat(search.complexityMin),
+        complexityMax = parseFloat(search.complexityMax);
 
     $scope.user = search.user || null;
 
     $scope.playerCountEnabled = !!playerCount;
     $scope.playerCount = playerCount || 4;
-    $scope.playerCountType = search.playerCountType || 'box';
+    $scope.playerCountType = validateCountType(search.playerCountType);
 
     $scope.playTimeEnabled = !!playTime;
     $scope.playTime = playTime || 60;
-    $scope.playTimeType = search.playTimeType || 'min';
+    $scope.playTimeType = validateTimeType(search.playTimeType);
+
+    $scope.complexity = {
+        'enabled': !!(complexityMin || complexityMax),
+        'min': complexityMin || 1.0,
+        'max': complexityMax || 5.0,
+        'options': {
+            'disabled': !(complexityMin || complexityMax),
+            'floor': 1.0,
+            'ceil': 5.0,
+            'step': 0.1,
+            'precision': 1,
+            'hidePointerLabels': true,
+            'hideLimitLabels': true,
+            'showTicks': 1,
+            'draggableRange': true
+        }
+    };
 
     $scope.fetchGames = fetchAndUpdateGames;
     $scope.now = _.now();
     $scope.pad = _.padStart;
+    $scope.renderSlider = renderSlider;
 
     $scope.open = function open(url) {
         $window.open(url, '_blank');
@@ -146,5 +192,12 @@ ludojApp.controller('GamesController', function GamesController(
         return url ? {'background-image': 'url("' + url + '")'} : null;
     };
 
+    $scope.$watch('complexity.enabled', renderSlider);
+
     fetchAndUpdateGames(1, false, search.user);
+
+    if (filtersActive()) {
+        $('#filter-game-form').collapse('show');
+        renderSlider();
+    }
 });
