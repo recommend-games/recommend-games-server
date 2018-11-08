@@ -51,7 +51,7 @@ ludojApp.controller('GamesController', function GamesController(
 
     function filtersActive() {
         return !!($scope.count.enabled ||
-            $scope.playTimeEnabled ||
+            $scope.time.enabled ||
             $scope.age.enabled ||
             $scope.complexity.enabled ||
             $scope.cooperative);
@@ -70,9 +70,9 @@ ludojApp.controller('GamesController', function GamesController(
             result.playerCountType = null;
         }
 
-        if ($scope.playTimeEnabled && $scope.playTime) {
-            result.playTime = $scope.playTime;
-            result.playTimeType = validateTimeType($scope.playTimeType);
+        if ($scope.time.enabled && $scope.time.value) {
+            result.playTime = $scope.time.value;
+            result.playTimeType = validateTimeType($scope.time.type);
         } else {
             result.playTime = null;
             result.playTimeType = null;
@@ -188,6 +188,7 @@ ludojApp.controller('GamesController', function GamesController(
     function renderSlider() {
         $timeout(function () {
             $scope.count.options.disabled = !$scope.count.enabled;
+            $scope.time.options.disabled = !$scope.time.enabled;
             $scope.complexity.options.disabled = !$scope.complexity.enabled;
             $scope.age.options.disabled = !$scope.age.enabled;
             $scope.$broadcast('rzSliderForceRender');
@@ -222,9 +223,39 @@ ludojApp.controller('GamesController', function GamesController(
         }
     };
 
-    $scope.playTimeEnabled = !!playTime;
-    $scope.playTime = playTime || 60;
-    $scope.playTimeType = validateTimeType(search.playTimeType);
+    $scope.time = {
+        'enabled': !!playTime,
+        'value': playTime || 60,
+        'type': validateTimeType(search.playTimeType),
+        'options': {
+            'disabled': !playTime,
+            'floor': 5,
+            'ceil': 240,
+            'step': 5,
+            'hidePointerLabels': true,
+            'hideLimitLabels': true,
+            'ticksArray': _.concat(5, _.range(15, 241, 15)),
+            'draggableRange': true,
+            'showSelectionBar': true
+        }
+    };
+
+    $scope.age = {
+        'enabled': !!playerAge,
+        'value': playerAge || 10,
+        'type': validateAgeType(search.playerAgeType),
+        'options': {
+            'disabled': !playerAge,
+            'floor': 1,
+            'ceil': 21,
+            'step': 1,
+            'hidePointerLabels': true,
+            'hideLimitLabels': true,
+            'ticksArray': _.concat(1, _.range(4, 19, 2), 21),
+            'draggableRange': true,
+            'showSelectionBar': true
+        }
+    };
 
     $scope.complexity = {
         'enabled': !!(complexityMin || complexityMax),
@@ -240,23 +271,6 @@ ludojApp.controller('GamesController', function GamesController(
             'hideLimitLabels': true,
             'showTicks': 1,
             'draggableRange': true
-        }
-    };
-
-    $scope.age = {
-        'enabled': !!playerAge,
-        'value': playerAge || 10,
-        'type': validateAgeType(search.playerAgeType),
-        'options': {
-            'disabled': !playerAge,
-            'floor': 1,
-            'ceil': 21,
-            'step': 1,
-            'hidePointerLabels': true,
-            'hideLimitLabels': true,
-            'showTicks': 1,
-            'draggableRange': true,
-            'showSelectionBar': true
         }
     };
 
@@ -278,8 +292,8 @@ ludojApp.controller('GamesController', function GamesController(
     $scope.clearFilters = function clearFilters() {
         $scope.user = null;
         $scope.search = null;
-        $scope.playerCountEnabled = false;
-        $scope.playTimeEnabled = false;
+        $scope.count.enabled = false;
+        $scope.time.enabled = false;
         $scope.complexity.enabled = false;
         $scope.age.enabled = false;
         $scope.cooperative = null;
@@ -287,6 +301,7 @@ ludojApp.controller('GamesController', function GamesController(
     };
 
     $scope.$watch('count.enabled', renderSlider);
+    $scope.$watch('time.enabled', renderSlider);
     $scope.$watch('complexity.enabled', renderSlider);
     $scope.$watch('age.enabled', renderSlider);
 

@@ -198,41 +198,36 @@
 							<div class="input-group-text">
 								<input type="checkbox"
 									class="form-check"
-									id="filter-game-time-enable"
-									name="filter-game-time-enable"
-									ng-model="playTimeEnabled" />
+									id="filter-time-enable"
+									name="filter-time-enable"
+									ng-model="time.enabled" />
 							</div>
 							<div class="input-group-text">
-								<label for="filter-play-time"
-										class="form-check-label {{ playTimeEnabled ? 'text-success' : 'text-muted' }}">
+								<label for="filter-time"
+										class="form-check-label {{ time.enabled ? 'text-success' : 'text-muted' }}">
 									Play time:
-									<span class="{{ playTimeEnabled ? '' : 'invisible' }}">
-										<strong class="text-monospace">{{ pad(playTime, 3, '&nbsp;') }}</strong> minutes
+									<span class="{{ time.enabled ? '' : 'invisible' }}">
+										<strong class="text-monospace">{{ pad(time.value, 3, '&nbsp;') }}</strong> minutes
 									</span>
 								</label>
 							</div>
 						</div>
-						<select name="filter-play-time-type"
-								ng-disabled="!playTimeEnabled"
-								ng-model="playTimeType"
+						<select name="filter-time-type"
+								ng-disabled="!time.enabled"
+								ng-model="time.type"
 								class="custom-select"
-								id="filter-play-time-type">
+								id="filter-time-type">
 							<option selected="selected">min</option>
 							<option>max</option>
 						</select>
 					</div>
 				</div>
 				<div class="col-xl-8 col-lg-7 col-md-6">
-					<input type="range"
-						class="form-control"
-						id="filter-play-time"
-						name="filter-play-time"
-						ng-disabled="!playTimeEnabled"
-						ng-model="playTime"
-						value="60"
-						min="5"
-						max="240"
-						step="5" />
+					<rzslider id="filter-time"
+						name="filter-time"
+						ng-disabled="!time.enabled"
+						rz-slider-model="time.value"
+						rz-slider-options="time.options"></rzslider>
 				</div>
 			</div>
 
