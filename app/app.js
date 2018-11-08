@@ -39,8 +39,16 @@ ludojApp.controller('GamesController', function GamesController(
         return playTimeTypes[playTimeType] ? playTimeType : 'min';
     }
 
+    function validateBoolean(input) {
+        var booleans = {'True': true, 'False': true};
+        return booleans[input] ? input : null;
+    }
+
     function filtersActive() {
-        return $scope.playerCountEnabled || $scope.playTimeEnabled || $scope.complexity.enabled;
+        return !!($scope.playerCountEnabled ||
+            $scope.playTimeEnabled ||
+            $scope.complexity.enabled ||
+            $scope.cooperative);
     }
 
     function filterValues() {
@@ -67,6 +75,8 @@ ludojApp.controller('GamesController', function GamesController(
             result.complexityMax = $scope.complexity.max;
         }
 
+        result.cooperative = validateBoolean($scope.cooperative);
+
         return result;
     }
 
@@ -90,6 +100,10 @@ ludojApp.controller('GamesController', function GamesController(
         if (values.complexityMin && values.complexityMax) {
             result.complexity__gte = values.complexityMin;
             result.complexity__lte = values.complexityMax;
+        }
+
+        if (values.cooperative) {
+            result.cooperative = values.cooperative;
         }
 
         return result;
@@ -178,6 +192,8 @@ ludojApp.controller('GamesController', function GamesController(
             'draggableRange': true
         }
     };
+
+    $scope.cooperative = validateBoolean(search.cooperative);
 
     $scope.fetchGames = fetchAndUpdateGames;
     $scope.now = _.now();

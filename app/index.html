@@ -110,7 +110,7 @@
 				role="form"
 				class="collapse form">
 			<div class="form-row mb-3">
-				<div class="col-xl-4 col-lg-5 col-md-6 col-sm-12">
+				<div class="col-xl-4 col-lg-5 col-md-6">
 					<div class="input-group">
 						<div class="input-group-prepend">
 							<div class="input-group-text">
@@ -122,7 +122,7 @@
 							</div>
 							<div class="input-group-text">
 								<label for="filter-game-players"
-										class="form-check-label {{ playerCountEnabled ? '' : 'text-muted' }}">
+										class="form-check-label {{ playerCountEnabled ? 'text-success' : 'text-muted' }}">
 									Player count:
 									<strong class="text-monospace {{ playerCountEnabled ? '' : 'invisible' }}">
 										{{ pad(playerCount, 2, '&nbsp;') }}
@@ -141,7 +141,7 @@
 						</select>
 					</div>
 				</div>
-				<div class="col-xl-8 col-lg-7 col-md-6 col-sm-12">
+				<div class="col-xl-8 col-lg-7 col-md-6">
 					<input type="range"
 						class="form-control"
 						id="filter-game-players"
@@ -156,7 +156,7 @@
 			</div>
 
 			<div class="form-row mb-3">
-				<div class="col-xl-4 col-lg-5 col-md-6 col-sm-12">
+				<div class="col-xl-4 col-lg-5 col-md-6">
 					<div class="input-group">
 						<div class="input-group-prepend">
 							<div class="input-group-text">
@@ -168,7 +168,7 @@
 							</div>
 							<div class="input-group-text">
 								<label for="filter-play-time"
-										class="form-check-label {{ playTimeEnabled ? '' : 'text-muted' }}">
+										class="form-check-label {{ playTimeEnabled ? 'text-success' : 'text-muted' }}">
 									Play time:
 									<span class="{{ playTimeEnabled ? '' : 'invisible' }}">
 										<strong class="text-monospace">{{ pad(playTime, 3, '&nbsp;') }}</strong> minutes
@@ -186,7 +186,7 @@
 						</select>
 					</div>
 				</div>
-				<div class="col-xl-8 col-lg-7 col-md-6 col-sm-12">
+				<div class="col-xl-8 col-lg-7 col-md-6">
 					<input type="range"
 						class="form-control"
 						id="filter-play-time"
@@ -201,7 +201,7 @@
 			</div>
 
 			<div class="form-row mb-3">
-				<div class="col-xl-4 col-lg-5 col-md-6 col-sm-12">
+				<div class="col-xl-4 col-lg-5 col-md-6">
 					<div class="input-group">
 						<div class="input-group-prepend">
 							<div class="input-group-text">
@@ -215,7 +215,7 @@
 						<div class="input-group-append">
 							<div class="input-group-text">
 								<label for="filter-complexity"
-										class="form-check-label {{ complexity.enabled ? '' : 'text-muted' }}">
+										class="form-check-label {{ complexity.enabled ? 'text-success' : 'text-muted' }}">
 									Complexity:
 									<strong class="text-monospace {{ complexity.enabled ? '' : 'invisible' }}">
 										{{ complexity.min | number:1 }}&mdash;{{ complexity.max | number:1 }}
@@ -225,7 +225,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="col-xl-8 col-lg-7 col-md-6 col-sm-12">
+				<div class="col-xl-8 col-lg-7 col-md-6">
 					<rzslider id="filter-complexity"
 						name="filter-complexity"
 						ng-disabled="!complexity.enabled"
@@ -235,10 +235,34 @@
 				</div>
 			</div>
 
-			<button type="submit"
-					class="btn btn-primary">
-				Filter
-			</button>
+			<div class="form-row">
+				<div class="col-md-9 col-sm-6 mb-3">
+					<div class="input-group">
+						<div class="input-group-prepend">
+							<div class="input-group-text">
+								<label for="filter-cooperative"
+										class="form-check-label {{ cooperative ? 'text-success' : 'text-muted' }}">
+									Cooperative:
+								</label>
+							</div>
+						</div>
+						<select name="filter-cooperative"
+								ng-model="cooperative"
+								class="custom-select"
+								id="filter-cooperative">
+							<option selected="selected" ng-value="null">[all]</option>
+							<option value="True">only cooperative</option>
+							<option value="False">only competitive</option>
+						</select>
+					</div>
+				</div>
+				<div class="col-md-3 col-sm-6 mb-3">
+					<button type="submit"
+							class="btn btn-primary btn-block">
+						Filter
+					</button>
+				</div>
+			</div>
 		</form>
 
 		<h2 ng-if="currUser">
@@ -253,7 +277,7 @@
 		<div class="row">
 			<div ng-repeat="game in games"
 					ng-click="open(game.url)"
-					class="col-lg-3 col-md-4 col-sm-6 col-12">
+					class="col-lg-3 col-md-4 col-sm-6">
 				<div class="game"
 						ng-style="bgImage(game.image_url)">
 					<div>
@@ -277,7 +301,7 @@
 			</div>
 			<div ng-if="nextPage"
 					ng-click="fetchGames(nextPage, true, currUser)"
-					class="col-lg-3 col-md-4 col-sm-6 col-12">
+					class="col-lg-3 col-md-4 col-sm-6">
 				<div class="game game-more">
 					<div>
 						<h2 class="game-title">More...</h2>
