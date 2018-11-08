@@ -25,20 +25,52 @@ ludojApp.controller('GamesController', function GamesController(
     $scope,
     $window
 ) {
-    function filters() {
+    function filterValues() {
         var result = {},
-            playerSuffix = '';
+            playerCountTypes = {
+                'box': true,
+                'recommended': true,
+                'best': true
+            },
+            playTimeTypes = {
+                'min': true,
+                'max': true
+            };
 
         if ($scope.playerCountEnabled && $scope.playerCount) {
-            playerSuffix = $scope.playerCountType === 'recommended' ? '_rec'
-                    : $scope.playerCountType === 'best' ? '_best'
-                    : '';
-            result['min_players' + playerSuffix + '__lte'] = $scope.playerCount;
-            result['max_players' + playerSuffix + '__gte'] = $scope.playerCount;
+            result.playerCount = $scope.playerCount;
+            result.playerCountType = playerCountTypes[$scope.playerCountType] ? $scope.playerCountType : 'box';
+        } else {
+            result.playerCount = null;
+            result.playerCountType = null;
         }
 
         if ($scope.playTimeEnabled && $scope.playTime) {
-            result[$scope.playTimeType + '_time__lte'] = $scope.playTime;
+            result.playTime = $scope.playTime;
+            result.playTimeType = playTimeTypes[$scope.playTimeType] ? $scope.playTimeType : 'min';
+        } else {
+            result.playTime = null;
+            result.playTimeType = null;
+        }
+
+        return result;
+    }
+
+    function filters() {
+        var result = {},
+            values = filterValues(),
+            playerSuffix = '';
+
+        if (values.playerCount) {
+            playerSuffix = values.playerCountType === 'recommended' ? '_rec'
+                    : values.playerCountType === 'best' ? '_best'
+                    : '';
+            result['min_players' + playerSuffix + '__lte'] = values.playerCount;
+            result['max_players' + playerSuffix + '__gte'] = values.playerCount;
+        }
+
+        if (values.playTime) {
+            result[values.playTimeType + '_time__lte'] = values.playTime;
         }
 
         return result;
@@ -66,7 +98,9 @@ ludojApp.controller('GamesController', function GamesController(
                 $scope.prevPage = _.get(response, 'data.previous') ? page - 1 : null;
                 $scope.nextPage = _.get(response, 'data.next') ? page + 1 : null;
 
-                $location.search('user', user);
+                var values = filterValues();
+                values.user = user;
+                $location.search(values);
                 $scope.user = user;
                 $scope.currUser = user;
 
@@ -86,9 +120,23 @@ ludojApp.controller('GamesController', function GamesController(
             });
     }
 
-    fetchAndUpdateGames(1, false, $location.search().user);
+    var search = $location.search(),
+        playerCount = _.parseInt(search.playerCount),
+        playTime = _.parseInt(search.playTime);
+
+    $scope.user = search.user || null;
+
+    $scope.playerCountEnabled = !!playerCount;
+    $scope.playerCount = playerCount || 4;
+    $scope.playerCountType = search.playerCountType || 'box';
+
+    $scope.playTimeEnabled = !!playTime;
+    $scope.playTime = playTime || 60;
+    $scope.playTimeType = search.playTimeType || 'min';
 
     $scope.fetchGames = fetchAndUpdateGames;
+    $scope.now = _.now();
+    $scope.pad = _.padStart;
 
     $scope.open = function open(url) {
         $window.open(url, '_blank');
@@ -98,11 +146,5 @@ ludojApp.controller('GamesController', function GamesController(
         return url ? {'background-image': 'url("' + url + '")'} : null;
     };
 
-    $scope.now = _.now();
-    $scope.pad = _.padStart;
-
-    $scope.playerCount = 4;
-    $scope.playerCountType = 'box';
-    $scope.playTime = 60;
-    $scope.playTimeType = 'min';
+    fetchAndUpdateGames(1, false, search.user);
 });
