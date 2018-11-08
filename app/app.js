@@ -50,7 +50,7 @@ ludojApp.controller('GamesController', function GamesController(
     }
 
     function filtersActive() {
-        return !!($scope.playerCountEnabled ||
+        return !!($scope.count.enabled ||
             $scope.playTimeEnabled ||
             $scope.age.enabled ||
             $scope.complexity.enabled ||
@@ -62,9 +62,9 @@ ludojApp.controller('GamesController', function GamesController(
 
         result.search = _.trim($scope.search) || null;
 
-        if ($scope.playerCountEnabled && $scope.playerCount) {
-            result.playerCount = $scope.playerCount;
-            result.playerCountType = validateCountType($scope.playerCountType);
+        if ($scope.count.enabled && $scope.count.value) {
+            result.playerCount = $scope.count.value;
+            result.playerCountType = validateCountType($scope.count.type);
         } else {
             result.playerCount = null;
             result.playerCountType = null;
@@ -187,6 +187,7 @@ ludojApp.controller('GamesController', function GamesController(
 
     function renderSlider() {
         $timeout(function () {
+            $scope.count.options.disabled = !$scope.count.enabled;
             $scope.complexity.options.disabled = !$scope.complexity.enabled;
             $scope.age.options.disabled = !$scope.age.enabled;
             $scope.$broadcast('rzSliderForceRender');
@@ -204,9 +205,22 @@ ludojApp.controller('GamesController', function GamesController(
 
     $scope.search = search.search || null;
 
-    $scope.playerCountEnabled = !!playerCount;
-    $scope.playerCount = playerCount || 4;
-    $scope.playerCountType = validateCountType(search.playerCountType);
+    $scope.count = {
+        'enabled': !!playerCount,
+        'value': playerCount || 4,
+        'type': validateCountType(search.playerCountType),
+        'options': {
+            'disabled': !playerCount,
+            'floor': 1,
+            'ceil': 10,
+            'step': 1,
+            'hidePointerLabels': true,
+            'hideLimitLabels': true,
+            'showTicks': 1,
+            'draggableRange': true,
+            'showSelectionBar': false
+        }
+    };
 
     $scope.playTimeEnabled = !!playTime;
     $scope.playTime = playTime || 60;
@@ -272,6 +286,7 @@ ludojApp.controller('GamesController', function GamesController(
         return fetchAndUpdateGames(1, false);
     };
 
+    $scope.$watch('count.enabled', renderSlider);
     $scope.$watch('complexity.enabled', renderSlider);
     $scope.$watch('age.enabled', renderSlider);
 

@@ -157,25 +157,25 @@
 							<div class="input-group-text">
 								<input type="checkbox"
 									class="form-check"
-									id="filter-game-players-enable"
-									name="filter-game-players-enable"
-									ng-model="playerCountEnabled" />
+									id="filter-count-enable"
+									name="filter-count-enable"
+									ng-model="count.enabled" />
 							</div>
 							<div class="input-group-text">
-								<label for="filter-game-players"
-										class="form-check-label {{ playerCountEnabled ? 'text-success' : 'text-muted' }}">
+								<label for="filter-count"
+										class="form-check-label {{ count.enabled ? 'text-success' : 'text-muted' }}">
 									Player count:
-									<strong class="text-monospace {{ playerCountEnabled ? '' : 'invisible' }}">
-										{{ pad(playerCount, 2, '&nbsp;') }}
+									<strong class="text-monospace {{ count.enabled ? '' : 'invisible' }}">
+										{{ pad(count.value, 2, '&nbsp;') }}
 									</strong>
 								</label>
 							</div>
 						</div>
-						<select name="filter-game-players-type"
-								ng-disabled="!playerCountEnabled"
-								ng-model="playerCountType"
+						<select name="filter-count-type"
+								ng-disabled="!count.enabled"
+								ng-model="count.type"
 								class="custom-select"
-								id="filter-game-players-type">
+								id="filter-count-type">
 							<option selected="selected">box</option>
 							<option>recommended</option>
 							<option>best</option>
@@ -183,16 +183,11 @@
 					</div>
 				</div>
 				<div class="col-xl-8 col-lg-7 col-md-6">
-					<input type="range"
-						class="form-control"
-						id="filter-game-players"
-						name="filter-game-players"
-						ng-disabled="!playerCountEnabled"
-						ng-model="playerCount"
-						value="4"
-						min="1"
-						max="10"
-						step="1" />
+					<rzslider id="filter-count"
+						name="filter-count"
+						ng-disabled="!count.enabled"
+						rz-slider-model="count.value"
+						rz-slider-options="count.options"></rzslider>
 				</div>
 			</div>
 
