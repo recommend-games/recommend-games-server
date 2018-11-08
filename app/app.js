@@ -60,6 +60,8 @@ ludojApp.controller('GamesController', function GamesController(
     function filterValues() {
         var result = {};
 
+        result.search = _.trim($scope.search) || null;
+
         if ($scope.playerCountEnabled && $scope.playerCount) {
             result.playerCount = $scope.playerCount;
             result.playerCountType = validateCountType($scope.playerCountType);
@@ -102,6 +104,10 @@ ludojApp.controller('GamesController', function GamesController(
             values = filterValues(),
             playerSuffix = '',
             ageSuffix = '';
+
+        if (values.search) {
+            result.search = values.search;
+        }
 
         if (values.playerCount) {
             playerSuffix = values.playerCountType === 'recommended' ? '_rec'
@@ -196,6 +202,8 @@ ludojApp.controller('GamesController', function GamesController(
 
     $scope.user = search.user || null;
 
+    $scope.search = search.search || null;
+
     $scope.playerCountEnabled = !!playerCount;
     $scope.playerCount = playerCount || 4;
     $scope.playerCountType = validateCountType(search.playerCountType);
@@ -233,7 +241,8 @@ ludojApp.controller('GamesController', function GamesController(
             'hidePointerLabels': true,
             'hideLimitLabels': true,
             'showTicks': 1,
-            'draggableRange': true
+            'draggableRange': true,
+            'showSelectionBar': true
         }
     };
 
@@ -253,12 +262,13 @@ ludojApp.controller('GamesController', function GamesController(
     };
 
     $scope.clearFilters = function clearFilters() {
+        $scope.user = null;
+        $scope.search = null;
         $scope.playerCountEnabled = false;
         $scope.playTimeEnabled = false;
         $scope.complexity.enabled = false;
         $scope.age.enabled = false;
         $scope.cooperative = null;
-        $scope.user = null;
         return fetchAndUpdateGames(1, false);
     };
 

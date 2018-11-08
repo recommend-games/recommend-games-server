@@ -71,7 +71,11 @@
 				novalidate="novalidate"
 				role="form"
 				class="form">
-			<label for="user">Personal recommendations for:</label>
+			<label for="user"
+					id="bgg-user-label"
+					class="{{ user ? 'text-success' : 'text-muted' }}">
+				Personal recommendations for:
+			</label>
 			<div class="input-group mb-3">
 				<input type="text"
 					id="user"
@@ -91,17 +95,54 @@
 			</div>
 		</form>
 
-		<p class="text-right">
-			<button type="button"
-					class="btn btn-link"
-					ng-click="renderSlider()"
-					data-toggle="collapse"
-					data-target="#filter-game-form"
-					aria-expanded="false"
-					aria-controls="filter-game-form">
-				Advanced filters:
-			</button>
-		</p>
+		<form ng-submit="fetchGames(1, false, user)"
+				id="search-game-form"
+				name="search-game-form"
+				novalidate="novalidate"
+				role="form"
+				class="form">
+			<div class="form-row">
+				<div class="col-md-9 col-sm-8 mb-3">
+					<div class="input-group">
+						<div class="input-group-prepend">
+							<div class="input-group-text">
+								<label for="search"
+										id="search-label"
+										class="form-check-label {{ search ? 'text-success' : 'text-muted' }}">
+									Game name:
+								</label>
+							</div>
+						</div>
+						<input type="text"
+							id="search"
+							name="search"
+							ng-model="search"
+							ng-required="true"
+							class="form-control"
+							placeholder="e.g., &quot;catan&quot;"
+							aria-describedby="search-label" />
+						<div class="input-group-append">
+							<button type="submit"
+									ng-disabled="!search"
+									class="btn btn-primary">
+								Search
+							</button>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-sm-4 mb-3 text-right">
+					<button type="button"
+							class="btn btn-outline-primary btn-sm"
+							ng-click="renderSlider()"
+							data-toggle="collapse"
+							data-target="#filter-game-form"
+							aria-expanded="false"
+							aria-controls="filter-game-form">
+						Advanced filters:
+					</button>
+				</div>
+			</div>
+		</form>
 
 		<form ng-submit="fetchGames(1, false, user)"
 				id="filter-game-form"
@@ -275,6 +316,8 @@
 				</div>
 			</div>
 
+			<!-- TODO year filter -->
+
 			<div class="form-row">
 				<div class="col-md-6 mb-3">
 					<div class="input-group">
@@ -299,13 +342,13 @@
 				<div class="col-md-3 mb-3">
 					<button type="button"
 							ng-click="clearFilters()"
-							class="btn btn-outline-secondary d-block w-100">
+							class="btn btn-outline-secondary btn-block">
 						Clear
 					</button>
 				</div>
 				<div class="col-md-3 mb-3">
 					<button type="submit"
-							class="btn btn-primary d-block w-100">
+							class="btn btn-primary btn-block">
 						Filter
 					</button>
 				</div>
