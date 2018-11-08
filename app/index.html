@@ -104,24 +104,41 @@
 				novalidate="novalidate"
 				role="form"
 				class="collapse form">
-			<div class="form-row {{ playerCountEnabled ? '' : 'text-muted' }}">
-				<div class="form-group col-lg-3 col-md-4 col-sm-6">
-					<div class="form-check">
-						<input type="checkbox"
-							class="form-check-input"
-							id="filter-game-players-enable"
-							name="filter-game-players-enable"
-							ng-model="playerCountEnabled" />
-						<label for="filter-game-players"
-								class="form-check-label">
-							Player count:
-							<strong ng-if="playerCountEnabled">{{ playerCount }}</strong>
-						</label>
+			<div class="form-row mb-3">
+				<div class="col-xl-4 col-lg-5 col-md-6 col-sm-12">
+					<div class="input-group">
+						<div class="input-group-prepend">
+							<div class="input-group-text">
+								<input type="checkbox"
+									class="form-check"
+									id="filter-game-players-enable"
+									name="filter-game-players-enable"
+									ng-model="playerCountEnabled" />
+							</div>
+							<div class="input-group-text">
+								<label for="filter-game-players"
+										class="form-check-label {{ playerCountEnabled ? '' : 'text-muted' }}">
+									Player count:
+									<strong class="text-monospace {{ playerCountEnabled ? '' : 'invisible' }}">
+										{{ pad(playerCount, 2, '&nbsp;') }}
+									</strong>
+								</label>
+							</div>
+						</div>
+						<select name="filter-game-players-type"
+								ng-disabled="!playerCountEnabled"
+								ng-model="playerCountType"
+								class="custom-select"
+								id="filter-game-players-type">
+							<option selected="selected">box</option>
+							<option>recommended</option>
+							<option>best</option>
+						</select>
 					</div>
 				</div>
-				<div class="form-group col-lg-9 col-md-8 col-sm-6">
+				<div class="col-xl-8 col-lg-7 col-md-6 col-sm-12">
 					<input type="range"
-						class="form-control-range"
+						class="form-control"
 						id="filter-game-players"
 						name="filter-game-players"
 						ng-disabled="!playerCountEnabled"
@@ -131,64 +148,42 @@
 						max="10"
 						step="1" />
 				</div>
-				<div class="form-group col-xs-12">
-					<div class="form-check form-check-inline">
-						<input type="radio"
-							name="filter-game-players-type"
-							ng-model="playerCountType"
-							value="box"
-							checked="checked"
-							class="form-check-input"
-							id="filter-game-players-box" />
-						<label for="filter-game-players-box"
-								class="form-check-label">
-							box
-						</label>
-					</div>
-					<div class="form-check form-check-inline">
-						<input type="radio"
-							name="filter-game-players-type"
-							ng-model="playerCountType"
-							value="recommended"
-							class="form-check-input"
-							id="filter-game-players-recommended" />
-						<label for="filter-game-players-recommended"
-								class="form-check-label">
-							recommended
-						</label>
-					</div>
-					<div class="form-check form-check-inline">
-						<input type="radio"
-							name="filter-game-players-type"
-							ng-model="playerCountType"
-							value="best"
-							class="form-check-input"
-							id="filter-game-players-best" />
-						<label for="filter-game-players-best"
-								class="form-check-label">
-							best
-						</label>
-					</div>
-				</div>
 			</div>
-			<div class="form-row">
-				<div class="form-group col-lg-3 col-md-4 col-sm-6">
-					<div class="form-check">
-						<input type="checkbox"
-							class="form-check-input"
-							id="filter-game-time-enable"
-							name="filter-game-time-enable"
-							ng-model="playTimeEnabled" />
-						<label for="filter-play-time"
-								class="form-check-label {{ playTimeEnabled ? '' : 'text-muted' }}">
-							Play time:
-							<strong ng-if="playTimeEnabled">{{ playTime }} minutes</strong>
-						</label>
+
+			<div class="form-row mb-3">
+				<div class="col-xl-4 col-lg-5 col-md-6 col-sm-12">
+					<div class="input-group">
+						<div class="input-group-prepend">
+							<div class="input-group-text">
+								<input type="checkbox"
+									class="form-check"
+									id="filter-game-time-enable"
+									name="filter-game-time-enable"
+									ng-model="playTimeEnabled" />
+							</div>
+							<div class="input-group-text">
+								<label for="filter-play-time"
+										class="form-check-label {{ playTimeEnabled ? '' : 'text-muted' }}">
+									Play time:
+									<span class="{{ playTimeEnabled ? '' : 'invisible' }}">
+										<strong class="text-monospace">{{ pad(playTime, 3, '&nbsp;') }}</strong> minutes
+									</span>
+								</label>
+							</div>
+						</div>
+						<select name="filter-play-time-type"
+								ng-disabled="!playTimeEnabled"
+								ng-model="playTimeType"
+								class="custom-select"
+								id="filter-play-time-type">
+							<option selected="selected">min</option>
+							<option>max</option>
+						</select>
 					</div>
 				</div>
-				<div class="form-group col-lg-9 col-md-8 col-sm-6">
+				<div class="col-xl-8 col-lg-7 col-md-6 col-sm-12">
 					<input type="range"
-						class="form-control-range"
+						class="form-control"
 						id="filter-play-time"
 						name="filter-play-time"
 						ng-disabled="!playTimeEnabled"
@@ -199,6 +194,7 @@
 						step="5" />
 				</div>
 			</div>
+
 			<button type="submit"
 					class="btn btn-primary">
 				Filter

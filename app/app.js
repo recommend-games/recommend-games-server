@@ -38,7 +38,7 @@ ludojApp.controller('GamesController', function GamesController(
         }
 
         if ($scope.playTimeEnabled && $scope.playTime) {
-            result.min_time__lte = $scope.playTime;
+            result[$scope.playTimeType + '_time__lte'] = $scope.playTime;
         }
 
         return result;
@@ -99,8 +99,10 @@ ludojApp.controller('GamesController', function GamesController(
     };
 
     $scope.now = _.now();
+    $scope.pad = _.padStart;
 
     $scope.playerCount = 4;
     $scope.playerCountType = 'box';
     $scope.playTime = 60;
+    $scope.playTimeType = 'min';
 });

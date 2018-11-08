@@ -1,13 +1,13 @@
 .game {
-    padding-bottom: 100%;
-    position: relative;
-    margin: 5px 0;
     background-color: #0C6;
-    background-position: top;
+    background-position: center top;
     background-repeat: no-repeat;
     background-size: cover;
     border-radius: 5px;
     cursor: pointer;
+    margin: 5px 0;
+    padding-bottom: 100%;
+    position: relative;
 }
 
 .game-more {
@@ -15,49 +15,49 @@
 }
 
 .game > div {
-    position: absolute;
-    width: 100%;
-    height: 100%;
     background-image: linear-gradient(
         to bottom,
         transparent,
         rgba(0, 0, 0, 0.2),
         black);
     border-radius: 5px;
+    height: 100%;
+    position: absolute;
+    width: 100%;
 }
 
 .game-rank {
+    font-size: 1.2rem;
     position: absolute;
     right: 10px;
     top: 10px;
-    font-size: 1.2rem;
 }
 
 .game-title {
-    position: absolute;
     bottom: 0;
+    color: white;
     font-size: 1.2rem;
     padding: 0 10px;
-    color: white;
+    position: absolute;
     text-shadow: 0 0 3px black;
 }
 
 .game-score {
+    font-size: .8rem;
     text-shadow: none;
-    font-size: 0.8rem;
 }
 
 .btn-more {
+    font-size: 1.8rem;
+    left: 23%;
     position: absolute;
     top: 40%;
-    left: 23%;
-    font-size: 1.8rem;
-}
-
-img.img-icon {
-    max-width: 1.6rem;
 }
 
 .nav-link-icon {
     white-space: nowrap;
+}
+
+.text-monospace {
+    font-size: smaller;
 }
