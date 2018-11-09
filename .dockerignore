@@ -113,3 +113,4 @@
 **/requirements*
 **/tox.ini
 app/
+release.sh

@@ -35,8 +35,8 @@ ludojApp.controller('GamesController', function GamesController(
         playTime = _.parseInt(search.playTime),
         complexityMin = parseFloat(search.complexityMin),
         complexityMax = parseFloat(search.complexityMax),
-        yearMin = _.parseInt(search.complexityMin),
-        yearMax = _.parseInt(search.complexityMax),
+        yearMin = _.parseInt(search.yearMin),
+        yearMax = _.parseInt(search.yearMax),
         yearFloor = 1970,
         yearNow = new Date().getFullYear();
 
