@@ -423,9 +423,18 @@
 					</div>
 				</div>
 			</div>
-		</div>
+		</div><!-- row -->
 
-	</div>
+		<div ng-if="isEmpty(games) &amp;&amp; !nextPage"
+				class="alert alert-danger"
+				role="alert">
+			<h4 class="alert-heading">No games found</h4>
+			<p class="mb-0">
+				No games could be loaded.
+				<a href="#" class="alert-link" ng-click="clearFilters()">Try without filters instead</a>...
+			</p>
+		</div>
+	</div><!-- container -->
 
 	<footer class="navbar navbar-expand navbar-dark bg-dark">
 		<div class="container">

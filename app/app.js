@@ -314,6 +314,7 @@ ludojApp.controller('GamesController', function GamesController(
     $scope.fetchGames = fetchAndUpdateGames;
     $scope.yearNow = yearNow;
     $scope.pad = _.padStart;
+    $scope.isEmpty = _.isEmpty;
     $scope.renderSlider = renderSlider;
 
     $scope.open = function open(url) {
