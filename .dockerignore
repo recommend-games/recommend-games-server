@@ -108,6 +108,9 @@
 **/tests/
 **/.htmllintrc
 
+**/README*
+**/LICENSE*
+
 **/Dockerfile
 **/docker-compose.yaml
 **/requirements*
