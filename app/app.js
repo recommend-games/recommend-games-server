@@ -203,6 +203,8 @@ ludojApp.controller('GamesController', function GamesController(
                 $scope.prevPage = _.get(response, 'data.previous') ? page - 1 : null;
                 $scope.nextPage = _.get(response, 'data.next') ? page + 1 : null;
 
+                $scope.total = _.get(response, 'data.count');
+
                 var values = filterValues();
                 values.user = user;
                 $location.search(values);
@@ -223,6 +225,7 @@ ludojApp.controller('GamesController', function GamesController(
             .catch(function (reason) {
                 $log.error(reason);
                 $scope.empty = false;
+                $scope.total = null;
                 toastr.error(
                     'Sorry, there was an error. Tap to try again...',
                     'Error loading games',
@@ -335,6 +338,7 @@ ludojApp.controller('GamesController', function GamesController(
     $scope.yearNow = yearNow;
     $scope.pad = _.padStart;
     $scope.empty = false;
+    $scope.total = null;
     $scope.renderSlider = renderSlider;
 
     $scope.open = function open(url) {

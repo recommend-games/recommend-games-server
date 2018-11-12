@@ -478,7 +478,13 @@
 					class="col-lg-3 col-md-4 col-sm-6">
 				<div class="game game-more">
 					<div>
-						<h2 class="game-title">More...</h2>
+						<h2 class="game-title">
+							More...
+							<small ng-if="total"
+									class="text-muted">
+								({{ total }} games in total)
+							</small>
+						</h2>
 					</div>
 				</div>
 			</div>
