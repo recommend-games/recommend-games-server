@@ -5,12 +5,15 @@
 
 var ludojApp = angular.module('ludojApp', [
     'blockUI',
-    'rzModule'
+    'ngAnimate',
+    'rzModule',
+    'toastr'
 ]);
 
 ludojApp.config(function (
     $locationProvider,
-    blockUIConfig
+    blockUIConfig,
+    toastrConfig
 ) {
     $locationProvider.html5Mode({
         enabled: true,
@@ -19,6 +22,12 @@ ludojApp.config(function (
 
     blockUIConfig.autoBlock = true;
     blockUIConfig.delay = 0;
+
+    toastrConfig.autoDismiss = false;
+    toastrConfig.positionClass = 'toast-bottom-right';
+    toastrConfig.tapToDismiss = true;
+    toastrConfig.timeOut = 5 * 60000;
+    toastrConfig.extendedTimeOut = 60000;
 });
 
 ludojApp.controller('GamesController', function GamesController(
@@ -27,7 +36,8 @@ ludojApp.controller('GamesController', function GamesController(
     $log,
     $scope,
     $timeout,
-    $window
+    $window,
+    toastr
 ) {
     var search = $location.search(),
         playerCount = _.parseInt(search.playerCount),
@@ -170,6 +180,8 @@ ludojApp.controller('GamesController', function GamesController(
     }
 
     function fetchGames(page, user) {
+        toastr.clear();
+
         page = page || $scope.page || $scope.nextPage || 1;
         user = user || null;
 
@@ -206,19 +218,18 @@ ludojApp.controller('GamesController', function GamesController(
             .then(function (games) {
                 $scope.games = append && !_.isEmpty($scope.games) ? _.concat($scope.games, games) : games;
                 $scope.empty = _.isEmpty($scope.games) && !$scope.nextPage;
-                $scope.error = null;
-                $scope.retryPage = null;
-                $scope.retryAppend = null;
-                $scope.retryUser = null;
                 return games;
             })
             .catch(function (reason) {
                 $log.error(reason);
                 $scope.empty = false;
-                $scope.error = 'Sorry, there was an error.';
-                $scope.retryPage = page;
-                $scope.retryAppend = append;
-                $scope.retryUser = user;
+                toastr.error(
+                    'Sorry, there was an error. Tap to try again...',
+                    'Error loading games',
+                    {'onTap': function onTap() {
+                        return fetchAndUpdateGames(page, append, user);
+                    }}
+                );
             });
     }
 
@@ -324,10 +335,6 @@ ludojApp.controller('GamesController', function GamesController(
     $scope.yearNow = yearNow;
     $scope.pad = _.padStart;
     $scope.empty = false;
-    $scope.error = null;
-    $scope.retryPage = null;
-    $scope.retryAppend = null;
-    $scope.retryUser = null;
     $scope.renderSlider = renderSlider;
 
     $scope.open = function open(url) {
