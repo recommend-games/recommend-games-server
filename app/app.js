@@ -205,11 +205,20 @@ ludojApp.controller('GamesController', function GamesController(
         return fetchGames(page, user)
             .then(function (games) {
                 $scope.games = append && !_.isEmpty($scope.games) ? _.concat($scope.games, games) : games;
+                $scope.empty = _.isEmpty($scope.games) && !$scope.nextPage;
+                $scope.error = null;
+                $scope.retryPage = null;
+                $scope.retryAppend = null;
+                $scope.retryUser = null;
                 return games;
             })
             .catch(function (reason) {
                 $log.error(reason);
-                // TODO display error
+                $scope.empty = false;
+                $scope.error = 'Sorry, there was an error.';
+                $scope.retryPage = page;
+                $scope.retryAppend = append;
+                $scope.retryUser = user;
             });
     }
 
@@ -314,7 +323,11 @@ ludojApp.controller('GamesController', function GamesController(
     $scope.fetchGames = fetchAndUpdateGames;
     $scope.yearNow = yearNow;
     $scope.pad = _.padStart;
-    $scope.isEmpty = _.isEmpty;
+    $scope.empty = false;
+    $scope.error = null;
+    $scope.retryPage = null;
+    $scope.retryAppend = null;
+    $scope.retryUser = null;
     $scope.renderSlider = renderSlider;
 
     $scope.open = function open(url) {

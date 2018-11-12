@@ -407,6 +407,29 @@
 			See recommendations <a href="#" ng-click="fetchGames(1, false, null)">for all users</a> instead
 		</p>
 
+		<div ng-if="error"
+				class="alert alert-danger alert-dismissible fade show"
+				role="alert">
+			<h4 class="alert-heading">Error loading games</h4>
+			<p class="mb-0">
+				{{ error }}
+				<a href="#" class="alert-link" ng-click="fetchGames(retryPage, retryAppend, retryUser)">Try again</a>...
+			</p>
+			<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+
+		<div ng-if="empty"
+				class="alert alert-warning"
+				role="alert">
+			<h4 class="alert-heading">No games found</h4>
+			<p class="mb-0">
+				No games could be loaded.
+				<a href="#" class="alert-link" ng-click="clearFilters()">Try without filters instead</a>...
+			</p>
+		</div>
+
 		<div class="row">
 			<div ng-repeat="game in games"
 					ng-click="open(game.url)"
@@ -442,16 +465,6 @@
 				</div>
 			</div>
 		</div><!-- row -->
-
-		<div ng-if="isEmpty(games) &amp;&amp; !nextPage"
-				class="alert alert-danger"
-				role="alert">
-			<h4 class="alert-heading">No games found</h4>
-			<p class="mb-0">
-				No games could be loaded.
-				<a href="#" class="alert-link" ng-click="clearFilters()">Try without filters instead</a>...
-			</p>
-		</div>
 	</div><!-- container -->
 
 	<footer class="navbar navbar-expand navbar-dark bg-dark">
