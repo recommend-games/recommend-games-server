@@ -160,7 +160,7 @@
 										id="filter-count-enable"
 										name="filter-count-enable"
 										ng-model="count.enabled" />
-									<span class="slider"></span>
+									<span class="slider {{ count.enabled ? 'bg-success' : 'bg-secondary' }}"></span>
 								</label>
 							</div>
 							<div class="input-group-text">
@@ -203,7 +203,7 @@
 										id="filter-time-enable"
 										name="filter-time-enable"
 										ng-model="time.enabled" />
-									<span class="slider"></span>
+									<span class="slider {{ time.enabled ? 'bg-success' : 'bg-secondary' }}"></span>
 								</label>
 							</div>
 							<div class="input-group-text">
@@ -245,7 +245,7 @@
 										id="filter-age-enable"
 										name="filter-age-enable"
 										ng-model="age.enabled" />
-									<span class="slider"></span>
+									<span class="slider {{ age.enabled ? 'bg-success' : 'bg-secondary' }}"></span>
 								</label>
 							</div>
 							<div class="input-group-text">
@@ -287,7 +287,7 @@
 										id="filter-complexity-enable"
 										name="filter-complexity-enable"
 										ng-model="complexity.enabled" />
-									<span class="slider"></span>
+									<span class="slider {{ complexity.enabled ? 'bg-success' : 'bg-secondary' }}"></span>
 								</label>
 							</div>
 						</div>
@@ -324,7 +324,7 @@
 										id="filter-year-enable"
 										name="filter-year-enable"
 										ng-model="year.enabled" />
-									<span class="slider"></span>
+									<span class="slider {{ year.enabled ? 'bg-success' : 'bg-secondary' }}"></span>
 								</label>
 							</div>
 						</div>
