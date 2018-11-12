@@ -118,3 +118,89 @@ input:checked + .slider:before {
     -ms-transform: translateX(15px);
     transform: translateX(15px);
 }
+
+/*! fork-me-on-github v2.1.0 | (c) 2014, 2014 | MIT License | https://github.com/edull24/fork-me-on-github */
+.fork-me-wrapper {
+    height: 170px;
+    overflow: hidden;
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 170px;
+    z-index: 9999;
+}
+
+.fork-me {
+    background-color: black;
+    background-image: url("fork.svg");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 80%;
+    border-radius: .25rem;
+    height: 42px;
+    overflow: hidden;
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    white-space: nowrap;
+    width: 42px;
+}
+
+@media only screen and (min-width: 576px) {
+    .fork-me {
+        background-color: black;
+        background-image: none;
+        border-radius: 0;
+        box-shadow: 0 0 10px 0 #888888;
+        height: auto;
+        padding: 2px 0;
+        right: -55px;
+        top: 40px;
+        -ms-transform: rotate(45deg);
+        -webkit-transform: rotate(45deg);
+        transform: rotate(45deg);
+        width: auto;
+    }
+}
+
+.fork-me-link,
+.fork-me-link:link,
+.fork-me-link:visited,
+.fork-me-link:hover,
+.fork-me-link:focus,
+.fork-me-link:active {
+    border: none;
+    display: block;
+    height: 100%;
+    text-decoration: none;
+}
+
+@media only screen and (min-width: 576px) {
+    .fork-me-link,
+    .fork-me-link:link,
+    .fork-me-link:visited,
+    .fork-me-link:hover,
+    .fork-me-link:focus,
+    .fork-me-link:active {
+        border: 1px dotted white;
+        color: white;
+        font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif;
+        padding: 10px 50px;
+        text-align: center;
+        text-shadow: 0 0 5px #444444;
+    }
+}
+
+.fork-me-link:focus {
+    text-decoration: underline;
+}
+
+.fork-me-text {
+    display: none;
+}
+
+@media only screen and (min-width: 576px) {
+    .fork-me-text {
+        display: inline;
+    }
+}
