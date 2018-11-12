@@ -458,6 +458,10 @@
 						<span ng-if="game.rec_rank"
 								class="game-rank badge badge-pill badge-success">
 							#{{ game.rec_rank }}
+							<small ng-if="game.rec_rating"
+									class="text-muted">
+								({{ game.rec_rating | number:1 }})
+							</small>
 						</span>
 						<h2 class="game-title">
 							{{ game.name }}
@@ -465,10 +469,6 @@
 									class="text-muted">
 								({{ game.year }})
 							</small>
-							<span ng-if="game.rec_rating"
-									class="game-score badge badge-info">
-								{{ game.rec_rating | number:1 }}
-							</span>
 						</h2>
 					</div>
 				</div>
