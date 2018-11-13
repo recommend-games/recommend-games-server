@@ -16,6 +16,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', '+*6x!0^!j^&h4+l-w7h!)pk=1m7gie&@&0cjq7)19%
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.getenv('DEBUG'))
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'development' if DEBUG else 'production')
+READ_ONLY = ENVIRONMENT == 'production'
 
 ALLOWED_HOSTS = [
     '0.0.0.0',

@@ -6,7 +6,11 @@
 import os
 import sys
 
+from dotenv import load_dotenv
+
 if __name__ == '__main__':
+    load_dotenv(verbose=True)
+
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ludoj.settings')
 
     try:

@@ -8,11 +8,14 @@ from django.conf import settings
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotAuthenticated, MethodNotAllowed, PermissionDenied
 from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from .models import Game, Person
+from .permissions import ReadOnly
 from .serializers import GameSerializer, PersonSerializer
 
 
@@ -108,6 +111,15 @@ class GameViewSet(ModelViewSet):
     search_fields = (
         'name',
     )
+
+    def get_permissions(self):
+        cls = ReadOnly if settings.READ_ONLY else AllowAny
+        return (cls(),)
+
+    def handle_exception(self, exc):
+        if settings.READ_ONLY and isinstance(exc, (NotAuthenticated, PermissionDenied)):
+            exc = MethodNotAllowed(self.request.method)
+        return super().handle_exception(exc)
 
     @action(detail=False)
     def recommend(self, request):
