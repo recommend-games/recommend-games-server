@@ -138,13 +138,20 @@ class GameViewSet(ModelViewSet):
 
         # TODO speed up recommendation by pre-computing known games, clusters etc (#16)
 
+        params = dict(request.query_params)
+        params.pop('ordering', None)
+        params.pop('page', None)
+        params.pop('user', None)
+
+        fqs = self.filter_queryset(self.get_queryset())
+        games = fqs.values_list('bgg_id', flat=True) if params else None
         percentiles = getattr(settings, 'STAR_PERCENTILES', None)
         recommendation = recommender.recommend(
             users=(user,),
+            games=games,
             star_percentiles=percentiles,
         )
 
-        # TODO make filtering and pagination work together (#7)
         page = self.paginate_queryset(recommendation)
         if page is None:
             recommendation = recommendation[:10]
@@ -154,9 +161,7 @@ class GameViewSet(ModelViewSet):
             paginate = True
 
         recommendation = {game['bgg_id']: game for game in recommendation}
-
-        games = self.filter_queryset(self.get_queryset()).filter(bgg_id__in=recommendation)
-
+        games = fqs.filter(bgg_id__in=recommendation)
         for game in games:
             rec = recommendation[game.bgg_id]
             game.rec_rank = rec['rank']
@@ -164,7 +169,7 @@ class GameViewSet(ModelViewSet):
             game.rec_stars = rec.get('stars')
 
         serializer = self.get_serializer(
-            instance=sorted(games, key=lambda game: (game.rec_rank, -game.rec_rating)),
+            instance=sorted(games, key=lambda game: game.rec_rank),
             many=True,
         )
 
