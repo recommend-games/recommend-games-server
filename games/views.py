@@ -73,6 +73,7 @@ class GameViewSet(ModelViewSet):
     ordering = (
         '-rec_rating',
         '-bayes_rating',
+        '-avg_rating',
     )
     serializer_class = GameSerializer
     filter_backends = (
@@ -123,11 +124,15 @@ class GameViewSet(ModelViewSet):
         if recommender is None or user not in recommender.known_users:
             return self.list(request)
 
-        # TODO speed up recommendation by pre-computing known games, clusters etc
+        # TODO speed up recommendation by pre-computing known games, clusters etc (#16)
 
-        recommendation = recommender.recommend(users=(user,))
+        percentiles = getattr(settings, 'STAR_PERCENTILES', None)
+        recommendation = recommender.recommend(
+            users=(user,),
+            star_percentiles=percentiles,
+        )
 
-        # TODO make filtering and pagination work together
+        # TODO make filtering and pagination work together (#7)
         page = self.paginate_queryset(recommendation)
         if page is None:
             recommendation = recommendation[:10]
@@ -144,6 +149,7 @@ class GameViewSet(ModelViewSet):
             rec = recommendation[game.bgg_id]
             game.rec_rank = rec['rank']
             game.rec_rating = rec['score']
+            game.rec_stars = rec.get('stars')
 
         serializer = self.get_serializer(
             instance=sorted(games, key=lambda game: (game.rec_rank, -game.rec_rating)),

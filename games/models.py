@@ -57,6 +57,7 @@ class Game(Model):
 
     rec_rank = PositiveIntegerField(blank=True, null=True, db_index=True)
     rec_rating = FloatField(blank=True, null=True, db_index=True)
+    rec_stars = FloatField(blank=True, null=True, db_index=True)
 
     complexity = FloatField(blank=True, null=True, db_index=True)
     language_dependency = FloatField(blank=True, null=True, db_index=True)
@@ -70,9 +71,10 @@ class Game(Model):
         ordering = (
             '-rec_rating',
             '-bayes_rating',
+            '-avg_rating',
         )
         indexes = (
-            Index(fields=('-rec_rating', '-bayes_rating')),
+            Index(fields=('-rec_rating', '-bayes_rating', '-avg_rating')),
         )
 
     def __str__(self):

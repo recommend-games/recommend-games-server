@@ -28,9 +28,14 @@
 
 .game-rank {
     font-size: 1.2rem;
+    line-height: .8;
     position: absolute;
     right: 10px;
     top: 10px;
+}
+
+.game-stars {
+    font-size: .7rem;
 }
 
 .game-title {
@@ -40,11 +45,6 @@
     padding: 0 10px;
     position: absolute;
     text-shadow: 0 0 3px black;
-}
-
-.game-score {
-    font-size: .8rem;
-    text-shadow: none;
 }
 
 .btn-more {

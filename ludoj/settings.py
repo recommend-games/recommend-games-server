@@ -141,3 +141,5 @@ REST_FRAMEWORK = {
 # Recommender
 
 RECOMMENDER_PATH = os.path.join(BASE_DIR, '.tc')
+
+STAR_PERCENTILES = (.165, .365, .615, .815, .915, .965, .985, .995)

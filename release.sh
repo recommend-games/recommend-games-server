@@ -29,20 +29,21 @@ python3 -m ludoj.json \
 
 ### RECOMMENDER ###
 cd "${WS}/ludoj-recommender"
-rm --recursive --force .tc
-mkdir --parents .tc
+rm --recursive --force '.tc'
+mkdir --parents '.tc'
 # train new recommender model
 python3 -m ludoj_recommender \
     --train \
-    --model .tc \
+    --model '.tc' \
     --games-file "${WS}/ludoj-scraper/results/bgg.csv" \
     --ratings-file "${WS}/ludoj-scraper/results/bgg_ratings.csv" \
     --verbose
 # load recommender file
 python3 -m ludoj_recommender.load \
-    --model .tc \
+    --model '.tc' \
     --url 'http://localhost:8000/api/games/' \
-    --id-field 'bgg_id'
+    --id-field 'bgg_id' \
+    --percentiles .165 .365 .615 .815 .915 .965 .985 .995
 
 # stop server now
 
@@ -50,7 +51,7 @@ python3 -m ludoj_recommender.load \
 cd "${WS}/ludoj-server"
 rm --recursive --force .tc static
 mkdir --parents .tc/recommender
-cp ${WS}/ludoj-recommender/.tc/recommender/* .tc/recommender/
+cp "${WS}"/ludoj-recommender/.tc/recommender/* .tc/recommender/
 python3 manage.py collectstatic --no-input
 heroku container:push web
 heroku container:release web

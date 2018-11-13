@@ -203,7 +203,7 @@
 								</label>
 							</div>
 							<div class="input-group-text">
-								<label for="filter-count"
+								<label for="filter-count-enable"
 										class="form-check-label {{ count.enabled ? 'text-success' : 'text-muted' }}">
 									Player count:
 									<strong class="text-monospace {{ count.enabled ? '' : 'invisible' }}">
@@ -246,7 +246,7 @@
 								</label>
 							</div>
 							<div class="input-group-text">
-								<label for="filter-time"
+								<label for="filter-time-enable"
 										class="form-check-label {{ time.enabled ? 'text-success' : 'text-muted' }}">
 									Play time:
 									<span class="{{ time.enabled ? '' : 'invisible' }}">
@@ -288,7 +288,7 @@
 								</label>
 							</div>
 							<div class="input-group-text">
-								<label for="filter-age"
+								<label for="filter-age-enable"
 										class="form-check-label {{ age.enabled ? 'text-success' : 'text-muted' }}">
 									Player age:
 									<span class="{{ age.enabled ? '' : 'invisible' }}">
@@ -332,7 +332,7 @@
 						</div>
 						<div class="input-group-append">
 							<div class="input-group-text">
-								<label for="filter-complexity"
+								<label for="filter-complexity-enable"
 										class="form-check-label {{ complexity.enabled ? 'text-success' : 'text-muted' }}">
 									Complexity:
 									<strong class="text-monospace {{ complexity.enabled ? '' : 'invisible' }}">
@@ -369,7 +369,7 @@
 						</div>
 						<div class="input-group-append">
 							<div class="input-group-text">
-								<label for="filter-year"
+								<label for="filter-year-enable"
 										class="form-check-label {{ year.enabled ? 'text-success' : 'text-muted' }}">
 									Year:
 									<span class="{{ year.enabled ? '' : 'invisible' }}">
@@ -462,6 +462,12 @@
 									class="text-white-50">
 								({{ game.rec_rating | number:1 }})
 							</small>
+							<span ng-if="game.rec_stars"
+									class="game-stars">
+								<br />
+								<i ng-repeat="starClass in starClasses(game.rec_stars) track by $index"
+									class="{{ starClass }}"></i>
+							</span>
 						</span>
 						<h2 class="game-title">
 							{{ game.name }}

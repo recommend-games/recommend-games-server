@@ -21,7 +21,7 @@ class PersonSerializer(ModelSerializer):
 class GameSerializer(ModelSerializer):
     ''' game serializer '''
 
-    # TODO improve on designer and artist relationship
+    # TODO improve on designer and artist relationship (#15)
     # e.g., use StringRelatedField, but add designer_id write only field
 
     class Meta:
