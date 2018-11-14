@@ -10,6 +10,8 @@ var ludojApp = angular.module('ludojApp', [
     'toastr'
 ]);
 
+ludojApp.constant('API_URL', '/api/');
+
 ludojApp.config(function (
     $locationProvider,
     blockUIConfig,
@@ -30,13 +32,101 @@ ludojApp.config(function (
     toastrConfig.extendedTimeOut = 60000;
 });
 
-ludojApp.controller('GamesController', function GamesController(
+ludojApp.factory('gamesService', function gamesService(
+    $cacheFactory,
+    $log,
     $http,
+    $q,
+    API_URL
+) {
+    var service = {},
+        cache = $cacheFactory('ludoj', {'capacity': 1024});
+
+    service.getGames = function getGames(page, user, filters) {
+        page = page || null;
+        user = user || null;
+
+        var url = API_URL + 'games/',
+            params = !_.isEmpty(filters) ? _.cloneDeep(filters) : {};
+
+        if (page) {
+            params.page = page;
+        }
+
+        if (user) {
+            url += 'recommend/';
+            params.user = user;
+        }
+
+        $log.info(params);
+
+        return $http.get(url, {'params': params})
+            .then(function (response) {
+                var games = _.get(response, 'data.results');
+
+                if (!games) {
+                    return $q.reject('Unable to load games.');
+                }
+
+                if (!user) {
+                    _.forEach(games, function (game) {
+                        var id = _.get(game, 'bgg_id');
+                        if (id) {
+                            cache.put(id, game);
+                        } else {
+                            $log.warn('invalid game', game);
+                        }
+                    });
+                }
+
+                return response.data;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to load games.';
+                return $q.reject(response);
+            });
+    };
+
+    service.getGame = function getGame(id, forceRefresh) {
+        id = _.parseInt(id);
+        var cached = forceRefresh ? null : cache.get(id);
+
+        if (!_.isEmpty(cached)) {
+            return $q.resolve(cached);
+        }
+
+        return $http.get(API_URL + 'games/' + id + '/')
+            .then(function (response) {
+                var responseId = _.get(response, 'data.bgg_id');
+
+                if (id !== responseId) {
+                    return $q.reject('Unable to load game.');
+                }
+
+                cache.put(id, response.data);
+
+                return response.data;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to load game.';
+                return $q.reject(response);
+            });
+    };
+
+    return service;
+});
+
+ludojApp.controller('GamesController', function GamesController(
     $location,
     $log,
     $scope,
     $timeout,
     $window,
+    gamesService,
     toastr
 ) {
     var search = $location.search(),
@@ -182,28 +272,15 @@ ludojApp.controller('GamesController', function GamesController(
     function fetchGames(page, user) {
         toastr.clear();
 
-        page = page || $scope.page || $scope.nextPage || 1;
-        user = user || null;
+        page = _.parseInt(page) || $scope.page || $scope.nextPage || 1;
 
-        var url = '/api/games/',
-            params = filters();
-
-        params.page = page;
-
-        if (user) {
-            url += 'recommend/';
-            params.user = user;
-        }
-
-        $log.info(params);
-
-        return $http.get(url, {'params': params})
+        return gamesService.getGames(page, user, filters())
             .then(function (response) {
                 $scope.currPage = page;
-                $scope.prevPage = _.get(response, 'data.previous') ? page - 1 : null;
-                $scope.nextPage = _.get(response, 'data.next') ? page + 1 : null;
+                $scope.prevPage = response.previous ? page - 1 : null;
+                $scope.nextPage = response.next ? page + 1 : null;
 
-                $scope.total = _.get(response, 'data.count');
+                $scope.total = response.count;
 
                 var values = filterValues();
                 values.user = user;
@@ -211,7 +288,7 @@ ludojApp.controller('GamesController', function GamesController(
                 $scope.user = user;
                 $scope.currUser = user;
 
-                return _.get(response, 'data.results');
+                return response.results;
             });
     }
 
