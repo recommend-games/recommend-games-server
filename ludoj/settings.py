@@ -120,11 +120,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATICFILES_DIRS = [
+STATIC_ROOT = os.path.join(BASE_DIR, 'app' if DEBUG else 'static')
+STATICFILES_DIRS = [] if DEBUG else [
     os.path.join(BASE_DIR, 'app'),
 ]
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = (
+    'django.contrib.staticfiles.storage.StaticFilesStorage' if DEBUG
+    else 'whitenoise.storage.CompressedManifestStaticFilesStorage')
 
 # WhiteNoise
 

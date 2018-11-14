@@ -1,11 +1,12 @@
 'use strict';
 
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
-/*global _, $, URL, angular */ // moment, showdown
+/*global _, $, URL, angular */
 
 var ludojApp = angular.module('ludojApp', [
     'blockUI',
     'ngAnimate',
+    'ngRoute',
     'rzModule',
     'toastr'
 ]);
@@ -14,12 +15,25 @@ ludojApp.constant('API_URL', '/api/');
 
 ludojApp.config(function (
     $locationProvider,
+    $routeProvider,
     blockUIConfig,
     toastrConfig
 ) {
-    $locationProvider.html5Mode({
-        enabled: true,
-        requireBase: false
+    $locationProvider
+        .html5Mode({
+            enabled: false,
+            requireBase: false
+        })
+        .hashPrefix('');
+
+    $routeProvider.when('/:id', {
+        templateUrl: 'detail.html',
+        controller: 'DetailController'
+    }).when('/', {
+        templateUrl: 'list.html',
+        controller: 'ListController'
+    }).otherwise({
+        redirectTo: '/'
     });
 
     blockUIConfig.autoBlock = true;
@@ -120,7 +134,7 @@ ludojApp.factory('gamesService', function gamesService(
     return service;
 });
 
-ludojApp.controller('GamesController', function GamesController(
+ludojApp.controller('ListController', function ListController(
     $location,
     $log,
     $scope,
@@ -419,7 +433,12 @@ ludojApp.controller('GamesController', function GamesController(
     $scope.renderSlider = renderSlider;
 
     $scope.open = function open(url) {
-        $window.open(url, '_blank');
+        var id = _.parseInt(url);
+        if (id) {
+            $location.path('/' + id);
+        } else {
+            $window.open(url, '_blank');
+        }
     };
 
     $scope.bgImage = function bgImage(url) {
@@ -457,4 +476,15 @@ ludojApp.controller('GamesController', function GamesController(
         $('#filter-game-form').collapse('show');
         renderSlider();
     }
+});
+
+ludojApp.controller('DetailController', function DetailController(
+    $routeParams,
+    $scope,
+    gamesService
+) {
+    gamesService.getGame($routeParams.id)
+        .then(function (game) {
+            $scope.game = game;
+        });
 });
