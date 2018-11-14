@@ -53,5 +53,6 @@ rm --recursive --force .tc static
 mkdir --parents .tc/recommender
 cp "${WS}"/ludoj-recommender/.tc/recommender/* .tc/recommender/
 python3 manage.py collectstatic --no-input
+sqlite3 db.sqlite3 'VACUUM;'
 heroku container:push web
 heroku container:release web
