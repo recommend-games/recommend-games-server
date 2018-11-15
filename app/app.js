@@ -436,6 +436,8 @@ ludojApp.controller('ListController', function ListController(
     $scope.empty = false;
     $scope.total = null;
     $scope.renderSlider = renderSlider;
+    $scope.filtersActive = filtersActive;
+    $scope.updateParams = updateParams;
 
     $scope.open = function open(url) {
         var id = _.parseInt(url);
@@ -445,8 +447,6 @@ ludojApp.controller('ListController', function ListController(
             $window.open(url, '_blank');
         }
     };
-
-    $scope.updateParams = updateParams;
 
     $scope.bgImage = function bgImage(url) {
         return url ? {'background-image': 'url("' + url + '")'} : null;

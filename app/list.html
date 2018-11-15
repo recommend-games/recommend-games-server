@@ -81,6 +81,10 @@
 						aria-expanded="false"
 						aria-controls="filter-game-form">
 					Advanced filters:
+					<span ng-if="filtersActive()"
+							class="badge badge-primary">
+						{{ filtersActive() }}
+					</span>
 				</button>
 			</div>
 		</div>
