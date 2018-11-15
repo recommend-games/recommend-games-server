@@ -27,6 +27,11 @@ python3 -m ludoj.json \
     --output "${WS}/ludoj-scraper/feeds/bgg.jl" \
     --url 'http://localhost:8000/api/games/' \
     --id-field 'bgg_id'
+python3 -m ludoj.json \
+    "${WS}/ludoj-scraper/feeds/bgg.jl" \
+    --url 'http://localhost:8000/api/games/' \
+    --id-field 'bgg_id' \
+    --implementation 'implements'
 
 ### RECOMMENDER ###
 cd "${WS}/ludoj-recommender"
