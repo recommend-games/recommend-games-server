@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-WS="${HOME}/Workspace"
+export DEBUG=true
+export WS="${HOME}/Workspace"
 
 ### SERVER ###
 cd "${WS}/ludoj-server"
@@ -46,6 +47,8 @@ python3 -m ludoj_recommender.load \
     --percentiles .165 .365 .615 .815 .915 .965 .985 .995
 
 # stop server now
+
+export DEBUG=
 
 ### SERVER ###
 cd "${WS}/ludoj-server"
