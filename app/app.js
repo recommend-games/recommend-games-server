@@ -26,7 +26,7 @@ ludojApp.config(function (
         })
         .hashPrefix('');
 
-    $routeProvider.when('/:id', {
+    $routeProvider.when('/game/:id', {
         templateUrl: 'detail.html',
         controller: 'DetailController'
     }).when('/', {
@@ -56,12 +56,12 @@ ludojApp.factory('gamesService', function gamesService(
     var service = {},
         cache = $cacheFactory('ludoj', {'capacity': 1024});
 
-    service.getGames = function getGames(page, user, filters) {
+    service.getGames = function getGames(page, filters, user) {
         page = page || null;
-        user = user || null;
+        user = user || _.get(filters, 'user') || null;
 
         var url = API_URL + 'games/',
-            params = !_.isEmpty(filters) ? _.cloneDeep(filters) : {};
+            params = _.isEmpty(filters) ? {} : _.cloneDeep(filters);
 
         if (page) {
             params.page = page;
@@ -72,7 +72,7 @@ ludojApp.factory('gamesService', function gamesService(
             params.user = user;
         }
 
-        $log.info(params);
+        $log.debug('query parameters', params);
 
         return $http.get(url, {'params': params})
             .then(function (response) {
@@ -137,13 +137,15 @@ ludojApp.factory('gamesService', function gamesService(
 ludojApp.controller('ListController', function ListController(
     $location,
     $log,
+    $route,
+    $routeParams,
     $scope,
     $timeout,
     $window,
     gamesService,
     toastr
 ) {
-    var search = $location.search(),
+    var search = $routeParams,
         playerCount = _.parseInt(search.playerCount),
         playerAge = _.parseInt(search.playerAge),
         playTime = _.parseInt(search.playTime),
@@ -175,17 +177,20 @@ ludojApp.controller('ListController', function ListController(
     }
 
     function filtersActive() {
-        return !!($scope.count.enabled ||
-            $scope.time.enabled ||
-            $scope.age.enabled ||
-            $scope.complexity.enabled ||
-            $scope.year.enabled ||
-            $scope.cooperative);
+        return _.sum([
+            !!$scope.count.enabled,
+            !!$scope.time.enabled,
+            !!$scope.age.enabled,
+            !!$scope.complexity.enabled,
+            !!$scope.year.enabled,
+            !!$scope.cooperative
+        ]);
     }
 
     function filterValues() {
         var result = {};
 
+        result.user = _.trim($scope.user) || null;
         result.search = _.trim($scope.search) || null;
 
         if ($scope.count.enabled && $scope.count.value) {
@@ -239,6 +244,10 @@ ludojApp.controller('ListController', function ListController(
             playerSuffix = '',
             ageSuffix = '';
 
+        if (values.user) {
+            result.user = values.user;
+        }
+
         if (values.search) {
             result.search = values.search;
         }
@@ -283,34 +292,25 @@ ludojApp.controller('ListController', function ListController(
         return result;
     }
 
-    function fetchGames(page, user) {
+    function fetchGames(page, append, user) {
         toastr.clear();
 
+        var currFilters = filters();
         page = _.parseInt(page) || $scope.page || $scope.nextPage || 1;
+        user = _.trim(user) || _.trim(currFilters.user) || null;
 
-        return gamesService.getGames(page, user, filters())
+        return gamesService.getGames(page, currFilters, user)
             .then(function (response) {
                 $scope.currPage = page;
                 $scope.prevPage = response.previous ? page - 1 : null;
                 $scope.nextPage = response.next ? page + 1 : null;
-
                 $scope.total = response.count;
+                $scope.currUser = user || null;
 
-                var values = filterValues();
-                values.user = user;
-                $location.search(values);
-                $scope.user = user;
-                $scope.currUser = user;
-
-                return response.results;
-            });
-    }
-
-    function fetchAndUpdateGames(page, append, user) {
-        return fetchGames(page, user)
-            .then(function (games) {
+                var games = response.results;
                 $scope.games = append && !_.isEmpty($scope.games) ? _.concat($scope.games, games) : games;
                 $scope.empty = _.isEmpty($scope.games) && !$scope.nextPage;
+
                 return games;
             })
             .catch(function (reason) {
@@ -321,10 +321,15 @@ ludojApp.controller('ListController', function ListController(
                     'Sorry, there was an error. Tap to try again...',
                     'Error loading games',
                     {'onTap': function onTap() {
-                        return fetchAndUpdateGames(page, append, user);
+                        return fetchGames(page, append, user);
                     }}
                 );
             });
+    }
+
+    function updateParams() {
+        $log.debug('current filter values:', filterValues());
+        $route.updateParams(filterValues());
     }
 
     function renderSlider() {
@@ -425,7 +430,7 @@ ludojApp.controller('ListController', function ListController(
 
     $scope.cooperative = validateBoolean(search.cooperative);
 
-    $scope.fetchGames = fetchAndUpdateGames;
+    $scope.fetchGames = fetchGames;
     $scope.yearNow = yearNow;
     $scope.pad = _.padStart;
     $scope.empty = false;
@@ -435,11 +440,13 @@ ludojApp.controller('ListController', function ListController(
     $scope.open = function open(url) {
         var id = _.parseInt(url);
         if (id) {
-            $location.path('/' + id);
+            $location.path('/game/' + id);
         } else {
             $window.open(url, '_blank');
         }
     };
+
+    $scope.updateParams = updateParams;
 
     $scope.bgImage = function bgImage(url) {
         return url ? {'background-image': 'url("' + url + '")'} : null;
@@ -461,7 +468,12 @@ ludojApp.controller('ListController', function ListController(
         $scope.complexity.enabled = false;
         $scope.year.enabled = false;
         $scope.cooperative = null;
-        return fetchAndUpdateGames(1, false);
+        updateParams();
+    };
+
+    $scope.clearUser = function clearUser() {
+        $scope.user = null;
+        updateParams();
     };
 
     $scope.$watch('count.enabled', renderSlider);
@@ -470,15 +482,18 @@ ludojApp.controller('ListController', function ListController(
     $scope.$watch('complexity.enabled', renderSlider);
     $scope.$watch('year.enabled', renderSlider);
 
-    fetchAndUpdateGames(1, false, search.user);
+    fetchGames(1, false, $scope.user);
 
     if (filtersActive()) {
-        $('#filter-game-form').collapse('show');
-        renderSlider();
+        $timeout(function () {
+            $('#filter-game-form').collapse('show');
+            renderSlider();
+        }, 100);
     }
 });
 
 ludojApp.controller('DetailController', function DetailController(
+    $location,
     $routeParams,
     $scope,
     gamesService
@@ -487,4 +502,11 @@ ludojApp.controller('DetailController', function DetailController(
         .then(function (game) {
             $scope.game = game;
         });
+
+    $scope.back = function back() {
+        var params = _.clone($routeParams);
+        params.id = null;
+        $location.search(params)
+            .path('/');
+    };
 });

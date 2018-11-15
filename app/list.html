@@ -7,7 +7,7 @@
 		Top-rated games as evaluated by our <a href="https://gitlab.com/mshepherd/ludoj-recommender" target="_blank">recommendation engine</a>.
 	</p>
 
-	<form ng-submit="fetchGames(1, false, user)"
+	<form ng-submit="updateParams()"
 			id="fetch-game-form"
 			name="fetch-game-form"
 			novalidate="novalidate"
@@ -37,7 +37,7 @@
 		</div>
 	</form>
 
-	<form ng-submit="fetchGames(1, false, user)"
+	<form ng-submit="updateParams()"
 			id="search-game-form"
 			name="search-game-form"
 			novalidate="novalidate"
@@ -86,7 +86,7 @@
 		</div>
 	</form>
 
-	<form ng-submit="fetchGames(1, false, user)"
+	<form ng-submit="updateParams()"
 			id="filter-game-form"
 			name="filter-game-form"
 			novalidate="novalidate"
@@ -338,7 +338,7 @@
 		</strong>
 	</h2>
 	<p ng-if="currUser">
-		See recommendations <a href="#" ng-click="fetchGames(1, false, null)">for all users</a> instead
+		See recommendations <a href="" ng-click="clearUser()">for all users</a> instead
 	</p>
 
 	<div ng-if="empty"
@@ -347,7 +347,7 @@
 		<h4 class="alert-heading">No games found</h4>
 		<p class="mb-0">
 			No games could be loaded.
-			<a href="#" class="alert-link" ng-click="clearFilters()">Try without filters instead</a>...
+			<a href="" class="alert-link" ng-click="clearFilters()">Try without filters instead</a>...
 		</p>
 	</div>
 
