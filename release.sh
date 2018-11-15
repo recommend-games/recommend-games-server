@@ -7,6 +7,16 @@ export WS="${HOME}/Workspace"
 
 ### SERVER ###
 cd "${WS}/ludoj-server"
+# linting
+pylint ludoj games manage.py
+cd app
+htmlhint
+htmllint
+jslint "$(find . -name '*.js')"
+jshint "$(find . -name '*.js')"
+csslint .
+# fresh database
+cd ..
 rm db.sqlite3
 python3 manage.py migrate
 python3 manage.py runserver 8000 --noreload # need to keep running
