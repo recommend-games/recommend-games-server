@@ -1,10 +1,19 @@
 <!DOCTYPE html>
-<section xmlns="http://www.w3.org/1999/xhtml"
-		lang="en"
-		xml:lang="en">
-	<h1 class="display-1">{{ game.name }}</h1>
+<section xmlns="http://www.w3.org/1999/xhtml">
+	<h1 class="display-3">{{ game.name }}</h1>
 	<p>
 		View on <a ng-href="{{ game.url }}" target="_blank">BoardGameGeek <i class="fas fa-external-link-alt"></i></a>.
 		<a href="" ng-click="back()">Back to overview</a>.
 	</p>
+	<section ng-if="!noImplementations">
+		<h2>
+			Implementations
+		</h2>
+		<div class="row">
+			<game-square ng-repeat="game in implementations"
+					game="game"
+					ng-click="open(game.bgg_id)"
+					class="col-xl-2 col-md-3 col-sm-4 col-6 game-small"></game-square>
+		</div>
+	</section>
 </section>

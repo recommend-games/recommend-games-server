@@ -134,6 +134,28 @@ ludojApp.factory('gamesService', function gamesService(
     return service;
 });
 
+ludojApp.directive('gameSquare', function gameSquare() {
+    return {
+        'restrict': 'E',
+        'templateUrl': 'game-square.html',
+        'scope': {
+            'game': '='
+        },
+        'controller': function controller($scope) {
+            $scope.bgImage = function bgImage(url) {
+                return url ? {'background-image': 'url("' + url + '")'} : null;
+            };
+
+            $scope.starClasses = function starClasses(score) {
+                return _.map(_.range(1, 6), function (star) {
+                    return score >= star ? 'fas fa-star'
+                        : score >= star - 0.5 ? 'fas fa-star-half-alt' : 'far fa-star';
+                });
+            };
+        }
+    };
+});
+
 ludojApp.controller('ListController', function ListController(
     $location,
     $log,
@@ -448,17 +470,6 @@ ludojApp.controller('ListController', function ListController(
         }
     };
 
-    $scope.bgImage = function bgImage(url) {
-        return url ? {'background-image': 'url("' + url + '")'} : null;
-    };
-
-    $scope.starClasses = function starClasses(score) {
-        return _.map(_.range(1, 6), function (star) {
-            return score >= star ? 'fas fa-star'
-                : score >= star - 0.5 ? 'fas fa-star-half-alt' : 'far fa-star';
-        });
-    };
-
     $scope.clearFilters = function clearFilters() {
         $scope.user = null;
         $scope.search = null;
@@ -494,14 +505,13 @@ ludojApp.controller('ListController', function ListController(
 
 ludojApp.controller('DetailController', function DetailController(
     $location,
+    $q,
     $routeParams,
     $scope,
+    $window,
     gamesService
 ) {
-    gamesService.getGame($routeParams.id)
-        .then(function (game) {
-            $scope.game = game;
-        });
+    $scope.noImplementations = true;
 
     $scope.back = function back() {
         var params = _.clone($routeParams);
@@ -509,4 +519,26 @@ ludojApp.controller('DetailController', function DetailController(
         $location.search(params)
             .path('/');
     };
+
+    $scope.open = function open(url) {
+        var id = _.parseInt(url);
+        if (id) {
+            $location.path('/game/' + id);
+        } else {
+            $window.open(url, '_blank');
+        }
+    };
+
+    gamesService.getGame($routeParams.id)
+        .then(function (game) {
+            $scope.game = game;
+            return $q.all(_.map(game.implements, function (id) {
+                return gamesService.getGame(id);
+            }));
+        })
+        .then(function (implementations) {
+            $scope.implementations = implementations;
+            $scope.noImplementations = _.isEmpty(implementations);
+        });
+        // TODO catch errors
 });

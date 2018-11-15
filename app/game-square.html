@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<div xmlns="http://www.w3.org/1999/xhtml" class="game"
+		ng-style="bgImage(game.image_url)">
+	<div>
+		<span ng-if="game.rec_rank"
+				class="game-rank badge badge-pill badge-success">
+			#{{ game.rec_rank }}
+			<small ng-if="game.rec_rating"
+					class="text-white-50">
+				({{ game.rec_rating | number:1 }})
+			</small>
+			<span ng-if="game.rec_stars"
+					class="game-stars">
+				<br />
+				<i ng-repeat="starClass in starClasses(game.rec_stars) track by $index"
+					class="{{ starClass }}"></i>
+			</span>
+		</span>
+		<h2 class="game-title">
+			{{ game.name }}
+			<small ng-if="game.year"
+					class="text-secondary">
+				({{ game.year }})
+			</small>
+		</h2>
+	</div>
+</div>
