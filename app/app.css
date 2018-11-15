@@ -136,7 +136,7 @@ input:checked + .slider:before {
 
 .fork-me {
     background-color: black;
-    background-image: url("fork.svg");
+    background-image: url("/assets/fork.svg");
     background-position: center center;
     background-repeat: no-repeat;
     background-size: 80%;

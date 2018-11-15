@@ -27,10 +27,10 @@ ludojApp.config(function (
         .hashPrefix('');
 
     $routeProvider.when('/game/:id', {
-        templateUrl: 'detail.html',
+        templateUrl: '/partials/detail.html',
         controller: 'DetailController'
     }).when('/', {
-        templateUrl: 'list.html',
+        templateUrl: '/partials/list.html',
         controller: 'ListController'
     }).otherwise({
         redirectTo: '/'
@@ -137,7 +137,7 @@ ludojApp.factory('gamesService', function gamesService(
 ludojApp.directive('gameSquare', function gameSquare() {
     return {
         'restrict': 'E',
-        'templateUrl': 'game-square.html',
+        'templateUrl': '/partials/game-square.html',
         'scope': {
             'game': '='
         },
