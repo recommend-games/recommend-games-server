@@ -512,6 +512,7 @@ ludojApp.controller('DetailController', function DetailController(
     gamesService
 ) {
     $scope.noImplementations = true;
+    $scope.expandDescription = false;
 
     $scope.back = function back() {
         var params = _.clone($routeParams);
@@ -527,6 +528,10 @@ ludojApp.controller('DetailController', function DetailController(
         } else {
             $window.open(url, '_blank');
         }
+    };
+
+    $scope.toggleDescription = function toggleDescription() {
+        $scope.expandDescription = !$scope.expandDescription;
     };
 
     gamesService.getGame($routeParams.id)

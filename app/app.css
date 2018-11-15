@@ -18,7 +18,7 @@
     background-image: linear-gradient(
         to bottom,
         transparent,
-        rgba(0, 0, 0, 0.2),
+        rgba(0, 0, 0, .2),
         black);
     border-radius: 5px;
     height: 100%;
@@ -34,6 +34,10 @@
     top: 10px;
 }
 
+.game-small .game-rank {
+    font-size: .9rem;
+}
+
 .game-stars {
     font-size: .7rem;
 }
@@ -45,6 +49,38 @@
     padding: 0 10px;
     position: absolute;
     text-shadow: 0 0 3px black;
+}
+
+.game-small .game-title {
+    font-size: 1rem;
+}
+
+.game-description {
+    max-height: 300px;
+    overflow: hidden;
+    position: relative;
+    -webkit-transition: .4s ease-in-out;
+    transition: .4s ease-in-out;
+}
+
+.expanded {
+    max-height: 9999px;
+}
+
+.game-description::after {
+    background-image: linear-gradient(transparent, white);
+    bottom: 0;
+    content: '';
+    height: 50px;
+    left: 0;
+    position: absolute;
+    -webkit-transition: .4s;
+    transition: .4s;
+    width: 100%;
+}
+
+.expanded::after {
+    height: 0;
 }
 
 .btn-more {
@@ -121,6 +157,10 @@ input:checked + .slider:before {
 
 .form-label-game {
     cursor: pointer;
+}
+
+.display-3 small {
+    font-size: 50%;
 }
 
 /*! fork-me-on-github v2.1.0 | (c) 2014, 2014 | MIT License | https://github.com/edull24/fork-me-on-github */
