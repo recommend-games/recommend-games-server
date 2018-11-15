@@ -56,7 +56,7 @@ class GameFilter(FilterSet):
             'max_time': ['exact', 'gt', 'gte', 'lt', 'lte'],
             'cooperative': ['exact',],
             'compilation': ['exact',],
-            'implementation_of': ['exact',],
+            'implements': ['exact',],
             'bgg_rank': ['exact', 'gt', 'gte', 'lt', 'lte'],
             'num_votes': ['exact', 'gt', 'gte', 'lt', 'lte'],
             'avg_rating': ['exact', 'gt', 'gte', 'lt', 'lte'],

@@ -46,7 +46,7 @@ class Game(Model):
     compilation = BooleanField(default=False, db_index=True)
     # family = ListField(CharField(), blank=True)
     # expansion = ListField(CharField(), blank=True)
-    implementation_of = ManyToManyField(
+    implements = ManyToManyField(
         'self', symmetrical=False, blank=True, related_name='implemented_by')
 
     bgg_rank = PositiveIntegerField(blank=True, null=True, db_index=True)
