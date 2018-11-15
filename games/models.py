@@ -84,6 +84,7 @@ class Game(Model):
 class Person(Model):
     ''' person model '''
 
+    bgg_id = PositiveIntegerField(primary_key=True)
     name = CharField(max_length=255, db_index=True)
 
     created_at = DateTimeField(auto_now_add=True, editable=False, db_index=True)
