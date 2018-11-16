@@ -495,6 +495,14 @@ ludojApp.controller('ListController', function ListController(
 
     fetchGames(1, false, $scope.user);
 
+    $('#filter-game-form')
+        .on('show.bs.collapse', function () {
+            $('#filter-toggle-icon').removeClass('fa-plus-square').addClass('fa-minus-square');
+        })
+        .on('hide.bs.collapse', function () {
+            $('#filter-toggle-icon').removeClass('fa-minus-square').addClass('fa-plus-square');
+        });
+
     if (filtersActive()) {
         $timeout(function () {
             $('#filter-game-form').collapse('show');

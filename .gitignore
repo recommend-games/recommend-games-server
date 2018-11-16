@@ -110,5 +110,5 @@ recommender/
 .tc
 .storage/
 
-*.sqlite3
+*.sqlite3*
 requirements.txt

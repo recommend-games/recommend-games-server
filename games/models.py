@@ -90,5 +90,11 @@ class Person(Model):
     created_at = DateTimeField(auto_now_add=True, editable=False, db_index=True)
     modified_at = DateTimeField(auto_now=True, editable=False, db_index=True)
 
+    class Meta:
+        ''' meta '''
+        ordering = (
+            'name',
+        )
+
     def __str__(self):
         return self.name
