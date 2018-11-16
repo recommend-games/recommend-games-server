@@ -56,6 +56,22 @@ ludojApp.factory('gamesService', function gamesService(
     var service = {},
         cache = $cacheFactory('ludoj', {'capacity': 1024});
 
+    function join(array, sep, lastSep) {
+        sep = sep || ', ';
+
+        if (!lastSep || _.size(array) <= 1) {
+            return _.join(array, sep);
+        }
+
+        return _.join(_.slice(array, 0, -1), sep) + lastSep + _.last(array);
+    }
+
+    function processGame(game) {
+        game.designer_display = join(game.designer_name, ', ', ' & ');
+        game.artist_display = join(game.artist_name, ', ', ' & ');
+        return game;
+    }
+
     service.getGames = function getGames(page, filters, user) {
         page = page || null;
         user = user || _.get(filters, 'user') || null;
@@ -81,6 +97,9 @@ ludojApp.factory('gamesService', function gamesService(
                 if (!games) {
                     return $q.reject('Unable to load games.');
                 }
+
+                games = _.map(games, processGame);
+                response.data.results = games;
 
                 if (!user) {
                     _.forEach(games, function (game) {
@@ -113,15 +132,16 @@ ludojApp.factory('gamesService', function gamesService(
 
         return $http.get(API_URL + 'games/' + id + '/')
             .then(function (response) {
-                var responseId = _.get(response, 'data.bgg_id');
+                var responseId = _.get(response, 'data.bgg_id'),
+                    game;
 
                 if (id !== responseId) {
                     return $q.reject('Unable to load game.');
                 }
 
-                cache.put(id, response.data);
-
-                return response.data;
+                game = processGame(response.data);
+                cache.put(id, game);
+                return game;
             })
             .catch(function (reason) {
                 $log.error('There has been an error', reason);

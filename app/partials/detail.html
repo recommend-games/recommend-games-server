@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <section xmlns="http://www.w3.org/1999/xhtml">
-	<h1 class="display-3">
+	<h1>
 		{{ game.name }}
-		<small ng-if="game.year"
+		<small ng-if="game.year || game.designer_display"
 				class="text-secondary">
-			({{ game.year }})
+			<span ng-if="game.designer_display">by {{ game.designer_display }}</span>
+			<span ng-if="game.year">({{ game.year }})</span>
 		</small>
 	</h1>
 	<p>
@@ -13,6 +14,11 @@
 	</p>
 	<p ng-click="toggleDescription()"
 			class="lead game-description {{ expandDescription ? 'expanded' : '' }}">
+		<img ng-if="game.image_url"
+			ng-src="{{ game.image_url }}"
+			class="img-fluid game-img rounded d-block float-md-right mx-auto mx-md-0"
+			alt="{{ game.name }}" />
+		<!-- TODO artist as caption -->
 		{{ game.description }}
 	</p>
 	<section ng-if="!noImplementations">

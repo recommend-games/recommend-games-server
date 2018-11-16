@@ -55,6 +55,10 @@
     font-size: 1rem;
 }
 
+.game-img {
+    max-height: 300px;
+}
+
 .game-description {
     max-height: 300px;
     overflow: hidden;
@@ -157,10 +161,6 @@ input:checked + .slider:before {
 
 .form-label-game {
     cursor: pointer;
-}
-
-.display-3 small {
-    font-size: 50%;
 }
 
 /*! fork-me-on-github v2.1.0 | (c) 2014, 2014 | MIT License | https://github.com/edull24/fork-me-on-github */
