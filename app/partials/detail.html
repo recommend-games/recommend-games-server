@@ -12,15 +12,18 @@
 		View on <a ng-href="{{ game.url }}" target="_blank">BoardGameGeek <i class="fas fa-external-link-alt"></i></a>.
 		<a href="" ng-click="back()">Back to overview</a>.
 	</p>
-	<p ng-click="toggleDescription()"
-			class="lead game-description {{ expandDescription ? 'expanded' : '' }}">
+	<div ng-click="toggleDescription()"
+			class="game-description {{ expandDescription ? 'expanded' : '' }}">
 		<img ng-if="game.image_url"
 			ng-src="{{ game.image_url }}"
 			class="img-fluid game-img d-block float-md-right mb-3 mx-auto ml-md-3"
 			alt="{{ game.name }}" />
 		<!-- TODO artist as caption -->
-		{{ game.description }}
-	</p>
+		<p ng-repeat="description in game.description_array"
+				class="{{ $first ? 'lead' : '' }}">
+			{{ description }}
+		</p>
+	</div>
 	<section ng-if="!noImplementations">
 		<h2>
 			Implementations

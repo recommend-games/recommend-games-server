@@ -69,6 +69,7 @@ ludojApp.factory('gamesService', function gamesService(
     function processGame(game) {
         game.designer_display = join(game.designer_name, ', ', ' & ');
         game.artist_display = join(game.artist_name, ', ', ' & ');
+        game.description_array = _.filter(_.map(_.split(game.description, /\n(\s*\n\s*)+/), _.trim));
         return game;
     }
 
