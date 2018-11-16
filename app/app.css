@@ -60,7 +60,7 @@
 }
 
 .game-description {
-    max-height: 300px;
+    max-height: 400px;
     overflow: hidden;
     position: relative;
     -webkit-transition: .4s ease-in-out;
