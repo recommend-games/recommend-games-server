@@ -35,13 +35,18 @@ rsync --archive \
 python3 -m ludoj.json \
     "${WS}/ludoj-scraper/results/bgg.csv" \
     --output "${WS}/ludoj-scraper/feeds/bgg.jl" \
-    --url 'http://localhost:8000/api/games/' \
+    --url 'http://localhost:8000/api/' \
     --id-field 'bgg_id'
 python3 -m ludoj.json \
     "${WS}/ludoj-scraper/feeds/bgg.jl" \
-    --url 'http://localhost:8000/api/games/' \
+    --url 'http://localhost:8000/api/' \
     --id-field 'bgg_id' \
     --implementation 'implements'
+python3 -m ludoj.json \
+    "${WS}/ludoj-scraper/feeds/bgg.jl" \
+    --url 'http://localhost:8000/api/' \
+    --id-field 'bgg_id' \
+    --fields 'designer' 'artist'
 
 ### RECOMMENDER ###
 cd "${WS}/ludoj-recommender"
