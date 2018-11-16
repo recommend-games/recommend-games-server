@@ -98,6 +98,12 @@
     white-space: nowrap;
 }
 
+.bgg-icon {
+    height: 18px;
+    vertical-align: text-bottom;
+    width: auto;
+}
+
 .text-monospace {
     font-size: smaller;
 }

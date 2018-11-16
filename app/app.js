@@ -176,6 +176,10 @@ ludojApp.directive('gameSquare', function gameSquare() {
     };
 });
 
+ludojApp.controller('FooterController', function FooterController($scope) {
+    $scope.yearNow = new Date().getFullYear();
+});
+
 ludojApp.controller('ListController', function ListController(
     $location,
     $log,
