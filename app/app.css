@@ -107,7 +107,7 @@
 }
 
 .player-count-container {
-    display: inline-block;
+    display: inline;
     font-size: 75%;
     vertical-align: super;
 }
@@ -130,6 +130,7 @@
     filter: drop-shadow(0px 0px 2px);
 }*/
 
+.game-age,
 .game-time {
     font-size: 150%;
     white-space: nowrap;
