@@ -19,7 +19,13 @@
 			class="img-fluid game-img d-block float-md-right mb-3 mx-auto ml-md-3"
 			alt="{{ game.name }}" />
 		<!-- TODO artist as caption -->
-		<player-count ng-if="game" game="game"></player-count>
+		<div class="game-info-box mb-3">
+			<player-count ng-if="game" game="game"></player-count>
+			<span ng-if="game.time_string"
+					class="game-time">
+				<i class="fas fa-clock"></i> {{ game.time_string }}
+			</span>
+		</div>
 		<p ng-repeat="description in game.description_array"
 				class="{{ $first ? 'lead' : '' }}">
 			{{ description }}

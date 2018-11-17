@@ -89,7 +89,12 @@ ludojApp.factory('gamesService', function gamesService(
                 'playable with',
                 'recommended for',
                 'best with'
-            ];
+            ],
+            times = _([game.min_time, game.max_time])
+                .filter()
+                .sortBy()
+                .uniq()
+                .join('–');
 
         game.counts = _.map(counts, function (rec, count) {
             count += 1;
@@ -105,6 +110,8 @@ ludojApp.factory('gamesService', function gamesService(
                 'alt': alt
             };
         });
+
+        game.time_string = times ? times + ' minutes' : null;
 
         return game;
     }

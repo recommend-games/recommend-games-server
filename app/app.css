@@ -109,6 +109,7 @@
 .player-count-container {
     display: inline-block;
     font-size: 75%;
+    vertical-align: super;
 }
 
 .player-count {
@@ -124,9 +125,14 @@
     opacity: .666;
 }
 
-.player-count-recommended,
+/*.player-count-recommended,
 .player-count-best {
     filter: drop-shadow(0px 0px 2px);
+}*/
+
+.game-time {
+    font-size: 150%;
+    white-space: nowrap;
 }
 
 .text-monospace {
