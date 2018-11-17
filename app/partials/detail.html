@@ -19,6 +19,7 @@
 			class="img-fluid game-img d-block float-md-right mb-3 mx-auto ml-md-3"
 			alt="{{ game.name }}" />
 		<!-- TODO artist as caption -->
+		<player-count ng-if="game" game="game"></player-count>
 		<p ng-repeat="description in game.description_array"
 				class="{{ $first ? 'lead' : '' }}">
 			{{ description }}

@@ -177,6 +177,58 @@ ludojApp.directive('gameSquare', function gameSquare() {
     };
 });
 
+ludojApp.directive('playerCount', function playerCount() {
+    return {
+        'restrict': 'E',
+        'templateUrl': '/partials/player-count.html',
+        'scope': {
+            'game': '='
+        },
+        'controller': function controller($scope, $log) {
+            function between(lower, value, upper) {
+                lower = parseFloat(lower);
+                value = parseFloat(value);
+                upper = parseFloat(upper);
+                return _.isNaN(lower) || _.isNaN(value) || _.isNaN(upper) ? false : lower <= value && value <= upper;
+            }
+
+            $log.info($scope.game);
+
+            var game = $scope.game || {},
+                counts = _.map(_.range(1, 11), function (count) {
+                    return between(game.min_players_best, count, game.max_players_best) ? 3
+                            : between(game.min_players_rec, count, game.max_players_rec) ? 2
+                            : between(game.min_players, count, game.max_players) ? 1 : 0;
+                }),
+                styles = ['not', 'box', 'recommended', 'best'],
+                alts = [
+                    'not recommended for',
+                    'playable with',
+                    'recommended for',
+                    'best with'
+                ];
+
+            $scope.meeples = _.map(counts, function (rec, count) {
+                $log.info(rec, count);
+                count += 1;
+                var string = _.padStart(count, 2, '0'),
+                    image = rec === 0 ? 'meeple_' + string + '_empty.svg' : 'meeple_' + string + '.svg',
+                    style = 'player-count-' + styles[rec],
+                    alt = alts[rec] + ' ' + count + ' player' + (count > 1 ? 's' : '');
+                return {
+                    'count': count,
+                    'rec': rec,
+                    'style': style,
+                    'image': '/assets/meeples/' + image,
+                    'alt': alt
+                };
+            });
+
+            $log.info($scope.meeples);
+        }
+    };
+});
+
 ludojApp.controller('FooterController', function FooterController($scope) {
     $scope.yearNow = new Date().getFullYear();
 });

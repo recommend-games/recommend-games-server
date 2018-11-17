@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<div xmlns="http://www.w3.org/1999/xhtml"
+		class="player-count-container mb-3">
+	<strong>Player count</strong>:<br />
+	<img ng-repeat="meeple in meeples"
+		ng-src="{{ meeple.image }}"
+		class="player-count {{ meeple.style }}"
+		alt="{{ meeple.alt }}" />
+</div>

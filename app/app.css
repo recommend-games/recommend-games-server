@@ -106,6 +106,29 @@
     /*opacity: .5;*/
 }
 
+.player-count-container {
+    display: inline-block;
+    font-size: 75%;
+}
+
+.player-count {
+    height: 2rem;
+}
+
+.player-count-not,
+.player-count-box {
+    opacity: .333;
+}
+
+.player-count-recommended {
+    opacity: .666;
+}
+
+.player-count-recommended,
+.player-count-best {
+    filter: drop-shadow(0px 0px 2px);
+}
+
 .text-monospace {
     font-size: smaller;
 }
