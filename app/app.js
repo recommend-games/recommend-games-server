@@ -270,17 +270,17 @@ ludojApp.controller('ListController', function ListController(
 
     function validateCountType(playerCountType) {
         var playerCountTypes = {'box': true, 'recommended': true, 'best': true};
-        return playerCountTypes[playerCountType] ? playerCountType : 'box';
+        return playerCountTypes[playerCountType] ? playerCountType : 'recommended';
     }
 
     function validateTimeType(playTimeType) {
         var playTimeTypes = {'min': true, 'max': true};
-        return playTimeTypes[playTimeType] ? playTimeType : 'min';
+        return playTimeTypes[playTimeType] ? playTimeType : 'max';
     }
 
     function validateAgeType(playerAgeType) {
         var playerAgeTypes = {'box': true, 'recommended': true};
-        return playerAgeTypes[playerAgeType] ? playerAgeType : 'box';
+        return playerAgeTypes[playerAgeType] ? playerAgeType : 'recommended';
     }
 
     function validateBoolean(input) {
