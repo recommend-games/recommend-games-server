@@ -36,6 +36,10 @@
 					title="{{ game.complexity | number:1 }} / 5">
 				<i class="fas fa-balance-scale"></i> {{ game.complexity_string }}
 			</span>
+			<span ng-if="game.cooperative_string"
+					class="game-cooperative">
+				<i class="fas fa-handshake"></i> {{ game.cooperative_string }}
+			</span>
 		</div>
 		<p ng-repeat="description in game.description_array"
 				class="{{ $first ? 'lead' : '' }}">

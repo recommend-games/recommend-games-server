@@ -120,8 +120,8 @@ ludojApp.factory('gamesService', function gamesService(
         });
 
         game.time_string = times ? times + ' minutes' : null;
-
         game.complexity_string = between(1, game.complexity, 5) ? complexities[_.round(game.complexity)] + ' complexity' : null;
+        game.cooperative_string = game.cooperative === true ? 'cooperative' : game.cooperative === false ? 'competitive' : null;
 
         return game;
     }
