@@ -436,6 +436,11 @@ ludojApp.controller('ListController', function ListController(
                         return fetchGames(page, append, user);
                     }}
                 );
+            })
+            .then(function () {
+                $(function () {
+                    $('[data-toggle="tooltip"]').tooltip();
+                });
             });
     }
 
@@ -593,7 +598,6 @@ ludojApp.controller('ListController', function ListController(
                     .on('hide.bs.collapse', function () {
                         $('#filter-toggle-icon').removeClass('fa-minus-square').addClass('fa-plus-square');
                     });
-                $('[data-toggle="tooltip"]').tooltip();
             });
             renderSlider();
         });
