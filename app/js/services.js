@@ -165,12 +165,12 @@ ludojApp.factory('gamesService', function gamesService(
     return service;
 });
 
-ludojApp.factory('filterService', function filterService($localStorage) {
+ludojApp.factory('filterService', function filterService($sessionStorage) {
     var yearFloor = 1970,
         yearNow = new Date().getFullYear(),
         service = {
             'yearFloor': yearFloor,
-            'yearNow': yearNow,
+            'yearNow': yearNow
         };
 
     function validateCountType(playerCountType) {
@@ -270,11 +270,11 @@ ludojApp.factory('filterService', function filterService($localStorage) {
     };
 
     service.getParams = function getParams(params) {
-        return parseParams(!params || params.filters ? $localStorage.params : params);
+        return parseParams(!params || params.filters ? $sessionStorage.params : params);
     };
 
     service.setParams = function setParams(params) {
-        $localStorage.params = parseParams(params);
+        $sessionStorage.params = parseParams(params);
     };
 
     service.filtersFromParams = function filtersFromParams(params) {
