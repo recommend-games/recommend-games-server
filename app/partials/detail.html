@@ -17,7 +17,8 @@
 		<img ng-if="game.image_url"
 			ng-src="{{ game.image_url }}"
 			class="img-fluid game-img d-block float-md-right mb-3 mx-auto ml-md-3"
-			alt="{{ game.name }}" />
+			alt="{{ game.name }}"
+			title="{{ game.name }}" />
 		<!-- TODO artist as caption -->
 		<div class="game-info-box mb-3">
 			<player-count ng-if="game" game="game"></player-count>
