@@ -59,40 +59,48 @@
     max-height: 250px;
 }
 
-.expandable {
-    max-height: 400px;
-    overflow: hidden;
-    position: relative;
-    -webkit-transition: .4s ease-in-out;
-    transition: .4s ease-in-out;
+@media only screen and (max-width: 767.98px) {
+    .expandable {
+        max-height: 400px;
+        overflow: hidden;
+        padding-bottom: 30px;
+        position: relative;
+        -webkit-transition: .4s ease-in-out;
+        transition: .4s ease-in-out;
+    }
+
+    .expandable.expanded {
+        max-height: 9999px;
+    }
+
+    .expandable .expandable-bottom {
+        background-image: linear-gradient(transparent, white, white);
+        bottom: 0;
+        cursor: pointer;
+        font-weight: bold;
+        height: 60px;
+        left: 0;
+        position: absolute;
+        text-align: center;
+        -webkit-transition: .4s;
+        transition: .4s;
+        width: 100%;
+    }
+
+    .expandable .expandable-bottom span {
+        bottom: 0;
+        position: absolute;
+    }
+
+    .expandable.expanded .expandable-bottom {
+        background-image: none;
+    }
 }
 
-.expandable.expanded {
-    max-height: 9999px;
-    padding-bottom: 30px;
-}
-
-.expandable .expandable-bottom {
-    background-image: linear-gradient(transparent, white);
-    bottom: 0;
-    cursor: pointer;
-    font-weight: bold;
-    height: 50px;
-    left: 0;
-    position: absolute;
-    text-align: center;
-    -webkit-transition: .4s;
-    transition: .4s;
-    width: 100%;
-}
-
-.expandable .expandable-bottom span {
-    bottom: 0;
-    position: absolute;
-}
-
-.expandable.expanded .expandable-bottom {
-    background-image: none;
+@media (min-width: 768px) {
+    .expandable .expandable-bottom {
+        display: none;
+    }
 }
 
 .btn-more {
@@ -238,6 +246,26 @@ input:checked + .slider:before {
     width: 42px;
 }
 
+.fork-me-link,
+.fork-me-link:link,
+.fork-me-link:visited,
+.fork-me-link:hover,
+.fork-me-link:focus,
+.fork-me-link:active {
+    border: none;
+    display: block;
+    height: 100%;
+    text-decoration: none;
+}
+
+.fork-me-link:focus {
+    text-decoration: underline;
+}
+
+.fork-me-text {
+    display: none;
+}
+
 @media only screen and (min-width: 576px) {
     .fork-me {
         background-color: black;
@@ -253,21 +281,7 @@ input:checked + .slider:before {
         transform: rotate(45deg);
         width: auto;
     }
-}
 
-.fork-me-link,
-.fork-me-link:link,
-.fork-me-link:visited,
-.fork-me-link:hover,
-.fork-me-link:focus,
-.fork-me-link:active {
-    border: none;
-    display: block;
-    height: 100%;
-    text-decoration: none;
-}
-
-@media only screen and (min-width: 576px) {
     .fork-me-link,
     .fork-me-link:link,
     .fork-me-link:visited,
@@ -281,17 +295,7 @@ input:checked + .slider:before {
         text-align: center;
         text-shadow: 0 0 5px #444444;
     }
-}
 
-.fork-me-link:focus {
-    text-decoration: underline;
-}
-
-.fork-me-text {
-    display: none;
-}
-
-@media only screen and (min-width: 576px) {
     .fork-me-text {
         display: inline;
     }
