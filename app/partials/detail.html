@@ -1,7 +1,12 @@
 <!DOCTYPE html>
 <section xmlns="http://www.w3.org/1999/xhtml">
 	<h1>
-		{{ game.name }}
+		<span ng-if="game.name_short"
+				data-toggle="tooltip"
+				title="{{ game.name }}">
+			{{ game.name_short }}
+		</span>
+		<span ng-if="!game.name_short">{{ game.name }}</span>
 		<small ng-if="game.year || game.designer_display"
 				class="text-secondary">
 			<span ng-if="game.designer_display">by {{ game.designer_display }}</span>

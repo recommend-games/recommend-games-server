@@ -18,7 +18,12 @@
 			</span>
 		</span>
 		<h2 class="game-title">
-			{{ game.name }}
+			<span ng-if="game.name_short"
+					data-toggle="tooltip"
+					title="{{ game.name }}">
+				{{ game.name_short }}
+			</span>
+			<span ng-if="!game.name_short">{{ game.name }}</span>
 			<small ng-if="game.year"
 					class="text-secondary">
 				({{ game.year }})

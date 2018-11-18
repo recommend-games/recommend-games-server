@@ -74,6 +74,8 @@ ludojApp.factory('gamesService', function gamesService(
     }
 
     function processGame(game) {
+        game.name_short = _.size(game.name) > 50 ? _.truncate(game.name, {'length': 50, 'separator': /,? +/}) : null;
+
         game.designer_display = join(game.designer_name, ', ', ' & ');
         game.artist_display = join(game.artist_name, ', ', ' & ');
         game.description_array = _.filter(_.map(_.split(game.description, /\n(\s*\n\s*)+/), _.trim));
@@ -581,18 +583,20 @@ ludojApp.controller('ListController', function ListController(
     $scope.$watch('complexity.enabled', renderSlider);
     $scope.$watch('year.enabled', renderSlider);
 
-    fetchGames(1, false, $scope.user);
-
-    $timeout(function () {
-        $('#filter-game-form')
-            .on('show.bs.collapse', function () {
-                $('#filter-toggle-icon').removeClass('fa-plus-square').addClass('fa-minus-square');
-            })
-            .on('hide.bs.collapse', function () {
-                $('#filter-toggle-icon').removeClass('fa-minus-square').addClass('fa-plus-square');
+    fetchGames(1, false, $scope.user)
+        .then(function () {
+            $(function () {
+                $('#filter-game-form')
+                    .on('show.bs.collapse', function () {
+                        $('#filter-toggle-icon').removeClass('fa-plus-square').addClass('fa-minus-square');
+                    })
+                    .on('hide.bs.collapse', function () {
+                        $('#filter-toggle-icon').removeClass('fa-minus-square').addClass('fa-plus-square');
+                    });
+                $('[data-toggle="tooltip"]').tooltip();
             });
-        renderSlider();
-    }, 100);
+            renderSlider();
+        });
 });
 
 ludojApp.controller('DetailController', function DetailController(
@@ -600,7 +604,6 @@ ludojApp.controller('DetailController', function DetailController(
     $q,
     $routeParams,
     $scope,
-    $timeout,
     $window,
     gamesService
 ) {
@@ -637,10 +640,11 @@ ludojApp.controller('DetailController', function DetailController(
         .then(function (implementations) {
             $scope.implementations = implementations;
             $scope.noImplementations = _.isEmpty(implementations);
+        })
+        .then(function () {
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip();
+            });
         });
         // TODO catch errors
-
-    $timeout(function () {
-        $('[data-toggle="tooltip"]').tooltip();
-    }, 100);
 });
