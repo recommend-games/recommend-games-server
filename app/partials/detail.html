@@ -29,6 +29,12 @@
 					class="game-age">
 				<i class="fas fa-child"></i> {{ game.min_age_rec || game.min_age | number:0 }}+ years
 			</span>
+			<span ng-if="game.complexity_string"
+					class="game-complexity"
+					data-toggle="tooltip"
+					title="{{ game.complexity | number:1 }} / 5">
+				<i class="fas fa-balance-scale"></i> {{ game.complexity_string }}
+			</span>
 		</div>
 		<p ng-repeat="description in game.description_array"
 				class="{{ $first ? 'lead' : '' }}">

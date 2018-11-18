@@ -94,7 +94,15 @@ ludojApp.factory('gamesService', function gamesService(
                 .filter()
                 .sortBy()
                 .uniq()
-                .join('–');
+                .join('–'),
+            complexities = [
+                null,
+                'Light',
+                'Medium Light',
+                'Medium',
+                'Medium Heavy',
+                'Heavy'
+            ];
 
         game.counts = _.map(counts, function (rec, count) {
             count += 1;
@@ -112,6 +120,8 @@ ludojApp.factory('gamesService', function gamesService(
         });
 
         game.time_string = times ? times + ' minutes' : null;
+
+        game.complexity_string = between(1, game.complexity, 5) ? complexities[_.round(game.complexity)] + ' complexity' : null;
 
         return game;
     }
@@ -590,6 +600,7 @@ ludojApp.controller('DetailController', function DetailController(
     $q,
     $routeParams,
     $scope,
+    $timeout,
     $window,
     gamesService
 ) {
@@ -628,4 +639,8 @@ ludojApp.controller('DetailController', function DetailController(
             $scope.noImplementations = _.isEmpty(implementations);
         });
         // TODO catch errors
+
+    $timeout(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    }, 100);
 });
