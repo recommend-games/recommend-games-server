@@ -5,5 +5,7 @@
 	<img ng-repeat="count in game.counts"
 		ng-src="{{ count.image }}"
 		class="player-count {{ count.style }}"
-		alt="{{ count.alt }}" />
+		data-toggle="tooltip"
+		alt="{{ count.alt }}"
+		title="{{ count.alt }}" />
 </span>
