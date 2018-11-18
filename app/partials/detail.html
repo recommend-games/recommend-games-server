@@ -15,7 +15,7 @@
 	</h1>
 	<p>
 		View on <a ng-href="{{ game.url }}" target="_blank">BoardGameGeek <i class="fas fa-external-link-alt"></i></a>.
-		<a href="" ng-click="back()">Back to overview</a>.
+		<a href="#/?filters">Back to overview</a>.
 	</p>
 	<div class="game-description {{ expandable ? 'expandable' : '' }} {{ expandDescription ? 'expanded' : '' }} clearfix">
 		<img ng-if="game.image_url"
@@ -67,7 +67,6 @@
 		<div class="row">
 			<game-square ng-repeat="game in implementations"
 					game="game"
-					ng-click="open(game.bgg_id)"
 					class="col-xl-2 col-md-3 col-sm-4 col-6 game-small"></game-square>
 		</div>
 	</section>

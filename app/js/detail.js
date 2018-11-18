@@ -5,32 +5,14 @@
 'use strict';
 
 ludojApp.controller('DetailController', function DetailController(
-    $location,
     $q,
     $routeParams,
     $scope,
-    $window,
     gamesService
 ) {
     $scope.noImplementations = true;
     $scope.expandable = false;
     $scope.expandDescription = false;
-
-    $scope.back = function back() {
-        var params = _.clone($routeParams);
-        params.id = null;
-        $location.search(params)
-            .path('/');
-    };
-
-    $scope.open = function open(url) {
-        var id = _.parseInt(url);
-        if (id) {
-            $location.path('/game/' + id);
-        } else {
-            $window.open(url, '_blank');
-        }
-    };
 
     $scope.toggleDescription = function toggleDescription() {
         $scope.expandDescription = !$scope.expandDescription;

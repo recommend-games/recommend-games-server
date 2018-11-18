@@ -5,13 +5,11 @@
 'use strict';
 
 ludojApp.controller('ListController', function ListController(
-    $location,
     $log,
     $route,
     $routeParams,
     $scope,
     $timeout,
-    $window,
     filterService,
     gamesService,
     toastr
@@ -185,15 +183,6 @@ ludojApp.controller('ListController', function ListController(
     $scope.renderSlider = renderSlider;
     $scope.filtersActive = filtersActive;
     $scope.updateParams = updateParams;
-
-    $scope.open = function open(url) {
-        var id = _.parseInt(url);
-        if (id) {
-            $location.path('/game/' + id);
-        } else {
-            $window.open(url, '_blank');
-        }
-    };
 
     $scope.clearFilters = function clearFilters() {
         $scope.user = null;
