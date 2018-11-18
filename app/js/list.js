@@ -34,8 +34,6 @@ ludojApp.controller('ListController', function ListController(
             filters = filterService.filtersFromParams(params);
         page = _.parseInt(page) || $scope.page || $scope.nextPage || 1;
 
-        $log.debug('params:', params, 'filters:', filters);
-
         return gamesService.getGames(page, filters)
             .then(function (response) {
                 filterService.setParams(params);
@@ -74,7 +72,6 @@ ludojApp.controller('ListController', function ListController(
     function updateParams() {
         var params = filterService.paramsFromScope($scope);
         params.filters = null;
-        $log.debug('current filter values:', params);
         $route.updateParams(params);
     }
 

@@ -165,10 +165,7 @@ ludojApp.factory('gamesService', function gamesService(
     return service;
 });
 
-ludojApp.factory('filterService', function filterService(
-    $localStorage,
-    $log
-) {
+ludojApp.factory('filterService', function filterService($localStorage) {
     var yearFloor = 1970,
         yearNow = new Date().getFullYear(),
         service = {
@@ -273,8 +270,6 @@ ludojApp.factory('filterService', function filterService(
     };
 
     service.getParams = function getParams(params) {
-        $log.debug('getParams(', params, ')');
-        $log.debug($localStorage.params);
         return parseParams(!params || params.filters ? $localStorage.params : params);
     };
 
