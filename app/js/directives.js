@@ -1,7 +1,8 @@
-'use strict';
-
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
+/*jshint -W097 */
 /*global ludojApp, _ */
+
+'use strict';
 
 ludojApp.directive('gameSquare', function gameSquare() {
     return {

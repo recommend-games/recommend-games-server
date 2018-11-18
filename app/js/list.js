@@ -1,7 +1,8 @@
-'use strict';
-
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
+/*jshint -W097 */
 /*global ludojApp, _, $ */
+
+'use strict';
 
 ludojApp.controller('ListController', function ListController(
     $location,
@@ -11,39 +12,11 @@ ludojApp.controller('ListController', function ListController(
     $scope,
     $timeout,
     $window,
+    filterService,
     gamesService,
     toastr
 ) {
-    var search = $routeParams,
-        playerCount = _.parseInt(search.playerCount),
-        playerAge = _.parseInt(search.playerAge),
-        playTime = _.parseInt(search.playTime),
-        complexityMin = parseFloat(search.complexityMin),
-        complexityMax = parseFloat(search.complexityMax),
-        yearMin = _.parseInt(search.yearMin),
-        yearMax = _.parseInt(search.yearMax),
-        yearFloor = 1970,
-        yearNow = new Date().getFullYear();
-
-    function validateCountType(playerCountType) {
-        var playerCountTypes = {'box': true, 'recommended': true, 'best': true};
-        return playerCountTypes[playerCountType] ? playerCountType : 'recommended';
-    }
-
-    function validateTimeType(playTimeType) {
-        var playTimeTypes = {'min': true, 'max': true};
-        return playTimeTypes[playTimeType] ? playTimeType : 'max';
-    }
-
-    function validateAgeType(playerAgeType) {
-        var playerAgeTypes = {'box': true, 'recommended': true};
-        return playerAgeTypes[playerAgeType] ? playerAgeType : 'recommended';
-    }
-
-    function validateBoolean(input) {
-        var booleans = {'True': true, 'False': true};
-        return booleans[input] ? input : null;
-    }
+    var params = filterService.getParams($routeParams);
 
     function filtersActive() {
         return _.sum([
@@ -56,125 +29,24 @@ ludojApp.controller('ListController', function ListController(
         ]);
     }
 
-    function filterValues() {
-        var result = {};
-
-        result.user = _.trim($scope.user) || null;
-        result.search = _.trim($scope.search) || null;
-
-        if ($scope.count.enabled && $scope.count.value) {
-            result.playerCount = $scope.count.value;
-            result.playerCountType = validateCountType($scope.count.type);
-        } else {
-            result.playerCount = null;
-            result.playerCountType = null;
-        }
-
-        if ($scope.time.enabled && $scope.time.value) {
-            result.playTime = $scope.time.value;
-            result.playTimeType = validateTimeType($scope.time.type);
-        } else {
-            result.playTime = null;
-            result.playTimeType = null;
-        }
-
-        if ($scope.age.enabled && $scope.age.value) {
-            result.playerAge = $scope.age.value;
-            result.playerAgeType = validateAgeType($scope.age.type);
-        } else {
-            result.playerAge = null;
-            result.playerAgeType = null;
-        }
-
-        if ($scope.complexity.enabled && $scope.complexity.min && $scope.complexity.max) {
-            result.complexityMin = $scope.complexity.min;
-            result.complexityMax = $scope.complexity.max;
-        } else {
-            result.complexityMin = null;
-            result.complexityMax = null;
-        }
-
-        if ($scope.year.enabled && $scope.year.min && $scope.year.max) {
-            result.yearMin = $scope.year.min;
-            result.yearMax = $scope.year.max;
-        } else {
-            result.yearMin = null;
-            result.yearMax = null;
-        }
-
-        result.cooperative = validateBoolean($scope.cooperative);
-
-        return result;
-    }
-
-    function filters() {
-        var result = {},
-            values = filterValues(),
-            playerSuffix = '',
-            ageSuffix = '';
-
-        if (values.user) {
-            result.user = values.user;
-        }
-
-        if (values.search) {
-            result.search = values.search;
-        }
-
-        if (values.playerCount) {
-            playerSuffix = values.playerCountType === 'recommended' ? '_rec'
-                    : values.playerCountType === 'best' ? '_best'
-                    : '';
-            result['min_players' + playerSuffix + '__lte'] = values.playerCount;
-            result['max_players' + playerSuffix + '__gte'] = values.playerCount;
-        }
-
-        if (values.playTime) {
-            result[values.playTimeType + '_time__gt'] = 0;
-            result[values.playTimeType + '_time__lte'] = values.playTime;
-        }
-
-        if (values.playerAge) {
-            ageSuffix = values.playerAgeType === 'recommended' ? '_rec'
-                    : '';
-            result['min_age' + ageSuffix + '__gt'] = 0;
-            result['min_age' + ageSuffix + '__lte'] = values.playerAge;
-        }
-
-        if (values.complexityMin && values.complexityMax) {
-            result.complexity__gte = values.complexityMin;
-            result.complexity__lte = values.complexityMax;
-        }
-
-        if (values.yearMin && values.yearMin > yearFloor) {
-            result.year__gte = values.yearMin;
-        }
-
-        if (values.yearMax && values.yearMax <= yearNow) {
-            result.year__lte = values.yearMax;
-        }
-
-        if (values.cooperative) {
-            result.cooperative = values.cooperative;
-        }
-
-        return result;
-    }
-
-    function fetchGames(page, append, user) {
+    function fetchGames(page, append) {
         toastr.clear();
 
-        var currFilters = filters();
+        var params = filterService.getParams(append ? null : $routeParams),
+            filters = filterService.filtersFromParams(params);
         page = _.parseInt(page) || $scope.page || $scope.nextPage || 1;
-        user = _.trim(user) || _.trim(currFilters.user) || null;
 
-        return gamesService.getGames(page, currFilters, user)
+        $log.debug('params:', params, 'filters:', filters);
+
+        return gamesService.getGames(page, filters)
             .then(function (response) {
+                filterService.setParams(params);
+
                 $scope.currPage = page;
                 $scope.prevPage = response.previous ? page - 1 : null;
                 $scope.nextPage = response.next ? page + 1 : null;
                 $scope.total = response.count;
-                $scope.currUser = user || null;
+                $scope.currUser = params.user;
 
                 var games = response.results;
                 $scope.games = append && !_.isEmpty($scope.games) ? _.concat($scope.games, games) : games;
@@ -190,7 +62,7 @@ ludojApp.controller('ListController', function ListController(
                     'Sorry, there was an error. Tap to try again...',
                     'Error loading games',
                     {'onTap': function onTap() {
-                        return fetchGames(page, append, user);
+                        return fetchGames(page, append);
                     }}
                 );
             })
@@ -202,8 +74,10 @@ ludojApp.controller('ListController', function ListController(
     }
 
     function updateParams() {
-        $log.debug('current filter values:', filterValues());
-        $route.updateParams(filterValues());
+        var params = filterService.paramsFromScope($scope);
+        params.filters = null;
+        $log.debug('current filter values:', params);
+        $route.updateParams(params);
     }
 
     function renderSlider() {
@@ -217,16 +91,16 @@ ludojApp.controller('ListController', function ListController(
         });
     }
 
-    $scope.user = search.user || null;
+    $scope.user = params.user;
 
-    $scope.search = search.search || null;
+    $scope.search = params.search;
 
     $scope.count = {
-        'enabled': !!playerCount,
-        'value': playerCount || 4,
-        'type': validateCountType(search.playerCountType),
+        'enabled': !!params.playerCount,
+        'value': params.playerCount || 4,
+        'type': filterService.validateCountType(params.playerCountType),
         'options': {
-            'disabled': !playerCount,
+            'disabled': !params.playerCount,
             'floor': 1,
             'ceil': 10,
             'step': 1,
@@ -238,11 +112,11 @@ ludojApp.controller('ListController', function ListController(
     };
 
     $scope.time = {
-        'enabled': !!playTime,
-        'value': playTime || 60,
-        'type': validateTimeType(search.playTimeType),
+        'enabled': !!params.playTime,
+        'value': params.playTime || 60,
+        'type': filterService.validateTimeType(params.playTimeType),
         'options': {
-            'disabled': !playTime,
+            'disabled': !params.playTime,
             'floor': 5,
             'ceil': 240,
             'step': 5,
@@ -254,11 +128,11 @@ ludojApp.controller('ListController', function ListController(
     };
 
     $scope.age = {
-        'enabled': !!playerAge,
-        'value': playerAge || 10,
-        'type': validateAgeType(search.playerAgeType),
+        'enabled': !!params.playerAge,
+        'value': params.playerAge || 10,
+        'type': filterService.validateAgeType(params.playerAgeType),
         'options': {
-            'disabled': !playerAge,
+            'disabled': !params.playerAge,
             'floor': 1,
             'ceil': 21,
             'step': 1,
@@ -270,11 +144,11 @@ ludojApp.controller('ListController', function ListController(
     };
 
     $scope.complexity = {
-        'enabled': !!(complexityMin || complexityMax),
-        'min': complexityMin || 1.0,
-        'max': complexityMax || 5.0,
+        'enabled': !!(params.complexityMin || params.complexityMax),
+        'min': params.complexityMin || 1.0,
+        'max': params.complexityMax || 5.0,
         'options': {
-            'disabled': !(complexityMin || complexityMax),
+            'disabled': !(params.complexityMin || params.complexityMax),
             'floor': 1.0,
             'ceil': 5.0,
             'step': 0.1,
@@ -287,25 +161,24 @@ ludojApp.controller('ListController', function ListController(
     };
 
     $scope.year = {
-        'enabled': !!(yearMin || yearMax),
-        'min': yearMin || yearFloor,
-        'max': yearMax || yearNow + 1,
+        'enabled': !!(params.yearMin || params.yearMax),
+        'min': params.yearMin || filterService.yearFloor,
+        'max': params.yearMax || filterService.yearNow + 1,
         'options': {
-            'disabled': !(complexityMin || complexityMax),
-            'floor': yearFloor,
-            'ceil': yearNow + 1,
+            'disabled': !(params.yearMin || params.yearMax),
+            'floor': filterService.yearFloor,
+            'ceil': filterService.yearNow + 1,
             'step': 1,
             'hidePointerLabels': true,
             'hideLimitLabels': true,
-            'ticksArray': _.concat(_.range(yearFloor, yearNow + 1, 5), yearNow + 1),
+            'ticksArray': _.concat(_.range(filterService.yearFloor, filterService.yearNow + 1, 5), filterService.yearNow + 1),
             'draggableRange': true
         }
     };
 
-    $scope.cooperative = validateBoolean(search.cooperative);
+    $scope.cooperative = params.cooperative;
 
     $scope.fetchGames = fetchGames;
-    $scope.yearNow = yearNow;
     $scope.pad = _.padStart;
     $scope.empty = false;
     $scope.total = null;

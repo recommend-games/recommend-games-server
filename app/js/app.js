@@ -1,12 +1,14 @@
-'use strict';
-
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
+/*jshint -W097 */
 /*global angular */
+
+'use strict';
 
 var ludojApp = angular.module('ludojApp', [
     'blockUI',
     'ngAnimate',
     'ngRoute',
+    'ngStorage',
     'rzModule',
     'toastr'
 ]);
