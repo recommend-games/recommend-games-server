@@ -13,7 +13,7 @@ cd app
 htmlhint
 htmllint
 jslint "$(find . -name '*.js')"
-jshint "$(find . -name '*.js')"
+jshint .
 csslint .
 # fresh database
 cd ..

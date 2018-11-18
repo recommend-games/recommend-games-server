@@ -107,7 +107,8 @@
 
 # other
 **/tests/
-**/.htmllintrc
+**/.csslintrc*
+**/.htmllintrc*
 
 **/README*
 **/LICENSE*
