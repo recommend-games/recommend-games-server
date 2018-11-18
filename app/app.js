@@ -99,11 +99,11 @@ ludojApp.factory('gamesService', function gamesService(
                 .join('–'),
             complexities = [
                 null,
-                'Light',
-                'Medium Light',
-                'Medium',
-                'Medium Heavy',
-                'Heavy'
+                'light',
+                'medium light',
+                'medium',
+                'medium heavy',
+                'heavy'
             ];
 
         game.counts = _.map(counts, function (rec, count) {
@@ -612,6 +612,7 @@ ludojApp.controller('DetailController', function DetailController(
     gamesService
 ) {
     $scope.noImplementations = true;
+    $scope.expandable = false;
     $scope.expandDescription = false;
 
     $scope.back = function back() {
@@ -644,6 +645,7 @@ ludojApp.controller('DetailController', function DetailController(
         .then(function (implementations) {
             $scope.implementations = implementations;
             $scope.noImplementations = _.isEmpty(implementations);
+            $scope.expandable = !$scope.noImplementations;
         })
         .then(function () {
             $(function () {

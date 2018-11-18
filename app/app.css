@@ -59,7 +59,7 @@
     max-height: 250px;
 }
 
-.game-description {
+.expandable {
     max-height: 400px;
     overflow: hidden;
     position: relative;
@@ -67,24 +67,32 @@
     transition: .4s ease-in-out;
 }
 
-.expanded {
+.expandable.expanded {
     max-height: 9999px;
+    padding-bottom: 30px;
 }
 
-.game-description::after {
+.expandable .expandable-bottom {
     background-image: linear-gradient(transparent, white);
     bottom: 0;
-    content: '';
+    cursor: pointer;
+    font-weight: bold;
     height: 50px;
     left: 0;
     position: absolute;
+    text-align: center;
     -webkit-transition: .4s;
     transition: .4s;
     width: 100%;
 }
 
-.expanded::after {
-    height: 0;
+.expandable .expandable-bottom span {
+    bottom: 0;
+    position: absolute;
+}
+
+.expandable.expanded .expandable-bottom {
+    background-image: none;
 }
 
 .btn-more {
