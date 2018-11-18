@@ -87,7 +87,7 @@ ludojApp.factory('gamesService', function gamesService(
             }),
             styles = ['not', 'box', 'recommended', 'best'],
             alts = [
-                'not recommended for',
+                'not playable with',
                 'playable with',
                 'recommended for',
                 'best with'
