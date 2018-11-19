@@ -7,9 +7,10 @@ export WS="${HOME}/Workspace"
 
 # before starting, make sure that
 # - results are sync'ed and merged to "${WS}/ludoj-scraper/results/"
-# - recommender models have been trained to "${WS}"/ludoj-recommender/.tc/"
+# - recommender models have been trained to "${WS}/ludoj-recommender/.tc/"
 # - pipenv update --dev in "${WS}/ludoj-server"
 # - Docker is running
+# - no other instance of server is running (e.g., from previous run)
 
 ### SERVER ###
 cd "${WS}/ludoj-server"
