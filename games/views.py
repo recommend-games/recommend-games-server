@@ -130,6 +130,7 @@ class GameViewSet(ModelViewSet):
         if not user:
             return self.list(request)
 
+        user = user.lower()
         path = getattr(settings, 'RECOMMENDER_PATH', None)
         recommender = _load_model(path)
 
