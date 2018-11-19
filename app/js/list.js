@@ -6,6 +6,7 @@
 
 ludojApp.controller('ListController', function ListController(
     $log,
+    $q,
     $route,
     $routeParams,
     $scope,
@@ -27,17 +28,22 @@ ludojApp.controller('ListController', function ListController(
         ]);
     }
 
-    function fetchGames(page, append) {
+    function fetchGames(page) {
         toastr.clear();
 
-        var params = filterService.getParams(append ? null : $routeParams),
-            filters = filterService.filtersFromParams(params);
         page = _.parseInt(page) || $scope.page || $scope.nextPage || 1;
 
-        return gamesService.getGames(page, filters)
+        var params = filterService.getParams(append ? null : $routeParams),
+            filters = filterService.filtersFromParams(params),
+            append = page > 1,
+            cachedGames = !append && $routeParams.filters ? gamesService.getCachedGames() : null,
+            promise = _.isEmpty(cachedGames) ? gamesService.getGames(page, filters) : $q.resolve(cachedGames);
+
+        return promise
             .then(function (response) {
                 filterService.setParams(params);
 
+                page = response.page || page;
                 $scope.currPage = page;
                 $scope.prevPage = response.previous ? page - 1 : null;
                 $scope.nextPage = response.next ? page + 1 : null;
@@ -45,8 +51,12 @@ ludojApp.controller('ListController', function ListController(
                 $scope.currUser = params.user;
 
                 var games = response.results;
-                $scope.games = append && !_.isEmpty($scope.games) ? _.concat($scope.games, games) : games;
-                $scope.empty = _.isEmpty($scope.games) && !$scope.nextPage;
+                games = append && !_.isEmpty($scope.games) ? _.concat($scope.games, games) : games;
+                response.results = games;
+                gamesService.setCachedGames(response);
+
+                $scope.games = games;
+                $scope.empty = _.isEmpty(games) && !$scope.nextPage;
 
                 return games;
             })
@@ -58,7 +68,7 @@ ludojApp.controller('ListController', function ListController(
                     'Sorry, there was an error. Tap to try again...',
                     'Error loading games',
                     {'onTap': function onTap() {
-                        return fetchGames(page, append);
+                        return fetchGames(page);
                     }}
                 );
             })
@@ -204,7 +214,7 @@ ludojApp.controller('ListController', function ListController(
     $scope.$watch('complexity.enabled', renderSlider);
     $scope.$watch('year.enabled', renderSlider);
 
-    fetchGames(1, false, $scope.user)
+    fetchGames(1)
         .then(function () {
             $(function () {
                 $('#filter-game-form')

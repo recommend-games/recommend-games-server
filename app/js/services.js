@@ -12,7 +12,8 @@ ludojApp.factory('gamesService', function gamesService(
     API_URL
 ) {
     var service = {},
-        cache = $cacheFactory('ludoj', {'capacity': 1024});
+        cache = $cacheFactory('ludoj', {'capacity': 1024}),
+        games = null;
 
     function join(array, sep, lastSep) {
         sep = sep || ', ';
@@ -111,6 +112,7 @@ ludojApp.factory('gamesService', function gamesService(
 
                 games = _.map(games, processGame);
                 response.data.results = games;
+                response.data.page = page;
 
                 if (!params.user) {
                     _.forEach(games, function (game) {
@@ -160,6 +162,14 @@ ludojApp.factory('gamesService', function gamesService(
                 response = _.isString(response) ? response : 'Unable to load game.';
                 return $q.reject(response);
             });
+    };
+
+    service.getCachedGames = function getCachedGames() {
+        return games || {};
+    };
+
+    service.setCachedGames = function setCachedGames(newGames) {
+        games = newGames;
     };
 
     return service;
