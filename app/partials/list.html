@@ -14,7 +14,7 @@
 			class="form">
 		<label for="user"
 				id="bgg-user-label"
-				class="{{ user ? 'text-success' : 'text-muted' }}">
+				class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
 			Personal recommendations for:
 		</label>
 		<div class="input-group mb-3">
@@ -42,18 +42,14 @@
 			novalidate="novalidate"
 			role="form"
 			class="form">
-		<div class="form-row">
-			<div class="col-md-9 col-sm-8 mb-3">
+		<div class="form-row align-items-end">
+			<div class="col-xl-9 col-lg-8 col-md-7 col-sm-6 mb-3">
+				<label for="search"
+						id="search-label"
+						class="{{ search ? 'text-success' : 'text-muted' }} mb-0">
+					Game name:
+				</label>
 				<div class="input-group">
-					<div class="input-group-prepend">
-						<div class="input-group-text">
-							<label for="search"
-									id="search-label"
-									class="form-check-label {{ search ? 'text-success' : 'text-muted' }}">
-								Game name:
-							</label>
-						</div>
-					</div>
 					<input type="text"
 						id="search"
 						name="search"
@@ -71,21 +67,28 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-md-3 col-sm-4 mb-3 text-right">
-				<button type="button"
-						class="btn btn-outline-primary btn-sm"
-						ng-click="renderSlider()"
-						data-toggle="collapse"
-						data-target="#filter-game-form"
-						aria-expanded="false"
-						aria-controls="filter-game-form">
-					<span ng-if="filtersActive()"
-							class="badge badge-primary">
-						{{ filtersActive() }}
-					</span>
-					Advanced filters
-					<i class="far fa-plus-square" id="filter-toggle-icon"></i>
-				</button>
+			<div class="col-xl-3 col-lg-4 col-md-5 col-sm-6 mb-3 text-right">
+				<div class="btn-group btn-group-sm" role="group" aria-label="Filters">
+					<button type="button"
+							class="btn btn-outline-secondary"
+							ng-click="clearFilters()">
+						Clear filters
+					</button>
+					<button type="button"
+							class="btn btn-outline-primary"
+							ng-click="renderSlider()"
+							data-toggle="collapse"
+							data-target="#filter-game-form"
+							aria-expanded="false"
+							aria-controls="filter-game-form">
+						<span ng-if="filtersActive()"
+								class="badge badge-primary">
+							{{ filtersActive() }}
+						</span>
+						Advanced
+						<i class="far fa-plus-square" id="filter-toggle-icon"></i>
+					</button>
+				</div>
 			</div>
 		</div>
 	</form>
