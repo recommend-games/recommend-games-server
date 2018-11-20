@@ -3,22 +3,23 @@
 set -euxo pipefail
 
 export DEBUG=true
-export WS="${HOME}/Workspace"
+export WORK_SPACE="${HOME}/Workspace"
 
 # before starting, make sure that
-# - results are sync'ed and merged to "${WS}/ludoj-scraper/results/"
-# - recommender models have been trained to "${WS}/ludoj-recommender/.tc/"
-# - pipenv update --dev in "${WS}/ludoj-server"
+# - results are sync'ed and merged to "${WORK_SPACE}/ludoj-scraper/results/"
+# - recommender models have been trained to "${WORK_SPACE}/ludoj-recommender/.tc/"
+# - pipenv update --dev in "${WORK_SPACE}/ludoj-server"
 # - Docker is running
 # - no other instance of server is running (e.g., from previous run)
 
 ### SERVER ###
-cd "${WS}/ludoj-server"
+cd "${WORK_SPACE}/ludoj-server"
 # fresh database
 mv db.sqlite3 db.sqlite3.bk || true
 python3 manage.py migrate
 # run server
-nohup python3 manage.py runserver 8000 --noreload >> 'server.log' 2>&1 &
+mkdir -p logs
+nohup python3 manage.py runserver 8000 --noreload >> 'logs/server.log' 2>&1 &
 SERVER_PID="$!"
 echo "Started server with pid <${SERVER_PID}>..."
 while true && ! curl --head --fail 'http://localhost:8000/api/'; do
@@ -28,7 +29,7 @@ done
 echo 'Server is up and running!'
 
 ### SCRAPER ###
-cd "${WS}/ludoj-scraper"
+cd "${WORK_SPACE}/ludoj-scraper"
 python3 -m ludoj.json \
     'results/bgg.csv' \
     --output 'feeds/bgg.jl' \
@@ -46,11 +47,11 @@ python3 -m ludoj.json \
     --fields 'designer' 'artist'
 
 ### SERVER ###
-cd "${WS}/ludoj-server"
+cd "${WORK_SPACE}/ludoj-server"
 # update recommender
 rm --recursive --force .tc static
 mkdir --parents .tc/recommender
-cp "${WS}"/ludoj-recommender/.tc/recommender/* .tc/recommender/
+cp "${WORK_SPACE}"/ludoj-recommender/.tc/recommender/* .tc/recommender/
 python3 -m ludoj_recommender.load \
     --model '.tc' \
     --url 'http://localhost:8000/api/games/' \

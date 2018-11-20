@@ -107,6 +107,7 @@
 
 # other
 **/*.bk
+**/logs/
 **/tests/
 **/.csslintrc*
 **/.htmllintrc*

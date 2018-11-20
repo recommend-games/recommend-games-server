@@ -100,6 +100,7 @@ sitepackages/
 ._*
 bin/
 include/
+logs/
 share/
 pip-selfcheck.json
 

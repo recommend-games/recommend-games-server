@@ -47,7 +47,6 @@
                 "sha256:f9dc52cd70907aafb99a773b66b156f2f995c7a0d284397c487c8b71ddbef2f9",
                 "sha256:fc7212e36ebeb81aebf7949c92897b622490d7c0e333a479c0395591e7994600"
             ],
-            "markers": "extra == 'brotli'",
             "version": "==1.0.7"
         },
         "certifi": {
@@ -340,11 +339,11 @@
                 "brotli"
             ],
             "hashes": [
-                "sha256:b1ddbce083c51a064da5e99dacbfff38b291d8436b6fd75156a3bb2265c55d39",
-                "sha256:d3609f505db173be501e8a5549d396e6013543fe126ee073b435833fc3403306"
+                "sha256:118ab3e5f815d380171b100b05b76de2a07612f422368a201a9ffdeefb2251c1",
+                "sha256:42133ddd5229eeb6a0c9899496bdbe56c292394bf8666da77deeb27454c0456a"
             ],
             "index": "pypi",
-            "version": "==4.1.1"
+            "version": "==4.1.2"
         }
     },
     "develop": {
