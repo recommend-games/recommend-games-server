@@ -122,7 +122,7 @@ USE_TZ = True
 STATIC_URL = '/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'app' if DEBUG else 'static')
 STATICFILES_DIRS = [] if DEBUG else [
-    os.path.join(BASE_DIR, 'app'),
+    os.path.join(BASE_DIR, '.temp'),
 ]
 STATICFILES_STORAGE = (
     'django.contrib.staticfiles.storage.StaticFilesStorage' if DEBUG

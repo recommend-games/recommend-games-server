@@ -27,9 +27,7 @@ ludojApp.controller('DetailController', function DetailController(
             $document[0].title = game.name + ' – ' + APP_TITLE;
 
             $('#game-details')
-                .append('<script type="application/ld+json">' +
-                    $filter('json')(gamesService.jsonLD(game), 0) +
-                    '</script>');
+                .append('<script type="application/ld+json">' + $filter('json')(gamesService.jsonLD(game), 0) + '</script>');
 
             return $q.all(_.map(game.implements, function (id) {
                 return gamesService.getGame(id);

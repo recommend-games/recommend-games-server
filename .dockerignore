@@ -109,6 +109,7 @@
 **/*.bk
 **/logs/
 **/tests/
+**/.temp*
 **/.csslintrc*
 **/.htmllintrc*
 

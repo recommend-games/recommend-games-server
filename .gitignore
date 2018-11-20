@@ -108,7 +108,8 @@ static/
 
 feeds/
 recommender/
-.tc
+.tc*
+.temp*
 .storage/
 
 *.sqlite3*

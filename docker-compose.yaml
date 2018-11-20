@@ -7,15 +7,11 @@ services:
         build:
             context: '.'
             dockerfile: Dockerfile
-        # depends_on:
-        #     - db
         environment:
-            - DEBUG=true
+            - DEBUG=
             - PORT=8000
         ports:
             - '8000:8000'
-        # volumes:
-        #     - ./output:/root/output
         restart: always
         networks:
             - ludoj

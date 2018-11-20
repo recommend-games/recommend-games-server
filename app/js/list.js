@@ -65,9 +65,7 @@ ludojApp.controller('ListController', function ListController(
 
                 if (!append && !_.isEmpty(games)) {
                     $('#games-list')
-                        .append('<script type="application/ld+json">' +
-                            $filter('json')(gamesService.jsonLD(_.slice(games, 0, 10)), 0) +
-                            '</script>');
+                        .append('<script type="application/ld+json">' + $filter('json')(gamesService.jsonLD(_.slice(games, 0, 10)), 0) + '</script>');
                 }
 
                 return games;

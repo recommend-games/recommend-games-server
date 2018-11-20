@@ -49,7 +49,7 @@ python3 -m ludoj.json \
 ### SERVER ###
 cd "${WORK_SPACE}/ludoj-server"
 # update recommender
-rm --recursive --force .tc static
+rm --recursive --force .tc* .temp* static
 mkdir --parents .tc/recommender
 cp "${WORK_SPACE}"/ludoj-recommender/.tc/recommender/* .tc/recommender/
 python3 -m ludoj_recommender.load \
@@ -60,8 +60,13 @@ python3 -m ludoj_recommender.load \
 # stop server now
 kill "${SERVER_PID}" || true
 sleep 10
+# minify static
+mkdir --parents .temp
+cp --recursive app/* .temp/
+css-html-js-minify --overwrite .temp
 export DEBUG=
 python3 manage.py collectstatic --no-input
+rm --recursive --force .temp
 sqlite3 db.sqlite3 'VACUUM;'
 heroku container:push web
 heroku container:release web

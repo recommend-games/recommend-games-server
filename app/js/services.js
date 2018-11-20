@@ -175,24 +175,24 @@ ludojApp.factory('gamesService', function gamesService(
     service.jsonLD = function jsonLD(game) {
         if (_.isArray(game)) {
             return {
-                '@context': 'http://schema.org',
+                '@context': 'http:/' + '/schema.org',
                 '@type': 'ItemList',
                 'itemListElement': _.map(game, function (g, i) {
                     return {
                         '@type':'ListItem',
                         'position': i + 1,
-                        'url': 'https://ludoj.herokuapp.com/#/game/' + g.bgg_id
+                        'url': 'https:/' + '/ludoj.herokuapp.com/#/game/' + g.bgg_id
                     };
                 })
             };
         }
 
         return {
-            '@context': 'http://schema.org',
+            '@context': 'http:/' + '/schema.org',
             '@type': 'Game',
             'name': game.name,
             'description': game.description,
-            'url': 'https://ludoj.herokuapp.com/#/game/' + game.bgg_id,
+            'url': 'https:/' + '/ludoj.herokuapp.com/#/game/' + game.bgg_id,
             'image': game.image_url,
             'author': _.map(game.designer_name, function (designer) {
                 return {
