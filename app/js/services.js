@@ -172,6 +172,57 @@ ludojApp.factory('gamesService', function gamesService(
         games = newGames;
     };
 
+    service.jsonLD = function jsonLD(game) {
+        if (_.isArray(game)) {
+            return {
+                '@context': 'http://schema.org',
+                '@type': 'ItemList',
+                'itemListElement': _.map(game, function (g, i) {
+                    return {
+                        '@type':'ListItem',
+                        'position': i + 1,
+                        'url': 'https://ludoj.herokuapp.com/#/game/' + g.bgg_id
+                    };
+                })
+            };
+        }
+
+        return {
+            '@context': 'http://schema.org',
+            '@type': 'Game',
+            'name': game.name,
+            'description': game.description,
+            'url': 'https://ludoj.herokuapp.com/#/game/' + game.bgg_id,
+            'image': game.image_url,
+            'author': _.map(game.designer_name, function (designer) {
+                return {
+                    '@type': 'Person',
+                    'name': designer
+                };
+            }),
+            'datePublished': game.year,
+            'audience': {
+                '@type': 'PeopleAudience',
+                'suggestedMinAge': game.min_age_rec || game.min_age
+            },
+            'typicalAgeRange': _.round(game.min_age_rec || game.min_age) + '-',
+            'numberOfPlayers': {
+                '@type': 'QuantitativeValue',
+                'minValue': game.min_players,
+                'maxValue': game.max_players
+            },
+            'aggregateRating': {
+                '@type': 'AggregateRating',
+                'ratingValue': game.bayes_rating,
+                'ratingCount': game.num_votes,
+                'worstRating': 1,
+                'bestRating': 10
+            }
+            // 'timeRequired': game.max_time
+            // 'publisher': game.publisher_name
+        };
+    };
+
     return service;
 });
 

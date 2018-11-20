@@ -5,7 +5,9 @@
 'use strict';
 
 ludojApp.controller('ListController', function ListController(
+    $document,
     $log,
+    $filter,
     $q,
     $route,
     $routeParams,
@@ -13,8 +15,11 @@ ludojApp.controller('ListController', function ListController(
     $timeout,
     filterService,
     gamesService,
-    toastr
+    toastr,
+    APP_TITLE
 ) {
+    $document[0].title = APP_TITLE;
+
     var params = filterService.getParams($routeParams);
 
     function filtersActive() {
@@ -57,6 +62,13 @@ ludojApp.controller('ListController', function ListController(
 
                 $scope.games = games;
                 $scope.empty = _.isEmpty(games) && !$scope.nextPage;
+
+                if (!append && !_.isEmpty(games)) {
+                    $('#games-list')
+                        .append('<script type="application/ld+json">' +
+                            $filter('json')(gamesService.jsonLD(_.slice(games, 0, 10)), 0) +
+                            '</script>');
+                }
 
                 return games;
             })

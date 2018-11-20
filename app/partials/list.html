@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<section xmlns="http://www.w3.org/1999/xhtml">
+<section xmlns="http://www.w3.org/1999/xhtml"
+		id="games-list">
 	<h1 class="display-1">Ludoj</h1>
 	<p class="lead">
-		Top-rated games as evaluated by our <a href="https://gitlab.com/mshepherd/ludoj-recommender" target="_blank">recommendation engine</a>.
+		Top-rated board games as evaluated by our <a href="https://gitlab.com/mshepherd/ludoj-recommender" target="_blank">recommendation engine</a>.
 	</p>
 
 	<form ng-submit="updateParams()"
@@ -374,4 +375,17 @@
 			</div>
 		</div>
 	</div>
+
+	<script type="application/ld+json">
+		{
+			"@context": "http://schema.org",
+			"@type": "WebSite",
+			"url": "https://ludoj.herokuapp.com/",
+			"potentialAction": [{
+				"@type": "SearchAction",
+				"target": "https://ludoj.herokuapp.com/#/?search={search_term_string}",
+				"query-input": "required name=search_term_string"
+			}]
+		}
+	</script>
 </section>

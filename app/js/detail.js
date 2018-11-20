@@ -5,10 +5,13 @@
 'use strict';
 
 ludojApp.controller('DetailController', function DetailController(
+    $document,
+    $filter,
     $q,
     $routeParams,
     $scope,
-    gamesService
+    gamesService,
+    APP_TITLE
 ) {
     $scope.noImplementations = true;
     $scope.expandable = false;
@@ -21,6 +24,13 @@ ludojApp.controller('DetailController', function DetailController(
     gamesService.getGame($routeParams.id)
         .then(function (game) {
             $scope.game = game;
+            $document[0].title = game.name + ' – ' + APP_TITLE;
+
+            $('#game-details')
+                .append('<script type="application/ld+json">' +
+                    $filter('json')(gamesService.jsonLD(game), 0) +
+                    '</script>');
+
             return $q.all(_.map(game.implements, function (id) {
                 return gamesService.getGame(id);
             }));

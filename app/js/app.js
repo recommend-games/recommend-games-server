@@ -13,7 +13,8 @@ var ludojApp = angular.module('ludojApp', [
     'toastr'
 ]);
 
-ludojApp.constant('API_URL', '/api/');
+ludojApp.constant('API_URL', '/api/')
+    .constant('APP_TITLE', 'Ludoj – board game recommendations');
 
 ludojApp.config(function (
     $locationProvider,
