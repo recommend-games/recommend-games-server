@@ -64,6 +64,11 @@ sleep 10
 mkdir --parents .temp
 cp --recursive app/* .temp/
 css-html-js-minify --overwrite .temp
+python3 sitemap.py \
+    --url 'https://ludoj.herokuapp.com/' \
+    --api-url 'http://localhost:8000/api/games/' \
+    --limit 50000 \
+    --output .temp/sitemap.xml
 export DEBUG=
 python3 manage.py collectstatic --no-input
 rm --recursive --force .temp
