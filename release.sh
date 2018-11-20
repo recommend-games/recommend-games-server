@@ -57,9 +57,6 @@ python3 -m ludoj_recommender.load \
     --url 'http://localhost:8000/api/games/' \
     --id-field 'bgg_id' \
     --percentiles .165 .365 .615 .815 .915 .965 .985 .995
-# stop server now
-kill "${SERVER_PID}" || true
-sleep 10
 # minify static
 mkdir --parents .temp
 cp --recursive app/* .temp/
@@ -69,6 +66,9 @@ python3 sitemap.py \
     --api-url 'http://localhost:8000/api/games/' \
     --limit 50000 \
     --output .temp/sitemap.xml
+# stop server now
+kill "${SERVER_PID}" || true
+sleep 10
 export DEBUG=
 python3 manage.py collectstatic --no-input
 rm --recursive --force .temp
