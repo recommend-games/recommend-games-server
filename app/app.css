@@ -220,6 +220,10 @@ input:checked + .slider:before {
     cursor: pointer;
 }
 
+.related-games {
+    line-height: 1;
+}
+
 /*! fork-me-on-github v2.1.0 | (c) 2014, 2014 | MIT License | https://github.com/edull24/fork-me-on-github */
 .fork-me-wrapper {
     height: 170px;

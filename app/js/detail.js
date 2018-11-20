@@ -13,7 +13,10 @@ ludojApp.controller('DetailController', function DetailController(
     gamesService,
     APP_TITLE
 ) {
-    $scope.noImplementations = true;
+    var implementationOf = [],
+        implementedBy = [];
+
+    $scope.implementations = false;
     $scope.expandable = false;
     $scope.expandDescription = false;
 
@@ -29,14 +32,34 @@ ludojApp.controller('DetailController', function DetailController(
             $('#game-details')
                 .append('<script type="application/ld+json">' + $filter('json')(gamesService.jsonLD(game), 0) + '</script>');
 
-            return $q.all(_.map(game.implements, function (id) {
+            implementationOf = game.implements || [];
+            implementedBy = game.implemented_by || [];
+
+            return $q.all(_.map(_.concat(implementationOf, implementedBy), function (id) {
                 return gamesService.getGame(id);
             }));
         })
         .then(function (implementations) {
-            $scope.implementations = implementations;
-            $scope.noImplementations = _.isEmpty(implementations);
-            $scope.expandable = !$scope.noImplementations;
+            implementations = _(implementations)
+                .map(function (game) {
+                    return [game.bgg_id, game];
+                })
+                .fromPairs()
+                .value();
+            $scope.implementationOf = _(implementationOf)
+                .map(function (id) {
+                    return implementations[id];
+                })
+                .filter()
+                .value();
+            $scope.implementedBy = _(implementedBy)
+                .map(function (id) {
+                    return implementations[id];
+                })
+                .filter()
+                .value();
+            $scope.implementations = !_.isEmpty($scope.implementationOf) || !_.isEmpty($scope.implementedBy);
+            $scope.expandable = !!$scope.implementations;
         })
         .then(function () {
             $(function () {
