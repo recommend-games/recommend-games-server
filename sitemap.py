@@ -39,8 +39,16 @@ def _fetch_ids(url):
 def _url_elements(url, ids, lastmod=None):
     lastmod = '{:s}Z'.format(datetime.utcnow().isoformat()) if lastmod is None else lastmod
 
+    # pylint: disable=no-member
     yield ELM.url(
         ELM.loc(url),
+        ELM.lastmod(lastmod),
+        ELM.changefreq('weekly'),
+        ELM.priority(1),
+    )
+
+    yield ELM.url(
+        ELM.loc(f'{url}#/about'),
         ELM.lastmod(lastmod),
         ELM.changefreq('weekly'),
         ELM.priority(1),
@@ -58,7 +66,8 @@ def sitemap(url, url_api=None, limit=None):
     ''' return sitemap XML element '''
 
     ids = _fetch_ids(url_api or url)
-    ids = islice(ids, limit - 1) if limit else ids
+    ids = islice(ids, max(limit - 2, 0)) if limit else ids
+    # pylint: disable=no-member
     return ELM.urlset(*_url_elements(url, ids))
 
 

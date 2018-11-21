@@ -5,4 +5,4 @@ max-returns=10
 min-public-methods=0
 min-similarity-lines=20
 ignore=migrations
-
+extension-pkg-whitelist=lxml.etree,lxml.objectify
