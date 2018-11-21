@@ -10,19 +10,30 @@ export WORK_SPACE="${HOME}/Workspace"
 # - recommender models have been trained to "${WORK_SPACE}/ludoj-recommender/.tc/"
 # - pipenv update --dev in "${WORK_SPACE}/ludoj-server"
 # - Docker is running
-# - no other instance of server is running (e.g., from previous run)
+
+PORT=8000
+URL="http://localhost:${PORT}/api"
+URL_LIVE='https://ludoj.herokuapp.com/'
+
+if curl --head --fail "${URL}/"; then
+    echo "The server appears to be already running on port <$PORT>, aborting..."
+    exit 1
+fi
 
 ### SERVER ###
 cd "${WORK_SPACE}/ludoj-server"
+
 # fresh database
 mv db.sqlite3 db.sqlite3.bk || true
 python3 manage.py migrate
+
 # run server
 mkdir -p logs
-nohup python3 manage.py runserver 8000 --noreload >> 'logs/server.log' 2>&1 &
+nohup python3 manage.py runserver "$PORT" --noreload >> 'logs/server.log' 2>&1 &
 SERVER_PID="$!"
 echo "Started server with pid <${SERVER_PID}>..."
-while true && ! curl --head --fail 'http://localhost:8000/api/'; do
+
+while true && ! curl --head --fail "${URL}/"; do
     echo 'Server is not ready yet'
     sleep 1
 done
@@ -30,48 +41,75 @@ echo 'Server is up and running!'
 
 ### SCRAPER ###
 cd "${WORK_SPACE}/ludoj-scraper"
+
+# games
+echo 'Uploading games to database...'
 python3 -m ludoj.json \
     'results/bgg.csv' \
     --output 'feeds/bgg.jl' \
-    --url 'http://localhost:8000/api/' \
+    --url "${URL}/" \
     --id-field 'bgg_id'
+
+# implementations
+echo 'Uploading implementations to database...'
 python3 -m ludoj.json \
     'feeds/bgg.jl' \
-    --url 'http://localhost:8000/api/' \
+    --url "${URL}/" \
     --id-field 'bgg_id' \
     --implementation 'implements'
+
+# persons
+echo 'Uploading persons to database...'
 python3 -m ludoj.json \
     'feeds/bgg.jl' \
-    --url 'http://localhost:8000/api/' \
+    --url "${URL}/" \
     --id-field 'bgg_id' \
     --fields 'designer' 'artist'
 
 ### SERVER ###
 cd "${WORK_SPACE}/ludoj-server"
+
 # update recommender
 rm --recursive --force .tc* .temp* static
 mkdir --parents .tc/recommender
 cp "${WORK_SPACE}"/ludoj-recommender/.tc/recommender/* .tc/recommender/
+
+# recommendations
+echo 'Uploading recommendations to database...'
 python3 -m ludoj_recommender.load \
     --model '.tc' \
-    --url 'http://localhost:8000/api/games/' \
+    --url "${URL}/games/" \
     --id-field 'bgg_id' \
     --percentiles .165 .365 .615 .815 .915 .965 .985 .995
+
 # minify static
 mkdir --parents .temp
 cp --recursive app/* .temp/
 css-html-js-minify --overwrite .temp
+
+# sitemap
+echo 'Generating sitemap...'
 python3 sitemap.py \
-    --url 'https://ludoj.herokuapp.com/' \
-    --api-url 'http://localhost:8000/api/games/' \
+    --url "${URL_LIVE}" \
+    --api-url "${URL}/games/" \
     --limit 50000 \
     --output .temp/sitemap.xml
+
 # stop server now
+echo 'Stopping the server...'
 kill "${SERVER_PID}" || true
 sleep 10
-export DEBUG=
-python3 manage.py collectstatic --no-input
+
+# static files
+DEBUG='' python3 manage.py collectstatic --no-input
 rm --recursive --force .temp
+
+# clean up database
 sqlite3 db.sqlite3 'VACUUM;'
+
+# release
+echo 'Building, pushing, and releasing container to Heroku'
 heroku container:push web
 heroku container:release web
+
+echo 'Done.'
