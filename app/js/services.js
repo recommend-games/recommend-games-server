@@ -34,6 +34,7 @@ ludojApp.factory('gamesService', function gamesService(
 
     function processGame(game) {
         game.name_short = _.size(game.name) > 50 ? _.truncate(game.name, {'length': 50, 'separator': /,? +/}) : null;
+        game.name_url = encodeURIComponent(_.toLower(game.name));
 
         game.designer_display = join(game.designer_name, ', ', ' & ');
         game.artist_display = join(game.artist_name, ', ', ' & ');

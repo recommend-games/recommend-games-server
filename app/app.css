@@ -235,10 +235,20 @@ input:checked + .slider:before {
     vertical-align: middle;
 }
 
+.product-link {
+    text-decoration: none!important;
+}
+
+.product-link-flag {
+    font-size: 125%;
+    vertical-align: middle;
+}
+
 /*! fork-me-on-github v2.1.0 | (c) 2014, 2014 | MIT License | https://github.com/edull24/fork-me-on-github */
 .fork-me-wrapper {
     height: 170px;
     overflow: hidden;
+    pointer-events: none;
     position: absolute;
     right: 0;
     top: 0;
@@ -271,6 +281,7 @@ input:checked + .slider:before {
     border: none;
     display: block;
     height: 100%;
+    pointer-events: initial;
     text-decoration: none;
 }
 
