@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-set -euxo pipefail
-
-export DEBUG=true
-export WORK_SPACE="${HOME}/Workspace"
-
 # before starting, make sure that
 # - results are sync'ed and merged to "${WORK_SPACE}/ludoj-scraper/results/"
 # - recommender models have been trained to "${WORK_SPACE}/ludoj-recommender/.tc/"
 # - pipenv update --dev in "${WORK_SPACE}/ludoj-server"
 # - Docker is running
+
+set -euxo pipefail
+
+export DEBUG=true
+export WORK_SPACE="${HOME}/Workspace"
 
 PORT=8000
 URL="http://localhost:${PORT}/api"
@@ -85,7 +85,12 @@ python3 -m ludoj_recommender.load \
 # minify static
 mkdir --parents .temp
 cp --recursive app/* .temp/
-css-html-js-minify --overwrite .temp
+css-html-js-minify \
+    --overwrite \
+    --sort \
+    .temp
+# Yandex cannot parse minified file
+cp app/yandex*.html .temp/
 
 # sitemap
 echo 'Generating sitemap...'
