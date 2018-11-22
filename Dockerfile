@@ -29,4 +29,4 @@ COPY static static
 RUN useradd -m ludoj
 USER ludoj
 
-CMD gunicorn --bind 0.0.0.0:$PORT ludoj.wsgi
+CMD gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 16 ludoj.wsgi
