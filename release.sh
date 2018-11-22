@@ -115,7 +115,7 @@ sqlite3 db.sqlite3 'VACUUM;'
 
 # release
 echo 'Building, pushing, and releasing container to Heroku'
-heroku container:push web
-heroku container:release web
+heroku container:push web --app ludoj
+heroku container:release web --app ludoj
 
 echo 'Done.'
