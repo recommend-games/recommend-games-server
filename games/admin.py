@@ -2,9 +2,11 @@
 
 ''' admin settings '''
 
+from django.conf import settings
 from django.contrib import admin
 
 from .models import Game, Person
 
-admin.site.register(Game)
-admin.site.register(Person)
+if settings.DEBUG:
+    admin.site.register(Game)
+    admin.site.register(Person)
