@@ -30,7 +30,7 @@ python3 manage.py migrate
 # run server
 mkdir -p logs
 nohup python3 manage.py runserver "$PORT" --noreload >> 'logs/server.log' 2>&1 &
-SERVER_PID="$!"
+SERVER_PID="${!}"
 echo "Started server with pid <${SERVER_PID}>..."
 
 while true && ! curl --head --fail "${URL}/"; do
@@ -85,12 +85,13 @@ python3 -m ludoj_recommender.load \
 # minify static
 mkdir --parents .temp
 cp --recursive app/* .temp/
-css-html-js-minify \
-    --overwrite \
-    --sort \
-    .temp
-# Yandex cannot parse minified file
-cp app/yandex*.html .temp/
+for FILE in $(find app -name '*.css'); do
+    python3 -m rcssmin < "${FILE}" > ".temp/${FILE#app/}"
+done
+for FILE in $(find app -name '*.js'); do
+    python3 -m rjsmin < "${FILE}" > ".temp/${FILE#app/}"
+done
+# TODO minify HTML
 
 # sitemap
 echo 'Generating sitemap...'
