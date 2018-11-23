@@ -22,8 +22,10 @@ READ_ONLY = ENVIRONMENT == 'production'
 ALLOWED_HOSTS = [
     '0.0.0.0',
     '127.0.0.1',
+    '[::1]',
     'localhost',
     'ludoj.herokuapp.com',
+    '.recommend.games',
 ]
 
 # Application definition
