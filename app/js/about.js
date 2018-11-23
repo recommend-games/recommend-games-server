@@ -17,16 +17,16 @@ ludojApp.controller('AboutController', function AboutController(
         'ordering': '-avg_rating',
         'num_votes__gte': 100
     })
-    .then(function (response) {
-        $scope.topAvg = _.head(response.results);
-    });
+        .then(function (response) {
+            $scope.topAvg = _.head(response.results);
+        });
 
     gamesService.getGames(1, {
         'ordering': '-bayes_rating'
     })
-    .then(function (response) {
-        $scope.topBayes = _.head(response.results);
-    });
+        .then(function (response) {
+            $scope.topBayes = _.head(response.results);
+        });
 
     gamesService.setCanonicalUrl($location.path());
 });

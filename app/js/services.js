@@ -14,7 +14,7 @@ ludojApp.factory('gamesService', function gamesService(
 ) {
     var service = {},
         cache = $cacheFactory('ludoj', {'capacity': 1024}),
-        games = null;
+        cachedGames = null;
 
     function join(array, sep, lastSep) {
         sep = sep || ', ';
@@ -167,11 +167,11 @@ ludojApp.factory('gamesService', function gamesService(
     };
 
     service.getCachedGames = function getCachedGames() {
-        return games || {};
+        return cachedGames || {};
     };
 
-    service.setCachedGames = function setCachedGames(newGames) {
-        games = newGames;
+    service.setCachedGames = function setCachedGames(games) {
+        cachedGames = games;
     };
 
     service.jsonLD = function jsonLD(game) {
@@ -181,7 +181,7 @@ ludojApp.factory('gamesService', function gamesService(
                 '@type': 'ItemList',
                 'itemListElement': _.map(game, function (g, i) {
                     return {
-                        '@type':'ListItem',
+                        '@type': 'ListItem',
                         'position': i + 1,
                         'url': CANONICAL_URL + '#/game/' + g.bgg_id
                     };

@@ -37,11 +37,13 @@ ludojApp.controller('DetailController', function DetailController(
             implementedBy = game.implemented_by || [];
 
             return $q.all(_.map(_.concat(implementationOf, implementedBy), function (id) {
-                return gamesService.getGame(id);
+                return gamesService.getGame(id)
+                    .catch(_.constant());
             }));
         })
         .then(function (implementations) {
             implementations = _(implementations)
+                .filter()
                 .map(function (game) {
                     return [game.bgg_id, game];
                 })
