@@ -126,7 +126,7 @@ class GameViewSet(ModelViewSet):
     ''' game view set '''
 
     # pylint: disable=no-member
-    queryset = Game.objects.filter(compilation=False)
+    queryset = Game.objects.all()
     ordering = (
         '-rec_rating',
         '-bayes_rating',
