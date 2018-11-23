@@ -2,6 +2,9 @@
 
 ''' views '''
 
+import json
+import logging
+
 from functools import lru_cache
 
 from django.conf import settings
@@ -18,6 +21,8 @@ from .models import Game, Person
 from .permissions import ReadOnly
 from .serializers import GameSerializer, PersonSerializer
 
+LOGGER = logging.getLogger(__name__)
+
 
 @lru_cache(maxsize=32)
 def _load_model(path):
@@ -29,6 +34,55 @@ def _load_model(path):
     except Exception:
         pass
     return None
+
+
+@lru_cache(maxsize=8)
+def _compilation_ids():
+    try:
+        import turicreate as tc
+    except ImportError:
+        LOGGER.exception('unable to import <turicreate>')
+        return None
+
+    compilations_path = getattr(settings, 'COMPILATIONS_PATH', None)
+
+    if compilations_path:
+        try:
+            with open(compilations_path) as compilations_file:
+                ids = json.load(compilations_file)
+            return tc.SArray(data=ids, dtype=int)
+        except Exception:
+            pass
+
+    try:
+        # pylint: disable=no-member
+        ids = list(Game.objects.filter(compilation=True).values_list('bgg_id', flat=True))
+        if compilations_path:
+            with open(compilations_path, 'w') as compilations_file:
+                json.dump(ids, compilations_file, separators=(',', ':'))
+        return tc.SArray(data=ids, dtype=int)
+    except Exception:
+        LOGGER.exception('unable to fetch or write compilation IDs')
+
+    return None
+
+
+@lru_cache(maxsize=8)
+def _compilations(user=None):
+    try:
+        import turicreate as tc
+    except ImportError:
+        LOGGER.exception('unable to import <turicreate>')
+        return None
+
+    compilations = _compilation_ids()
+    if compilations is None:
+        return None
+
+    sframe = tc.SFrame({'bgg_id': compilations})
+    sframe['bgg_user_name'] = user
+
+    return sframe
 
 
 class GameFilter(FilterSet):
@@ -72,7 +126,7 @@ class GameViewSet(ModelViewSet):
     ''' game view set '''
 
     # pylint: disable=no-member
-    queryset = Game.objects.all()
+    queryset = Game.objects.filter(compilation=False)
     ordering = (
         '-rec_rating',
         '-bayes_rating',
@@ -150,6 +204,8 @@ class GameViewSet(ModelViewSet):
         recommendation = recommender.recommend(
             users=(user,),
             games=games,
+            exclude=_compilations(user),
+            exclude_clusters=False,
             star_percentiles=percentiles,
         )
 

@@ -26,6 +26,7 @@ COPY games games
 COPY ludoj ludoj
 COPY static static
 
+RUN mkdir data && chmod a+w data
 RUN useradd -m ludoj
 USER ludoj
 

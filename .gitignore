@@ -99,6 +99,7 @@ sitepackages/
 .~*
 ._*
 bin/
+data/
 include/
 logs/
 share/
