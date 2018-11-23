@@ -6,6 +6,7 @@
 
 ludojApp.controller('ListController', function ListController(
     $document,
+    $location,
     $log,
     $filter,
     $q,
@@ -237,4 +238,6 @@ ludojApp.controller('ListController', function ListController(
             });
             renderSlider();
         });
+
+    gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
 });

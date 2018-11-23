@@ -7,6 +7,7 @@
 ludojApp.controller('DetailController', function DetailController(
     $document,
     $filter,
+    $location,
     $q,
     $routeParams,
     $scope,
@@ -67,4 +68,6 @@ ludojApp.controller('DetailController', function DetailController(
             });
         });
         // TODO catch errors
+
+    gamesService.setCanonicalUrl($location.path());
 });

@@ -1,6 +1,6 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global ludojApp, _ */
+/*global ludojApp, _, $ */
 
 'use strict';
 
@@ -225,10 +225,39 @@ ludojApp.factory('gamesService', function gamesService(
         };
     };
 
+    function canonicalUrl(path, params) {
+        var url = CANONICAL_URL + '#' + (path || '/'),
+            qString = _(_.toPairs(params))
+                .filter(1)
+                .sortBy(0)
+                .map(function (v) {
+                    return v[0] + '=' + encodeURIComponent(v[1]);
+                })
+                .join('&');
+        return qString ? url + '?' + qString : url;
+    }
+
+    service.setCanonicalUrl = function setCanonicalUrl(path, params) {
+        var id = 'canonical-url',
+            url;
+
+        $('#' + id).remove();
+
+        if (!path) {
+            return;
+        }
+
+        url = canonicalUrl(path, params);
+        $('head').append('<link rel="canonical" href="' + url + '" id="' + id + '" />');
+        return url;
+    };
+
     return service;
 });
 
-ludojApp.factory('filterService', function filterService($sessionStorage) {
+ludojApp.factory('filterService', function filterService(
+    $sessionStorage
+) {
     var yearFloor = 1970,
         yearNow = new Date().getFullYear(),
         service = {

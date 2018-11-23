@@ -6,6 +6,7 @@
 
 ludojApp.controller('AboutController', function AboutController(
     $document,
+    $location,
     $scope,
     gamesService,
     APP_TITLE
@@ -26,4 +27,6 @@ ludojApp.controller('AboutController', function AboutController(
     .then(function (response) {
         $scope.topBayes = _.head(response.results);
     });
+
+    gamesService.setCanonicalUrl($location.path());
 });

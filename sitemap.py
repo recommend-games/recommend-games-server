@@ -41,7 +41,7 @@ def _url_elements(url, ids, lastmod=None):
 
     # pylint: disable=no-member
     yield ELM.url(
-        ELM.loc(url),
+        ELM.loc(f'{url}#/'),
         ELM.lastmod(lastmod),
         ELM.changefreq('weekly'),
         ELM.priority(1),
