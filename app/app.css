@@ -1,3 +1,12 @@
+.beta {
+    font-size: 20%;
+    font-style: italic;
+    left: -20px;
+    position: relative;
+    top: -20px;
+    vertical-align: super;
+}
+
 .game {
     background-color: #0C6;
     background-position: center top;
