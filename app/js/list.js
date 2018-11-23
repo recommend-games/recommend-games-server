@@ -53,7 +53,7 @@ ludojApp.controller('ListController', function ListController(
                 $scope.prevPage = response.previous ? page - 1 : null;
                 $scope.nextPage = response.next ? page + 1 : null;
                 $scope.total = response.count;
-                $scope.currUser = params.user;
+                $scope.currUser = params.for;
 
                 var games = response.results;
                 games = append && !_.isEmpty($scope.games) ? _.concat($scope.games, games) : games;
@@ -106,7 +106,7 @@ ludojApp.controller('ListController', function ListController(
         });
     }
 
-    $scope.user = params.user;
+    $scope.user = params.for;
 
     $scope.search = params.search;
 

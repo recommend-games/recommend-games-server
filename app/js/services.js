@@ -263,7 +263,7 @@ ludojApp.factory('filterService', function filterService($sessionStorage) {
             playerAge = _.parseInt(params.playerAge) || null;
 
         return {
-            'user': _.trim(params.user) || null,
+            'for': _.trim(params.for) || _.trim(params.user) || null,
             'search': _.trim(params.search) || null,
             'playerCount': playerCount,
             'playerCountType': playerCount && validateCountType(params.playerCountType),
@@ -283,7 +283,7 @@ ludojApp.factory('filterService', function filterService($sessionStorage) {
         scope = scope || {};
 
         var result = {
-            'user': scope.user,
+            'for': scope.user,
             'search': scope.search,
             'cooperative': scope.cooperative
         };
@@ -345,8 +345,8 @@ ludojApp.factory('filterService', function filterService($sessionStorage) {
             ageSuffix = '';
         params = params || {};
 
-        if (params.user) {
-            result.user = params.user;
+        if (params.for) {
+            result.user = params.for;
         }
 
         if (params.search) {
