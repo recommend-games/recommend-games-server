@@ -1,3 +1,3 @@
 User-agent: *
-Sitemap: https://ludoj.herokuapp.com/sitemap.xml
+Sitemap: https://recommend.games/sitemap.xml
 Disallow: /admin/

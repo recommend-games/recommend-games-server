@@ -13,7 +13,7 @@ export WORK_SPACE="${HOME}/Workspace"
 
 PORT=8000
 URL="http://localhost:${PORT}/api"
-URL_LIVE='https://ludoj.herokuapp.com/'
+URL_LIVE='https://recommend.games/'
 
 if curl --head --fail "${URL}/"; then
     echo "The server appears to be already running on port <$PORT>, aborting..."

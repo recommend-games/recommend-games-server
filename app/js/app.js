@@ -14,7 +14,8 @@ var ludojApp = angular.module('ludojApp', [
 ]);
 
 ludojApp.constant('API_URL', '/api/')
-    .constant('APP_TITLE', 'Ludoj – board game recommendations');
+    .constant('APP_TITLE', 'Ludoj – board game recommendations on recommend.games')
+    .constant('CANONICAL_URL', 'https://recommend.games/');
 
 ludojApp.config(function (
     $locationProvider,

@@ -73,7 +73,7 @@ def sitemap(url, url_api=None, limit=None):
 
 def _parse_args():
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('--url', '-u', default='https://ludoj.herokuapp.com/', help='')
+    parser.add_argument('--url', '-u', default='https://recommend.games/', help='')
     parser.add_argument('--api-url', '-a', default='http://localhost:8000/api/games/', help='')
     parser.add_argument('--limit', '-l', type=int, help='')
     parser.add_argument('--output', '-o', help='')
