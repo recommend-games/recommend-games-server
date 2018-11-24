@@ -9,12 +9,12 @@ ludojApp.factory('gamesService', function gamesService(
     $log,
     $http,
     $q,
+    $sessionStorage,
     API_URL,
     CANONICAL_URL
 ) {
     var service = {},
-        cache = $cacheFactory('ludoj', {'capacity': 1024}),
-        cachedGames = null;
+        cache = $cacheFactory('ludoj', {'capacity': 1024});
 
     function join(array, sep, lastSep) {
         sep = sep || ', ';
@@ -167,11 +167,11 @@ ludojApp.factory('gamesService', function gamesService(
     };
 
     service.getCachedGames = function getCachedGames() {
-        return cachedGames || {};
+        return $sessionStorage.games || {};
     };
 
     service.setCachedGames = function setCachedGames(games) {
-        cachedGames = games;
+        $sessionStorage.games = games;
     };
 
     service.jsonLD = function jsonLD(game) {

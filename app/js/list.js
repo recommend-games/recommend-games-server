@@ -40,14 +40,29 @@ ludojApp.controller('ListController', function ListController(
         page = _.parseInt(page) || $scope.page || $scope.nextPage || 1;
 
         var append = page > 1,
-            parsed = filterService.getParams(append ? null : $routeParams),
-            filters = filterService.filtersFromParams(parsed),
-            cachedGames = !append && $routeParams.filters ? gamesService.getCachedGames() : null,
-            promise = _.isEmpty(cachedGames) ? gamesService.getGames(page, filters) : $q.resolve(cachedGames);
+            cachedParams = filterService.getParams(),
+            routeParams = filterService.getParams($routeParams),
+            parsed = append ? cachedParams : routeParams,
+            promise = null,
+            cachedGames,
+            filters;
+
+        if (!append && ($routeParams.filters || _.isEqual(cachedParams, routeParams))) {
+            cachedGames = gamesService.getCachedGames();
+            $log.debug('loaded ' + _.size(_.get(cachedGames, 'results')) + ' game(s) from cache');
+            promise = !_.isEmpty(cachedGames) ? $q.resolve(cachedGames) : null;
+        }
+
+        if (_.isNil(promise)) {
+            filters = filterService.filtersFromParams(parsed);
+            promise = gamesService.getGames(page, filters);
+        }
 
         return promise
             .then(function (response) {
-                filterService.setParams(parsed);
+                if (!append) {
+                    filterService.setParams(parsed);
+                }
 
                 page = response.page || page;
                 $scope.currPage = page;

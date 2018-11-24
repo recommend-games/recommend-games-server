@@ -244,8 +244,12 @@ input:checked + .slider:before {
     vertical-align: middle;
 }
 
-.product-link {
-    text-decoration: none!important;
+.product-link,
+.product-link:link,
+.product-link:visited,
+.product-link:hover,
+.product-link:active {
+    text-decoration: none;
 }
 
 .product-link-flag {
