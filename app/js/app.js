@@ -5,7 +5,7 @@
 'use strict';
 
 var ludojApp = angular.module('ludojApp', [
-    'addthis',
+    // 'addthis',
     'blockUI',
     'ngAnimate',
     'ngRoute',
@@ -19,15 +19,15 @@ ludojApp.constant('API_URL', '/api/')
     .constant('CANONICAL_URL', 'https://recommend.games/');
 
 ludojApp.config(function (
-    $addthisProvider,
+    // $addthisProvider,
     $locationProvider,
     $routeProvider,
     blockUIConfig,
     toastrConfig
 ) {
-    $addthisProvider.config({
-        'pubid': 'ra-5bfa99b66f363320'
-    });
+    // $addthisProvider.config({
+    //     'pubid': 'ra-5bfa99b66f363320'
+    // });
 
     $locationProvider
         .html5Mode({
