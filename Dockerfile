@@ -26,8 +26,7 @@ COPY games games
 COPY ludoj ludoj
 COPY static static
 
-RUN mkdir data && chmod a+w data
-RUN useradd -m ludoj
+RUN mkdir data && chmod a+w data && useradd -m ludoj
 USER ludoj
 
 CMD gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 16 ludoj.wsgi
