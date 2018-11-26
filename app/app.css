@@ -340,3 +340,19 @@ input:checked + .slider:before {
         display: inline;
     }
 }
+
+.angular-error {
+    animation: 3s fadeIn;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    33% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
