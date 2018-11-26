@@ -19,9 +19,9 @@ ludojApp.controller('ListController', function ListController(
     toastr,
     APP_TITLE
 ) {
-    $document[0].title = APP_TITLE;
-
     var params = filterService.getParams($routeParams);
+
+    $document[0].title = params.for ? 'Recommendations for ' + params.for + ' – ' + APP_TITLE : APP_TITLE;
 
     function filtersActive() {
         return _.sum([
