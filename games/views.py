@@ -56,7 +56,10 @@ def _compilation_ids():
 
     try:
         # pylint: disable=no-member
-        ids = list(Game.objects.filter(compilation=True).values_list('bgg_id', flat=True))
+        ids = list(
+            Game.objects.all()
+            .filter(compilation=True)
+            .values_list('bgg_id', flat=True))
         if compilations_path:
             with open(compilations_path, 'w') as compilations_file:
                 json.dump(ids, compilations_file, separators=(',', ':'))
@@ -81,6 +84,8 @@ def _compilations(user=None):
 
     sframe = tc.SFrame({'bgg_id': compilations})
     sframe['bgg_user_name'] = user
+
+    del tc, compilations
 
     return sframe
 
@@ -199,7 +204,7 @@ class GameViewSet(ModelViewSet):
         params.pop('user', None)
 
         fqs = self.filter_queryset(self.get_queryset())
-        games = fqs.values_list('bgg_id', flat=True) if params else None
+        games = list(fqs.values_list('bgg_id', flat=True)) if params else None
         percentiles = getattr(settings, 'STAR_PERCENTILES', None)
         recommendation = recommender.recommend(
             users=(user,),
@@ -208,6 +213,7 @@ class GameViewSet(ModelViewSet):
             exclude_clusters=False,
             star_percentiles=percentiles,
         )
+        del user, path, params, percentiles, recommender
 
         page = self.paginate_queryset(recommendation)
         if page is None:
@@ -216,6 +222,7 @@ class GameViewSet(ModelViewSet):
         else:
             recommendation = page
             paginate = True
+        del page
 
         recommendation = {game['bgg_id']: game for game in recommendation}
         games = fqs.filter(bgg_id__in=recommendation)
@@ -224,11 +231,13 @@ class GameViewSet(ModelViewSet):
             game.rec_rank = rec['rank']
             game.rec_rating = rec['score']
             game.rec_stars = rec.get('stars')
+        del fqs, recommendation
 
         serializer = self.get_serializer(
             instance=sorted(games, key=lambda game: game.rec_rank),
             many=True,
         )
+        del games
 
         return (
             self.get_paginated_response(serializer.data) if paginate

@@ -25,6 +25,7 @@ ALLOWED_HOSTS = [
     '[::1]',
     'localhost',
     'ludoj.herokuapp.com',
+    'ludoj-staging.herokuapp.com',
     '.recommend.games',
 ]
 
