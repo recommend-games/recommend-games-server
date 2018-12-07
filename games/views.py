@@ -17,9 +17,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from .models import Game, Person
+from .models import Collection, Game, Person, User
 from .permissions import ReadOnly
-from .serializers import GameSerializer, PersonSerializer
+from .serializers import CollectionSerializer, GameSerializer, PersonSerializer, UserSerializer
 
 LOGGER = logging.getLogger(__name__)
 
@@ -251,3 +251,19 @@ class PersonViewSet(ModelViewSet):
     # pylint: disable=no-member
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
+
+
+class UserViewSet(ModelViewSet):
+    ''' user view set '''
+
+    # pylint: disable=no-member
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class CollectionViewSet(ModelViewSet):
+    ''' user view set '''
+
+    # pylint: disable=no-member
+    queryset = Collection.objects.all()
+    serializer_class = CollectionSerializer

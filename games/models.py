@@ -3,8 +3,9 @@
 ''' models '''
 
 from django.db.models import (
-    BooleanField, CharField, DateTimeField, FloatField, Index, ManyToManyField, Model,
-    PositiveIntegerField, PositiveSmallIntegerField, SmallIntegerField, TextField, URLField)
+    CASCADE, BooleanField, CharField, DateTimeField, FloatField,
+    ForeignKey, Index, ManyToManyField, Model, PositiveIntegerField,
+    PositiveSmallIntegerField, SmallIntegerField, TextField, URLField)
 from django.utils import timezone
 
 
@@ -98,3 +99,59 @@ class Person(Model):
 
     def __str__(self):
         return self.name
+
+
+class User(Model):
+    ''' user model '''
+
+    name = CharField(primary_key=True, max_length=255)
+    games = ManyToManyField(Game, through='Collection', blank=True)
+
+    created_at = DateTimeField(auto_now_add=True, editable=False, db_index=True)
+    modified_at = DateTimeField(auto_now=True, editable=False, db_index=True)
+
+    class Meta:
+        ''' meta '''
+        ordering = (
+            'name',
+        )
+
+    def __str__(self):
+        return self.name
+
+
+class Collection(Model):
+    ''' collection model '''
+
+    game = ForeignKey(Game, on_delete=CASCADE)
+    user = ForeignKey(User, on_delete=CASCADE)
+
+    rating = FloatField(blank=True, null=True, db_index=True)
+    owned = BooleanField(default=False, db_index=True)
+    prev_owned = BooleanField(default=False, db_index=True)
+    for_trade = BooleanField(default=False, db_index=True)
+    want_in_trade = BooleanField(default=False, db_index=True)
+    want_to_play = BooleanField(default=False, db_index=True)
+    want_to_buy = BooleanField(default=False, db_index=True)
+    preordered = BooleanField(default=False, db_index=True)
+    wishlist = PositiveSmallIntegerField(blank=True, null=True, db_index=True)
+    play_count = PositiveIntegerField(default=0, db_index=True)
+
+    rec_rank = PositiveIntegerField(blank=True, null=True, db_index=True)
+    rec_rating = FloatField(blank=True, null=True, db_index=True)
+    rec_stars = FloatField(blank=True, null=True, db_index=True)
+
+    scraped_at = DateTimeField(default=timezone.now, db_index=True)
+    created_at = DateTimeField(auto_now_add=True, editable=False, db_index=True)
+    modified_at = DateTimeField(auto_now=True, editable=False, db_index=True)
+
+    class Meta:
+        ''' meta '''
+        ordering = (
+            'game',
+            'user',
+        )
+        unique_together = ('game', 'user')
+
+    def __str__(self):
+        return f'{self.game.name}: {self.user.name}'
