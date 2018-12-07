@@ -1,6 +1,6 @@
 # ludoj-server #
 
-Board game recommendation service. Live demo: https://ludoj.herokuapp.com/
+Board game recommendation service. Live demo: https://recommend.games/
 
 ## Quick start ##
 
