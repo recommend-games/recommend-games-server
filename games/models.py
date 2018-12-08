@@ -3,10 +3,8 @@
 ''' models '''
 
 from django.db.models import (
-    CASCADE, BooleanField, CharField, DateTimeField, FloatField,
-    ForeignKey, Index, ManyToManyField, Model, PositiveIntegerField,
-    PositiveSmallIntegerField, SmallIntegerField, TextField, URLField)
-from django.utils import timezone
+    CASCADE, BooleanField, CharField, FloatField, ForeignKey, Index, ManyToManyField, Model,
+    PositiveIntegerField, PositiveSmallIntegerField, SmallIntegerField, TextField, URLField)
 
 
 class Game(Model):
@@ -63,10 +61,6 @@ class Game(Model):
     complexity = FloatField(blank=True, null=True, db_index=True)
     language_dependency = FloatField(blank=True, null=True, db_index=True)
 
-    scraped_at = DateTimeField(default=timezone.now, db_index=True)
-    created_at = DateTimeField(auto_now_add=True, editable=False, db_index=True)
-    modified_at = DateTimeField(auto_now=True, editable=False, db_index=True)
-
     class Meta:
         ''' meta '''
         ordering = (
@@ -88,9 +82,6 @@ class Person(Model):
     bgg_id = PositiveIntegerField(primary_key=True)
     name = CharField(max_length=255, db_index=True)
 
-    created_at = DateTimeField(auto_now_add=True, editable=False, db_index=True)
-    modified_at = DateTimeField(auto_now=True, editable=False, db_index=True)
-
     class Meta:
         ''' meta '''
         ordering = (
@@ -106,9 +97,6 @@ class User(Model):
 
     name = CharField(primary_key=True, max_length=255)
     games = ManyToManyField(Game, through='Collection', blank=True)
-
-    created_at = DateTimeField(auto_now_add=True, editable=False, db_index=True)
-    modified_at = DateTimeField(auto_now=True, editable=False, db_index=True)
 
     class Meta:
         ''' meta '''
@@ -140,10 +128,6 @@ class Collection(Model):
     rec_rank = PositiveIntegerField(blank=True, null=True, db_index=True)
     rec_rating = FloatField(blank=True, null=True, db_index=True)
     rec_stars = FloatField(blank=True, null=True, db_index=True)
-
-    scraped_at = DateTimeField(default=timezone.now, db_index=True)
-    created_at = DateTimeField(auto_now_add=True, editable=False, db_index=True)
-    modified_at = DateTimeField(auto_now=True, editable=False, db_index=True)
 
     class Meta:
         ''' meta '''
