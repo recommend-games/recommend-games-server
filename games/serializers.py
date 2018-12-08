@@ -19,7 +19,7 @@ class GameSerializer(ModelSerializer):
     class Meta:
         ''' meta '''
         model = Game
-        exclude = ('scraped_at', 'created_at', 'modified_at')
+        fields = '__all__'
 
 
 class PersonSerializer(ModelSerializer):
@@ -28,7 +28,7 @@ class PersonSerializer(ModelSerializer):
     class Meta:
         ''' meta '''
         model = Person
-        exclude = ('created_at', 'modified_at')
+        fields = '__all__'
 
 
 class CollectionSerializer(ModelSerializer):
@@ -39,7 +39,7 @@ class CollectionSerializer(ModelSerializer):
     class Meta:
         ''' meta '''
         model = Collection
-        exclude = ('scraped_at', 'created_at', 'modified_at')
+        fields = '__all__'
 
 
 class UserSerializer(ModelSerializer):
@@ -50,4 +50,4 @@ class UserSerializer(ModelSerializer):
     class Meta:
         ''' meta '''
         model = User
-        exclude = ('created_at', 'modified_at')
+        fields = '__all__'
