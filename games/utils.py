@@ -40,3 +40,18 @@ def format_from_path(path):
     except Exception:
         pass
     return None
+
+
+def parse_int(string, base=10):
+    ''' safely convert an object to int if possible, else return None '''
+    if isinstance(string, int):
+        return string
+    try:
+        return int(string, base=base)
+    except Exception:
+        pass
+    try:
+        return int(string)
+    except Exception:
+        pass
+    return None
