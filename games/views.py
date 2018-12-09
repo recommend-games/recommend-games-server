@@ -20,20 +20,9 @@ from rest_framework.viewsets import ModelViewSet
 from .models import Collection, Game, Person, User
 from .permissions import ReadOnly
 from .serializers import CollectionSerializer, GameSerializer, PersonSerializer, UserSerializer
+from .utils import load_recommender
 
 LOGGER = logging.getLogger(__name__)
-
-
-@lru_cache(maxsize=32)
-def _load_model(path):
-    if not path:
-        return None
-    try:
-        from ludoj_recommender import GamesRecommender
-        return GamesRecommender.load(path=path)
-    except Exception:
-        pass
-    return None
 
 
 @lru_cache(maxsize=8)
@@ -191,7 +180,7 @@ class GameViewSet(ModelViewSet):
 
         user = user.lower()
         path = getattr(settings, 'RECOMMENDER_PATH', None)
-        recommender = _load_model(path)
+        recommender = load_recommender(path)
 
         if recommender is None or user not in recommender.known_users:
             return self.list(request)

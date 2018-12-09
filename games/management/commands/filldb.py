@@ -9,11 +9,13 @@ import sys
 
 from collections import defaultdict
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.transaction import atomic
 
 from ...models import Game, Person
-from ...utils import arg_to_iter, batchify, format_from_path, parse_int, take_first
+from ...utils import (
+    arg_to_iter, batchify, format_from_path, load_recommender, parse_int, take_first)
 
 LOGGER = logging.getLogger(__name__)
 VALUE_ID_REGEX = re.compile(r'^(.*?)(:(\d+))?$')
@@ -38,6 +40,37 @@ def _load(*paths):
             yield from _load_jl(path)
         else:
             yield from _load_json(path)
+
+
+def _rating_data(pk_field='bgg_id'):
+    path = getattr(settings, 'RECOMMENDER_PATH', None)
+    recommender = load_recommender(path)
+
+    if not recommender:
+        return {}
+
+    count = -1
+    recommendations = recommender.recommend(
+        star_percentiles=getattr(settings, 'STAR_PERCENTILES', None))
+    result = {}
+
+    for count, game in enumerate(recommendations):
+        if count and count % 1000 == 0:
+            LOGGER.info('processed %d items so far', count)
+
+        pkey = game.get(pk_field)
+        if pkey is None:
+            continue
+
+        result[pkey] = {
+            'rec_rank': game.get('rank'),
+            'rec_rating': game.get('score'),
+            'rec_stars': game.get('stars'),
+        }
+
+    LOGGER.info('processed %d items in total', count)
+
+    return result
 
 
 def _parse_item(item, fields=None, fields_mapping=None):
@@ -79,11 +112,17 @@ def _parse_value_id(string, regex=VALUE_ID_REGEX):
     return result or None
 
 
-def _make_instances(model, items, fields=None, fields_mapping=None):
+def _make_instances(model, items, fields=None, fields_mapping=None, add_data=None):
+    add_data = add_data or {}
+    pk_field = model._meta.pk.name
     count = -1
+
     for count, item in enumerate(items):
         try:
             data = _parse_item(item, fields, fields_mapping)
+            extra = add_data.get(data.get(pk_field)) or {}
+            for key, value in extra.items():
+                data.setdefault(key, value)
             yield model(**data)
         except Exception:
             LOGGER.exception('error while parsing an item: %r', item)
@@ -92,13 +131,30 @@ def _make_instances(model, items, fields=None, fields_mapping=None):
     LOGGER.info('processed %d items in total', count + 1)
 
 
-def _create_from_items(model, items, fields=None, fields_mapping=None, batch_size=None):
+def _create_from_items(
+        model,
+        items,
+        fields=None,
+        fields_mapping=None,
+        add_data=None,
+        batch_size=None,
+    ):
     LOGGER.info('creating instances of %r', model)
-    instances = _make_instances(model, items, fields, fields_mapping)
+
+    instances = _make_instances(
+        model=model,
+        items=items,
+        fields=fields,
+        fields_mapping=fields_mapping,
+        add_data=add_data,
+    )
+
     batches = batchify(instances, batch_size) if batch_size else (instances,)
+
     for count, batch in enumerate(batches):
         LOGGER.info('processing batch #%d...', count + 1)
         model.objects.bulk_create(batch)
+
     LOGGER.info('done processing')
 
 
@@ -163,7 +219,7 @@ def _create_references(
         LOGGER.info('found %d items for model %r to create', len(foreign_values[fmodel]), fmodel)
         values = ((k, tuple(v)) for k, v in foreign_values[fmodel].items() if k and v)
         values = ({id_field: k, value_field: v[0]} for k, v in values if k and len(v) == 1)
-        _create_from_items(fmodel, values, batch_size=batch_size)
+        _create_from_items(model=fmodel, items=values, batch_size=batch_size)
 
     del foreign, foreign_values
 
@@ -246,7 +302,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('paths', nargs='+', help='file(s) to be processed')
         parser.add_argument(
-            '--batch', '-b', type=int, default=1000, help='batch size for DB transactions')
+            '--batch', '-b', type=int, default=10000, help='batch size for DB transactions')
 
     def handle(self, *args, **kwargs):
         logging.basicConfig(
@@ -256,13 +312,20 @@ class Command(BaseCommand):
         )
 
         items = tuple(_load(*kwargs['paths']))
+        # pylint: disable=no-member
+        add_data = _rating_data(Game._meta.pk.name)
+
         _create_from_items(
             model=Game,
             items=items,
             fields=self.game_fields,
             fields_mapping=self.game_fields_mapping,
+            add_data=add_data,
             batch_size=kwargs['batch'],
         )
+
+        del add_data
+
         _create_references(
             model=Game,
             items=items,

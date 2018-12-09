@@ -2,11 +2,14 @@
 
 ''' utils '''
 
+import logging
 import os.path
 
+from functools import lru_cache
 from itertools import groupby
 
 ITERABLE_SINGLE_VALUES = (dict, str, bytes)
+LOGGER = logging.getLogger(__name__)
 
 
 def arg_to_iter(arg):
@@ -54,4 +57,17 @@ def parse_int(string, base=10):
         return int(string)
     except Exception:
         pass
+    return None
+
+
+@lru_cache(maxsize=32)
+def load_recommender(path):
+    ''' load recommender from given path '''
+    if not path:
+        return None
+    try:
+        from ludoj_recommender import GamesRecommender
+        return GamesRecommender.load(path=path)
+    except Exception:
+        LOGGER.exception('unable to load recommender model from <%s>', path)
     return None
