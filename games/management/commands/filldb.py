@@ -42,9 +42,8 @@ def _load(*paths):
             yield from _load_json(path)
 
 
-def _rating_data(pk_field='bgg_id'):
-    path = getattr(settings, 'RECOMMENDER_PATH', None)
-    recommender = load_recommender(path)
+def _rating_data(recommender_path=getattr(settings, 'RECOMMENDER_PATH', None), pk_field='bgg_id'):
+    recommender = load_recommender(recommender_path)
 
     if not recommender:
         return {}
@@ -303,6 +302,9 @@ class Command(BaseCommand):
         parser.add_argument('paths', nargs='+', help='file(s) to be processed')
         parser.add_argument(
             '--batch', '-b', type=int, default=10000, help='batch size for DB transactions')
+        parser.add_argument(
+            '--recommender', '-r', default=getattr(settings, 'RECOMMENDER_PATH', None),
+            help='path to recommender model')
 
     def handle(self, *args, **kwargs):
         logging.basicConfig(
@@ -313,7 +315,10 @@ class Command(BaseCommand):
 
         items = tuple(_load(*kwargs['paths']))
         # pylint: disable=no-member
-        add_data = _rating_data(Game._meta.pk.name)
+        add_data = _rating_data(
+            recommender_path=kwargs['recommender'],
+            pk_field=Game._meta.pk.name,
+        )
 
         _create_from_items(
             model=Game,
