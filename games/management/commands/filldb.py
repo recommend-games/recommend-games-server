@@ -375,7 +375,7 @@ class Command(BaseCommand):
         parser.add_argument(
             '--in-format', '-f', choices=('json', 'jsonl', 'jl'), help='input format')
         parser.add_argument(
-            '--batch', '-b', type=int, default=10000, help='batch size for DB transactions')
+            '--batch', '-b', type=int, default=100_000, help='batch size for DB transactions')
         parser.add_argument(
             '--recommender', '-r', default=getattr(settings, 'RECOMMENDER_PATH', None),
             help='path to recommender model')
@@ -421,6 +421,7 @@ class Command(BaseCommand):
             items = (item for item in items if item.get('bgg_id') in game_pks)
             del game_pks
 
+            # TODO move fields and mapping to command instance
             _create_secondary_instances(
                 model=Collection,
                 secondary={'model': User, 'from': 'user_id', 'to': 'name'},
