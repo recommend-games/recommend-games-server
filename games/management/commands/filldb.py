@@ -8,12 +8,13 @@ import re
 import sys
 
 from collections import defaultdict
+from itertools import groupby
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.transaction import atomic
 
-from ...models import Game, Person
+from ...models import Collection, Game, Person, User
 from ...utils import (
     arg_to_iter, batchify, format_from_path, load_recommender, parse_int, take_first)
 
@@ -34,9 +35,10 @@ def _load_jl(path):
             yield json.loads(line)
 
 
-def _load(*paths):
+def _load(*paths, in_format=None):
     for path in paths:
-        if format_from_path(path) in ('jl', 'jsonl'):
+        file_format = in_format or format_from_path(path)
+        if file_format in ('jl', 'jsonl'):
             yield from _load_jl(path)
         else:
             yield from _load_json(path)
@@ -75,7 +77,7 @@ def _rating_data(recommender_path=getattr(settings, 'RECOMMENDER_PATH', None), p
 def _parse_item(item, fields=None, fields_mapping=None):
     result = {
         k: v for k, v in item.items() if k in fields
-    } if fields else dict(item)
+    } if fields is not None else dict(item)
 
     if not fields_mapping:
         return result
@@ -243,10 +245,78 @@ def _create_references(
     LOGGER.info('done updating')
 
 
+def _make_secondary_instances(
+        model,
+        secondary,
+        items,
+        **kwargs,
+    ):
+    instances = _make_instances(model=model, items=items, **kwargs)
+
+    if not secondary.get('model') or not secondary.get('from'):
+        LOGGER.warning('cannot create secondary models with information %r', secondary)
+        yield from instances
+        return
+
+    if not secondary.get('to'):
+        secondary['to'] = secondary['model']._meta.pk.name
+
+    for value, group in groupby(
+            instances, key=lambda instance: getattr(instance, secondary['from'], None)):
+        if value:
+            yield secondary['model'](**{secondary['to']: value})
+        yield from group
+
+
+def _create_secondary_instances(
+        model,
+        secondary,
+        items,
+        models_order=(),
+        batch_size=None,
+        **kwargs,
+    ):
+    instances = _make_secondary_instances(
+        model=model,
+        secondary=secondary,
+        items=items,
+        **kwargs,
+    )
+    del items
+    batches = batchify(instances, batch_size) if batch_size else (instances,)
+    del instances
+    models_order = tuple(arg_to_iter(models_order))
+
+    for count, batch in enumerate(batches):
+        LOGGER.info('processing batch #%d...', count + 1)
+
+        models = defaultdict(list)
+        for instance in batch:
+            models[type(instance)].append(instance)
+        order = models_order or tuple(models.keys())
+        del batch
+
+        for mdl in order:
+            instances = models.pop(mdl, ())
+            if instances:
+                LOGGER.info('creating %d instances of %r', len(instances), mdl)
+                mdl.objects.bulk_create(instances)
+
+        if any(models.values()):
+            LOGGER.warning(
+                'some models have not been processed properly: %r', tuple(models.keys()))
+
+        del models
+
+    del batches
+
+    LOGGER.info('done processing')
+
+
 class Command(BaseCommand):
     ''' Loads a file to the database '''
 
-    help = 'Loads a file to the database'
+    help = 'Loads files to the database'
 
     game_fields = frozenset((
         'avg_rating',
@@ -299,7 +369,11 @@ class Command(BaseCommand):
     }
 
     def add_arguments(self, parser):
-        parser.add_argument('paths', nargs='+', help='file(s) to be processed')
+        parser.add_argument('paths', nargs='+', help='game file(s) to be processed')
+        parser.add_argument(
+            '--collection-paths', '-c', nargs='+', help='collection file(s) to be processed')
+        parser.add_argument(
+            '--in-format', '-f', choices=('json', 'jsonl', 'jl'), help='input format')
         parser.add_argument(
             '--batch', '-b', type=int, default=10000, help='batch size for DB transactions')
         parser.add_argument(
@@ -312,6 +386,8 @@ class Command(BaseCommand):
             level=logging.DEBUG if kwargs['verbosity'] else logging.INFO,
             format='%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s'
         )
+
+        LOGGER.info(kwargs)
 
         items = tuple(_load(*kwargs['paths']))
         # pylint: disable=no-member
@@ -338,6 +414,35 @@ class Command(BaseCommand):
             recursive=self.game_fields_recursive,
             batch_size=kwargs['batch'],
         )
+
+        if kwargs['collection_paths']:
+            game_pks = frozenset(item.get('bgg_id') for item in items)
+            items = _load(*kwargs['collection_paths'], in_format=kwargs['in_format'])
+            items = (item for item in items if item.get('bgg_id') in game_pks)
+            del game_pks
+
+            _create_secondary_instances(
+                model=Collection,
+                secondary={'model': User, 'from': 'user_id', 'to': 'name'},
+                items=items,
+                models_order=(User, Collection),
+                fields=(),
+                fields_mapping={
+                    'bgg_id': 'game_id',
+                    'bgg_user_name': 'user_id',
+                    'bgg_user_rating': 'rating',
+                    'bgg_user_owned': 'owned',
+                    'bgg_user_prev_owned': 'prev_owned',
+                    'bgg_user_for_trade': 'for_trade',
+                    'bgg_user_want_in_trade': 'want_in_trade',
+                    'bgg_user_want_to_play': 'want_to_play',
+                    'bgg_user_want_to_buy': 'want_to_buy',
+                    'bgg_user_preordered': 'preordered',
+                    'bgg_user_wishlist': 'wishlist',
+                    'bgg_user_play_count': 'play_count',
+                },
+                batch_size=kwargs['batch'],
+            )
 
         del items
 
