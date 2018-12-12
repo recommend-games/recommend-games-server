@@ -60,6 +60,18 @@ def parse_int(string, base=10):
     return None
 
 
+def parse_bool(item):
+    ''' parses an item and converts it to a boolean '''
+    if isinstance(item, int):
+        return bool(item)
+    if item in ('True', 'true', 'Yes', 'yes'):
+        return True
+    integer = parse_int(item)
+    if integer is not None:
+        return bool(integer)
+    return False
+
+
 @lru_cache(maxsize=32)
 def load_recommender(path):
     ''' load recommender from given path '''

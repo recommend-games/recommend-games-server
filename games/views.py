@@ -5,7 +5,8 @@
 import json
 import logging
 
-from functools import lru_cache
+from functools import lru_cache, reduce
+from operator import or_
 
 from django.conf import settings
 from django_filters import FilterSet
@@ -20,7 +21,7 @@ from rest_framework.viewsets import ModelViewSet
 from .models import Collection, Game, Person, User
 from .permissions import ReadOnly
 from .serializers import CollectionSerializer, GameSerializer, PersonSerializer, UserSerializer
-from .utils import load_recommender
+from .utils import arg_to_iter, load_recommender, parse_bool, parse_int, take_first
 
 LOGGER = logging.getLogger(__name__)
 
@@ -60,21 +61,30 @@ def _compilation_ids():
 
 
 @lru_cache(maxsize=8)
-def _compilations(user=None):
+def _exclude(user=None, other=None):
     try:
         import turicreate as tc
     except ImportError:
         LOGGER.exception('unable to import <turicreate>')
         return None
 
-    compilations = _compilation_ids()
-    if compilations is None:
+    ids = _compilation_ids()
+
+    if other is not None:
+        other = (
+            other if isinstance(other, tc.SArray)
+            else tc.SArray(list(arg_to_iter(other)), dtype=int))
+        ids = ids.append(other) if ids is not None else other
+        del other
+
+    # pylint: disable=len-as-condition
+    if ids is None or not len(ids):
         return None
 
-    sframe = tc.SFrame({'bgg_id': compilations})
+    sframe = tc.SFrame({'bgg_id': ids})
     sframe['bgg_user_name'] = user
 
-    del tc, compilations
+    del tc, ids
 
     return sframe
 
@@ -159,6 +169,15 @@ class GameViewSet(ModelViewSet):
     search_fields = (
         'name',
     )
+    collection_fields = (
+        'owned',
+        'prev_owned',
+        'for_trade',
+        'want_in_trade',
+        'want_to_play',
+        'want_to_buy',
+        'preordered',
+    )
 
     def get_permissions(self):
         cls = ReadOnly if settings.READ_ONLY else AllowAny
@@ -188,21 +207,43 @@ class GameViewSet(ModelViewSet):
         # TODO speed up recommendation by pre-computing known games, clusters etc (#16)
 
         params = dict(request.query_params)
+        params.setdefault('exclude_known', True)
         params.pop('ordering', None)
         params.pop('page', None)
         params.pop('user', None)
 
+        exclude_known = parse_bool(take_first(params.pop('exclude_known', None)))
+        exclude_fields = [
+            field for field in self.collection_fields
+            if parse_bool(take_first(params.pop(f'exclude_{field}', None)))]
+        exclude_wishlist = parse_int(take_first(params.pop('exclude_wishlist', None)))
+        exclude_play_count = parse_int(take_first(params.pop('exclude_play_count', None)))
+
         fqs = self.filter_queryset(self.get_queryset())
         games = list(fqs.values_list('bgg_id', flat=True)) if params else None
         percentiles = getattr(settings, 'STAR_PERCENTILES', None)
+
+        try:
+            collection = User.objects.get(name__iexact=user).collection_set.all()
+            excludes = [collection.filter(**{field: True}) for field in exclude_fields]
+            if exclude_wishlist:
+                excludes.append(collection.filter(wishlist__lte=exclude_wishlist))
+            if exclude_play_count:
+                excludes.append(collection.filter(play_count__gte=exclude_play_count))
+            exclude = reduce(or_, excludes).values_list('game', flat=True) if excludes else None
+            del collection, excludes
+        except Exception:
+            exclude = None
+
         recommendation = recommender.recommend(
             users=(user,),
             games=games,
-            exclude=_compilations(user),
+            exclude=_exclude(user, other=exclude),
+            exclude_known=exclude_known,
             exclude_clusters=False,
             star_percentiles=percentiles,
         )
-        del user, path, params, percentiles, recommender
+        del user, path, params, percentiles, recommender, exclude
 
         page = self.paginate_queryset(recommendation)
         if page is None:
