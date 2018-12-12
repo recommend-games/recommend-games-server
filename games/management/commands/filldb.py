@@ -419,7 +419,6 @@ class Command(BaseCommand):
             game_pks = frozenset(item.get('bgg_id') for item in items)
             items = _load(*kwargs['collection_paths'], in_format=kwargs['in_format'])
             items = (item for item in items if item.get('bgg_id') in game_pks)
-            del game_pks
 
             # TODO move fields and mapping to command instance
             _create_secondary_instances(
