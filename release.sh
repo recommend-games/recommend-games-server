@@ -34,10 +34,10 @@ pipenv run python3 manage.py migrate
 echo 'Uploading games, persons, and recommendations to database...'
 pipenv run python3 manage.py filldb \
     "${WORK_SPACE}/ludoj-scraper/results/bgg.jl" \
+    --collection-paths "${WORK_SPACE}/ludoj-scraper/results/bgg_ratings.jl" \
     --in-format jl \
     --batch 100000 \
     --recommender "${WORK_SPACE}/ludoj-recommender/.tc"
-# --collection-paths "${WORK_SPACE}/ludoj-scraper/results/bgg_ratings.jl"
 
 # update recommender
 rm --recursive --force .tc* .temp* static
