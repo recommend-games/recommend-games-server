@@ -124,6 +124,15 @@ ludojApp.controller('ListController', function ListController(
 
     $scope.user = params.for;
 
+    $scope.exclude = {
+        'rated': filterService.booleanDefault(params.excludeRated, true),
+        'owned': filterService.booleanDefault(params.excludeOwned, true),
+        'prevOwned': filterService.booleanDefault(params.excludePrevOwned, true),
+        'wishlist': filterService.booleanDefault(params.excludeWishlist, false),
+        'played': filterService.booleanDefault(params.excludePlayed, false),
+        'preordered': filterService.booleanDefault(params.excludePreordered, true)
+    };
+
     $scope.search = params.search;
 
     $scope.count = {
@@ -226,11 +235,13 @@ ludojApp.controller('ListController', function ListController(
         $scope.complexity.enabled = false;
         $scope.year.enabled = false;
         $scope.cooperative = null;
+        $scope.exclude = {};
         updateParams();
     };
 
     $scope.clearUser = function clearUser() {
         $scope.user = null;
+        $scope.exclude = {};
         updateParams();
     };
 

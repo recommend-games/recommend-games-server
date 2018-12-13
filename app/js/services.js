@@ -285,15 +285,59 @@ ludojApp.factory('filterService', function filterService(
         return booleans[input] ? input : null;
     }
 
+    function parseBoolean(input) {
+        if (_.isBoolean(input)) {
+            return input;
+        }
+
+        var integer = _.parseInt(input),
+            booleans = {
+                'true': true,
+                'True': true,
+                'false': false,
+                'False': false,
+                'yes': true,
+                'Yes': true,
+                'no': false,
+                'No': false
+            };
+
+        if (_.isInteger(integer)) {
+            return !!integer;
+        }
+
+        return _.isBoolean(booleans[input]) ? booleans[input] : null;
+    }
+
+    function booleanDefault(boolean, default_, ignore) {
+        if (ignore) {
+            return null;
+        }
+        boolean = parseBoolean(boolean);
+        return _.isBoolean(boolean) ? boolean : default_;
+    }
+
+    function booleanString(boolean) {
+        boolean = parseBoolean(boolean);
+        return !_.isBoolean(boolean) ? null : boolean ? 'True' : 'False';
+    }
+
     function parseParams(params) {
         params = params || {};
 
-        var playerCount = _.parseInt(params.playerCount) || null,
+        var user = _.trim(params.for) || _.trim(params.user) || null,
+            playerCount = _.parseInt(params.playerCount) || null,
             playTime = _.parseInt(params.playTime) || null,
             playerAge = _.parseInt(params.playerAge) || null;
 
         return {
-            'for': _.trim(params.for) || _.trim(params.user) || null,
+            'for': user,
+            'excludeRated': booleanDefault(params.excludeRated, true, !user),
+            'excludeOwned': booleanDefault(params.excludeOwned, true, !user),
+            'excludePrevOwned': booleanDefault(params.excludePrevOwned, true, !user),
+            'excludeWishlist': booleanDefault(params.excludeWishlist, false, !user),
+            'excludePlayed': booleanDefault(params.excludePlayed, false, !user),
+            'excludePreordered': booleanDefault(params.excludePreordered, true, !user),
             'search': _.trim(params.search) || null,
             'playerCount': playerCount,
             'playerCountType': playerCount && validateCountType(params.playerCountType),
@@ -358,6 +402,22 @@ ludojApp.factory('filterService', function filterService(
             result.yearMax = null;
         }
 
+        if (scope.user) {
+            result.excludeRated = parseBoolean(_.get(scope, 'exclude.rated'));
+            result.excludeOwned = parseBoolean(_.get(scope, 'exclude.owned'));
+            result.excludePrevOwned = parseBoolean(_.get(scope, 'exclude.prevOwned'));
+            result.excludeWishlist = parseBoolean(_.get(scope, 'exclude.wishlist'));
+            result.excludePlayed = parseBoolean(_.get(scope, 'exclude.played'));
+            result.excludePreordered = parseBoolean(_.get(scope, 'exclude.preordered'));
+        } else {
+            result.excludeRated = null;
+            result.excludeOwned = null;
+            result.excludePrevOwned = null;
+            result.excludeWishlist = null;
+            result.excludePlayed = null;
+            result.excludePreordered = null;
+        }
+
         return parseParams(result);
     };
 
@@ -377,6 +437,12 @@ ludojApp.factory('filterService', function filterService(
 
         if (params.for) {
             result.user = params.for;
+            result.exclude_known = booleanString(params.excludeRated);
+            result.exclude_owned = booleanString(params.excludeOwned);
+            result.exclude_prev_owned = booleanString(params.excludePrevOwned);
+            result.exclude_wishlist = params.excludeWishlist === true ? 5 : null;
+            result.exclude_play_count = params.excludePlayed === true ? 1 : null;
+            result.exclude_preordered = booleanString(params.excludePreordered);
         }
 
         if (params.search) {
@@ -423,6 +489,7 @@ ludojApp.factory('filterService', function filterService(
         return result;
     };
 
+    service.booleanDefault = booleanDefault;
     service.validateAgeType = validateAgeType;
     service.validateBoolean = validateBoolean;
     service.validateCountType = validateCountType;
