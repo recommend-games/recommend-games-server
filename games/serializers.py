@@ -6,16 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField, StringRelatedField
 
-from .models import Game, Person
-
-
-class PersonSerializer(ModelSerializer):
-    ''' person serializer '''
-
-    class Meta:
-        ''' meta '''
-        model = Person
-        exclude = ('created_at', 'modified_at')
+from .models import Collection, Game, Person, User
 
 
 class GameSerializer(ModelSerializer):
@@ -28,4 +19,35 @@ class GameSerializer(ModelSerializer):
     class Meta:
         ''' meta '''
         model = Game
-        exclude = ('scraped_at', 'created_at', 'modified_at')
+        fields = '__all__'
+
+
+class PersonSerializer(ModelSerializer):
+    ''' person serializer '''
+
+    class Meta:
+        ''' meta '''
+        model = Person
+        fields = '__all__'
+
+
+class CollectionSerializer(ModelSerializer):
+    ''' collection serializer '''
+
+    game_name = StringRelatedField(source='game', read_only=True)
+
+    class Meta:
+        ''' meta '''
+        model = Collection
+        fields = '__all__'
+
+
+class UserSerializer(ModelSerializer):
+    ''' user serializer '''
+
+    games = CollectionSerializer(source='collection_set', many=True, read_only=True)
+
+    class Meta:
+        ''' meta '''
+        model = User
+        fields = '__all__'

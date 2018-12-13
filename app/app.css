@@ -235,6 +235,15 @@ input:checked + .slider:before {
     cursor: pointer;
 }
 
+.form-exclude-disabled .slider,
+.form-exclude-disabled .form-label-exclude {
+    cursor: not-allowed;
+}
+
+.form-exclude-enabled .form-label-exclude {
+    cursor: pointer;
+}
+
 .related-games {
     line-height: 1;
 }

@@ -5,35 +5,26 @@
 import json
 import logging
 
-from functools import lru_cache
+from functools import lru_cache, reduce
+from operator import or_
 
 from django.conf import settings
+from django.db.models import Q
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotAuthenticated, MethodNotAllowed, PermissionDenied
 from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from .models import Game, Person
+from .models import Collection, Game, Person, User
 from .permissions import ReadOnly
-from .serializers import GameSerializer, PersonSerializer
+from .serializers import CollectionSerializer, GameSerializer, PersonSerializer, UserSerializer
+from .utils import arg_to_iter, load_recommender, parse_bool, parse_int, take_first
 
 LOGGER = logging.getLogger(__name__)
-
-
-@lru_cache(maxsize=32)
-def _load_model(path):
-    if not path:
-        return None
-    try:
-        from ludoj_recommender import GamesRecommender
-        return GamesRecommender.load(path=path)
-    except Exception:
-        pass
-    return None
 
 
 @lru_cache(maxsize=8)
@@ -71,21 +62,30 @@ def _compilation_ids():
 
 
 @lru_cache(maxsize=8)
-def _compilations(user=None):
+def _exclude(user=None, other=None):
     try:
         import turicreate as tc
     except ImportError:
         LOGGER.exception('unable to import <turicreate>')
         return None
 
-    compilations = _compilation_ids()
-    if compilations is None:
+    ids = _compilation_ids()
+
+    if other is not None:
+        other = (
+            other if isinstance(other, tc.SArray)
+            else tc.SArray(tuple(arg_to_iter(other)), dtype=int))
+        ids = ids.append(other) if ids is not None else other
+        del other
+
+    # pylint: disable=len-as-condition
+    if ids is None or not len(ids):
         return None
 
-    sframe = tc.SFrame({'bgg_id': compilations})
+    sframe = tc.SFrame({'bgg_id': ids})
     sframe['bgg_user_name'] = user
 
-    del tc, compilations
+    del tc, ids
 
     return sframe
 
@@ -138,12 +138,14 @@ class GameViewSet(ModelViewSet):
         '-avg_rating',
     )
     serializer_class = GameSerializer
+
     filter_backends = (
         DjangoFilterBackend,
         OrderingFilter,
         SearchFilter,
     )
     filterset_class = GameFilter
+
     ordering_fields = (
         'year',
         'min_players',
@@ -171,6 +173,16 @@ class GameViewSet(ModelViewSet):
         'name',
     )
 
+    collection_fields = (
+        'owned',
+        'prev_owned',
+        'for_trade',
+        'want_in_trade',
+        'want_to_play',
+        'want_to_buy',
+        'preordered',
+    )
+
     def get_permissions(self):
         cls = ReadOnly if settings.READ_ONLY else AllowAny
         return (cls(),)
@@ -191,7 +203,7 @@ class GameViewSet(ModelViewSet):
 
         user = user.lower()
         path = getattr(settings, 'RECOMMENDER_PATH', None)
-        recommender = _load_model(path)
+        recommender = load_recommender(path)
 
         if recommender is None or user not in recommender.known_users:
             return self.list(request)
@@ -199,21 +211,49 @@ class GameViewSet(ModelViewSet):
         # TODO speed up recommendation by pre-computing known games, clusters etc (#16)
 
         params = dict(request.query_params)
+        params.setdefault('exclude_known', True)
         params.pop('ordering', None)
         params.pop('page', None)
         params.pop('user', None)
 
+        exclude_known = parse_bool(take_first(params.pop('exclude_known', None)))
+        exclude_fields = [
+            field for field in self.collection_fields
+            if parse_bool(take_first(params.pop(f'exclude_{field}', None)))]
+        exclude_wishlist = parse_int(take_first(params.pop('exclude_wishlist', None)))
+        exclude_play_count = parse_int(take_first(params.pop('exclude_play_count', None)))
+
         fqs = self.filter_queryset(self.get_queryset())
-        games = list(fqs.values_list('bgg_id', flat=True)) if params else None
+        games = list(fqs.order_by().values_list('bgg_id', flat=True)) if params else None
         percentiles = getattr(settings, 'STAR_PERCENTILES', None)
+
+        try:
+            collection = User.objects.get(name__iexact=user).collection_set.order_by()
+            queries = [Q(**{field: True}) for field in exclude_fields]
+            if exclude_wishlist:
+                queries.append(Q(wishlist__lte=exclude_wishlist))
+            if exclude_play_count:
+                queries.append(Q(play_count__gte=exclude_play_count))
+            if queries:
+                query = reduce(or_, queries)
+                exclude = tuple(
+                    collection.filter(query).values_list('game_id', flat=True)
+                ) if queries else None
+            else:
+                exclude = None
+            del collection, queries
+        except Exception:
+            exclude = None
+
         recommendation = recommender.recommend(
             users=(user,),
             games=games,
-            exclude=_compilations(user),
+            exclude=_exclude(user, other=exclude),
+            exclude_known=exclude_known,
             exclude_clusters=False,
             star_percentiles=percentiles,
         )
-        del user, path, params, percentiles, recommender
+        del user, path, params, percentiles, recommender, exclude
 
         page = self.paginate_queryset(recommendation)
         if page is None:
@@ -251,3 +291,36 @@ class PersonViewSet(ModelViewSet):
     # pylint: disable=no-member
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
+
+    def get_permissions(self):
+        cls = ReadOnly if settings.READ_ONLY else AllowAny
+        return (cls(),)
+
+    def handle_exception(self, exc):
+        if settings.READ_ONLY and isinstance(exc, (NotAuthenticated, PermissionDenied)):
+            exc = MethodNotAllowed(self.request.method)
+        return super().handle_exception(exc)
+
+
+class UserViewSet(ModelViewSet):
+    ''' user view set '''
+
+    # pylint: disable=no-member
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_permissions(self):
+        cls = AllowAny if settings.DEBUG else IsAuthenticated
+        return (cls(),)
+
+
+class CollectionViewSet(ModelViewSet):
+    ''' user view set '''
+
+    # pylint: disable=no-member
+    queryset = Collection.objects.all()
+    serializer_class = CollectionSerializer
+
+    def get_permissions(self):
+        cls = AllowAny if settings.DEBUG else IsAuthenticated
+        return (cls(),)
