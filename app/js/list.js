@@ -127,10 +127,8 @@ ludojApp.controller('ListController', function ListController(
     $scope.exclude = {
         'rated': filterService.booleanDefault(params.excludeRated, true),
         'owned': filterService.booleanDefault(params.excludeOwned, true),
-        'prevOwned': filterService.booleanDefault(params.excludePrevOwned, true),
         'wishlist': filterService.booleanDefault(params.excludeWishlist, false),
-        'played': filterService.booleanDefault(params.excludePlayed, false),
-        'preordered': filterService.booleanDefault(params.excludePreordered, true)
+        'played': filterService.booleanDefault(params.excludePlayed, false)
     };
 
     $scope.search = params.search;

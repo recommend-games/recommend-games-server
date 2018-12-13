@@ -334,10 +334,8 @@ ludojApp.factory('filterService', function filterService(
             'for': user,
             'excludeRated': booleanDefault(params.excludeRated, true, !user),
             'excludeOwned': booleanDefault(params.excludeOwned, true, !user),
-            'excludePrevOwned': booleanDefault(params.excludePrevOwned, true, !user),
             'excludeWishlist': booleanDefault(params.excludeWishlist, false, !user),
             'excludePlayed': booleanDefault(params.excludePlayed, false, !user),
-            'excludePreordered': booleanDefault(params.excludePreordered, true, !user),
             'search': _.trim(params.search) || null,
             'playerCount': playerCount,
             'playerCountType': playerCount && validateCountType(params.playerCountType),
@@ -405,17 +403,13 @@ ludojApp.factory('filterService', function filterService(
         if (scope.user) {
             result.excludeRated = parseBoolean(_.get(scope, 'exclude.rated'));
             result.excludeOwned = parseBoolean(_.get(scope, 'exclude.owned'));
-            result.excludePrevOwned = parseBoolean(_.get(scope, 'exclude.prevOwned'));
             result.excludeWishlist = parseBoolean(_.get(scope, 'exclude.wishlist'));
             result.excludePlayed = parseBoolean(_.get(scope, 'exclude.played'));
-            result.excludePreordered = parseBoolean(_.get(scope, 'exclude.preordered'));
         } else {
             result.excludeRated = null;
             result.excludeOwned = null;
-            result.excludePrevOwned = null;
             result.excludeWishlist = null;
             result.excludePlayed = null;
-            result.excludePreordered = null;
         }
 
         return parseParams(result);
@@ -439,10 +433,10 @@ ludojApp.factory('filterService', function filterService(
             result.user = params.for;
             result.exclude_known = booleanString(params.excludeRated);
             result.exclude_owned = booleanString(params.excludeOwned);
-            result.exclude_prev_owned = booleanString(params.excludePrevOwned);
+            result.exclude_prev_owned = booleanString(params.excludeOwned);
             result.exclude_wishlist = params.excludeWishlist === true ? 5 : null;
             result.exclude_play_count = params.excludePlayed === true ? 1 : null;
-            result.exclude_preordered = booleanString(params.excludePreordered);
+            result.exclude_preordered = booleanString(params.excludeOwned);
         }
 
         if (params.search) {

@@ -80,20 +80,6 @@
 				<div class="form-check form-check-inline">
 					<label class="switch mb-0">
 						<input type="checkbox"
-							id="filter-exclude-prev-owned"
-							name="filter-exclude-prev-owned"
-							ng-model="exclude.prevOwned"
-							ng-disabled="!user" />
-						<span class="slider {{ user &amp;&amp; exclude.prevOwned ? 'bg-success' : 'bg-secondary' }}"></span>
-					</label>
-					<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.prevOwned ? 'text-success' : 'text-muted' }} ml-1"
-							for="filter-exclude-prev-owned">
-						prev. owned
-					</label>
-				</div>
-				<div class="form-check form-check-inline">
-					<label class="switch mb-0">
-						<input type="checkbox"
 							id="filter-exclude-wishlist"
 							name="filter-exclude-wishlist"
 							ng-model="exclude.wishlist"
@@ -117,20 +103,6 @@
 					<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.played ? 'text-success' : 'text-muted' }} ml-1"
 							for="filter-exclude-played">
 						played
-					</label>
-				</div>
-				<div class="form-check form-check-inline">
-					<label class="switch mb-0">
-						<input type="checkbox"
-							id="filter-exclude-preordered"
-							name="filter-exclude-preordered"
-							ng-model="exclude.preordered"
-							ng-disabled="!user" />
-						<span class="slider {{ user &amp;&amp; exclude.preordered ? 'bg-success' : 'bg-secondary' }}"></span>
-					</label>
-					<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.preordered ? 'text-success' : 'text-muted' }} ml-1"
-							for="filter-exclude-preordered">
-						preordered
 					</label>
 				</div>
 			</div>
