@@ -235,6 +235,7 @@ ludojApp.controller('ListController', function ListController(
         $scope.complexity.enabled = false;
         $scope.year.enabled = false;
         $scope.cooperative = null;
+        // TODO proper default settings
         $scope.exclude = {};
         updateParams();
     };
@@ -260,6 +261,13 @@ ludojApp.controller('ListController', function ListController(
                     })
                     .on('hide.bs.collapse', function () {
                         $('#filter-toggle-icon').removeClass('fa-minus-square').addClass('fa-plus-square');
+                    });
+                $('#form-exclude-filters')
+                    .on('show.bs.collapse', function () {
+                        $('#exclude-filters-icon').removeClass('fa-caret-down').addClass('fa-caret-up');
+                    })
+                    .on('hide.bs.collapse', function () {
+                        $('#exclude-filters-icon').removeClass('fa-caret-up').addClass('fa-caret-down');
                     });
             });
             renderSlider();

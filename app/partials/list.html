@@ -14,13 +14,13 @@
 			name="fetch-game-form"
 			novalidate="novalidate"
 			role="form"
-			class="form">
+			class="form mb-3">
 		<label for="user"
 				id="bgg-user-label"
 				class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
 			Personal recommendations for:
 		</label>
-		<div class="input-group mb-3">
+		<div class="input-group">
 			<input type="text"
 				id="user"
 				name="user"
@@ -35,6 +35,104 @@
 						class="btn btn-primary">
 					GO!
 				</button>
+				<button type="button"
+						ng-disabled="!user"
+						class="btn btn-outline-primary"
+						data-toggle="collapse"
+						data-target="#form-exclude-filters">
+					<i class="fas fa-caret-down" id="exclude-filters-icon"></i>
+				</button>
+			</div>
+		</div>
+		<div id="form-exclude-filters" class="collapse">
+			<label class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
+				Exclude games from recommendations:
+			</label>
+			<div class="{{ user ? 'form-exclude-enabled' : 'form-exclude-disabled' }}">
+				<div class="form-check form-check-inline">
+					<label class="switch mb-0">
+						<input type="checkbox"
+							id="filter-exclude-rated"
+							name="filter-exclude-rated"
+							ng-model="exclude.rated"
+							ng-disabled="!user" />
+						<span class="slider {{ user &amp;&amp; exclude.rated ? 'bg-success' : 'bg-secondary' }}"></span>
+					</label>
+					<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.rated ? 'text-success' : 'text-muted' }} ml-1"
+							for="filter-exclude-rated">
+						rated
+					</label>
+				</div>
+				<div class="form-check form-check-inline">
+					<label class="switch mb-0">
+						<input type="checkbox"
+							id="filter-exclude-owned"
+							name="filter-exclude-owned"
+							ng-model="exclude.owned"
+							ng-disabled="!user" />
+						<span class="slider {{ user &amp;&amp; exclude.owned ? 'bg-success' : 'bg-secondary' }}"></span>
+					</label>
+					<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.owned ? 'text-success' : 'text-muted' }} ml-1"
+							for="filter-exclude-owned">
+						owned
+					</label>
+				</div>
+				<div class="form-check form-check-inline">
+					<label class="switch mb-0">
+						<input type="checkbox"
+							id="filter-exclude-prev-owned"
+							name="filter-exclude-prev-owned"
+							ng-model="exclude.prevOwned"
+							ng-disabled="!user" />
+						<span class="slider {{ user &amp;&amp; exclude.prevOwned ? 'bg-success' : 'bg-secondary' }}"></span>
+					</label>
+					<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.prevOwned ? 'text-success' : 'text-muted' }} ml-1"
+							for="filter-exclude-prev-owned">
+						prev. owned
+					</label>
+				</div>
+				<div class="form-check form-check-inline">
+					<label class="switch mb-0">
+						<input type="checkbox"
+							id="filter-exclude-wishlist"
+							name="filter-exclude-wishlist"
+							ng-model="exclude.wishlist"
+							ng-disabled="!user" />
+						<span class="slider {{ user &amp;&amp; exclude.wishlist ? 'bg-success' : 'bg-secondary' }}"></span>
+					</label>
+					<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.wishlist ? 'text-success' : 'text-muted' }} ml-1"
+							for="filter-exclude-wishlist">
+						wishlist
+					</label>
+				</div>
+				<div class="form-check form-check-inline">
+					<label class="switch mb-0">
+						<input type="checkbox"
+							id="filter-exclude-played"
+							name="filter-exclude-played"
+							ng-model="exclude.played"
+							ng-disabled="!user" />
+						<span class="slider {{ user &amp;&amp; exclude.played ? 'bg-success' : 'bg-secondary' }}"></span>
+					</label>
+					<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.played ? 'text-success' : 'text-muted' }} ml-1"
+							for="filter-exclude-played">
+						played
+					</label>
+				</div>
+				<div class="form-check form-check-inline">
+					<label class="switch mb-0">
+						<input type="checkbox"
+							id="filter-exclude-preordered"
+							name="filter-exclude-preordered"
+							ng-model="exclude.preordered"
+							ng-disabled="!user" />
+						<span class="slider {{ user &amp;&amp; exclude.preordered ? 'bg-success' : 'bg-secondary' }}"></span>
+					</label>
+					<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.preordered ? 'text-success' : 'text-muted' }} ml-1"
+							for="filter-exclude-preordered">
+						preordered
+					</label>
+				</div>
 			</div>
 		</div>
 	</form>
@@ -102,100 +200,6 @@
 			novalidate="novalidate"
 			role="form"
 			class="collapse form">
-		<div class="form-row mb-3">
-			<div class="col">
-				<label class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
-					Exclude games from recommendations:
-				</label>
-				<div class="{{ user ? 'form-exclude-enabled' : 'form-exclude-disabled' }}">
-					<div class="form-check form-check-inline">
-						<label class="switch mb-0">
-							<input type="checkbox"
-								id="filter-exclude-rated"
-								name="filter-exclude-rated"
-								ng-model="exclude.rated"
-								ng-disabled="!user" />
-							<span class="slider {{ user &amp;&amp; exclude.rated ? 'bg-success' : 'bg-secondary' }}"></span>
-						</label>
-						<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.rated ? 'text-success' : 'text-muted' }} ml-1"
-								for="filter-exclude-rated">
-							rated
-						</label>
-					</div>
-					<div class="form-check form-check-inline">
-						<label class="switch mb-0">
-							<input type="checkbox"
-								id="filter-exclude-owned"
-								name="filter-exclude-owned"
-								ng-model="exclude.owned"
-								ng-disabled="!user" />
-							<span class="slider {{ user &amp;&amp; exclude.owned ? 'bg-success' : 'bg-secondary' }}"></span>
-						</label>
-						<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.owned ? 'text-success' : 'text-muted' }} ml-1"
-								for="filter-exclude-owned">
-							owned
-						</label>
-					</div>
-					<div class="form-check form-check-inline">
-						<label class="switch mb-0">
-							<input type="checkbox"
-								id="filter-exclude-prev-owned"
-								name="filter-exclude-prev-owned"
-								ng-model="exclude.prevOwned"
-								ng-disabled="!user" />
-							<span class="slider {{ user &amp;&amp; exclude.prevOwned ? 'bg-success' : 'bg-secondary' }}"></span>
-						</label>
-						<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.prevOwned ? 'text-success' : 'text-muted' }} ml-1"
-								for="filter-exclude-prev-owned">
-							prev. owned
-						</label>
-					</div>
-					<div class="form-check form-check-inline">
-						<label class="switch mb-0">
-							<input type="checkbox"
-								id="filter-exclude-wishlist"
-								name="filter-exclude-wishlist"
-								ng-model="exclude.wishlist"
-								ng-disabled="!user" />
-							<span class="slider {{ user &amp;&amp; exclude.wishlist ? 'bg-success' : 'bg-secondary' }}"></span>
-						</label>
-						<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.wishlist ? 'text-success' : 'text-muted' }} ml-1"
-								for="filter-exclude-wishlist">
-							wishlist
-						</label>
-					</div>
-					<div class="form-check form-check-inline">
-						<label class="switch mb-0">
-							<input type="checkbox"
-								id="filter-exclude-played"
-								name="filter-exclude-played"
-								ng-model="exclude.played"
-								ng-disabled="!user" />
-							<span class="slider {{ user &amp;&amp; exclude.played ? 'bg-success' : 'bg-secondary' }}"></span>
-						</label>
-						<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.played ? 'text-success' : 'text-muted' }} ml-1"
-								for="filter-exclude-played">
-							played
-						</label>
-					</div>
-					<div class="form-check form-check-inline">
-						<label class="switch mb-0">
-							<input type="checkbox"
-								id="filter-exclude-preordered"
-								name="filter-exclude-preordered"
-								ng-model="exclude.preordered"
-								ng-disabled="!user" />
-							<span class="slider {{ user &amp;&amp; exclude.preordered ? 'bg-success' : 'bg-secondary' }}"></span>
-						</label>
-						<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.preordered ? 'text-success' : 'text-muted' }} ml-1"
-								for="filter-exclude-preordered">
-							preordered
-						</label>
-					</div>
-				</div>
-			</div>
-		</div>
-
 		<div class="form-row mb-3"
 				data-toggle="tooltip"
 				title="Filter by number of players">
