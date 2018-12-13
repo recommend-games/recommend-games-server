@@ -9,6 +9,7 @@ from functools import lru_cache, reduce
 from operator import or_
 
 from django.conf import settings
+from django.db.models import Q
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
@@ -73,7 +74,7 @@ def _exclude(user=None, other=None):
     if other is not None:
         other = (
             other if isinstance(other, tc.SArray)
-            else tc.SArray(list(arg_to_iter(other)), dtype=int))
+            else tc.SArray(tuple(arg_to_iter(other)), dtype=int))
         ids = ids.append(other) if ids is not None else other
         del other
 
@@ -223,18 +224,24 @@ class GameViewSet(ModelViewSet):
         exclude_play_count = parse_int(take_first(params.pop('exclude_play_count', None)))
 
         fqs = self.filter_queryset(self.get_queryset())
-        games = list(fqs.values_list('bgg_id', flat=True)) if params else None
+        games = list(fqs.order_by().values_list('bgg_id', flat=True)) if params else None
         percentiles = getattr(settings, 'STAR_PERCENTILES', None)
 
         try:
-            collection = User.objects.get(name__iexact=user).collection_set.all()
-            excludes = [collection.filter(**{field: True}) for field in exclude_fields]
+            collection = User.objects.get(name__iexact=user).collection_set.order_by()
+            queries = [Q(**{field: True}) for field in exclude_fields]
             if exclude_wishlist:
-                excludes.append(collection.filter(wishlist__lte=exclude_wishlist))
+                queries.append(Q(wishlist__lte=exclude_wishlist))
             if exclude_play_count:
-                excludes.append(collection.filter(play_count__gte=exclude_play_count))
-            exclude = reduce(or_, excludes).values_list('game', flat=True) if excludes else None
-            del collection, excludes
+                queries.append(Q(play_count__gte=exclude_play_count))
+            if queries:
+                query = reduce(or_, queries)
+                exclude = tuple(
+                    collection.filter(query).values_list('game_id', flat=True)
+                ) if queries else None
+            else:
+                exclude = None
+            del collection, queries
         except Exception:
             exclude = None
 

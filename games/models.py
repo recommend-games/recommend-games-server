@@ -131,10 +131,6 @@ class Collection(Model):
 
     class Meta:
         ''' meta '''
-        ordering = (
-            'game',
-            'user',
-        )
         unique_together = ('game', 'user')
 
     def __str__(self):

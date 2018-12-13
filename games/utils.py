@@ -4,6 +4,7 @@
 
 import logging
 import os.path
+import timeit
 
 from functools import lru_cache
 from itertools import groupby
@@ -83,3 +84,21 @@ def load_recommender(path):
     except Exception:
         LOGGER.exception('unable to load recommender model from <%s>', path)
     return None
+
+
+class Timer:
+    ''' log execution time: with Timer('message'): do_something() '''
+
+    def __init__(self, message, logger=LOGGER):
+        self.message = message
+        self.logger = logger
+        self.start = None
+
+    def __enter__(self):
+        self.start = timeit.default_timer()
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        self.logger.info(
+            '"%s" execution time: %.1f ms',
+            self.message, 1000 * (timeit.default_timer() - self.start))
