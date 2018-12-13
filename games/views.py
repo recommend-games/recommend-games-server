@@ -14,7 +14,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotAuthenticated, MethodNotAllowed, PermissionDenied
 from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -137,12 +137,14 @@ class GameViewSet(ModelViewSet):
         '-avg_rating',
     )
     serializer_class = GameSerializer
+
     filter_backends = (
         DjangoFilterBackend,
         OrderingFilter,
         SearchFilter,
     )
     filterset_class = GameFilter
+
     ordering_fields = (
         'year',
         'min_players',
@@ -169,6 +171,7 @@ class GameViewSet(ModelViewSet):
     search_fields = (
         'name',
     )
+
     collection_fields = (
         'owned',
         'prev_owned',
@@ -282,6 +285,15 @@ class PersonViewSet(ModelViewSet):
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
 
+    def get_permissions(self):
+        cls = ReadOnly if settings.READ_ONLY else AllowAny
+        return (cls(),)
+
+    def handle_exception(self, exc):
+        if settings.READ_ONLY and isinstance(exc, (NotAuthenticated, PermissionDenied)):
+            exc = MethodNotAllowed(self.request.method)
+        return super().handle_exception(exc)
+
 
 class UserViewSet(ModelViewSet):
     ''' user view set '''
@@ -290,6 +302,10 @@ class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    def get_permissions(self):
+        cls = AllowAny if settings.DEBUG else IsAuthenticated
+        return (cls(),)
+
 
 class CollectionViewSet(ModelViewSet):
     ''' user view set '''
@@ -297,3 +313,7 @@ class CollectionViewSet(ModelViewSet):
     # pylint: disable=no-member
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
+
+    def get_permissions(self):
+        cls = AllowAny if settings.DEBUG else IsAuthenticated
+        return (cls(),)
