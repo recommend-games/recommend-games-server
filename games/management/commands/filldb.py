@@ -74,20 +74,22 @@ def _rating_data(recommender_path=getattr(settings, 'RECOMMENDER_PATH', None), p
     return result
 
 
-def _parse_item(item, fields=None, fields_mapping=None):
+def _parse_item(item, fields=None, fields_mapping=None, item_mapping=None):
     result = {
         k: v for k, v in item.items() if k in fields
     } if fields is not None else dict(item)
 
-    if not fields_mapping:
-        return result
+    if fields_mapping:
+        for map_from, map_to in fields_mapping.items():
+            if item.get(map_from):
+                if callable(map_to):
+                    result[map_from] = map_to(item[map_from])
+                else:
+                    result.setdefault(map_to, item[map_from])
 
-    for map_from, map_to in fields_mapping.items():
-        if item.get(map_from):
-            if callable(map_to):
-                result[map_from] = map_to(item[map_from])
-            else:
-                result.setdefault(map_to, item[map_from])
+    if item_mapping:
+        for field, function in item_mapping.items():
+            result[field] = function(item)
 
     return result
 
@@ -113,14 +115,21 @@ def _parse_value_id(string, regex=VALUE_ID_REGEX):
     return result or None
 
 
-def _make_instances(model, items, fields=None, fields_mapping=None, add_data=None):
+def _make_instances(
+        model,
+        items,
+        fields=None,
+        fields_mapping=None,
+        item_mapping=None,
+        add_data=None,
+    ):
     add_data = add_data or {}
     pk_field = model._meta.pk.name
     count = -1
 
     for count, item in enumerate(items):
         try:
-            data = _parse_item(item, fields, fields_mapping)
+            data = _parse_item(item, fields, fields_mapping, item_mapping)
             extra = add_data.get(data.get(pk_field)) or {}
             for key, value in extra.items():
                 data.setdefault(key, value)
@@ -137,6 +146,7 @@ def _create_from_items(
         items,
         fields=None,
         fields_mapping=None,
+        item_mapping=None,
         add_data=None,
         batch_size=None,
     ):
@@ -147,6 +157,7 @@ def _create_from_items(
         items=items,
         fields=fields,
         fields_mapping=fields_mapping,
+        item_mapping=item_mapping,
         add_data=add_data,
     )
 
@@ -318,7 +329,7 @@ class Command(BaseCommand):
 
     help = 'Loads files to the database'
 
-    game_fields = frozenset((
+    game_fields = frozenset({
         'avg_rating',
         'bayes_rating',
         'bgg_id',
@@ -350,7 +361,7 @@ class Command(BaseCommand):
         'stddev_rating',
         'url',
         'year',
-    ))
+    })
 
     game_fields_mapping = {
         'rank': 'bgg_rank',
@@ -366,6 +377,23 @@ class Command(BaseCommand):
 
     game_fields_recursive = {
         'implementation': 'implements',
+    }
+
+    collection_fields = ()
+
+    collection_fields_mapping = {
+        'bgg_id': 'game_id',
+        'bgg_user_name': 'user_id',
+        'bgg_user_rating': 'rating',
+        'bgg_user_wishlist': 'wishlist',
+        'bgg_user_play_count': 'play_count',
+    }
+
+    collection_item_mapping = {
+        'owned': lambda item: bool(
+            item.get('bgg_user_owned')
+            or item.get('bgg_user_prev_owned')
+            or item.get('bgg_user_preordered')),
     }
 
     def add_arguments(self, parser):
@@ -420,27 +448,14 @@ class Command(BaseCommand):
             items = _load(*kwargs['collection_paths'], in_format=kwargs['in_format'])
             items = (item for item in items if item.get('bgg_id') in game_pks)
 
-            # TODO move fields and mapping to command instance
             _create_secondary_instances(
                 model=Collection,
                 secondary={'model': User, 'from': 'user_id', 'to': 'name'},
                 items=items,
                 models_order=(User, Collection),
-                fields=(),
-                fields_mapping={
-                    'bgg_id': 'game_id',
-                    'bgg_user_name': 'user_id',
-                    'bgg_user_rating': 'rating',
-                    'bgg_user_owned': 'owned',
-                    'bgg_user_prev_owned': 'prev_owned',
-                    'bgg_user_for_trade': 'for_trade',
-                    'bgg_user_want_in_trade': 'want_in_trade',
-                    'bgg_user_want_to_play': 'want_to_play',
-                    'bgg_user_want_to_buy': 'want_to_buy',
-                    'bgg_user_preordered': 'preordered',
-                    'bgg_user_wishlist': 'wishlist',
-                    'bgg_user_play_count': 'play_count',
-                },
+                fields=self.collection_fields,
+                fields_mapping=self.collection_fields_mapping,
+                item_mapping=self.collection_item_mapping,
                 batch_size=kwargs['batch'],
             )
 

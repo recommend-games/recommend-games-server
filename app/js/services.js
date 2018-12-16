@@ -433,10 +433,8 @@ ludojApp.factory('filterService', function filterService(
             result.user = params.for;
             result.exclude_known = booleanString(params.excludeRated);
             result.exclude_owned = booleanString(params.excludeOwned);
-            result.exclude_prev_owned = booleanString(params.excludeOwned);
             result.exclude_wishlist = params.excludeWishlist === true ? 5 : null;
             result.exclude_play_count = params.excludePlayed === true ? 1 : null;
-            result.exclude_preordered = booleanString(params.excludeOwned);
         }
 
         if (params.search) {

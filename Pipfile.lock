@@ -318,14 +318,14 @@
         },
         "turicreate": {
             "hashes": [
-                "sha256:410cb095231a982e4d94cb58be7788a5a877584b2d95d435dfd2decdf59d23b7",
-                "sha256:7360dc31757cf37edf57b22841ffe5b9b8c089f0f1105510d1216c5de22e0ac1",
-                "sha256:80604f9f84919f180901e8f2f89034aabe3e5a1c2438ad12d3fb6d418af561c3",
-                "sha256:b79fc4c11187d71432960fdfff4203d08143e726ec442940a10a539fcf88165b",
-                "sha256:ca32e3295010c4b35c5ae16ad4a46b9f3fba934d7b7f090a07b6cd21906b1039",
-                "sha256:deaeaaedc5cf1ff6797cf3354f2ffc99e106f0aeb7b45c9a579f1dc4c401dbac"
+                "sha256:225f76c9eb953e098fccca3ba4a3c1ff8696f89e391844f3d663450f53a14802",
+                "sha256:4187b77545314c0dcd2d55948fb5ee1621cffdc55d0209d97964654c9ee309e2",
+                "sha256:43b1a1d36bf0e9b71c15b534b98d1505a7173b08e93f0d4661d2809273b8732a",
+                "sha256:5c5ae184c6b4cd0507529c0bfba8282298918576624fa15ee15c155d6df773ab",
+                "sha256:b55544a6c0c5630d2f001e40d729f9ca78d7b238fa02eb06eb98a4f6c356feff",
+                "sha256:d74219be4282794369d6bf842dcd070a93d98f4fbc6fd29091333174f75fff78"
             ],
-            "version": "==5.2"
+            "version": "==5.2.1"
         },
         "urllib3": {
             "hashes": [
@@ -609,19 +609,19 @@
         },
         "pytest": {
             "hashes": [
-                "sha256:1d131cc532be0023ef8ae265e2a779938d0619bb6c2510f52987ffcba7fa1ee4",
-                "sha256:ca4761407f1acc85ffd1609f464ca20bb71a767803505bd4127d0e45c5a50e23"
+                "sha256:f689bf2fc18c4585403348dd56f47d87780bf217c53ed9ae7a3e2d7faa45f8e9",
+                "sha256:f812ea39a0153566be53d88f8de94839db1e8a05352ed8a49525d7d7f37861e9"
             ],
             "index": "pypi",
-            "version": "==4.0.1"
+            "version": "==4.0.2"
         },
         "python-dotenv": {
             "hashes": [
-                "sha256:4f3582904d08dac5ab4c9aa44cb17ce056c9a35e585cfda6183d80054d247307",
-                "sha256:cb8cd327109898c7725f76c5256a081e8a9efe72ebbf127f8d1221ceb7f38bf2"
+                "sha256:a84569d0e00d178bc5b957f7ff208bf49287cbf61857c31c258c4a91f571527b",
+                "sha256:c9b1ddd3cdbe75c7d462cb84674d87130f4b948f090f02c7d7144779afb99ae0"
             ],
             "index": "pypi",
-            "version": "==0.10.0"
+            "version": "==0.10.1"
         },
         "rcssmin": {
             "hashes": [

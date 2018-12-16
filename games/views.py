@@ -175,12 +175,6 @@ class GameViewSet(ModelViewSet):
 
     collection_fields = (
         'owned',
-        'prev_owned',
-        'for_trade',
-        'want_in_trade',
-        'want_to_play',
-        'want_to_buy',
-        'preordered',
     )
 
     def get_permissions(self):

@@ -116,22 +116,9 @@ class Collection(Model):
 
     rating = FloatField(blank=True, null=True, db_index=True)
     owned = BooleanField(default=False, db_index=True)
-    prev_owned = BooleanField(default=False, db_index=True)
-    for_trade = BooleanField(default=False, db_index=True)
-    want_in_trade = BooleanField(default=False, db_index=True)
-    want_to_play = BooleanField(default=False, db_index=True)
-    want_to_buy = BooleanField(default=False, db_index=True)
-    preordered = BooleanField(default=False, db_index=True)
     wishlist = PositiveSmallIntegerField(blank=True, null=True, db_index=True)
     play_count = PositiveIntegerField(default=0, db_index=True)
 
-    rec_rank = PositiveIntegerField(blank=True, null=True, db_index=True)
-    rec_rating = FloatField(blank=True, null=True, db_index=True)
-    rec_stars = FloatField(blank=True, null=True, db_index=True)
-
-    class Meta:
-        ''' meta '''
-        unique_together = ('game', 'user')
-
     def __str__(self):
-        return f'{self.game.name}: {self.user.name}'
+        # pylint: disable=no-member
+        return f'{self.game_id}: {self.user_id}'
