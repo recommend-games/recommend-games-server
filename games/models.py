@@ -119,6 +119,12 @@ class Collection(Model):
     wishlist = PositiveSmallIntegerField(blank=True, null=True, db_index=True)
     play_count = PositiveIntegerField(default=0, db_index=True)
 
+    class Meta:
+        ''' meta '''
+        indexes = (
+            Index(fields=('user', 'owned')),
+        )
+
     def __str__(self):
         # pylint: disable=no-member
         return f'{self.game_id}: {self.user_id}'

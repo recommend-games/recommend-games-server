@@ -89,8 +89,8 @@ def load_recommender(path):
 class Timer:
     ''' log execution time: with Timer('message'): do_something() '''
 
-    def __init__(self, message, logger=LOGGER):
-        self.message = message
+    def __init__(self, message, logger=None):
+        self.message = f'"{message}" execution time: %.1f ms'
         self.logger = logger
         self.start = None
 
@@ -99,6 +99,8 @@ class Timer:
         return self
 
     def __exit__(self, *args, **kwargs):
-        self.logger.info(
-            '"%s" execution time: %.1f ms',
-            self.message, 1000 * (timeit.default_timer() - self.start))
+        duration = 1000 * (timeit.default_timer() - self.start)
+        if self.logger is None:
+            print(self.message % duration)
+        else:
+            self.logger.info(self.message, duration)
