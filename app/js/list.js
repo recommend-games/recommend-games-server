@@ -128,7 +128,8 @@ ludojApp.controller('ListController', function ListController(
         'rated': filterService.booleanDefault(params.excludeRated, true),
         'owned': filterService.booleanDefault(params.excludeOwned, true),
         'wishlist': filterService.booleanDefault(params.excludeWishlist, false),
-        'played': filterService.booleanDefault(params.excludePlayed, false)
+        'played': filterService.booleanDefault(params.excludePlayed, false),
+        'clusters': filterService.booleanDefault(params.excludeClusters, false)
     };
 
     $scope.search = params.search;
@@ -233,14 +234,11 @@ ludojApp.controller('ListController', function ListController(
         $scope.complexity.enabled = false;
         $scope.year.enabled = false;
         $scope.cooperative = null;
-        // TODO proper default settings
-        $scope.exclude = {};
         updateParams();
     };
 
     $scope.clearUser = function clearUser() {
         $scope.user = null;
-        $scope.exclude = {};
         updateParams();
     };
 

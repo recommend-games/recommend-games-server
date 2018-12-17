@@ -105,6 +105,20 @@
 						played
 					</label>
 				</div>
+				<div class="form-check form-check-inline">
+					<label class="switch mb-0">
+						<input type="checkbox"
+							id="filter-exclude-clusters"
+							name="filter-exclude-clusters"
+							ng-model="exclude.clusters"
+							ng-disabled="!user" />
+						<span class="slider {{ user &amp;&amp; exclude.clusters ? 'bg-success' : 'bg-secondary' }}"></span>
+					</label>
+					<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.clusters ? 'text-success' : 'text-muted' }} ml-1"
+							for="filter-exclude-clusters">
+						implementations
+					</label>
+				</div>
 			</div>
 		</div>
 	</form>

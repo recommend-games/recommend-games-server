@@ -216,6 +216,7 @@ class GameViewSet(ModelViewSet):
             if parse_bool(take_first(params.pop(f'exclude_{field}', None)))]
         exclude_wishlist = parse_int(take_first(params.pop('exclude_wishlist', None)))
         exclude_play_count = parse_int(take_first(params.pop('exclude_play_count', None)))
+        exclude_clusters = parse_bool(take_first(params.pop('exclude_clusters', None)))
 
         fqs = self.filter_queryset(self.get_queryset())
         games = list(fqs.order_by().values_list('bgg_id', flat=True)) if params else None
@@ -230,9 +231,7 @@ class GameViewSet(ModelViewSet):
                 queries.append(Q(play_count__gte=exclude_play_count))
             if queries:
                 query = reduce(or_, queries)
-                exclude = tuple(
-                    collection.filter(query).values_list('game_id', flat=True)
-                ) if queries else None
+                exclude = tuple(collection.filter(query).values_list('game_id', flat=True))
             else:
                 exclude = None
             del collection, queries
@@ -244,7 +243,7 @@ class GameViewSet(ModelViewSet):
             games=games,
             exclude=_exclude(user, other=exclude),
             exclude_known=exclude_known,
-            exclude_clusters=False,
+            exclude_clusters=exclude_clusters,
             star_percentiles=percentiles,
         )
         del user, path, params, percentiles, recommender, exclude
