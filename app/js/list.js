@@ -100,6 +100,7 @@ ludojApp.controller('ListController', function ListController(
             })
             .then(function () {
                 $(function () {
+                    $('.tooltip').remove();
                     $('[data-toggle="tooltip"]').tooltip();
                 });
             });

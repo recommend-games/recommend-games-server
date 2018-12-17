@@ -66,6 +66,7 @@ ludojApp.controller('DetailController', function DetailController(
         })
         .then(function () {
             $(function () {
+                $('.tooltip').remove();
                 $('[data-toggle="tooltip"]').tooltip();
             });
         });
