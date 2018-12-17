@@ -41,8 +41,11 @@ pipenv run python3 manage.py filldb \
 
 # update recommender
 rm --recursive --force .tc* .temp* static
-mkdir --parents .tc/recommender
-cp "${WORK_SPACE}"/ludoj-recommender/.tc/recommender/* .tc/recommender/
+mkdir --parents .tc
+cp --recursive \
+    "${WORK_SPACE}"/ludoj-recommender/.tc/recommender \
+    "${WORK_SPACE}"/ludoj-recommender/.tc/clusters \
+    .tc/
 
 # minify static
 mkdir --parents .temp

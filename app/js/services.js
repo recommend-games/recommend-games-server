@@ -336,6 +336,7 @@ ludojApp.factory('filterService', function filterService(
             'excludeOwned': booleanDefault(params.excludeOwned, true, !user),
             'excludeWishlist': booleanDefault(params.excludeWishlist, false, !user),
             'excludePlayed': booleanDefault(params.excludePlayed, false, !user),
+            'excludeClusters': booleanDefault(params.excludeClusters, true, !user),
             'search': _.trim(params.search) || null,
             'playerCount': playerCount,
             'playerCountType': playerCount && validateCountType(params.playerCountType),
@@ -405,11 +406,13 @@ ludojApp.factory('filterService', function filterService(
             result.excludeOwned = parseBoolean(_.get(scope, 'exclude.owned'));
             result.excludeWishlist = parseBoolean(_.get(scope, 'exclude.wishlist'));
             result.excludePlayed = parseBoolean(_.get(scope, 'exclude.played'));
+            result.excludeClusters = parseBoolean(_.get(scope, 'exclude.clusters'));
         } else {
             result.excludeRated = null;
             result.excludeOwned = null;
             result.excludeWishlist = null;
             result.excludePlayed = null;
+            result.excludeClusters = null;
         }
 
         return parseParams(result);
@@ -435,6 +438,7 @@ ludojApp.factory('filterService', function filterService(
             result.exclude_owned = booleanString(params.excludeOwned);
             result.exclude_wishlist = params.excludeWishlist === true ? 5 : null;
             result.exclude_play_count = params.excludePlayed === true ? 1 : null;
+            result.exclude_clusters = booleanString(params.excludeClusters);
         }
 
         if (params.search) {
