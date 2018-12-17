@@ -244,6 +244,10 @@ input:checked + .slider:before {
     cursor: pointer;
 }
 
+.form-label-exclude {
+    text-decoration: underline dotted;
+}
+
 .related-games {
     line-height: 1;
 }

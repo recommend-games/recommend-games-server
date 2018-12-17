@@ -130,7 +130,7 @@ ludojApp.controller('ListController', function ListController(
         'owned': filterService.booleanDefault(params.excludeOwned, true),
         'wishlist': filterService.booleanDefault(params.excludeWishlist, false),
         'played': filterService.booleanDefault(params.excludePlayed, false),
-        'clusters': filterService.booleanDefault(params.excludeClusters, false)
+        'clusters': filterService.booleanDefault(params.excludeClusters, true)
     };
 
     $scope.search = params.search;
