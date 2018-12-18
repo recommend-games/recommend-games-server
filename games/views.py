@@ -219,7 +219,9 @@ class GameViewSet(ModelViewSet):
         exclude_clusters = parse_bool(take_first(params.pop('exclude_clusters', None)))
 
         fqs = self.filter_queryset(self.get_queryset())
-        games = list(fqs.order_by().values_list('bgg_id', flat=True)) if params else None
+        # we should only need this if params are set, but see #90
+        games = frozenset(
+            fqs.order_by().values_list('bgg_id', flat=True)) & recommender.rated_games
         percentiles = getattr(settings, 'STAR_PERCENTILES', None)
 
         try:
@@ -246,7 +248,7 @@ class GameViewSet(ModelViewSet):
             exclude_clusters=exclude_clusters,
             star_percentiles=percentiles,
         )
-        del user, path, params, percentiles, recommender, exclude
+        del user, path, params, percentiles, recommender, exclude, games
 
         page = self.paginate_queryset(recommendation)
         if page is None:
