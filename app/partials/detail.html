@@ -105,4 +105,17 @@
 			</div>
 		</div>
 	</section>
+	<section>
+		<h2>Statistics</h2>
+		<dl>
+			<dt>BGG ranking</dt>
+			<dd><strong>{{ game.bgg_rank | number:0 }}</strong> (geek rating <strong>{{ game.bayes_rating | number:3 }} / 10</strong>, average rating <strong>{{ game.avg_rating | number:3 }} / 10</strong>, <strong>{{ game.num_votes | number:0 }}</strong> votes)</dd>
+			<dt>Ludoj ranking</dt>
+			<dd><strong>{{ game.rec_rank | number:0 }}</strong> (rating <strong>{{ game.rec_rating | number:3 }}</strong>, TODO stars)</dd>
+			<dt>Complexity</dt>
+			<dd><strong>{{ game.complexity | number:2 }} / 5</strong> ({{ game.complexity_string }})</dd>
+			<dt>Language dependency</dt>
+			<dd><strong>{{ game.language_dependency | number:2 }}</strong> / 5 ({{ game.language_dependency_string }} TODO)</dd>
+		</dl>
+	</section>
 </section>
