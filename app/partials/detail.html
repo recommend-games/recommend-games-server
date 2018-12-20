@@ -70,6 +70,10 @@
 					class="game-cooperative">
 				<i class="fas fa-handshake"></i> {{ game.cooperative_string }}
 			</span>
+			<span ng-if="game.rec_rank"
+					class="game-ranking">
+				<i class="fas fa-hashtag"></i> Rank: {{ game.rec_rank }}
+			</span>
 		</div>
 		<p ng-repeat="description in game.description_array"
 				class="{{ $first ? 'lead' : '' }}">

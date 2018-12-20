@@ -165,7 +165,8 @@
 .game-age,
 .game-complexity,
 .game-cooperative,
-.game-time {
+.game-time,
+.game-ranking {
     font-size: 150%;
     white-space: nowrap;
 }
