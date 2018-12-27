@@ -19,12 +19,27 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from .models import Collection, Game, Person, User
+from .models import Category, Collection, Game, Mechanic, Person, User
 from .permissions import ReadOnly
-from .serializers import CollectionSerializer, GameSerializer, PersonSerializer, UserSerializer
+from .serializers import (
+    CategorySerializer, CollectionSerializer, GameSerializer,
+    MechanicSerializer, PersonSerializer, UserSerializer)
 from .utils import arg_to_iter, load_recommender, parse_bool, parse_int, take_first
 
 LOGGER = logging.getLogger(__name__)
+
+
+class PermissionsModelViewSet(ModelViewSet):
+    ''' add permissions based on settings '''
+
+    def get_permissions(self):
+        cls = ReadOnly if settings.READ_ONLY else AllowAny
+        return (cls(),)
+
+    def handle_exception(self, exc):
+        if settings.READ_ONLY and isinstance(exc, (NotAuthenticated, PermissionDenied)):
+            exc = MethodNotAllowed(self.request.method)
+        return super().handle_exception(exc)
 
 
 @lru_cache(maxsize=8)
@@ -127,7 +142,7 @@ class GameFilter(FilterSet):
         }
 
 
-class GameViewSet(ModelViewSet):
+class GameViewSet(PermissionsModelViewSet):
     ''' game view set '''
 
     # pylint: disable=no-member
@@ -176,15 +191,6 @@ class GameViewSet(ModelViewSet):
     collection_fields = (
         'owned',
     )
-
-    def get_permissions(self):
-        cls = ReadOnly if settings.READ_ONLY else AllowAny
-        return (cls(),)
-
-    def handle_exception(self, exc):
-        if settings.READ_ONLY and isinstance(exc, (NotAuthenticated, PermissionDenied)):
-            exc = MethodNotAllowed(self.request.method)
-        return super().handle_exception(exc)
 
     @action(detail=False)
     def recommend(self, request):
@@ -280,21 +286,34 @@ class GameViewSet(ModelViewSet):
         )
 
 
-class PersonViewSet(ModelViewSet):
+class PersonViewSet(PermissionsModelViewSet):
     ''' person view set '''
 
     # pylint: disable=no-member
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
 
-    def get_permissions(self):
-        cls = ReadOnly if settings.READ_ONLY else AllowAny
-        return (cls(),)
+    # TODO /persons/{id}/games/ endpoint (#29)
 
-    def handle_exception(self, exc):
-        if settings.READ_ONLY and isinstance(exc, (NotAuthenticated, PermissionDenied)):
-            exc = MethodNotAllowed(self.request.method)
-        return super().handle_exception(exc)
+
+class CategoryViewSet(PermissionsModelViewSet):
+    ''' category view set '''
+
+    # pylint: disable=no-member
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+    # TODO /categories/{id}/games/ endpoint
+
+
+class MechanicViewSet(PermissionsModelViewSet):
+    ''' mechanic view set '''
+
+    # pylint: disable=no-member
+    queryset = Mechanic.objects.all()
+    serializer_class = MechanicSerializer
+
+    # TODO /mechanics/{id}/games/ endpoint
 
 
 class UserViewSet(ModelViewSet):
