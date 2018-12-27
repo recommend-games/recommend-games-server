@@ -14,8 +14,11 @@ ludojApp.controller('DetailController', function DetailController(
     gamesService,
     APP_TITLE
 ) {
-    var implementationOf = [],
-        implementedBy = [];
+    var compilationOf = [],
+        containedIn = [],
+        implementationOf = [],
+        implementedBy = [],
+        integratesWith = [];
 
     $scope.implementations = false;
     $scope.expandable = false;
@@ -33,13 +36,21 @@ ludojApp.controller('DetailController', function DetailController(
             $('#game-details')
                 .append('<script type="application/ld+json">' + $filter('json')(gamesService.jsonLD(game), 0) + '</script>');
 
+            compilationOf = game.compilation_of || [];
+            containedIn = game.contained_in || [];
             implementationOf = game.implements || [];
             implementedBy = game.implemented_by || [];
+            integratesWith = game.integrates_with || [];
 
-            return $q.all(_.map(_.concat(implementationOf, implementedBy), function (id) {
-                return gamesService.getGame(id)
-                    .catch(_.constant());
-            }));
+            var promises = _(_.concat(compilationOf, containedIn, implementationOf, implementedBy, integratesWith))
+                .uniq()
+                .map(function (id) {
+                    return gamesService.getGame(id)
+                        .catch(_.constant());
+                })
+                .value();
+
+            return $q.all(promises);
         })
         .then(function (implementations) {
             implementations = _(implementations)
@@ -49,19 +60,27 @@ ludojApp.controller('DetailController', function DetailController(
                 })
                 .fromPairs()
                 .value();
-            $scope.implementationOf = _(implementationOf)
-                .map(function (id) {
-                    return implementations[id];
-                })
-                .filter()
-                .value();
-            $scope.implementedBy = _(implementedBy)
-                .map(function (id) {
-                    return implementations[id];
-                })
-                .filter()
-                .value();
-            $scope.implementations = !_.isEmpty($scope.implementationOf) || !_.isEmpty($scope.implementedBy);
+
+            function findIds(ids) {
+                return _(ids)
+                    .map(function (id) {
+                        return implementations[id];
+                    })
+                    .filter()
+                    .value();
+            }
+
+            $scope.compilationOf = findIds(compilationOf);
+            $scope.containedIn = findIds(containedIn);
+            $scope.implementationOf = findIds(implementationOf);
+            $scope.implementedBy = findIds(implementedBy);
+            $scope.integratesWith = findIds(integratesWith);
+
+            $scope.implementations = !_.isEmpty($scope.compilationOf) ||
+                !_.isEmpty($scope.containedIn) ||
+                !_.isEmpty($scope.implementationOf) ||
+                !_.isEmpty($scope.implementedBy) ||
+                !_.isEmpty($scope.integratesWith);
             $scope.expandable = !!$scope.implementations;
         })
         .then(function () {
