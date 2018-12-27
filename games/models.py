@@ -39,14 +39,18 @@ class Game(Model):
     min_time = PositiveSmallIntegerField(blank=True, null=True, db_index=True)
     max_time = PositiveSmallIntegerField(blank=True, null=True, db_index=True)
 
-    # category = ListField(CharField(), blank=True)
-    # mechanic = ListField(CharField(), blank=True)
+    category = ManyToManyField('Category', blank=True, related_name='games')
+    mechanic = ManyToManyField('Mechanic', blank=True, related_name='games')
     cooperative = BooleanField(default=False, db_index=True)
     compilation = BooleanField(default=False, db_index=True)
+    compilation_of = ManyToManyField(
+        'self', symmetrical=False, blank=True, related_name='contained_in')
     # family = ListField(CharField(), blank=True)
     # expansion = ListField(CharField(), blank=True)
     implements = ManyToManyField(
         'self', symmetrical=False, blank=True, related_name='implemented_by')
+    integrates_with = ManyToManyField(
+        'self', symmetrical=True, blank=True)
 
     bgg_rank = PositiveIntegerField(blank=True, null=True, db_index=True)
     num_votes = PositiveIntegerField(default=0, db_index=True)
@@ -78,6 +82,38 @@ class Game(Model):
 
 class Person(Model):
     ''' person model '''
+
+    bgg_id = PositiveIntegerField(primary_key=True)
+    name = CharField(max_length=255, db_index=True)
+
+    class Meta:
+        ''' meta '''
+        ordering = (
+            'name',
+        )
+
+    def __str__(self):
+        return self.name
+
+
+class Category(Model):
+    ''' category model '''
+
+    bgg_id = PositiveIntegerField(primary_key=True)
+    name = CharField(max_length=255, db_index=True)
+
+    class Meta:
+        ''' meta '''
+        ordering = (
+            'name',
+        )
+
+    def __str__(self):
+        return self.name
+
+
+class Mechanic(Model):
+    ''' mechanic model '''
 
     bgg_id = PositiveIntegerField(primary_key=True)
     name = CharField(max_length=255, db_index=True)

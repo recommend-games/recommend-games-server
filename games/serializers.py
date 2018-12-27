@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField, StringRelatedField
 
-from .models import Collection, Game, Person, User
+from .models import Category, Collection, Game, Mechanic, Person, User
 
 
 class GameSerializer(ModelSerializer):
@@ -14,6 +14,9 @@ class GameSerializer(ModelSerializer):
 
     designer_name = StringRelatedField(source='designer', many=True, read_only=True)
     artist_name = StringRelatedField(source='artist', many=True, read_only=True)
+    category_name = StringRelatedField(source='category', many=True, read_only=True)
+    mechanic_name = StringRelatedField(source='mechanic', many=True, read_only=True)
+    contained_in = PrimaryKeyRelatedField(many=True, read_only=True)
     implemented_by = PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
@@ -28,6 +31,24 @@ class PersonSerializer(ModelSerializer):
     class Meta:
         ''' meta '''
         model = Person
+        fields = '__all__'
+
+
+class CategorySerializer(ModelSerializer):
+    ''' category serializer '''
+
+    class Meta:
+        ''' meta '''
+        model = Category
+        fields = '__all__'
+
+
+class MechanicSerializer(ModelSerializer):
+    ''' mechanic serializer '''
+
+    class Meta:
+        ''' meta '''
+        model = Mechanic
         fields = '__all__'
 
 

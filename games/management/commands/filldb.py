@@ -14,7 +14,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.transaction import atomic
 
-from ...models import Collection, Game, Person, User
+from ...models import Category, Collection, Game, Mechanic, Person, User
 from ...utils import (
     arg_to_iter, batchify, format_from_path, load_recommender, parse_int, take_first)
 
@@ -372,12 +372,16 @@ class Command(BaseCommand):
     }
 
     game_fields_foreign = {
-        'designer': (Person, 'name'),
         'artist': (Person, 'name'),
+        'category': (Category, 'name'),
+        'designer': (Person, 'name'),
+        'mechanic': (Mechanic, 'name'),
     }
 
     game_fields_recursive = {
+        'compilation_of': 'compilation_of',
         'implementation': 'implements',
+        'integration': 'integrates_with',
     }
 
     collection_fields = ()
