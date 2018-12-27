@@ -210,7 +210,7 @@ def _create_references(
         for rec_from, rec_to in recursive.items():
             rec = {parse_int(r) for r in arg_to_iter(item.get(rec_from)) if r}
             rec = sorted(
-                model.objects.filter(pk__in=rec).values_list('pk', flat=True)
+                model.objects.filter(pk__in=rec).values_list('pk', flat=True).distinct()
             ) if rec else None
             if rec:
                 update[rec_to] = rec
@@ -229,8 +229,9 @@ def _create_references(
     for fmodel, value_field in frozenset(foreign.values()):
         id_field = fmodel._meta.pk.name
         LOGGER.info('found %d items for model %r to create', len(foreign_values[fmodel]), fmodel)
-        values = ((k, tuple(v)) for k, v in foreign_values[fmodel].items() if k and v)
-        values = ({id_field: k, value_field: v[0]} for k, v in values if k and len(v) == 1)
+        values = (
+            {id_field: k, value_field: take_first(v)}
+            for k, v in foreign_values[fmodel].items() if k and v)
         _create_from_items(model=fmodel, items=values, batch_size=batch_size)
 
     del foreign, foreign_values
