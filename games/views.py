@@ -210,51 +210,54 @@ class GameViewSet(PermissionsModelViewSet):
 
         # TODO speed up recommendation by pre-computing known games, clusters etc (#16)
 
-        params = dict(request.query_params)
-        params.setdefault('exclude_known', True)
-        params.pop('ordering', None)
-        params.pop('page', None)
-        params.pop('user', None)
-
-        exclude_known = parse_bool(take_first(params.pop('exclude_known', None)))
-        exclude_fields = [
-            field for field in self.collection_fields
-            if parse_bool(take_first(params.pop(f'exclude_{field}', None)))]
-        exclude_wishlist = parse_int(take_first(params.pop('exclude_wishlist', None)))
-        exclude_play_count = parse_int(take_first(params.pop('exclude_play_count', None)))
-        exclude_clusters = parse_bool(take_first(params.pop('exclude_clusters', None)))
-
         fqs = self.filter_queryset(self.get_queryset())
         # we should only need this if params are set, but see #90
         games = frozenset(
             fqs.order_by().values_list('bgg_id', flat=True)) & recommender.rated_games
-        percentiles = getattr(settings, 'STAR_PERCENTILES', None)
 
-        try:
-            collection = User.objects.get(name__iexact=user).collection_set.order_by()
-            queries = [Q(**{field: True}) for field in exclude_fields]
-            if exclude_wishlist:
-                queries.append(Q(wishlist__lte=exclude_wishlist))
-            if exclude_play_count:
-                queries.append(Q(play_count__gte=exclude_play_count))
-            if queries:
-                query = reduce(or_, queries)
-                exclude = tuple(collection.filter(query).values_list('game_id', flat=True))
-            else:
+        if games:
+            params = dict(request.query_params)
+            params.setdefault('exclude_known', True)
+
+            exclude_known = parse_bool(take_first(params.get('exclude_known')))
+            exclude_fields = [
+                field for field in self.collection_fields
+                if parse_bool(take_first(params.get(f'exclude_{field}')))]
+            exclude_wishlist = parse_int(take_first(params.get('exclude_wishlist')))
+            exclude_play_count = parse_int(take_first(params.get('exclude_play_count')))
+            exclude_clusters = parse_bool(take_first(params.get('exclude_clusters')))
+
+            try:
+                collection = User.objects.get(name__iexact=user).collection_set.order_by()
+                queries = [Q(**{field: True}) for field in exclude_fields]
+                if exclude_wishlist:
+                    queries.append(Q(wishlist__lte=exclude_wishlist))
+                if exclude_play_count:
+                    queries.append(Q(play_count__gte=exclude_play_count))
+                if queries:
+                    query = reduce(or_, queries)
+                    exclude = tuple(collection.filter(query).values_list('game_id', flat=True))
+                else:
+                    exclude = None
+                del collection, queries
+            except Exception:
                 exclude = None
-            del collection, queries
-        except Exception:
-            exclude = None
 
-        recommendation = recommender.recommend(
-            users=(user,),
-            games=games,
-            exclude=_exclude(user, other=exclude),
-            exclude_known=exclude_known,
-            exclude_clusters=exclude_clusters,
-            star_percentiles=percentiles,
-        )
-        del user, path, params, percentiles, recommender, exclude, games
+            recommendation = recommender.recommend(
+                users=(user,),
+                games=games,
+                exclude=_exclude(user, other=exclude),
+                exclude_known=exclude_known,
+                exclude_clusters=exclude_clusters,
+                star_percentiles=getattr(settings, 'STAR_PERCENTILES', None),
+            )
+
+            del params, exclude
+
+        else:
+            recommendation = ()
+
+        del user, path, recommender, games
 
         page = self.paginate_queryset(recommendation)
         if page is None:
