@@ -230,6 +230,8 @@ class GameViewSet(PermissionsModelViewSet):
             try:
                 collection = User.objects.get(name__iexact=user).collection_set.order_by()
                 queries = [Q(**{field: True}) for field in exclude_fields]
+                if exclude_known and exclude_clusters:
+                    queries.append(Q(rating__isnull=False))
                 if exclude_wishlist:
                     queries.append(Q(wishlist__lte=exclude_wishlist))
                 if exclude_play_count:
