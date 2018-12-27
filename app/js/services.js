@@ -33,6 +33,17 @@ ludojApp.factory('gamesService', function gamesService(
         return _.isNaN(lower) || _.isNaN(value) || _.isNaN(upper) ? false : lower <= value && value <= upper;
     }
 
+    function starClasses(score) {
+        if (!between(1, score, 5)) {
+            return [];
+        }
+
+        return _.map(_.range(1, 6), function (star) {
+            return score >= star ? 'fas fa-star'
+                : score >= star - 0.5 ? 'fas fa-star-half-alt' : 'far fa-star';
+        });
+    }
+
     function processGame(game) {
         game.name_short = _.size(game.name) > 50 ? _.truncate(game.name, {'length': 50, 'separator': /,? +/}) : null;
         game.name_url = encodeURIComponent(_.toLower(game.name));
@@ -65,6 +76,14 @@ ludojApp.factory('gamesService', function gamesService(
                 'medium',
                 'medium heavy',
                 'heavy'
+            ],
+            language_dependencies = [
+                null,
+                'no necessary in-game text',
+                'some necessary text',
+                'moderate in-game text',
+                'extensive use of text',
+                'unplayable in another language'
             ];
 
         game.counts = _.map(counts, function (rec, count) {
@@ -83,8 +102,14 @@ ludojApp.factory('gamesService', function gamesService(
         });
 
         game.time_string = times ? times + ' minutes' : null;
-        game.complexity_string = between(1, game.complexity, 5) ? complexities[_.round(game.complexity)] + ' complexity' : null;
+        game.complexity_string = between(1, game.complexity, 5)
+            ? complexities[_.round(game.complexity)] + ' complexity'
+            : null;
+        game.language_dependency_string = between(1, game.language_dependency, 5)
+            ? language_dependencies[_.round(game.language_dependency)]
+            : null;
         game.cooperative_string = game.cooperative === true ? 'cooperative' : game.cooperative === false ? 'competitive' : null;
+        game.star_classes = starClasses(game.rec_stars);
 
         return game;
     }

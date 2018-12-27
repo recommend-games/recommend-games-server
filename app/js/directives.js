@@ -15,13 +15,6 @@ ludojApp.directive('gameSquare', function gameSquare() {
             $scope.bgImage = function bgImage(url) {
                 return url ? {'background-image': 'url("' + url + '")'} : null;
             };
-
-            $scope.starClasses = function starClasses(score) {
-                return _.map(_.range(1, 6), function (star) {
-                    return score >= star ? 'fas fa-star'
-                        : score >= star - 0.5 ? 'fas fa-star-half-alt' : 'far fa-star';
-                });
-            };
         }
     };
 });

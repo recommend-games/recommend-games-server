@@ -14,7 +14,7 @@
 			<span ng-if="game.rec_stars"
 					class="game-stars">
 				<br />
-				<i ng-repeat="starClass in starClasses(game.rec_stars) track by $index"
+				<i ng-repeat="starClass in game.star_classes track by $index"
 					class="{{ starClass }}"></i>
 			</span>
 		</span>
