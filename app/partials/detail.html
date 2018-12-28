@@ -79,6 +79,16 @@
 				class="{{ $first ? 'lead' : '' }}">
 			{{ description }}
 		</p>
+		<p ng-if="(game.category_name &amp;&amp; game.category_name.length) || (game.mechanic_name &amp;&amp; game.mechanic_name.length)">
+			<span ng-repeat="category in game.category_name"
+					class="badge badge-secondary mr-1">
+				{{ category }}
+			</span>
+			<span ng-repeat="mechanic in game.mechanic_name"
+					class="badge badge-dark mr-1">
+				{{ mechanic }}
+			</span>
+		</p>
 		<div ng-if="expandable"
 				ng-click="toggleDescription()"
 				class="expandable-bottom">
