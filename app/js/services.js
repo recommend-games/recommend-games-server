@@ -59,9 +59,9 @@ ludojApp.factory('gamesService', function gamesService(
         game.description_array = _.filter(_.map(_.split(game.description, /\n(\s*\n\s*)+/), _.trim));
 
         game.designer_data = _.isEmpty(game.designer) || _.isEmpty(game.designer_name) ?
-            null : _.fromPairs(_.zip(game.designer, game.designer_name));
+                null : _.fromPairs(_.zip(game.designer, game.designer_name));
         game.artist_data = _.isEmpty(game.artist) || _.isEmpty(game.artist_name) ?
-            null : _.fromPairs(_.zip(game.artist, game.artist_name));
+                null : _.fromPairs(_.zip(game.artist, game.artist_name));
 
         var counts = _.map(_.range(1, 11), function (count) {
                 return between(game.min_players_best, count, game.max_players_best) ? 3
@@ -114,9 +114,9 @@ ludojApp.factory('gamesService', function gamesService(
 
         game.time_string = times ? times + ' minutes' : null;
         game.complexity_string = between(1, game.complexity, 5) ?
-            complexities[_.round(game.complexity)] + ' complexity' : null;
+                complexities[_.round(game.complexity)] + ' complexity' : null;
         game.language_dependency_string = between(1, game.language_dependency, 5) ?
-            language_dependencies[_.round(game.language_dependency)] : null;
+                language_dependencies[_.round(game.language_dependency)] : null;
         game.cooperative_string = game.cooperative === true ? 'cooperative' : game.cooperative === false ? 'competitive' : null;
         game.star_classes = starClasses(game.rec_stars);
 
@@ -362,15 +362,22 @@ ludojApp.factory('filterService', function filterService(
         var user = _.trim(params.for) || _.trim(params.user) || null,
             playerCount = _.parseInt(params.playerCount) || null,
             playTime = _.parseInt(params.playTime) || null,
-            playerAge = _.parseInt(params.playerAge) || null;
+            playerAge = _.parseInt(params.playerAge) || null,
+            excludeRated = booleanDefault(params.excludeRated, true, !user),
+            excludeOwned = booleanDefault(params.excludeOwned, true, !user),
+            excludeWishlist = booleanDefault(params.excludeWishlist, false, !user),
+            excludePlayed = booleanDefault(params.excludePlayed, false, !user),
+            excludeClusters = booleanDefault(params.excludeClusters, true, !user),
+            yearMin = _.parseInt(params.yearMin),
+            yearMax = _.parseInt(params.yearMax);
 
         return {
             'for': user,
-            'excludeRated': booleanDefault(params.excludeRated, true, !user),
-            'excludeOwned': booleanDefault(params.excludeOwned, true, !user),
-            'excludeWishlist': booleanDefault(params.excludeWishlist, false, !user),
-            'excludePlayed': booleanDefault(params.excludePlayed, false, !user),
-            'excludeClusters': booleanDefault(params.excludeClusters, true, !user),
+            'excludeRated': excludeRated === false ? false : null,
+            'excludeOwned': excludeOwned === false ? false : null,
+            'excludeWishlist': excludeWishlist === true ? true : null,
+            'excludePlayed': excludePlayed === true ? true : null,
+            'excludeClusters': excludeClusters === false ? false : null,
             'search': _.trim(params.search) || null,
             'playerCount': playerCount,
             'playerCountType': playerCount && validateCountType(params.playerCountType),
@@ -380,8 +387,8 @@ ludojApp.factory('filterService', function filterService(
             'playerAgeType': playerAge && validateAgeType(params.playerAgeType),
             'complexityMin': parseFloat(params.complexityMin) || null,
             'complexityMax': parseFloat(params.complexityMax) || null,
-            'yearMin': _.parseInt(params.yearMin) || null,
-            'yearMax': _.parseInt(params.yearMax) || null,
+            'yearMin': yearMin && yearMin > yearFloor ? yearMin : null,
+            'yearMax': yearMax && yearMax <= yearNow ? yearMax : null,
             'cooperative': validateBoolean(params.cooperative)
         };
     }
@@ -468,11 +475,11 @@ ludojApp.factory('filterService', function filterService(
 
         if (params.for) {
             result.user = params.for;
-            result.exclude_known = booleanString(params.excludeRated);
-            result.exclude_owned = booleanString(params.excludeOwned);
-            result.exclude_wishlist = params.excludeWishlist === true ? 5 : null;
-            result.exclude_play_count = params.excludePlayed === true ? 1 : null;
-            result.exclude_clusters = booleanString(params.excludeClusters);
+            result.exclude_known = booleanString(booleanDefault(params.excludeRated, true));
+            result.exclude_owned = booleanString(booleanDefault(params.excludeOwned, true));
+            result.exclude_wishlist = booleanDefault(params.excludeWishlist, false) ? 5 : null;
+            result.exclude_play_count = booleanDefault(params.excludePlayed, false) ? 1 : null;
+            result.exclude_clusters = booleanString(booleanDefault(params.excludeClusters, true));
         }
 
         if (params.search) {
