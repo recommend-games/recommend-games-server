@@ -102,12 +102,10 @@ ludojApp.factory('gamesService', function gamesService(
         });
 
         game.time_string = times ? times + ' minutes' : null;
-        game.complexity_string = between(1, game.complexity, 5)
-            ? complexities[_.round(game.complexity)] + ' complexity'
-            : null;
-        game.language_dependency_string = between(1, game.language_dependency, 5)
-            ? language_dependencies[_.round(game.language_dependency)]
-            : null;
+        game.complexity_string = between(1, game.complexity, 5) ?
+            complexities[_.round(game.complexity)] + ' complexity' : null;
+        game.language_dependency_string = between(1, game.language_dependency, 5) ?
+            language_dependencies[_.round(game.language_dependency)] : null;
         game.cooperative_string = game.cooperative === true ? 'cooperative' : game.cooperative === false ? 'competitive' : null;
         game.star_classes = starClasses(game.rec_stars);
 

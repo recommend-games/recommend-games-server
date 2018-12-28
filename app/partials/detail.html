@@ -105,20 +105,20 @@
 			</div>
 		</div>
 	</section>
-	<section ng-if="game.bgg_rank || game.rec_rank || game.complexity || game.language_dependency">
+	<section ng-if="game.bgg_rank || game.bayes_rating || game.avg_rating || game.rec_rank || game.complexity || game.language_dependency">
 		<h2>Statistics</h2>
 		<dl class="row">
-			<dt ng-if="game.bgg_rank"
+			<dt ng-if="game.bgg_rank || game.bayes_rating || game.avg_rating"
 					class="col-md-3 col-sm-4 col-12">
 				<img src="/assets/bgg-color.svg" class="img-fluid img-icon-stats" />
 				BGG ranking
 			</dt>
-			<dd ng-if="game.bgg_rank"
+			<dd ng-if="game.bgg_rank || game.bayes_rating || game.avg_rating"
 					class="col-md-9 col-sm-8 col-12">
-				<strong>#{{ game.bgg_rank | number:0 }}</strong>
-				(geek rating <strong>{{ game.bayes_rating | number:3 }} / 10</strong>,
-				average rating <strong>{{ game.avg_rating | number:3 }} / 10</strong>,
-				from <strong>{{ game.num_votes | number:0 }}</strong> votes)
+				<strong ng-if="game.bgg_rank">#{{ game.bgg_rank | number:0 }}</strong>
+				<span ng-if="game.bgg_rank">(</span><span ng-if="game.bayes_rating">geek rating <strong>{{ game.bayes_rating | number:3 }} / 10</strong>,</span>
+				<span ng-if="game.avg_rating">average rating <strong>{{ game.avg_rating | number:3 }} / 10</strong>,</span>
+				from <strong>{{ game.num_votes || 0 | number:0 }}</strong> votes<span ng-if="game.bgg_rank">)</span>
 			</dd>
 
 			<dt ng-if="game.rec_rank"
