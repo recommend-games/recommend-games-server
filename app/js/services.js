@@ -48,6 +48,12 @@ ludojApp.factory('gamesService', function gamesService(
         game.name_short = _.size(game.name) > 50 ? _.truncate(game.name, {'length': 50, 'separator': /,? +/}) : null;
         game.name_url = encodeURIComponent(_.toLower(game.name));
 
+        // filter out '(Uncredited)' / #3
+        game.designer = _.without(game.designer, 3);
+        game.designer_name = _.without(game.designer_name, '(Uncredited)');
+        game.artist = _.without(game.artist, 3);
+        game.artist_name = _.without(game.artist_name, '(Uncredited)');
+
         game.designer_display = join(game.designer_name, ', ', ' & ');
         game.artist_display = join(game.artist_name, ', ', ' & ');
         game.description_array = _.filter(_.map(_.split(game.description, /\n(\s*\n\s*)+/), _.trim));
