@@ -243,6 +243,11 @@ ludojApp.controller('ListController', function ListController(
         updateParams();
     };
 
+    $scope.clearField = function clearField(field) {
+        $scope[field] = null;
+        $('#' + field).focus();
+    };
+
     $scope.$watch('count.enabled', renderSlider);
     $scope.$watch('time.enabled', renderSlider);
     $scope.$watch('age.enabled', renderSlider);

@@ -32,7 +32,7 @@
 			<div class="input-group-append">
 				<button type="button"
 						ng-disabled="!user"
-						ng-click="user = null"
+						ng-click="clearField('user')"
 						class="btn btn-outline-secondary">
 					<i class="fas fa-times"></i>
 				</button>
@@ -164,7 +164,7 @@
 					<div class="input-group-append">
 						<button type="button"
 								ng-disabled="!search"
-								ng-click="search = null"
+								ng-click="clearField('search')"
 								class="btn btn-outline-secondary">
 							<i class="fas fa-times"></i>
 						</button>
