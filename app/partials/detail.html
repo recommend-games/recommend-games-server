@@ -105,7 +105,7 @@
 			</div>
 		</div>
 	</section>
-	<section ng-if="game.bgg_rank || game.bayes_rating || game.avg_rating || game.rec_rank || game.complexity || game.language_dependency">
+	<section ng-if="game.bgg_rank || game.bayes_rating || game.avg_rating || game.rec_rank || game.designer_data || game.artist_data || game.complexity || game.language_dependency">
 		<h2>Statistics</h2>
 		<dl class="row">
 			<dt ng-if="game.bgg_rank || game.bayes_rating || game.avg_rating"
@@ -131,6 +131,32 @@
 				<strong>#{{ game.rec_rank | number:0 }}</strong>
 				(rating <strong>{{ game.rec_rating | number:3 }}</strong>
 				<i ng-repeat="starClass in game.star_classes track by $index" class="{{ starClass }}"></i>)
+			</dd>
+
+			<dt ng-if="game.designer_data"
+					class="col-md-3 col-sm-4 col-12">
+				<i class="fas fa-lightbulb"></i>
+				Designer
+			</dt>
+			<dd ng-if="game.designer_data"
+					class="col-md-9 col-sm-8 col-12">
+				<span ng-repeat="(id, name) in game.designer_data">
+					<a ng-href="https://boardgamegeek.com/boardgamedesigner/{{ id }}"
+						target="_blank"><strong>{{ name }} <i class="fas fa-external-link-alt"></i></strong></a><span ng-if="!$last">, </span>
+				</span>
+			</dd>
+
+			<dt ng-if="game.artist_data"
+					class="col-md-3 col-sm-4 col-12">
+				<i class="fas fa-paint-brush"></i>
+				Artist
+			</dt>
+			<dd ng-if="game.artist_data"
+					class="col-md-9 col-sm-8 col-12">
+				<span ng-repeat="(id, name) in game.artist_data">
+					<a ng-href="https://boardgamegeek.com/boardgameartist/{{ id }}"
+						target="_blank"><strong>{{ name }} <i class="fas fa-external-link-alt"></i></strong></a><span ng-if="!$last">, </span>
+				</span>
 			</dd>
 
 			<dt ng-if="game.complexity"

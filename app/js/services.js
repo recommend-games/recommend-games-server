@@ -52,6 +52,11 @@ ludojApp.factory('gamesService', function gamesService(
         game.artist_display = join(game.artist_name, ', ', ' & ');
         game.description_array = _.filter(_.map(_.split(game.description, /\n(\s*\n\s*)+/), _.trim));
 
+        game.designer_data = _.isEmpty(game.designer) || _.isEmpty(game.designer_name) ?
+            null : _.fromPairs(_.zip(game.designer, game.designer_name));
+        game.artist_data = _.isEmpty(game.artist) || _.isEmpty(game.artist_name) ?
+            null : _.fromPairs(_.zip(game.artist, game.artist_name));
+
         var counts = _.map(_.range(1, 11), function (count) {
                 return between(game.min_players_best, count, game.max_players_best) ? 3
                         : between(game.min_players_rec, count, game.max_players_rec) ? 2
