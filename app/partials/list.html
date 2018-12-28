@@ -21,7 +21,7 @@
 			Personal recommendations for:
 		</label>
 		<div class="input-group">
-			<input type="text"
+			<input type="search"
 				id="user"
 				name="user"
 				ng-model="user"
@@ -30,6 +30,12 @@
 				placeholder="BoardGameGeek user name"
 				aria-describedby="bgg-user-label" />
 			<div class="input-group-append">
+				<button type="button"
+						ng-disabled="!user"
+						ng-click="user = null"
+						class="btn btn-outline-secondary">
+					<i class="fas fa-times"></i>
+				</button>
 				<button type="submit"
 						ng-disabled="!user"
 						class="btn btn-primary">
@@ -147,7 +153,7 @@
 					Game name:
 				</label>
 				<div class="input-group">
-					<input type="text"
+					<input type="search"
 						id="search"
 						name="search"
 						ng-model="search"
@@ -156,6 +162,12 @@
 						placeholder="e.g., &quot;catan&quot;"
 						aria-describedby="search-label" />
 					<div class="input-group-append">
+						<button type="button"
+								ng-disabled="!search"
+								ng-click="search = null"
+								class="btn btn-outline-secondary">
+							<i class="fas fa-times"></i>
+						</button>
 						<button type="submit"
 								ng-disabled="!search"
 								class="btn btn-primary">
