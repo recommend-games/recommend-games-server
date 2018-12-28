@@ -72,7 +72,7 @@
 			</span>
 			<span ng-if="game.rec_rank"
 					class="game-ranking">
-				<i class="fas fa-hashtag"></i> Rank: {{ game.rec_rank }}
+				<i class="fas fa-hashtag"></i> Rank: {{ game.rec_rank | number:0 }}
 			</span>
 		</div>
 		<p ng-repeat="description in game.description_array"
