@@ -170,8 +170,6 @@ class GameViewSet(PermissionsModelViewSet):
         if recommender is None or user not in recommender.known_users:
             return self.list(request)
 
-        # TODO speed up recommendation by pre-computing known games, clusters etc (#16)
-
         fqs = self.filter_queryset(self.get_queryset())
         # we should only need this if params are set, but see #90
         games = frozenset(
@@ -260,7 +258,23 @@ class PersonViewSet(PermissionsModelViewSet):
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
 
-    # TODO /persons/{id}/games/ endpoint (#29)
+    # pylint: disable=unused-argument,invalid-name
+    @action(detail=True)
+    def games(self, request, pk=None):
+        ''' find all games for a person '''
+
+        person = self.get_object()
+        role = request.query_params.get('role')
+        queryset = person.artist_of if role == 'artist' else person.designer_of
+        queryset = self.filter_queryset(queryset.all())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = GameSerializer(page, many=True, context=self.get_serializer_context())
+            return self.get_paginated_response(serializer.data)
+
+        serializer = GameSerializer(queryset, many=True, context=self.get_serializer_context())
+        return Response(serializer.data)
 
 
 class CategoryViewSet(PermissionsModelViewSet):
@@ -270,7 +284,21 @@ class CategoryViewSet(PermissionsModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
-    # TODO /categories/{id}/games/ endpoint
+    # pylint: disable=unused-argument,invalid-name
+    @action(detail=True)
+    def games(self, request, pk=None):
+        ''' find all games in a category '''
+
+        category = self.get_object()
+        queryset = self.filter_queryset(category.games.all())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = GameSerializer(page, many=True, context=self.get_serializer_context())
+            return self.get_paginated_response(serializer.data)
+
+        serializer = GameSerializer(queryset, many=True, context=self.get_serializer_context())
+        return Response(serializer.data)
 
 
 class MechanicViewSet(PermissionsModelViewSet):
@@ -280,7 +308,21 @@ class MechanicViewSet(PermissionsModelViewSet):
     queryset = Mechanic.objects.all()
     serializer_class = MechanicSerializer
 
-    # TODO /mechanics/{id}/games/ endpoint
+    # pylint: disable=unused-argument,invalid-name
+    @action(detail=True)
+    def games(self, request, pk=None):
+        ''' find all games with a mechanic '''
+
+        mechanic = self.get_object()
+        queryset = self.filter_queryset(mechanic.games.all())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = GameSerializer(page, many=True, context=self.get_serializer_context())
+            return self.get_paginated_response(serializer.data)
+
+        serializer = GameSerializer(queryset, many=True, context=self.get_serializer_context())
+        return Response(serializer.data)
 
 
 class UserViewSet(ModelViewSet):
