@@ -14,14 +14,7 @@ export PIPENV_DONT_LOAD_ENV=1
 export DEBUG=true
 export WORK_SPACE="${HOME}/Workspace"
 
-PORT=8000
-URL="http://localhost:${PORT}/api"
 URL_LIVE='https://recommend.games/'
-
-if curl --head --fail "${URL}/"; then
-    echo "The server appears to be already running on port <$PORT>, aborting..."
-    exit 1
-fi
 
 ### SERVER ###
 cd "${WORK_SPACE}/ludoj-server"
@@ -58,30 +51,12 @@ for FILE in $(find app -name '*.js'); do
 done
 # TODO minify HTML
 
-# run server
-mkdir -p logs
-nohup pipenv run python3 manage.py runserver "$PORT" --noreload >> 'logs/server.log' 2>&1 &
-SERVER_PID="${!}"
-echo "Started server with pid <${SERVER_PID}>..."
-
-while true && ! curl --head --fail "${URL}/"; do
-    echo 'Server is not ready yet'
-    sleep 1
-done
-echo 'Server is up and running!'
-
 # sitemap
 echo 'Generating sitemap...'
-pipenv run python3 sitemap.py \
+pipenv run pipenv run python3 manage.py sitemap \
     --url "${URL_LIVE}" \
-    --api-url "${URL}/games/" \
     --limit 50000 \
     --output .temp/sitemap.xml
-
-# stop server now
-echo 'Stopping the server...'
-kill "${SERVER_PID}" || true
-sleep 10
 
 # static files
 DEBUG='' pipenv run python3 manage.py collectstatic --no-input
