@@ -2,10 +2,9 @@
 
 ''' views '''
 
-import json
 import logging
 
-from functools import lru_cache, reduce
+from functools import reduce
 from operator import or_
 
 from django.conf import settings
@@ -42,56 +41,19 @@ class PermissionsModelViewSet(ModelViewSet):
         return super().handle_exception(exc)
 
 
-@lru_cache(maxsize=8)
-def _compilation_ids():
+def _exclude(user=None, ids=None):
+    if ids is None:
+        return None
+
     try:
         import turicreate as tc
     except ImportError:
         LOGGER.exception('unable to import <turicreate>')
         return None
 
-    compilations_path = getattr(settings, 'COMPILATIONS_PATH', None)
-
-    if compilations_path:
-        try:
-            with open(compilations_path) as compilations_file:
-                ids = json.load(compilations_file)
-            return tc.SArray(data=ids, dtype=int)
-        except Exception:
-            pass
-
-    try:
-        # pylint: disable=no-member
-        ids = list(
-            Game.objects.all()
-            .filter(compilation=True)
-            .values_list('bgg_id', flat=True))
-        if compilations_path:
-            with open(compilations_path, 'w') as compilations_file:
-                json.dump(ids, compilations_file, separators=(',', ':'))
-        return tc.SArray(data=ids, dtype=int)
-    except Exception:
-        LOGGER.exception('unable to fetch or write compilation IDs')
-
-    return None
-
-
-@lru_cache(maxsize=8)
-def _exclude(user=None, other=None):
-    try:
-        import turicreate as tc
-    except ImportError:
-        LOGGER.exception('unable to import <turicreate>')
-        return None
-
-    ids = _compilation_ids()
-
-    if other is not None:
-        other = (
-            other if isinstance(other, tc.SArray)
-            else tc.SArray(tuple(arg_to_iter(other)), dtype=int))
-        ids = ids.append(other) if ids is not None else other
-        del other
+    ids = (
+        ids if isinstance(ids, tc.SArray)
+        else tc.SArray(tuple(arg_to_iter(ids)), dtype=int))
 
     # pylint: disable=len-as-condition
     if ids is None or not len(ids):
@@ -248,7 +210,7 @@ class GameViewSet(PermissionsModelViewSet):
             recommendation = recommender.recommend(
                 users=(user,),
                 games=games,
-                exclude=_exclude(user, other=exclude),
+                exclude=_exclude(user, ids=exclude),
                 exclude_known=exclude_known,
                 exclude_clusters=exclude_clusters,
                 star_percentiles=getattr(settings, 'STAR_PERCENTILES', None),

@@ -20,13 +20,14 @@ COPY Pipfile* ./
 RUN pipenv install --deploy --system --verbose
 
 COPY db.sqlite3 ./
+RUN chmod 0444 db.sqlite3
 COPY .tc .tc
-RUN chmod --recursive 0555 db.sqlite3 .tc
-COPY games games
+RUN chmod --recursive 0555 .tc
+
 COPY ludoj ludoj
+COPY games games
 COPY static static
 
-RUN mkdir data && chmod a+w data && useradd -m ludoj
 USER ludoj
 
 CMD gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 16 ludoj.wsgi
