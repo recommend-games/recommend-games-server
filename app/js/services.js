@@ -123,7 +123,7 @@ ludojApp.factory('gamesService', function gamesService(
         return game;
     }
 
-    service.getGames = function getGames(page, filters) {
+    service.getGames = function getGames(page, filters, noblock) {
         var url = API_URL + 'games/',
             params = _.isEmpty(filters) ? {} : _.cloneDeep(filters);
         page = page || null;
@@ -138,7 +138,7 @@ ludojApp.factory('gamesService', function gamesService(
 
         $log.debug('query parameters', params);
 
-        return $http.get(url, {'params': params})
+        return $http.get(url, {'params': params, 'noblock': !!noblock})
             .then(function (response) {
                 var games = _.get(response, 'data.results');
 
@@ -171,7 +171,7 @@ ludojApp.factory('gamesService', function gamesService(
             });
     };
 
-    service.getGame = function getGame(id, forceRefresh) {
+    service.getGame = function getGame(id, forceRefresh, noblock) {
         id = _.parseInt(id);
         var cached = forceRefresh ? null : cache.get(id);
 
@@ -179,7 +179,7 @@ ludojApp.factory('gamesService', function gamesService(
             return $q.resolve(cached);
         }
 
-        return $http.get(API_URL + 'games/' + id + '/')
+        return $http.get(API_URL + 'games/' + id + '/', {'noblock': !!noblock})
             .then(function (response) {
                 var responseId = _.get(response, 'data.bgg_id'),
                     game;
