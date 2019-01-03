@@ -21,11 +21,11 @@ cd "${WORK_SPACE}/ludoj-server"
 
 # fresh database
 mv db.sqlite3 db.sqlite3.bk || true
-pipenv run python3 manage.py migrate
+python3 manage.py migrate
 
 # fill database
 echo 'Uploading games, persons, and recommendations to database...'
-pipenv run python3 manage.py filldb \
+python3 manage.py filldb \
     "${WORK_SPACE}/ludoj-scraper/results/bgg.jl" \
     --collection-paths "${WORK_SPACE}/ludoj-scraper/results/bgg_ratings.jl" \
     --in-format jl \
@@ -45,22 +45,22 @@ cp --recursive \
 mkdir --parents .temp
 cp --recursive app/* .temp/
 for FILE in $(find app -name '*.css'); do
-    pipenv run python3 -m rcssmin < "${FILE}" > ".temp/${FILE#app/}"
+    python3 -m rcssmin < "${FILE}" > ".temp/${FILE#app/}"
 done
 for FILE in $(find app -name '*.js'); do
-    pipenv run python3 -m rjsmin < "${FILE}" > ".temp/${FILE#app/}"
+    python3 -m rjsmin < "${FILE}" > ".temp/${FILE#app/}"
 done
 # TODO minify HTML
 
 # sitemap
 echo 'Generating sitemap...'
-pipenv run pipenv run python3 manage.py sitemap \
+python3 manage.py sitemap \
     --url "${URL_LIVE}" \
     --limit 50000 \
     --output .temp/sitemap.xml
 
 # static files
-DEBUG='' pipenv run python3 manage.py collectstatic --no-input
+DEBUG='' python3 manage.py collectstatic --no-input
 rm --recursive --force .temp
 
 # clean up database
