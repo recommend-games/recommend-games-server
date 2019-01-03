@@ -10,11 +10,9 @@
 
 set -euxo pipefail
 
-export PIPENV_DONT_LOAD_ENV=1
-export DEBUG=true
+export DEBUG=''
 export WORK_SPACE="${HOME}/Workspace"
-
-URL_LIVE='https://recommend.games/'
+export URL_LIVE='https://recommend.games/'
 
 ### SERVER ###
 cd "${WORK_SPACE}/ludoj-server"
