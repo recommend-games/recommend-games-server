@@ -64,9 +64,6 @@ class Command(BaseCommand):
         parser.add_argument('--url', '-u', default='https://recommend.games/', help='')
         parser.add_argument('--limit', '-l', type=int, help='')
         parser.add_argument('--output', '-o', help='')
-        parser.add_argument(
-            '--verbose', '-V', action='count', default=0,
-            help='log level (repeat for more verbosity)')
 
     def handle(self, *args, **kwargs):
         logging.basicConfig(
