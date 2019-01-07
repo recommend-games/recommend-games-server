@@ -297,6 +297,18 @@ ludojApp.factory('filterService', function filterService(
         service = {
             'yearFloor': yearFloor,
             'yearNow': yearNow
+        },
+        orderingValues = {
+            'ludoj': '-rec_rating,-bayes_rating,-avg_rating',
+            'bgg': '-bayes_rating,-rec_rating,-avg_rating',
+            'complex': 'complexity,-rec_rating,-bayes_rating,-avg_rating',
+            '-complex': '-complexity,-rec_rating,-bayes_rating,-avg_rating',
+            'year': 'year,-rec_rating,-bayes_rating,-avg_rating',
+            '-year': '-year,-rec_rating,-bayes_rating,-avg_rating',
+            'time': 'min_time,-rec_rating,-bayes_rating,-avg_rating',
+            '-time': '-max_time,-rec_rating,-bayes_rating,-avg_rating',
+            'age': 'min_age,-rec_rating,-bayes_rating,-avg_rating',
+            '-age': '-min_age,-rec_rating,-bayes_rating,-avg_rating'
         };
 
     function validateCountType(playerCountType) {
@@ -356,6 +368,14 @@ ludojApp.factory('filterService', function filterService(
         return !_.isBoolean(boolean) ? null : boolean ? 'True' : 'False';
     }
 
+    function validateOrdering(ordering) {
+        return orderingValues[ordering] ? ordering : 'ludoj';
+    }
+
+    function orderingParams(ordering) {
+        return orderingValues[ordering] || orderingValues.ludoj;
+    }
+
     function parseParams(params) {
         params = params || {};
 
@@ -369,7 +389,8 @@ ludojApp.factory('filterService', function filterService(
             excludePlayed = booleanDefault(params.excludePlayed, false, !user),
             excludeClusters = booleanDefault(params.excludeClusters, true, !user),
             yearMin = _.parseInt(params.yearMin),
-            yearMax = _.parseInt(params.yearMax);
+            yearMax = _.parseInt(params.yearMax),
+            ordering = validateOrdering(params.ordering);
 
         return {
             'for': user,
@@ -389,7 +410,8 @@ ludojApp.factory('filterService', function filterService(
             'complexityMax': parseFloat(params.complexityMax) || null,
             'yearMin': yearMin && yearMin > yearFloor ? yearMin : null,
             'yearMax': yearMax && yearMax <= yearNow ? yearMax : null,
-            'cooperative': validateBoolean(params.cooperative)
+            'cooperative': validateBoolean(params.cooperative),
+            'ordering': user || ordering === 'ludoj' ? null : ordering
         };
     }
 
@@ -399,7 +421,8 @@ ludojApp.factory('filterService', function filterService(
         var result = {
             'for': scope.user,
             'search': scope.search,
-            'cooperative': scope.cooperative
+            'cooperative': scope.cooperative,
+            'ordering': scope.ordering
         };
 
         if (scope.count.enabled && scope.count.value) {
@@ -470,7 +493,9 @@ ludojApp.factory('filterService', function filterService(
     service.filtersFromParams = function filtersFromParams(params) {
         var result = {},
             playerSuffix = '',
-            ageSuffix = '';
+            ageSuffix = '',
+            mainOrdering;
+
         params = params || {};
 
         if (params.for) {
@@ -480,6 +505,12 @@ ludojApp.factory('filterService', function filterService(
             result.exclude_wishlist = booleanDefault(params.excludeWishlist, false) ? 5 : null;
             result.exclude_play_count = booleanDefault(params.excludePlayed, false) ? 1 : null;
             result.exclude_clusters = booleanString(booleanDefault(params.excludeClusters, true));
+        } else {
+            result.ordering = orderingParams(params.ordering);
+            mainOrdering = _.split(result.ordering, ',', 1)[0];
+            if (mainOrdering[0] !== '-') {
+                result[mainOrdering + '__isnull'] = 'False';
+            }
         }
 
         if (params.search) {
