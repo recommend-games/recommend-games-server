@@ -65,7 +65,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         logging.basicConfig(
             stream=sys.stderr,
-            level=logging.DEBUG if kwargs['verbosity'] else logging.INFO,
+            level=logging.DEBUG if kwargs['verbosity'] > 1 else logging.INFO,
             format='%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s',
         )
 
