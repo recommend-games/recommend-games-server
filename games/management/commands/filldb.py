@@ -412,14 +412,11 @@ class Command(BaseCommand):
         parser.add_argument(
             '--recommender', '-r', default=getattr(settings, 'RECOMMENDER_PATH', None),
             help='path to recommender model')
-        parser.add_argument(
-            '--verbose', '-V', action='count', default=0,
-            help='log level (repeat for more verbosity)')
 
     def handle(self, *args, **kwargs):
         logging.basicConfig(
             stream=sys.stderr,
-            level=logging.DEBUG if kwargs['verbosity'] else logging.INFO,
+            level=logging.DEBUG if kwargs['verbosity'] > 1 else logging.INFO,
             format='%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s',
         )
 
