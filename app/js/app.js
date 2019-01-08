@@ -16,7 +16,10 @@ var ludojApp = angular.module('ludojApp', [
 
 ludojApp.constant('API_URL', '/api/')
     .constant('APP_TITLE', 'Ludoj – board game recommendations on recommend.games')
-    .constant('CANONICAL_URL', 'https://recommend.games/');
+    .constant('CANONICAL_URL', 'https://recommend.games/')
+    .constant('DEFAULT_IMAGE', '/assets/android-chrome-512x512.png')
+    .constant('SITE_DESCRIPTION', 'Top-rated board games as evaluated by our recommendation engine. ' +
+        'Find the best board and card games with personal recommendations for your taste!');
 
 ludojApp.config(function (
     // $addthisProvider,

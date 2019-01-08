@@ -276,4 +276,6 @@ ludojApp.controller('ListController', function ListController(
 
     gamesService.setTitle(params.for ? 'Recommendations for ' + params.for : null);
     gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
+    gamesService.setImage();
+    gamesService.setDescription();
 });

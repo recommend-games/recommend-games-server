@@ -31,6 +31,8 @@ ludojApp.controller('DetailController', function DetailController(
             $scope.game = game;
 
             gamesService.setTitle(game.name);
+            gamesService.setImage(game.image_url);
+            gamesService.setDescription(game.description_short || game.description);
 
             $('#game-details')
                 .append('<script type="application/ld+json">' + $filter('json')(gamesService.jsonLD(game), 0) + '</script>');

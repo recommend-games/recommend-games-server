@@ -28,4 +28,8 @@ ludojApp.controller('AboutController', function AboutController(
 
     gamesService.setTitle('About Ludoj: how it all works');
     gamesService.setCanonicalUrl($location.path());
+    gamesService.setImage();
+    gamesService.setDescription('Ludoj strives to recommend the best board games for you. ' +
+        'We take the user ratings from BoardGameGeek, apply some black magic, and present recommendations that suit you. ' +
+        'Read more about how it works.');
 });
