@@ -45,7 +45,7 @@ ludojApp.controller('DetailController', function DetailController(
             var promises = _(_.concat(compilationOf, containedIn, implementationOf, implementedBy, integratesWith))
                 .uniq()
                 .map(function (id) {
-                    return gamesService.getGame(id)
+                    return gamesService.getGame(id, false, true)
                         .catch(_.constant());
                 })
                 .value();

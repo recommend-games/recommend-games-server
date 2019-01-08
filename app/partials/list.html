@@ -21,7 +21,7 @@
 			Personal recommendations for:
 		</label>
 		<div class="input-group">
-			<input type="text"
+			<input type="search"
 				id="user"
 				name="user"
 				ng-model="user"
@@ -30,6 +30,12 @@
 				placeholder="BoardGameGeek user name"
 				aria-describedby="bgg-user-label" />
 			<div class="input-group-append">
+				<button type="button"
+						ng-disabled="!user"
+						ng-click="clearField('user')"
+						class="btn btn-outline-secondary">
+					<i class="fas fa-times"></i>
+				</button>
 				<button type="submit"
 						ng-disabled="!user"
 						class="btn btn-primary">
@@ -147,7 +153,7 @@
 					Game name:
 				</label>
 				<div class="input-group">
-					<input type="text"
+					<input type="search"
 						id="search"
 						name="search"
 						ng-model="search"
@@ -156,6 +162,12 @@
 						placeholder="e.g., &quot;catan&quot;"
 						aria-describedby="search-label" />
 					<div class="input-group-append">
+						<button type="button"
+								ng-disabled="!search"
+								ng-click="clearField('search')"
+								class="btn btn-outline-secondary">
+							<i class="fas fa-times"></i>
+						</button>
 						<button type="submit"
 								ng-disabled="!search"
 								class="btn btn-primary">
@@ -410,7 +422,7 @@
 		</div>
 
 		<div class="form-row">
-			<div class="col-md-6 mb-3"
+			<div class="col-12 mb-3"
 					data-toggle="tooltip"
 					title="Display only cooperative, only competitive, or all games">
 				<div class="input-group">
@@ -429,6 +441,39 @@
 						<option selected="selected" ng-value="null">[all]</option>
 						<option value="True">only cooperative</option>
 						<option value="False">only competitive</option>
+					</select>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-row">
+			<div class="col-md-6 mb-3"
+					data-toggle="tooltip"
+					title="Select the ordering of the results">
+				<div class="input-group">
+					<div class="input-group-prepend">
+						<div class="input-group-text">
+							<label for="filter-ordering"
+									class="form-check-label {{ user ? 'text-muted' : 'text-success' }}">
+								Sort by:
+							</label>
+						</div>
+					</div>
+					<select name="filter-ordering"
+							ng-model="ordering"
+							ng-disabled="user"
+							class="custom-select"
+							id="filter-ordering">
+						<option selected="selected" value="ludoj">Ludoj ranking</option>
+						<option value="bgg">BoardGameGeek ranking</option>
+						<option value="-year">newest first</option>
+						<option value="year">oldest first</option>
+						<option value="complex">least complex first</option>
+						<option value="-complex">most complex first</option>
+						<option value="time">shortest first</option>
+						<option value="-time">longest first</option>
+						<option value="age">youngest age first</option>
+						<option value="-age">oldest age first</option>
 					</select>
 				</div>
 			</div>

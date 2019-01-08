@@ -2,10 +2,9 @@
 
 ''' views '''
 
-import json
 import logging
 
-from functools import lru_cache, reduce
+from functools import reduce
 from operator import or_
 
 from django.conf import settings
@@ -42,56 +41,19 @@ class PermissionsModelViewSet(ModelViewSet):
         return super().handle_exception(exc)
 
 
-@lru_cache(maxsize=8)
-def _compilation_ids():
+def _exclude(user=None, ids=None):
+    if ids is None:
+        return None
+
     try:
         import turicreate as tc
     except ImportError:
         LOGGER.exception('unable to import <turicreate>')
         return None
 
-    compilations_path = getattr(settings, 'COMPILATIONS_PATH', None)
-
-    if compilations_path:
-        try:
-            with open(compilations_path) as compilations_file:
-                ids = json.load(compilations_file)
-            return tc.SArray(data=ids, dtype=int)
-        except Exception:
-            pass
-
-    try:
-        # pylint: disable=no-member
-        ids = list(
-            Game.objects.all()
-            .filter(compilation=True)
-            .values_list('bgg_id', flat=True))
-        if compilations_path:
-            with open(compilations_path, 'w') as compilations_file:
-                json.dump(ids, compilations_file, separators=(',', ':'))
-        return tc.SArray(data=ids, dtype=int)
-    except Exception:
-        LOGGER.exception('unable to fetch or write compilation IDs')
-
-    return None
-
-
-@lru_cache(maxsize=8)
-def _exclude(user=None, other=None):
-    try:
-        import turicreate as tc
-    except ImportError:
-        LOGGER.exception('unable to import <turicreate>')
-        return None
-
-    ids = _compilation_ids()
-
-    if other is not None:
-        other = (
-            other if isinstance(other, tc.SArray)
-            else tc.SArray(tuple(arg_to_iter(other)), dtype=int))
-        ids = ids.append(other) if ids is not None else other
-        del other
+    ids = (
+        ids if isinstance(ids, tc.SArray)
+        else tc.SArray(tuple(arg_to_iter(ids)), dtype=int))
 
     # pylint: disable=len-as-condition
     if ids is None or not len(ids):
@@ -111,34 +73,34 @@ class GameFilter(FilterSet):
         ''' meta '''
         model = Game
         fields = {
-            'year': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'year': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
             'designer': ['exact',],
             'designer__name': ['exact', 'iexact'],
             'artist': ['exact',],
             'artist__name': ['exact', 'iexact'],
-            'min_players': ['exact', 'gt', 'gte', 'lt', 'lte'],
-            'max_players': ['exact', 'gt', 'gte', 'lt', 'lte'],
-            'min_players_rec': ['exact', 'gt', 'gte', 'lt', 'lte'],
-            'max_players_rec': ['exact', 'gt', 'gte', 'lt', 'lte'],
-            'min_players_best': ['exact', 'gt', 'gte', 'lt', 'lte'],
-            'max_players_best': ['exact', 'gt', 'gte', 'lt', 'lte'],
-            'min_age': ['exact', 'gt', 'gte', 'lt', 'lte'],
-            'max_age': ['exact', 'gt', 'gte', 'lt', 'lte'],
-            'min_age_rec': ['exact', 'gt', 'gte', 'lt', 'lte'],
-            'max_age_rec': ['exact', 'gt', 'gte', 'lt', 'lte'],
-            'min_time': ['exact', 'gt', 'gte', 'lt', 'lte'],
-            'max_time': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'min_players': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
+            'max_players': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
+            'min_players_rec': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
+            'max_players_rec': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
+            'min_players_best': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
+            'max_players_best': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
+            'min_age': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
+            'max_age': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
+            'min_age_rec': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
+            'max_age_rec': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
+            'min_time': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
+            'max_time': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
             'cooperative': ['exact',],
             'compilation': ['exact',],
             'implements': ['exact',],
-            'bgg_rank': ['exact', 'gt', 'gte', 'lt', 'lte'],
-            'num_votes': ['exact', 'gt', 'gte', 'lt', 'lte'],
-            'avg_rating': ['exact', 'gt', 'gte', 'lt', 'lte'],
-            'bayes_rating': ['exact', 'gt', 'gte', 'lt', 'lte'],
-            'rec_rank': ['exact', 'gt', 'gte', 'lt', 'lte'],
-            'rec_rating': ['exact', 'gt', 'gte', 'lt', 'lte'],
-            'complexity': ['exact', 'gt', 'gte', 'lt', 'lte'],
-            'language_dependency': ['exact', 'gt', 'gte', 'lt', 'lte'],
+            'bgg_rank': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
+            'num_votes': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
+            'avg_rating': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
+            'bayes_rating': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
+            'rec_rank': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
+            'rec_rating': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
+            'complexity': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
+            'language_dependency': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
         }
 
 
@@ -208,8 +170,6 @@ class GameViewSet(PermissionsModelViewSet):
         if recommender is None or user not in recommender.known_users:
             return self.list(request)
 
-        # TODO speed up recommendation by pre-computing known games, clusters etc (#16)
-
         fqs = self.filter_queryset(self.get_queryset())
         # we should only need this if params are set, but see #90
         games = frozenset(
@@ -248,7 +208,7 @@ class GameViewSet(PermissionsModelViewSet):
             recommendation = recommender.recommend(
                 users=(user,),
                 games=games,
-                exclude=_exclude(user, other=exclude),
+                exclude=_exclude(user, ids=exclude),
                 exclude_known=exclude_known,
                 exclude_clusters=exclude_clusters,
                 star_percentiles=getattr(settings, 'STAR_PERCENTILES', None),
@@ -298,7 +258,23 @@ class PersonViewSet(PermissionsModelViewSet):
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
 
-    # TODO /persons/{id}/games/ endpoint (#29)
+    # pylint: disable=unused-argument,invalid-name
+    @action(detail=True)
+    def games(self, request, pk=None):
+        ''' find all games for a person '''
+
+        person = self.get_object()
+        role = request.query_params.get('role')
+        queryset = person.artist_of if role == 'artist' else person.designer_of
+        queryset = self.filter_queryset(queryset.all())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = GameSerializer(page, many=True, context=self.get_serializer_context())
+            return self.get_paginated_response(serializer.data)
+
+        serializer = GameSerializer(queryset, many=True, context=self.get_serializer_context())
+        return Response(serializer.data)
 
 
 class CategoryViewSet(PermissionsModelViewSet):
@@ -308,7 +284,21 @@ class CategoryViewSet(PermissionsModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
-    # TODO /categories/{id}/games/ endpoint
+    # pylint: disable=unused-argument,invalid-name
+    @action(detail=True)
+    def games(self, request, pk=None):
+        ''' find all games in a category '''
+
+        category = self.get_object()
+        queryset = self.filter_queryset(category.games.all())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = GameSerializer(page, many=True, context=self.get_serializer_context())
+            return self.get_paginated_response(serializer.data)
+
+        serializer = GameSerializer(queryset, many=True, context=self.get_serializer_context())
+        return Response(serializer.data)
 
 
 class MechanicViewSet(PermissionsModelViewSet):
@@ -318,7 +308,21 @@ class MechanicViewSet(PermissionsModelViewSet):
     queryset = Mechanic.objects.all()
     serializer_class = MechanicSerializer
 
-    # TODO /mechanics/{id}/games/ endpoint
+    # pylint: disable=unused-argument,invalid-name
+    @action(detail=True)
+    def games(self, request, pk=None):
+        ''' find all games with a mechanic '''
+
+        mechanic = self.get_object()
+        queryset = self.filter_queryset(mechanic.games.all())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = GameSerializer(page, many=True, context=self.get_serializer_context())
+            return self.get_paginated_response(serializer.data)
+
+        serializer = GameSerializer(queryset, many=True, context=self.get_serializer_context())
+        return Response(serializer.data)
 
 
 class UserViewSet(ModelViewSet):

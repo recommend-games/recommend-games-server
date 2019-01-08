@@ -70,10 +70,24 @@
 					class="game-cooperative">
 				<i class="fas fa-handshake"></i> {{ game.cooperative_string }}
 			</span>
+			<span ng-if="game.rec_rank"
+					class="game-ranking">
+				<i class="fas fa-hashtag"></i> Rank: {{ game.rec_rank | number:0 }}
+			</span>
 		</div>
 		<p ng-repeat="description in game.description_array"
 				class="{{ $first ? 'lead' : '' }}">
 			{{ description }}
+		</p>
+		<p ng-if="(game.category_name &amp;&amp; game.category_name.length) || (game.mechanic_name &amp;&amp; game.mechanic_name.length)">
+			<span ng-repeat="category in game.category_name"
+					class="badge badge-secondary mr-1">
+				{{ category }}
+			</span>
+			<span ng-repeat="mechanic in game.mechanic_name"
+					class="badge badge-dark mr-1">
+				{{ mechanic }}
+			</span>
 		</p>
 		<div ng-if="expandable"
 				ng-click="toggleDescription()"
@@ -112,5 +126,80 @@
 				<game-square game="game" class="game-small"></game-square>
 			</div>
 		</div>
+	</section>
+	<section ng-if="game.bgg_rank || game.bayes_rating || game.avg_rating || game.rec_rank || game.designer_data || game.artist_data || game.complexity || game.language_dependency">
+		<h2>Statistics</h2>
+		<dl class="row">
+			<dt ng-if="game.bgg_rank || game.bayes_rating || game.avg_rating"
+					class="col-md-3 col-sm-4 col-12">
+				<img src="/assets/bgg-color.svg" class="img-fluid img-icon-stats" />
+				BGG ranking
+			</dt>
+			<dd ng-if="game.bgg_rank || game.bayes_rating || game.avg_rating"
+					class="col-md-9 col-sm-8 col-12">
+				<strong ng-if="game.bgg_rank">#{{ game.bgg_rank | number:0 }}</strong>
+				<span ng-if="game.bgg_rank">(</span><span ng-if="game.bayes_rating">geek rating <strong>{{ game.bayes_rating | number:3 }} / 10</strong>,</span>
+				<span ng-if="game.avg_rating">average rating <strong>{{ game.avg_rating | number:3 }} / 10</strong>,</span>
+				from <strong>{{ game.num_votes || 0 | number:0 }}</strong> votes<span ng-if="game.bgg_rank">)</span>
+			</dd>
+
+			<dt ng-if="game.rec_rank"
+					class="col-md-3 col-sm-4 col-12">
+				<img src="/assets/favicon.svg" class="img-fluid img-icon-stats" />
+				Ludoj ranking
+			</dt>
+			<dd ng-if="game.rec_rank"
+					class="col-md-9 col-sm-8 col-12">
+				<strong>#{{ game.rec_rank | number:0 }}</strong>
+				(rating <strong>{{ game.rec_rating | number:3 }}</strong>
+				<i ng-repeat="starClass in game.star_classes track by $index" class="{{ starClass }}"></i>)
+			</dd>
+
+			<dt ng-if="game.designer_data"
+					class="col-md-3 col-sm-4 col-12">
+				<i class="fas fa-lightbulb"></i>
+				Designer
+			</dt>
+			<dd ng-if="game.designer_data"
+					class="col-md-9 col-sm-8 col-12">
+				<span ng-repeat="(id, name) in game.designer_data">
+					<a ng-href="https://boardgamegeek.com/boardgamedesigner/{{ id }}"
+						target="_blank"><strong>{{ name }} <i class="fas fa-external-link-alt"></i></strong></a><span ng-if="!$last">, </span>
+				</span>
+			</dd>
+
+			<dt ng-if="game.artist_data"
+					class="col-md-3 col-sm-4 col-12">
+				<i class="fas fa-paint-brush"></i>
+				Artist
+			</dt>
+			<dd ng-if="game.artist_data"
+					class="col-md-9 col-sm-8 col-12">
+				<span ng-repeat="(id, name) in game.artist_data">
+					<a ng-href="https://boardgamegeek.com/boardgameartist/{{ id }}"
+						target="_blank"><strong>{{ name }} <i class="fas fa-external-link-alt"></i></strong></a><span ng-if="!$last">, </span>
+				</span>
+			</dd>
+
+			<dt ng-if="game.complexity"
+					class="col-md-3 col-sm-4 col-12">
+				<i class="fas fa-balance-scale"></i>
+				Complexity
+			</dt>
+			<dd ng-if="game.complexity"
+					class="col-md-9 col-sm-8 col-12">
+				<strong>{{ game.complexity | number:2 }} / 5</strong> ({{ game.complexity_string }})
+			</dd>
+
+			<dt ng-if="game.language_dependency"
+					class="col-md-3 col-sm-4 col-12">
+				<i class="fas fa-globe"></i>
+				Language dependency
+			</dt>
+			<dd ng-if="game.language_dependency"
+					class="col-md-9 col-sm-8 col-12">
+				<strong>{{ game.language_dependency | number:2 }} / 5</strong> ({{ game.language_dependency_string }})
+			</dd>
+		</dl>
 	</section>
 </section>

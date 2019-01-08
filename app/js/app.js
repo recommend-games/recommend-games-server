@@ -1,6 +1,6 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global angular */
+/*global angular, _ */
 
 'use strict';
 
@@ -51,6 +51,9 @@ ludojApp.config(function (
 
     blockUIConfig.autoBlock = true;
     blockUIConfig.delay = 0;
+    blockUIConfig.requestFilter = function requestFilter(config) {
+        return !_.get(config, 'noblock');
+    };
 
     toastrConfig.autoDismiss = false;
     toastrConfig.positionClass = 'toast-bottom-right';

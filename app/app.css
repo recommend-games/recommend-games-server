@@ -74,6 +74,10 @@
     max-width: 50%;
 }
 
+.img-icon-stats {
+    max-width: 1.5rem;
+}
+
 @media only screen and (max-width: 767.98px) {
     .expandable {
         max-height: 400px;
@@ -165,7 +169,8 @@
 .game-age,
 .game-complexity,
 .game-cooperative,
-.game-time {
+.game-time,
+.game-ranking {
     font-size: 150%;
     white-space: nowrap;
 }

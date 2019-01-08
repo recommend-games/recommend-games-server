@@ -218,6 +218,8 @@ ludojApp.controller('ListController', function ListController(
 
     $scope.cooperative = params.cooperative;
 
+    $scope.ordering = params.ordering || 'ludoj';
+
     $scope.fetchGames = fetchGames;
     $scope.pad = _.padStart;
     $scope.empty = false;
@@ -235,12 +237,18 @@ ludojApp.controller('ListController', function ListController(
         $scope.complexity.enabled = false;
         $scope.year.enabled = false;
         $scope.cooperative = null;
+        $scope.ordering = 'ludoj';
         updateParams();
     };
 
     $scope.clearUser = function clearUser() {
         $scope.user = null;
         updateParams();
+    };
+
+    $scope.clearField = function clearField(field) {
+        $scope[field] = null;
+        $('#' + field).focus();
     };
 
     $scope.$watch('count.enabled', renderSlider);

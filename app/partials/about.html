@@ -10,7 +10,7 @@
 			BoardGameGeek (BGG) users can rate each game with a score between 1 (<em>awful – defies game description</em>) and 10 (<em>outstanding – will always enjoy playing</em>).
 			These ratings are then used to rank games on the site. But you cannot just use the average score for the ranking, else games with few ratings would shoot to the top, even if a minimum number of votes is required.
 			<span ng-if="topAvg">(At the moment, the game with the highest average rating and at least 100 votes is <em><a ng-href="#/game/{{ topAvg.bgg_id }}">{{ topAvg.name }}</a></em>.)</span>
-			Instead, BGG uses a weighted average by adding a number of "dummy" votes to each game. The effect is that a game's rating is drawn towards to overall average rating across all games on BGG, but as more and more users vote, this "Geek Rating" will get closer to the actual average.
+			Instead, BGG uses a weighted average by adding a number of "dummy" votes to each game. The effect is that a game's rating is drawn towards the overall average rating across all games on BGG, but as more and more users vote, this "Geek Rating" will get closer to the actual average.
 			<span ng-if="topBayes">Currently, the highest ranked game according to BoardGameGeek is <em><a ng-href="#/game/{{ topBayes.bgg_id }}">{{ topBayes.name }}</a></em>.</span>
 			Read more about the ratings on the <a href="https://boardgamegeek.com/wiki/page/ratings" target="_blank">BGG Wiki <i class="fas fa-external-link-alt"></i></a>.
 		</p>
