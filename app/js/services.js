@@ -311,7 +311,7 @@ ludojApp.factory('gamesService', function gamesService(
     };
 
     service.setImage = function setImage(image) {
-        image = image || DEFAULT_IMAGE;
+        image = image || (CANONICAL_URL + DEFAULT_IMAGE);
 
         $('meta[property="og:image"]').remove();
         $('meta[name="twitter:image"]').remove();
