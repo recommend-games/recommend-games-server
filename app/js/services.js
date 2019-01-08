@@ -300,7 +300,12 @@ ludojApp.factory('gamesService', function gamesService(
         $document[0].title = title;
 
         $('meta[property="og:title"]').remove();
-        $('head').append('<meta property="og:title" content="' + title + '" />');
+        $('meta[name="twitter:title"]').remove();
+
+        $('head').append(
+            '<meta property="og:title" content="' + title + '" />',
+            '<meta name="twitter:title" content="' + title + '" />'
+        );
 
         return title;
     };
@@ -309,7 +314,12 @@ ludojApp.factory('gamesService', function gamesService(
         image = image || DEFAULT_IMAGE;
 
         $('meta[property="og:image"]').remove();
-        $('head').append('<meta property="og:image" content="' + image + '" />');
+        $('meta[name="twitter:image"]').remove();
+
+        $('head').append(
+            '<meta property="og:image" content="' + image + '" />',
+            '<meta name="twitter:image" content="' + image + '" />'
+        );
 
         return image;
     };
@@ -319,10 +329,12 @@ ludojApp.factory('gamesService', function gamesService(
 
         $('meta[name="description"]').remove();
         $('meta[property="og:description"]').remove();
+        $('meta[name="twitter:description"]').remove();
 
         $('head').append(
             '<meta name="description" content="' + description + '" />',
-            '<meta property="og:description" content="' + description + '" />'
+            '<meta property="og:description" content="' + description + '" />',
+            '<meta name="twitter:description" content="' + description + '" />'
         );
     };
 
