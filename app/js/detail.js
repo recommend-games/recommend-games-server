@@ -5,14 +5,12 @@
 'use strict';
 
 ludojApp.controller('DetailController', function DetailController(
-    $document,
     $filter,
     $location,
     $q,
     $routeParams,
     $scope,
-    gamesService,
-    APP_TITLE
+    gamesService
 ) {
     var compilationOf = [],
         containedIn = [],
@@ -31,7 +29,10 @@ ludojApp.controller('DetailController', function DetailController(
     gamesService.getGame($routeParams.id)
         .then(function (game) {
             $scope.game = game;
-            $document[0].title = game.name + ' – ' + APP_TITLE;
+
+            gamesService.setTitle(game.name);
+            gamesService.setImage(game.image_url);
+            gamesService.setDescription(game.description_short || game.description);
 
             $('#game-details')
                 .append('<script type="application/ld+json">' + $filter('json')(gamesService.jsonLD(game), 0) + '</script>');

@@ -6,12 +6,16 @@
 
 ludojApp.factory('gamesService', function gamesService(
     $cacheFactory,
+    $document,
     $log,
     $http,
     $q,
     $sessionStorage,
     API_URL,
-    CANONICAL_URL
+    APP_TITLE,
+    CANONICAL_URL,
+    DEFAULT_IMAGE,
+    SITE_DESCRIPTION
 ) {
     var service = {},
         cache = $cacheFactory('ludoj', {'capacity': 1024});
@@ -57,6 +61,7 @@ ludojApp.factory('gamesService', function gamesService(
         game.designer_display = join(game.designer_name, ', ', ' & ');
         game.artist_display = join(game.artist_name, ', ', ' & ');
         game.description_array = _.filter(_.map(_.split(game.description, /\n(\s*\n\s*)+/), _.trim));
+        game.description_short = _.size(game.description) > 250 ? _.truncate(game.description, {'length': 250, 'separator': /,? +/}) : null;
 
         game.designer_data = _.isEmpty(game.designer) || _.isEmpty(game.designer_name) ?
                 null : _.fromPairs(_.zip(game.designer, game.designer_name));
@@ -272,18 +277,65 @@ ludojApp.factory('gamesService', function gamesService(
     }
 
     service.setCanonicalUrl = function setCanonicalUrl(path, params) {
-        var id = 'canonical-url',
-            url;
-
-        $('#' + id).remove();
+        $('link[rel="canonical"]').remove();
+        $('meta[property="og:url"]').remove();
 
         if (!path) {
             return;
         }
 
-        url = canonicalUrl(path, params);
-        $('head').append('<link rel="canonical" href="' + url + '" id="' + id + '" />');
+        var url = canonicalUrl(path, params);
+
+        $('head').append(
+            '<link rel="canonical" href="' + url + '" />',
+            '<meta property="og:url" content="' + url + '" />'
+        );
+
         return url;
+    };
+
+    service.setTitle = function setTitle(title) {
+        title = title ? title + ' – ' + APP_TITLE : APP_TITLE;
+
+        $document[0].title = title;
+
+        $('meta[property="og:title"]').remove();
+        $('meta[name="twitter:title"]').remove();
+
+        $('head').append(
+            '<meta property="og:title" content="' + title + '" />',
+            '<meta name="twitter:title" content="' + title + '" />'
+        );
+
+        return title;
+    };
+
+    service.setImage = function setImage(image) {
+        image = image || DEFAULT_IMAGE;
+
+        $('meta[property="og:image"]').remove();
+        $('meta[name="twitter:image"]').remove();
+
+        $('head').append(
+            '<meta property="og:image" content="' + image + '" />',
+            '<meta name="twitter:image" content="' + image + '" />'
+        );
+
+        return image;
+    };
+
+    service.setDescription = function setDescription(description) {
+        description = description || SITE_DESCRIPTION;
+
+        $('meta[name="description"]').remove();
+        $('meta[property="og:description"]').remove();
+        $('meta[name="twitter:description"]').remove();
+
+        $('head').append(
+            '<meta name="description" content="' + description + '" />',
+            '<meta property="og:description" content="' + description + '" />',
+            '<meta name="twitter:description" content="' + description + '" />'
+        );
     };
 
     return service;

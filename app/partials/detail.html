@@ -132,7 +132,9 @@
 		<dl class="row">
 			<dt ng-if="game.bgg_rank || game.bayes_rating || game.avg_rating"
 					class="col-md-3 col-sm-4 col-12">
-				<img src="/assets/bgg-color.svg" class="img-fluid img-icon-stats" />
+				<img src="/assets/bgg-color.svg"
+					class="img-fluid img-icon-stats"
+					alt="BoardGameGeek ranking" />
 				BGG ranking
 			</dt>
 			<dd ng-if="game.bgg_rank || game.bayes_rating || game.avg_rating"
@@ -145,7 +147,9 @@
 
 			<dt ng-if="game.rec_rank"
 					class="col-md-3 col-sm-4 col-12">
-				<img src="/assets/favicon.svg" class="img-fluid img-icon-stats" />
+				<img src="/assets/favicon.svg"
+					class="img-fluid img-icon-stats"
+					alt="Ludoj ranking" />
 				Ludoj ranking
 			</dt>
 			<dd ng-if="game.rec_rank"
