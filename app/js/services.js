@@ -6,11 +6,13 @@
 
 ludojApp.factory('gamesService', function gamesService(
     $cacheFactory,
+    $document,
     $log,
     $http,
     $q,
     $sessionStorage,
     API_URL,
+    APP_TITLE,
     CANONICAL_URL
 ) {
     var service = {},
@@ -275,15 +277,28 @@ ludojApp.factory('gamesService', function gamesService(
         var id = 'canonical-url',
             url;
 
-        $('#' + id).remove();
+        $('#link-' + id).remove();
+        $('#meta-' + id).remove();
 
         if (!path) {
             return;
         }
 
         url = canonicalUrl(path, params);
-        $('head').append('<link rel="canonical" href="' + url + '" id="' + id + '" />');
+
+        $('head').append('<link rel="canonical" href="' + url + '" id="link-' + id + '" />');
+        $('head').append('<meta property="og:url" content="' + url + '" id="meta-' + id + '" />');
+
         return url;
+    };
+
+    service.setTitle = function setTitle(title) {
+        var fullTitle = title ? title + ' – ' + APP_TITLE : APP_TITLE;
+
+        $document[0].title = fullTitle;
+
+        $('#meta-title').remove();
+        $('head').append('<meta property="og:title" content="' + fullTitle + '" id="meta-title" />');
     };
 
     return service;

@@ -5,7 +5,6 @@
 'use strict';
 
 ludojApp.controller('ListController', function ListController(
-    $document,
     $location,
     $log,
     $filter,
@@ -16,12 +15,9 @@ ludojApp.controller('ListController', function ListController(
     $timeout,
     filterService,
     gamesService,
-    toastr,
-    APP_TITLE
+    toastr
 ) {
     var params = filterService.getParams($routeParams);
-
-    $document[0].title = params.for ? 'Recommendations for ' + params.for + ' – ' + APP_TITLE : APP_TITLE;
 
     function filtersActive() {
         return _.sum([
@@ -278,5 +274,6 @@ ludojApp.controller('ListController', function ListController(
             renderSlider();
         });
 
+    gamesService.setTitle(params.for ? 'Recommendations for ' + params.for : null);
     gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
 });
