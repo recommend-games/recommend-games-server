@@ -280,7 +280,7 @@ class GameViewSet(PermissionsModelViewSet):
         del page
 
         games = {game['similar']: game for game in games}
-        results = self.filter_queryset(self.get_queryset()).filter(bgg_id__in=games)
+        results = self.get_queryset().filter(bgg_id__in=games)
         for game in results:
             game.sort_rank = games[game.bgg_id]['rank']
         del games

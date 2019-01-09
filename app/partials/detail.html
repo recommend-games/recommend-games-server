@@ -125,6 +125,10 @@
 				<strong ng-if="$first">Contained in:</strong>
 				<game-square game="game" class="game-small"></game-square>
 			</div>
+			<div ng-repeat="game in similarGames" class="col-xl-2 col-md-3 col-sm-4 col-6">
+				<strong ng-if="$first">You might also like:</strong>
+				<game-square game="game" class="game-small"></game-square>
+			</div>
 		</div>
 	</section>
 	<section ng-if="game.bgg_rank || game.bayes_rating || game.avg_rating || game.rec_rank || game.designer_data || game.artist_data || game.complexity || game.language_dependency">

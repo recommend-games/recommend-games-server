@@ -216,6 +216,47 @@ ludojApp.factory('gamesService', function gamesService(
         $sessionStorage.games = games;
     };
 
+    service.getSimilarGames = function getSimilarGames(gameId, page, noblock) {
+        page = page || null;
+        var url = API_URL + 'games/' + gameId + '/similar/',
+            params = page ? {'page': page} : null;
+
+        return $http.get(url, {'params': params, 'noblock': !!noblock})
+            .then(function (response) {
+                var games = _.get(response, 'data.results');
+
+                if (!games) {
+                    return $q.reject('Unable to load games.');
+                }
+
+                games = _.map(games, processGame);
+                response.data.results = games;
+                response.data.page = page;
+
+                if (!params.user) {
+                    _.forEach(games, function (game) {
+                        var id = _.get(game, 'bgg_id');
+                        if (id) {
+                            cache.put(id, game);
+                        } else {
+                            $log.warn('invalid game', game);
+                        }
+                    });
+                }
+
+                return response.data;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to load games.';
+                return $q.reject({
+                    'reason': response,
+                    'status': _.get(reason, 'status')
+                });
+            });
+    };
+
     service.jsonLD = function jsonLD(game) {
         if (_.isArray(game)) {
             return {
