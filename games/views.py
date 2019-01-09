@@ -256,6 +256,46 @@ class GameViewSet(PermissionsModelViewSet):
             else Response(serializer.data)
         )
 
+    # pylint: disable=unused-argument,invalid-name
+    @action(detail=True)
+    def similar(self, request, pk=None):
+        ''' find games similar to this game '''
+
+        path = getattr(settings, 'RECOMMENDER_PATH', None)
+        recommender = load_recommender(path)
+
+        if recommender is None:
+            raise NotFound(f'cannot find similar games to <{pk}>')
+
+        games = recommender.similar_games(parse_int(pk), num_games=0)
+        del recommender
+
+        page = self.paginate_queryset(games)
+        if page is None:
+            games = games[:10]
+            paginate = False
+        else:
+            games = page
+            paginate = True
+        del page
+
+        games = {game['similar']: game for game in games}
+        results = self.filter_queryset(self.get_queryset()).filter(bgg_id__in=games)
+        for game in results:
+            game.sort_rank = games[game.bgg_id]['rank']
+        del games
+
+        serializer = self.get_serializer(
+            instance=sorted(results, key=lambda game: game.sort_rank),
+            many=True,
+        )
+        del results
+
+        return (
+            self.get_paginated_response(serializer.data) if paginate
+            else Response(serializer.data)
+        )
+
 
 class PersonViewSet(PermissionsModelViewSet):
     ''' person view set '''
