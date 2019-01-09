@@ -35,6 +35,7 @@ rm --recursive --force .tc* .temp* static
 mkdir --parents .tc
 cp --recursive \
     "${WORK_SPACE}"/ludoj-recommender/.tc/recommender \
+    "${WORK_SPACE}"/ludoj-recommender/.tc/similarity \
     "${WORK_SPACE}"/ludoj-recommender/.tc/clusters \
     "${WORK_SPACE}"/ludoj-recommender/.tc/compilations \
     .tc/

@@ -12,7 +12,7 @@ from django.db.models import Q
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotAuthenticated, MethodNotAllowed, PermissionDenied
+from rest_framework.exceptions import NotAuthenticated, NotFound, MethodNotAllowed, PermissionDenied
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -167,8 +167,11 @@ class GameViewSet(PermissionsModelViewSet):
         path = getattr(settings, 'RECOMMENDER_PATH', None)
         recommender = load_recommender(path)
 
-        if recommender is None or user not in recommender.known_users:
+        if recommender is None:
             return self.list(request)
+
+        if user not in recommender.known_users:
+            raise NotFound(f'user <{user}> could not be found')
 
         fqs = self.filter_queryset(self.get_queryset())
         # we should only need this if params are set, but see #90
@@ -205,9 +208,12 @@ class GameViewSet(PermissionsModelViewSet):
             except Exception:
                 exclude = None
 
+            similarity_model = take_first(params.get('model')) == 'similarity'
+
             recommendation = recommender.recommend(
                 users=(user,),
                 games=games,
+                similarity_model=similarity_model,
                 exclude=_exclude(user, ids=exclude),
                 exclude_known=exclude_known,
                 exclude_clusters=exclude_clusters,

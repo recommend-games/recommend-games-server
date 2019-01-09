@@ -172,7 +172,10 @@ ludojApp.factory('gamesService', function gamesService(
                 $log.error('There has been an error', reason);
                 var response = _.get(reason, 'data.detail') || reason;
                 response = _.isString(response) ? response : 'Unable to load games.';
-                return $q.reject(response);
+                return $q.reject({
+                    'reason': response,
+                    'status': _.get(reason, 'status')
+                });
             });
     };
 

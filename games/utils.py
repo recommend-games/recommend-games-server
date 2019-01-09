@@ -73,7 +73,7 @@ def parse_bool(item):
     return False
 
 
-@lru_cache(maxsize=32)
+@lru_cache(maxsize=8)
 def load_recommender(path):
     ''' load recommender from given path '''
     if not path:

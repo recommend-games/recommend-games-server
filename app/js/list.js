@@ -55,6 +55,21 @@ ludojApp.controller('ListController', function ListController(
         }
 
         return promise
+            .catch(function (response) {
+                $log.error(response);
+
+                if (response.status !== 404 || !filters.user) {
+                    return $q.reject(response);
+                }
+
+                toastr.error(
+                    "Sorry, this user cannot be found. We'll show general recommendations instead.",
+                    'Unable to create recommendations for ' + filters.user
+                );
+
+                filters.user = null;
+                return gamesService.getGames(page, filters);
+            })
             .then(function (response) {
                 if (!append) {
                     filterService.setParams(parsed);
@@ -82,8 +97,8 @@ ludojApp.controller('ListController', function ListController(
 
                 return games;
             })
-            .catch(function (reason) {
-                $log.error(reason);
+            .catch(function (response) {
+                $log.error(response);
                 $scope.empty = false;
                 $scope.total = null;
                 toastr.error(
