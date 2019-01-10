@@ -140,7 +140,7 @@
 	</form>
 
 	<p class="text-right mb-0">
-		No BoardGameGeek account? Tell us what games you like instead!
+		<em>No BoardGameGeek account? Tell us what games you like instead!</em>
 		<button type="button"
 				ng-disabled="isEmpty(likedGames) &amp;&amp; isEmpty(popularGames)"
 				class="btn btn-sm btn-primary"
@@ -509,14 +509,14 @@
 					<div class="input-group-prepend">
 						<div class="input-group-text">
 							<label for="filter-ordering"
-									class="form-check-label {{ user ? 'text-muted' : 'text-success' }}">
+									class="form-check-label {{ user || !isEmpty(likedGames) ? 'text-muted' : 'text-success' }}">
 								Sort by:
 							</label>
 						</div>
 					</div>
 					<select name="filter-ordering"
 							ng-model="ordering"
-							ng-disabled="user"
+							ng-disabled="user || !isEmpty(likedGames)"
 							class="custom-select"
 							id="filter-ordering">
 						<option selected="selected" value="ludoj">Ludoj ranking</option>
@@ -556,6 +556,10 @@
 	<p ng-if="currUser">
 		See recommendations <a href="" ng-click="clearUser()">for all users</a> instead
 	</p>
+
+	<h2 ng-if="!isEmpty(likedGames)">
+		Recommended games based on your taste
+	</h2>
 
 	<div ng-if="empty"
 			class="alert alert-warning"

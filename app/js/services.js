@@ -128,7 +128,7 @@ ludojApp.factory('gamesService', function gamesService(
         return game;
     }
 
-    service.getGames = function getGames(page, filters, noblock) {
+    function getGames(page, filters, noblock) {
         var url = API_URL + 'games/',
             params = _.isEmpty(filters) ? {} : _.cloneDeep(filters);
         page = page || null;
@@ -177,7 +177,9 @@ ludojApp.factory('gamesService', function gamesService(
                     'status': _.get(reason, 'status')
                 });
             });
-    };
+    }
+
+    service.getGames = getGames;
 
     service.getGame = function getGame(id, forceRefresh, noblock) {
         id = _.parseInt(id);
@@ -214,6 +216,22 @@ ludojApp.factory('gamesService', function gamesService(
 
     service.setCachedGames = function setCachedGames(games) {
         $sessionStorage.games = games;
+    };
+
+    service.getPopularGames = function getPopularGames(noblock) {
+        if (!_.isEmpty($sessionStorage.popularGames)) {
+            return $q.resolve($sessionStorage.popularGames);
+        }
+
+        return getGames(1, {
+            'ordering': '-num_votes',
+            'compilation': 'False'
+        }, !!noblock)
+            .then(function (response) {
+                var games = _.get(response, 'results');
+                $sessionStorage.popularGames = games;
+                return games;
+            });
     };
 
     service.getSimilarGames = function getSimilarGames(gameId, page, noblock) {

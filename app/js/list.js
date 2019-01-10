@@ -329,12 +329,9 @@ ludojApp.controller('ListController', function ListController(
             renderSlider();
         });
 
-    gamesService.getGames(1, {
-        'ordering': '-num_votes',
-        'compilation': 'False'
-    }, true)
-        .then(function (response) {
-            $scope.popularGames = _.take(response.results, 12);
+    gamesService.getPopularGames(true)
+        .then(function (games) {
+            $scope.popularGames = _.take(games, 12);
 
             var promises = _.map(params.like, function (id) {
                 return gamesService.getGame(id, false, true)
