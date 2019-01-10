@@ -21,6 +21,7 @@
 
 .game-more {
     background-color: #C06;
+    cursor: pointer;
 }
 
 .game > div {
@@ -62,6 +63,32 @@
 
 .game-small .game-title {
     font-size: 1rem;
+}
+
+.game-zoomable {
+    transition: all .2s;
+}
+
+.game-selectable {
+    opacity: .5;
+}
+
+.game-zoomable:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.game-liked .game-selectable {
+    opacity: 1;
+}
+
+.game-thumb {
+    color: white;
+    left: 0;
+    font-size: 2rem;
+    position: absolute;
+    text-shadow: 0 0 5px black;
+    top: 0;
 }
 
 .game-img {
@@ -253,7 +280,8 @@ input:checked + .slider:before {
     text-decoration: underline dotted;
 }
 
-.related-games {
+.related-games,
+.selectable-games {
     line-height: 1;
 }
 

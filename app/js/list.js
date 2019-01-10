@@ -233,11 +233,13 @@ ludojApp.controller('ListController', function ListController(
 
     $scope.fetchGames = fetchGames;
     $scope.pad = _.padStart;
+    $scope.isEmpty = _.isEmpty;
     $scope.empty = false;
     $scope.total = null;
     $scope.renderSlider = renderSlider;
     $scope.filtersActive = filtersActive;
     $scope.updateParams = updateParams;
+    $scope.selectionActive = false;
 
     $scope.clearFilters = function clearFilters() {
         $scope.user = null;
@@ -262,6 +264,38 @@ ludojApp.controller('ListController', function ListController(
         $('#' + field).focus();
     };
 
+    $scope.toggleSelection = function toggleSelection() {
+        $scope.selectionActive = !$scope.selectionActive;
+    };
+
+    function contains(array, game) {
+        return _.some(array, ['bgg_id', game.bgg_id]);
+    }
+
+    $scope.contains = contains;
+
+    $scope.likeGame = function likeGame(game) {
+        if (_.isEmpty($scope.likedGames)) {
+            $scope.likedGames = [game];
+        } else if (!contains($scope.likedGames, game)) {
+            $scope.likedGames.push(game);
+        }
+        _.remove($scope.popularGames, function (g) {
+            return g.bgg_id === game.bgg_id;
+        });
+    };
+
+    $scope.unlikeGame = function unlikeGame(game) {
+        if (_.isEmpty($scope.popularGames)) {
+            $scope.popularGames = [game];
+        } else if (!contains($scope.popularGames, game)) {
+            $scope.popularGames.push(game);
+        }
+        _.remove($scope.likedGames, function (g) {
+            return g.bgg_id === game.bgg_id;
+        });
+    };
+
     $scope.$watch('count.enabled', renderSlider);
     $scope.$watch('time.enabled', renderSlider);
     $scope.$watch('age.enabled', renderSlider);
@@ -277,13 +311,6 @@ ludojApp.controller('ListController', function ListController(
                     })
                     .on('hide.bs.collapse', function () {
                         $('#filter-toggle-icon').removeClass('fa-minus-square').addClass('fa-plus-square');
-                    });
-                $('#select-games')
-                    .on('show.bs.collapse', function () {
-                        $('#select-games-icon').removeClass('fa-plus-square').addClass('fa-minus-square');
-                    })
-                    .on('hide.bs.collapse', function () {
-                        $('#select-games-icon').removeClass('fa-minus-square').addClass('fa-plus-square');
                     });
                 $('#form-exclude-filters')
                     .on('show.bs.collapse', function () {

@@ -10,7 +10,9 @@ ludojApp.directive('gameSquare', function gameSquare() {
         'templateUrl': '/partials/game-square.html',
         'scope': {
             'game': '=',
-            'showRanking': '='
+            'showRanking': '=',
+            'thumb': '@',
+            'addClass': '@'
         },
         'controller': function controller($scope) {
             $scope.bgImage = function bgImage(url) {

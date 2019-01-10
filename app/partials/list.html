@@ -146,18 +146,39 @@
 				class="btn btn-sm btn-primary"
 				data-toggle="collapse"
 				data-target="#select-games"
+				ng-click="toggleSelection()"
 				aria-expanded="false"
 				aria-controls="select-games">
 			Select games
-			<i class="far fa-plus-square" id="select-games-icon"></i>
+			<i class="far {{ selectionActive ? 'fa-minus-square' : 'fa-plus-square' }}" id="select-games-icon"></i>
 		</button>
 	</p>
 
-	<div id="select-games" class="collapse row align-items-end mb-3">
-		<p class="col-12 mb-0">Select games you like and we will recommend games for your taste!</p>
-		<div ng-repeat="game in popularGames" class="col-xl-2 col-md-3 col-sm-4 col-6">
-			<strong ng-if="$first">Select games:</strong>
-			<game-square game="game" class="game-small"></game-square>
+	<div id="select-games" class="collapse mb-3">
+		<p class="mb-1">Select games you like and we will recommend games for your taste!</p>
+		<div ng-hide="isEmpty(likedGames)"
+				class="row align-items-end selectable-games mb-0">
+			<p class="col-12 mb-0"><strong>Liked games:</strong></p>
+			<a ng-repeat="game in likedGames"
+				game-square=""
+				game="game"
+				thumb="solid"
+				ng-click="unlikeGame(game)"
+				href=""
+				class="col-xl-2 col-md-3 col-sm-4 col-6 game-small game-liked"
+				add-class="game-zoomable game-selectable"></a>
+		</div>
+		<div ng-hide="isEmpty(popularGames)"
+				class="row align-items-end selectable-games mb-0">
+			<p class="col-12 mb-0"><strong>Select games you like:</strong></p>
+			<a ng-repeat="game in popularGames"
+				game-square=""
+				game="game"
+				thumb="outline"
+				ng-click="likeGame(game)"
+				href=""
+				class="col-xl-2 col-md-3 col-sm-4 col-6 game-small"
+				add-class="game-zoomable game-selectable"></a>
 		</div>
 	</div>
 
@@ -534,11 +555,22 @@
 
 	<div class="row">
 		<a ng-repeat="game in games"
+			ng-if="!selectionActive"
 			game-square=""
 			game="game"
 			show-ranking="true"
 			ng-href="#/game/{{ game.bgg_id }}"
 			class="col-lg-3 col-md-4 col-sm-6"></a>
+		<a ng-repeat="game in games"
+			ng-if="selectionActive"
+			game-square=""
+			game="game"
+			show-ranking="true"
+			thumb="{{ contains(likedGames, game) ? 'solid' : 'outline' }}"
+			ng-click="contains(likedGames, game) ? unlikeGame(game) : likeGame(game)"
+			href=""
+			class="col-lg-3 col-md-4 col-sm-6"
+			add-class="game-zoomable"></a>
 		<div ng-if="nextPage"
 				ng-click="fetchGames(nextPage)"
 				class="col-lg-3 col-md-4 col-sm-6">
