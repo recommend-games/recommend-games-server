@@ -12,7 +12,7 @@ from django.db.models import Q
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotAuthenticated, MethodNotAllowed, PermissionDenied
+from rest_framework.exceptions import NotAuthenticated, NotFound, MethodNotAllowed, PermissionDenied
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -65,6 +65,18 @@ def _exclude(user=None, ids=None):
     del tc, ids
 
     return sframe
+
+
+def _parse_ints(args):
+    for arg in arg_to_iter(args):
+        if isinstance(arg, int):
+            yield arg
+        elif isinstance(arg, str):
+            for parsed in map(parse_int, arg.split(',')):
+                if parsed is not None:
+                    yield parsed
+        elif isinstance(arg, (list, tuple)):
+            yield from _parse_ints(arg)
 
 
 class GameFilter(FilterSet):
@@ -154,72 +166,101 @@ class GameViewSet(PermissionsModelViewSet):
         'owned',
     )
 
+    def _excluded_games(self, user, params):
+        params = params or {}
+        params.setdefault('exclude_known', True)
+
+        exclude_known = parse_bool(take_first(params.get('exclude_known')))
+        exclude_fields = [
+            field for field in self.collection_fields
+            if parse_bool(take_first(params.get(f'exclude_{field}')))]
+        exclude_wishlist = parse_int(take_first(params.get('exclude_wishlist')))
+        exclude_play_count = parse_int(take_first(params.get('exclude_play_count')))
+        exclude_clusters = parse_bool(take_first(params.get('exclude_clusters')))
+
+        try:
+            queries = [Q(**{field: True}) for field in exclude_fields]
+            if exclude_known and exclude_clusters:
+                queries.append(Q(rating__isnull=False))
+            if exclude_wishlist:
+                queries.append(Q(wishlist__lte=exclude_wishlist))
+            if exclude_play_count:
+                queries.append(Q(play_count__gte=exclude_play_count))
+            if queries:
+                query = reduce(or_, queries)
+                return tuple(
+                    User.objects.get(name__iexact=user)
+                    .collection_set
+                    .order_by()
+                    .filter(query)
+                    .values_list('game_id', flat=True))
+
+        except Exception:
+            pass
+
+        return None
+
+    def _recommend_rating(self, user, recommender, params):
+        user = user.lower()
+        if user not in recommender.known_users:
+            raise NotFound(f'user <{user}> could not be found')
+
+        # we should only need this if params are set, but see #90
+        games = frozenset(
+            self.filter_queryset(self.get_queryset())
+            .order_by()
+            .values_list('bgg_id', flat=True)) & recommender.rated_games
+
+        if not games:
+            return ()
+
+        params = params or {}
+        exclude = self._excluded_games(user, params)
+        similarity_model = take_first(params.get('model')) == 'similarity'
+
+        return recommender.recommend(
+            users=(user,),
+            games=games,
+            similarity_model=similarity_model,
+            exclude=_exclude(user, ids=exclude),
+            exclude_known=parse_bool(take_first(params.get('exclude_known'))),
+            exclude_clusters=parse_bool(take_first(params.get('exclude_clusters'))),
+            star_percentiles=getattr(settings, 'STAR_PERCENTILES', None),
+        )
+
+    def _recommend_similar(self, like, recommender):
+        like = list(_parse_ints(like))
+        games = frozenset(
+            self.filter_queryset(self.get_queryset())
+            .order_by()
+            .values_list('bgg_id', flat=True)) & recommender.rated_games
+
+        if not games:
+            return ()
+
+        return recommender.recommend_similar(games=like, items=games)
+
     @action(detail=False)
     def recommend(self, request):
         ''' recommend games '''
 
         user = request.query_params.get('user')
+        like = request.query_params.get('like')
 
-        if not user:
+        if not user and not like:
             return self.list(request)
 
-        user = user.lower()
         path = getattr(settings, 'RECOMMENDER_PATH', None)
         recommender = load_recommender(path)
 
-        if recommender is None or user not in recommender.known_users:
+        if recommender is None:
             return self.list(request)
 
-        fqs = self.filter_queryset(self.get_queryset())
-        # we should only need this if params are set, but see #90
-        games = frozenset(
-            fqs.order_by().values_list('bgg_id', flat=True)) & recommender.rated_games
+        recommendation = (
+            self._recommend_rating(user, recommender, dict(request.query_params))
+            if user else self._recommend_similar(like, recommender))
 
-        if games:
-            params = dict(request.query_params)
-            params.setdefault('exclude_known', True)
-
-            exclude_known = parse_bool(take_first(params.get('exclude_known')))
-            exclude_fields = [
-                field for field in self.collection_fields
-                if parse_bool(take_first(params.get(f'exclude_{field}')))]
-            exclude_wishlist = parse_int(take_first(params.get('exclude_wishlist')))
-            exclude_play_count = parse_int(take_first(params.get('exclude_play_count')))
-            exclude_clusters = parse_bool(take_first(params.get('exclude_clusters')))
-
-            try:
-                collection = User.objects.get(name__iexact=user).collection_set.order_by()
-                queries = [Q(**{field: True}) for field in exclude_fields]
-                if exclude_known and exclude_clusters:
-                    queries.append(Q(rating__isnull=False))
-                if exclude_wishlist:
-                    queries.append(Q(wishlist__lte=exclude_wishlist))
-                if exclude_play_count:
-                    queries.append(Q(play_count__gte=exclude_play_count))
-                if queries:
-                    query = reduce(or_, queries)
-                    exclude = tuple(collection.filter(query).values_list('game_id', flat=True))
-                else:
-                    exclude = None
-                del collection, queries
-            except Exception:
-                exclude = None
-
-            recommendation = recommender.recommend(
-                users=(user,),
-                games=games,
-                exclude=_exclude(user, ids=exclude),
-                exclude_known=exclude_known,
-                exclude_clusters=exclude_clusters,
-                star_percentiles=getattr(settings, 'STAR_PERCENTILES', None),
-            )
-
-            del params, exclude
-
-        else:
-            recommendation = ()
-
-        del user, path, recommender, games
+        del user, like, path, recommender
 
         page = self.paginate_queryset(recommendation)
         if page is None:
@@ -231,19 +272,59 @@ class GameViewSet(PermissionsModelViewSet):
         del page
 
         recommendation = {game['bgg_id']: game for game in recommendation}
-        games = fqs.filter(bgg_id__in=recommendation)
+        games = self.filter_queryset(self.get_queryset()).filter(bgg_id__in=recommendation)
         for game in games:
             rec = recommendation[game.bgg_id]
             game.rec_rank = rec['rank']
             game.rec_rating = rec['score']
             game.rec_stars = rec.get('stars')
-        del fqs, recommendation
+        del recommendation
 
         serializer = self.get_serializer(
             instance=sorted(games, key=lambda game: game.rec_rank),
             many=True,
         )
         del games
+
+        return (
+            self.get_paginated_response(serializer.data) if paginate
+            else Response(serializer.data)
+        )
+
+    # pylint: disable=unused-argument,invalid-name
+    @action(detail=True)
+    def similar(self, request, pk=None):
+        ''' find games similar to this game '''
+
+        path = getattr(settings, 'RECOMMENDER_PATH', None)
+        recommender = load_recommender(path)
+
+        if recommender is None:
+            raise NotFound(f'cannot find similar games to <{pk}>')
+
+        games = recommender.similar_games(parse_int(pk), num_games=0)
+        del recommender
+
+        page = self.paginate_queryset(games)
+        if page is None:
+            games = games[:10]
+            paginate = False
+        else:
+            games = page
+            paginate = True
+        del page
+
+        games = {game['similar']: game for game in games}
+        results = self.get_queryset().filter(bgg_id__in=games)
+        for game in results:
+            game.sort_rank = games[game.bgg_id]['rank']
+        del games
+
+        serializer = self.get_serializer(
+            instance=sorted(results, key=lambda game: game.sort_rank),
+            many=True,
+        )
+        del results
 
         return (
             self.get_paginated_response(serializer.data) if paginate

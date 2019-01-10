@@ -107,23 +107,51 @@
 		<div class="row align-items-end related-games">
 			<div ng-repeat="game in compilationOf" class="col-xl-2 col-md-3 col-sm-4 col-6">
 				<strong ng-if="$first">Contains:</strong>
-				<game-square game="game" class="game-small"></game-square>
+				<a game-square=""
+					game="game"
+					show-ranking="true"
+					ng-href="#/game/{{ game.bgg_id }}"
+					class="game-small"></a>
 			</div>
 			<div ng-repeat="game in integratesWith" class="col-xl-2 col-md-3 col-sm-4 col-6">
 				<strong ng-if="$first">Integrates with:</strong>
-				<game-square game="game" class="game-small"></game-square>
+				<a game-square=""
+					game="game"
+					show-ranking="true"
+					ng-href="#/game/{{ game.bgg_id }}"
+					class="game-small"></a>
 			</div>
 			<div ng-repeat="game in implementationOf" class="col-xl-2 col-md-3 col-sm-4 col-6">
 				<strong ng-if="$first">Reimplements:</strong>
-				<game-square game="game" class="game-small"></game-square>
+				<a game-square=""
+					game="game"
+					show-ranking="true"
+					ng-href="#/game/{{ game.bgg_id }}"
+					class="game-small"></a>
 			</div>
 			<div ng-repeat="game in implementedBy" class="col-xl-2 col-md-3 col-sm-4 col-6">
 				<strong ng-if="$first">Reimplemented by:</strong>
-				<game-square game="game" class="game-small"></game-square>
+				<a game-square=""
+					game="game"
+					show-ranking="true"
+					ng-href="#/game/{{ game.bgg_id }}"
+					class="game-small"></a>
 			</div>
 			<div ng-repeat="game in containedIn" class="col-xl-2 col-md-3 col-sm-4 col-6">
 				<strong ng-if="$first">Contained in:</strong>
-				<game-square game="game" class="game-small"></game-square>
+				<a game-square=""
+					game="game"
+					show-ranking="true"
+					ng-href="#/game/{{ game.bgg_id }}"
+					class="game-small"></a>
+			</div>
+			<div ng-repeat="game in similarGames" class="col-xl-2 col-md-3 col-sm-4 col-6">
+				<strong ng-if="$first">You might also like:</strong>
+				<a game-square=""
+					game="game"
+					show-ranking="true"
+					ng-href="#/game/{{ game.bgg_id }}"
+					class="game-small"></a>
 			</div>
 		</div>
 	</section>
@@ -132,7 +160,9 @@
 		<dl class="row">
 			<dt ng-if="game.bgg_rank || game.bayes_rating || game.avg_rating"
 					class="col-md-3 col-sm-4 col-12">
-				<img src="/assets/bgg-color.svg" class="img-fluid img-icon-stats" />
+				<img src="/assets/bgg-color.svg"
+					class="img-fluid img-icon-stats"
+					alt="BoardGameGeek ranking" />
 				BGG ranking
 			</dt>
 			<dd ng-if="game.bgg_rank || game.bayes_rating || game.avg_rating"
@@ -145,7 +175,9 @@
 
 			<dt ng-if="game.rec_rank"
 					class="col-md-3 col-sm-4 col-12">
-				<img src="/assets/favicon.svg" class="img-fluid img-icon-stats" />
+				<img src="/assets/favicon.svg"
+					class="img-fluid img-icon-stats"
+					alt="Ludoj ranking" />
 				Ludoj ranking
 			</dt>
 			<dd ng-if="game.rec_rank"

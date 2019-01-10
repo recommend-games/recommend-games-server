@@ -5,7 +5,6 @@
 'use strict';
 
 ludojApp.controller('ListController', function ListController(
-    $document,
     $location,
     $log,
     $filter,
@@ -16,12 +15,9 @@ ludojApp.controller('ListController', function ListController(
     $timeout,
     filterService,
     gamesService,
-    toastr,
-    APP_TITLE
+    toastr
 ) {
     var params = filterService.getParams($routeParams);
-
-    $document[0].title = params.for ? 'Recommendations for ' + params.for + ' – ' + APP_TITLE : APP_TITLE;
 
     function filtersActive() {
         return _.sum([
@@ -59,6 +55,21 @@ ludojApp.controller('ListController', function ListController(
         }
 
         return promise
+            .catch(function (response) {
+                $log.error(response);
+
+                if (response.status !== 404 || !filters.user) {
+                    return $q.reject(response);
+                }
+
+                toastr.error(
+                    "Sorry, this user cannot be found. We'll show general recommendations instead.",
+                    'Unable to create recommendations for ' + filters.user
+                );
+
+                filters.user = null;
+                return gamesService.getGames(page, filters);
+            })
             .then(function (response) {
                 if (!append) {
                     filterService.setParams(parsed);
@@ -86,8 +97,8 @@ ludojApp.controller('ListController', function ListController(
 
                 return games;
             })
-            .catch(function (reason) {
-                $log.error(reason);
+            .catch(function (response) {
+                $log.error(response);
                 $scope.empty = false;
                 $scope.total = null;
                 toastr.error(
@@ -222,14 +233,17 @@ ludojApp.controller('ListController', function ListController(
 
     $scope.fetchGames = fetchGames;
     $scope.pad = _.padStart;
+    $scope.isEmpty = _.isEmpty;
     $scope.empty = false;
     $scope.total = null;
     $scope.renderSlider = renderSlider;
     $scope.filtersActive = filtersActive;
     $scope.updateParams = updateParams;
+    $scope.selectionActive = false;
 
     $scope.clearFilters = function clearFilters() {
         $scope.user = null;
+        $scope.likedGames = null;
         $scope.search = null;
         $scope.count.enabled = false;
         $scope.time.enabled = false;
@@ -250,6 +264,43 @@ ludojApp.controller('ListController', function ListController(
         $scope[field] = null;
         $('#' + field).focus();
     };
+
+    $scope.toggleSelection = function toggleSelection() {
+        $scope.selectionActive = !$scope.selectionActive;
+        if ($scope.selectionActive) {
+            $scope.user = null;
+        }
+    };
+
+    function contains(array, game) {
+        return _.some(array, ['bgg_id', game.bgg_id]);
+    }
+
+    function likeGame(game) {
+        if (_.isEmpty($scope.likedGames)) {
+            $scope.likedGames = [game];
+        } else if (!contains($scope.likedGames, game)) {
+            $scope.likedGames.push(game);
+        }
+        _.remove($scope.popularGames, function (g) {
+            return g.bgg_id === game.bgg_id;
+        });
+    }
+
+    function unlikeGame(game) {
+        if (_.isEmpty($scope.popularGames)) {
+            $scope.popularGames = [game];
+        } else if (!contains($scope.popularGames, game)) {
+            $scope.popularGames.push(game);
+        }
+        _.remove($scope.likedGames, function (g) {
+            return g.bgg_id === game.bgg_id;
+        });
+    }
+
+    $scope.contains = contains;
+    $scope.likeGame = likeGame;
+    $scope.unlikeGame = unlikeGame;
 
     $scope.$watch('count.enabled', renderSlider);
     $scope.$watch('time.enabled', renderSlider);
@@ -278,5 +329,31 @@ ludojApp.controller('ListController', function ListController(
             renderSlider();
         });
 
+    gamesService.getPopularGames(true)
+        .then(function (games) {
+            $scope.popularGames = _.take(games, 12);
+
+            var promises = _.map(params.like, function (id) {
+                return gamesService.getGame(id, false, true)
+                    .catch(_.constant());
+            });
+
+            return $q.all(promises);
+        })
+        .then(function (games) {
+            _.forEach(games, function (game) {
+                if (game) {
+                    likeGame(game);
+                }
+            });
+            $scope.likedGames = _($scope.likedGames)
+                .sortBy('num_votes')
+                .reverse()
+                .value();
+        });
+
+    gamesService.setTitle(params.for ? 'Recommendations for ' + params.for : null);
     gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
+    gamesService.setImage();
+    gamesService.setDescription();
 });

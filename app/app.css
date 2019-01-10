@@ -21,6 +21,7 @@
 
 .game-more {
     background-color: #C06;
+    cursor: pointer;
 }
 
 .game > div {
@@ -64,8 +65,56 @@
     font-size: 1rem;
 }
 
+.game-zoomable {
+    transition: all .2s;
+}
+
+.game-selectable {
+    opacity: .5;
+}
+
+.game-zoomable:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.game-liked .game-selectable {
+    opacity: 1;
+}
+
+.game-thumb {
+    color: white;
+    font-size: 2rem;
+    left: 0;
+    position: absolute;
+    text-shadow: 0 0 5px black;
+    top: 0;
+}
+
 .game-img {
     max-height: 250px;
+}
+
+.rec-button-container {
+    max-height: 50px;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.rec-button-container.ng-hide-add,
+.rec-button-container.ng-hide-remove {
+    overflow: hidden;
+    transition: all 0.2s linear;
+}
+
+.rec-button-container.ng-hide {
+    max-height: 0;
+}
+
+.rec-button-container button {
+    box-shadow: 0 0 4px 1px white;
 }
 
 .img-person {
@@ -253,7 +302,8 @@ input:checked + .slider:before {
     text-decoration: underline dotted;
 }
 
-.related-games {
+.related-games,
+.selectable-games {
     line-height: 1;
 }
 

@@ -139,65 +139,120 @@
 		</div>
 	</form>
 
+	<p class="text-right mb-0">
+		<em>No BoardGameGeek account? Tell us what games you like instead!</em>
+		<button type="button"
+				ng-disabled="isEmpty(likedGames) &amp;&amp; isEmpty(popularGames)"
+				class="btn btn-sm btn-primary"
+				data-toggle="collapse"
+				data-target="#select-games"
+				ng-click="toggleSelection()"
+				aria-expanded="false"
+				aria-controls="select-games">
+			<span ng-hide="isEmpty(likedGames)"
+					class="badge badge-light">
+				{{ likedGames.length }}
+			</span>
+			Select games
+			<i class="far {{ selectionActive ? 'fa-minus-square' : 'fa-plus-square' }}" id="select-games-icon"></i>
+		</button>
+	</p>
+
+	<div id="select-games" class="collapse">
+		<p class="mb-1">Select games you like and we will recommend games for your taste!</p>
+		<div ng-hide="isEmpty(likedGames)"
+				class="row selectable-games mb-0">
+			<p class="col-12 mb-0"><strong>Liked games:</strong></p>
+			<a ng-repeat="game in likedGames"
+				game-square=""
+				game="game"
+				thumb="solid"
+				ng-click="unlikeGame(game)"
+				href=""
+				class="col-xl-2 col-md-3 col-sm-4 col-6 game-small game-liked"
+				add-class="game-zoomable game-selectable"></a>
+		</div>
+		<div ng-hide="isEmpty(popularGames)"
+				class="row selectable-games mb-0">
+			<p class="col-12 mb-0"><strong>Select games you like:</strong></p>
+			<a ng-repeat="game in popularGames"
+				game-square=""
+				game="game"
+				thumb="outline"
+				ng-click="likeGame(game)"
+				href=""
+				class="col-xl-2 col-md-3 col-sm-4 col-6 game-small"
+				add-class="game-zoomable game-selectable"></a>
+		</div>
+	</div>
+
+	<div ng-show="selectionActive"
+			class="text-right pt-1 mb-0 rec-button-container">
+		<button type="button"
+			ng-disabled="!selectionActive || isEmpty(likedGames)"
+			ng-click="clearUser()"
+			class="btn btn-primary">
+			Find recommendations
+		</button>
+	</div>
+
 	<form ng-submit="updateParams()"
 			id="search-game-form"
 			name="search-game-form"
 			novalidate="novalidate"
 			role="form"
-			class="form">
-		<div class="form-row align-items-end">
-			<div class="col-xl-9 col-lg-8 col-md-7 col-sm-6 mb-3">
-				<label for="search"
-						id="search-label"
-						class="{{ search ? 'text-success' : 'text-muted' }} mb-0">
-					Game name:
-				</label>
-				<div class="input-group">
-					<input type="search"
-						id="search"
-						name="search"
-						ng-model="search"
-						ng-required="true"
-						class="form-control"
-						placeholder="e.g., &quot;catan&quot;"
-						aria-describedby="search-label" />
-					<div class="input-group-append">
-						<button type="button"
-								ng-disabled="!search"
-								ng-click="clearField('search')"
-								class="btn btn-outline-secondary">
-							<i class="fas fa-times"></i>
-						</button>
-						<button type="submit"
-								ng-disabled="!search"
-								class="btn btn-primary">
-							Search
-						</button>
-					</div>
+			class="form form-row align-items-end mt-1">
+		<div class="col-xl-9 col-lg-8 col-md-7 col-sm-6 mb-3">
+			<label for="search"
+					id="search-label"
+					class="{{ search ? 'text-success' : 'text-muted' }} mb-0">
+				Game name:
+			</label>
+			<div class="input-group">
+				<input type="search"
+					id="search"
+					name="search"
+					ng-model="search"
+					ng-required="true"
+					class="form-control"
+					placeholder="e.g., &quot;catan&quot;"
+					aria-describedby="search-label" />
+				<div class="input-group-append">
+					<button type="button"
+							ng-disabled="!search"
+							ng-click="clearField('search')"
+							class="btn btn-outline-secondary">
+						<i class="fas fa-times"></i>
+					</button>
+					<button type="submit"
+							ng-disabled="!search"
+							class="btn btn-primary">
+						Search
+					</button>
 				</div>
 			</div>
-			<div class="col-xl-3 col-lg-4 col-md-5 col-sm-6 mb-3 text-right">
-				<div class="btn-group btn-group-sm" role="group" aria-label="Filters">
-					<button type="button"
-							class="btn btn-outline-secondary"
-							ng-click="clearFilters()">
-						Clear filters
-					</button>
-					<button type="button"
-							class="btn btn-outline-primary"
-							ng-click="renderSlider()"
-							data-toggle="collapse"
-							data-target="#filter-game-form"
-							aria-expanded="false"
-							aria-controls="filter-game-form">
-						<span ng-if="filtersActive()"
-								class="badge badge-primary">
-							{{ filtersActive() }}
-						</span>
-						Advanced
-						<i class="far fa-plus-square" id="filter-toggle-icon"></i>
-					</button>
-				</div>
+		</div>
+		<div class="col-xl-3 col-lg-4 col-md-5 col-sm-6 mb-3 text-right">
+			<div class="btn-group btn-group-sm" role="group" aria-label="Filters">
+				<button type="button"
+						class="btn btn-outline-secondary"
+						ng-click="clearFilters()">
+					Clear filters
+				</button>
+				<button type="button"
+						class="btn btn-outline-primary"
+						ng-click="renderSlider()"
+						data-toggle="collapse"
+						data-target="#filter-game-form"
+						aria-expanded="false"
+						aria-controls="filter-game-form">
+					<span ng-if="filtersActive()"
+							class="badge badge-primary">
+						{{ filtersActive() }}
+					</span>
+					Advanced
+					<i class="far fa-plus-square" id="filter-toggle-icon"></i>
+				</button>
 			</div>
 		</div>
 	</form>
@@ -449,19 +504,19 @@
 		<div class="form-row">
 			<div class="col-md-6 mb-3"
 					data-toggle="tooltip"
-					title="Sort by TODO">
+					title="Select the ordering of the results">
 				<div class="input-group">
 					<div class="input-group-prepend">
 						<div class="input-group-text">
 							<label for="filter-ordering"
-									class="form-check-label {{ user ? 'text-muted' : 'text-success' }}">
+									class="form-check-label {{ user || !isEmpty(likedGames) ? 'text-muted' : 'text-success' }}">
 								Sort by:
 							</label>
 						</div>
 					</div>
 					<select name="filter-ordering"
 							ng-model="ordering"
-							ng-disabled="user"
+							ng-disabled="user || !isEmpty(likedGames)"
 							class="custom-select"
 							id="filter-ordering">
 						<option selected="selected" value="ludoj">Ludoj ranking</option>
@@ -502,6 +557,10 @@
 		See recommendations <a href="" ng-click="clearUser()">for all users</a> instead
 	</p>
 
+	<h2 ng-if="!isEmpty(likedGames)">
+		Recommended games based on your taste
+	</h2>
+
 	<div ng-if="empty"
 			class="alert alert-warning"
 			role="alert">
@@ -513,9 +572,23 @@
 	</div>
 
 	<div class="row">
-		<game-square ng-repeat="game in games"
+		<a ng-repeat="game in games"
+			ng-if="!selectionActive"
+			game-square=""
 			game="game"
-			class="col-lg-3 col-md-4 col-sm-6"></game-square>
+			show-ranking="true"
+			ng-href="#/game/{{ game.bgg_id }}"
+			class="col-lg-3 col-md-4 col-sm-6"></a>
+		<a ng-repeat="game in games"
+			ng-if="selectionActive"
+			game-square=""
+			game="game"
+			show-ranking="true"
+			thumb="{{ contains(likedGames, game) ? 'solid' : 'outline' }}"
+			ng-click="contains(likedGames, game) ? unlikeGame(game) : likeGame(game)"
+			href=""
+			class="col-lg-3 col-md-4 col-sm-6"
+			add-class="game-zoomable"></a>
 		<div ng-if="nextPage"
 				ng-click="fetchGames(nextPage)"
 				class="col-lg-3 col-md-4 col-sm-6">

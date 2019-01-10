@@ -85,8 +85,6 @@
 		integrity="sha384-wLW31FrRIuEoFenPj7ickIcZC840wgBgwChrUIt1zeNZIyQMg3pWOqPZiwfi9Rwa"
 		crossorigin="anonymous"
 		type="text/javascript"></script>
-	<!-- <script src="https://s7.addthis.com/icons/official-addthis-angularjs/current/dist/official-addthis-angularjs.min.js"
-		type="text/javascript"></script> -->
 	<!-- Custom -->
 	<script src="/js/app.js" type="text/javascript"></script>
 	<script src="/js/services.js" type="text/javascript"></script>
@@ -110,6 +108,21 @@
 	<meta name="keywords"
 		content="ludoj, games, board games, card games, party games, tabletop games, social games, recommendations, personal recommendations, BoardGameGeek, games list, description, details, filters, player count, best games, top games, ranking, recommended games, play, what games to play, buy, what game to buy" />
 	<meta name="author" content="Markus Shepherd" />
+
+	<meta property="og:site_name" content="Ludoj – recommend.games" />
+	<meta property="og:title" content="Ludoj – board game recommendations on recommend.games" />
+	<meta property="og:description"
+		content="Top-rated board games as evaluated by our recommendation engine. Find the best board and card games with personal recommendations for your taste!" />
+	<meta property="og:type" content="website" />
+	<meta property="og:image" content="https://recommend.games/assets/android-chrome-512x512.png" />
+	<meta property="og:locale" content="en_US" />
+
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:site" content="@recommend_games" />
+	<meta name="twitter:creator" content="@MarkusRShepherd" />
+	<meta name="twitter:title" content="Ludoj – board game recommendations on recommend.games" />
+	<meta name="twitter:description" content="Top-rated board games as evaluated by our recommendation engine. Find the best board and card games with personal recommendations for your taste!" />
+	<meta name="twitter:image" content="https://recommend.games/assets/android-chrome-512x512.png" />
 
 	<meta name="google-site-verification"
 		content="rodsci4ED8Ua3iJjzcjMXslFo5CxGchI4Q6XybBq9Vw" />
@@ -140,8 +153,6 @@
 		</div>
 	</div>
 
-	<!-- <div addthis-tool="" tool-class=""></div> -->
-
 	<div class="container" ng-view=""></div>
 
 	<div ng-if="angularError" class="container">
@@ -156,7 +167,7 @@
 	</div>
 
 	<footer ng-controller="FooterController"
-			class="navbar navbar-expand navbar-dark bg-dark">
+			class="navbar navbar-expand navbar-dark bg-dark pb-md-2 pb-5">
 		<div class="container">
 			<ul class="nav navbar-nav">
 				<li class="nav-item">
@@ -242,6 +253,10 @@
 			}
 		</script>
 	</footer>
+
+	<script async="async"
+		src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5bfa99b66f363320"
+		type="text/javascript"></script>
 
 	<!-- Global site tag (gtag.js) - Google Analytics -->
 	<script async="async"

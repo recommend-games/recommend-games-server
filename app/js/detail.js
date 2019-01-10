@@ -5,14 +5,12 @@
 'use strict';
 
 ludojApp.controller('DetailController', function DetailController(
-    $document,
     $filter,
     $location,
     $q,
     $routeParams,
     $scope,
-    gamesService,
-    APP_TITLE
+    gamesService
 ) {
     var compilationOf = [],
         containedIn = [],
@@ -28,10 +26,23 @@ ludojApp.controller('DetailController', function DetailController(
         $scope.expandDescription = !$scope.expandDescription;
     };
 
+    function updateImplementations() {
+        $scope.implementations = !_.isEmpty($scope.compilationOf) ||
+            !_.isEmpty($scope.containedIn) ||
+            !_.isEmpty($scope.implementationOf) ||
+            !_.isEmpty($scope.implementedBy) ||
+            !_.isEmpty($scope.integratesWith) ||
+            !_.isEmpty($scope.similarGames);
+        $scope.expandable = !!$scope.implementations;
+    }
+
     gamesService.getGame($routeParams.id)
         .then(function (game) {
             $scope.game = game;
-            $document[0].title = game.name + ' – ' + APP_TITLE;
+
+            gamesService.setTitle(game.name);
+            gamesService.setImage(game.image_url);
+            gamesService.setDescription(game.description_short || game.description);
 
             $('#game-details')
                 .append('<script type="application/ld+json">' + $filter('json')(gamesService.jsonLD(game), 0) + '</script>');
@@ -75,14 +86,8 @@ ludojApp.controller('DetailController', function DetailController(
             $scope.implementationOf = findIds(implementationOf);
             $scope.implementedBy = findIds(implementedBy);
             $scope.integratesWith = findIds(integratesWith);
-
-            $scope.implementations = !_.isEmpty($scope.compilationOf) ||
-                !_.isEmpty($scope.containedIn) ||
-                !_.isEmpty($scope.implementationOf) ||
-                !_.isEmpty($scope.implementedBy) ||
-                !_.isEmpty($scope.integratesWith);
-            $scope.expandable = !!$scope.implementations;
         })
+        .then(updateImplementations)
         .then(function () {
             $(function () {
                 $('.tooltip').remove();
@@ -90,6 +95,12 @@ ludojApp.controller('DetailController', function DetailController(
             });
         });
         // TODO catch errors
+
+    gamesService.getSimilarGames($routeParams.id, 1, true)
+        .then(function (response) {
+            $scope.similarGames = _.take(_.get(response, 'results'), 5);
+        })
+        .then(updateImplementations);
 
     gamesService.setCanonicalUrl($location.path());
 });
