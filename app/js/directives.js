@@ -4,6 +4,10 @@
 
 'use strict';
 
+function bgImage(url) {
+    return url ? {'background-image': 'url("' + url + '")'} : null;
+}
+
 ludojApp.directive('gameSquare', function gameSquare() {
     return {
         'restrict': 'AE',
@@ -15,9 +19,21 @@ ludojApp.directive('gameSquare', function gameSquare() {
             'addClass': '@'
         },
         'controller': function controller($scope) {
-            $scope.bgImage = function bgImage(url) {
-                return url ? {'background-image': 'url("' + url + '")'} : null;
-            };
+            $scope.bgImage = bgImage;
+        }
+    };
+});
+
+ludojApp.directive('articleSquare', function articleSquare() {
+    return {
+        'restrict': 'AE',
+        'templateUrl': '/partials/article-square.html',
+        'scope': {
+            'article': '=',
+            'addClass': '@'
+        },
+        'controller': function controller($scope) {
+            $scope.bgImage = bgImage;
         }
     };
 });

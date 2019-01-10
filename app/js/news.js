@@ -8,7 +8,7 @@ ludojApp.controller('NewsController', function NewsController(
     $http,
     $scope
 ) {
-    $http.get('http://news.recommend.games/news_00000.json')
+    $http.get('/api/news/news_00000.json')
         .then(function (response) {
             console.log(response);
             $scope.articles = _.get(response, 'data.results');
