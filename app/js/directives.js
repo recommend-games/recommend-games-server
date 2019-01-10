@@ -6,7 +6,7 @@
 
 ludojApp.directive('gameSquare', function gameSquare() {
     return {
-        'restrict': 'E',
+        'restrict': 'AE',
         'templateUrl': '/partials/game-square.html',
         'scope': {
             'game': '=',
