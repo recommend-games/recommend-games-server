@@ -107,27 +107,27 @@
 		<div class="row align-items-end related-games">
 			<div ng-repeat="game in compilationOf" class="col-xl-2 col-md-3 col-sm-4 col-6">
 				<strong ng-if="$first">Contains:</strong>
-				<game-square game="game" class="game-small"></game-square>
+				<game-square game="game" show-ranking="true" class="game-small"></game-square>
 			</div>
 			<div ng-repeat="game in integratesWith" class="col-xl-2 col-md-3 col-sm-4 col-6">
 				<strong ng-if="$first">Integrates with:</strong>
-				<game-square game="game" class="game-small"></game-square>
+				<game-square game="game" show-ranking="true" class="game-small"></game-square>
 			</div>
 			<div ng-repeat="game in implementationOf" class="col-xl-2 col-md-3 col-sm-4 col-6">
 				<strong ng-if="$first">Reimplements:</strong>
-				<game-square game="game" class="game-small"></game-square>
+				<game-square game="game" show-ranking="true" class="game-small"></game-square>
 			</div>
 			<div ng-repeat="game in implementedBy" class="col-xl-2 col-md-3 col-sm-4 col-6">
 				<strong ng-if="$first">Reimplemented by:</strong>
-				<game-square game="game" class="game-small"></game-square>
+				<game-square game="game" show-ranking="true" class="game-small"></game-square>
 			</div>
 			<div ng-repeat="game in containedIn" class="col-xl-2 col-md-3 col-sm-4 col-6">
 				<strong ng-if="$first">Contained in:</strong>
-				<game-square game="game" class="game-small"></game-square>
+				<game-square game="game" show-ranking="true" class="game-small"></game-square>
 			</div>
 			<div ng-repeat="game in similarGames" class="col-xl-2 col-md-3 col-sm-4 col-6">
 				<strong ng-if="$first">You might also like:</strong>
-				<game-square game="game" class="game-small"></game-square>
+				<game-square game="game" show-ranking="true" class="game-small"></game-square>
 			</div>
 		</div>
 	</section>

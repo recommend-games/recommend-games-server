@@ -4,7 +4,7 @@
 		ng-href="#/game/{{ game.bgg_id }}"
 		ng-style="bgImage(game.image_url)">
 	<div>
-		<span ng-if="game.rec_rank"
+		<span ng-if="showRanking &amp;&amp; game.rec_rank"
 				class="game-rank badge badge-pill badge-success">
 			#{{ game.rec_rank }}
 			<small ng-if="game.rec_rating"

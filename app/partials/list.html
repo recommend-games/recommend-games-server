@@ -515,6 +515,7 @@
 	<div class="row">
 		<game-square ng-repeat="game in games"
 			game="game"
+			show-ranking="true"
 			class="col-lg-3 col-md-4 col-sm-6"></game-square>
 		<div ng-if="nextPage"
 				ng-click="fetchGames(nextPage)"
