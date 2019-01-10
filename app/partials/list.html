@@ -158,7 +158,7 @@
 		</button>
 	</p>
 
-	<div id="select-games" class="collapse mb-3">
+	<div id="select-games" class="collapse">
 		<p class="mb-1">Select games you like and we will recommend games for your taste!</p>
 		<div ng-hide="isEmpty(likedGames)"
 				class="row selectable-games mb-0">
@@ -184,14 +184,16 @@
 				class="col-xl-2 col-md-3 col-sm-4 col-6 game-small"
 				add-class="game-zoomable game-selectable"></a>
 		</div>
-		<div class="text-right mt-1">
-			<button type="button"
-				ng-disabled="isEmpty(likedGames)"
-				ng-click="clearUser()"
-				class="btn btn-primary">
-				Find recommendations
-			</button>
-		</div>
+	</div>
+
+	<div ng-show="selectionActive"
+			class="text-right pt-1 mb-0 rec-button-container">
+		<button type="button"
+			ng-disabled="!selectionActive || isEmpty(likedGames)"
+			ng-click="clearUser()"
+			class="btn btn-primary">
+			Find recommendations
+		</button>
 	</div>
 
 	<form ng-submit="updateParams()"
@@ -199,7 +201,7 @@
 			name="search-game-form"
 			novalidate="novalidate"
 			role="form"
-			class="form form-row align-items-end">
+			class="form form-row align-items-end mt-1">
 		<div class="col-xl-9 col-lg-8 col-md-7 col-sm-6 mb-3">
 			<label for="search"
 					id="search-label"
