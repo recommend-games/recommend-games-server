@@ -142,13 +142,17 @@
 	<p class="text-right mb-0">
 		No BoardGameGeek account? Tell us what games you like instead!
 		<button type="button"
-				ng-disabled="!popularGames"
+				ng-disabled="isEmpty(likedGames) &amp;&amp; isEmpty(popularGames)"
 				class="btn btn-sm btn-primary"
 				data-toggle="collapse"
 				data-target="#select-games"
 				ng-click="toggleSelection()"
 				aria-expanded="false"
 				aria-controls="select-games">
+			<span ng-hide="isEmpty(likedGames)"
+					class="badge badge-light">
+				{{ likedGames.length }}
+			</span>
 			Select games
 			<i class="far {{ selectionActive ? 'fa-minus-square' : 'fa-plus-square' }}" id="select-games-icon"></i>
 		</button>
@@ -157,7 +161,7 @@
 	<div id="select-games" class="collapse mb-3">
 		<p class="mb-1">Select games you like and we will recommend games for your taste!</p>
 		<div ng-hide="isEmpty(likedGames)"
-				class="row align-items-end selectable-games mb-0">
+				class="row selectable-games mb-0">
 			<p class="col-12 mb-0"><strong>Liked games:</strong></p>
 			<a ng-repeat="game in likedGames"
 				game-square=""
@@ -169,7 +173,7 @@
 				add-class="game-zoomable game-selectable"></a>
 		</div>
 		<div ng-hide="isEmpty(popularGames)"
-				class="row align-items-end selectable-games mb-0">
+				class="row selectable-games mb-0">
 			<p class="col-12 mb-0"><strong>Select games you like:</strong></p>
 			<a ng-repeat="game in popularGames"
 				game-square=""
@@ -179,6 +183,14 @@
 				href=""
 				class="col-xl-2 col-md-3 col-sm-4 col-6 game-small"
 				add-class="game-zoomable game-selectable"></a>
+		</div>
+		<div class="text-right mt-1">
+			<button type="button"
+				ng-disabled="isEmpty(likedGames)"
+				ng-click="clearUser()"
+				class="btn btn-primary">
+				Find recommendations
+			</button>
 		</div>
 	</div>
 
