@@ -139,65 +139,85 @@
 		</div>
 	</form>
 
+	<p class="text-right mb-0">
+		No BoardGameGeek account? Tell us what games you like instead!
+		<button type="button"
+				ng-disabled="!popularGames"
+				class="btn btn-sm btn-primary"
+				data-toggle="collapse"
+				data-target="#select-games"
+				aria-expanded="false"
+				aria-controls="select-games">
+			Select games
+			<i class="far fa-plus-square" id="select-games-icon"></i>
+		</button>
+	</p>
+
+	<div id="select-games" class="collapse row align-items-end mb-3">
+		<p class="col-12 mb-0">Select games you like and we will recommend games for your taste!</p>
+		<div ng-repeat="game in popularGames" class="col-xl-2 col-md-3 col-sm-4 col-6">
+			<strong ng-if="$first">Select games:</strong>
+			<game-square game="game" class="game-small"></game-square>
+		</div>
+	</div>
+
 	<form ng-submit="updateParams()"
 			id="search-game-form"
 			name="search-game-form"
 			novalidate="novalidate"
 			role="form"
-			class="form">
-		<div class="form-row align-items-end">
-			<div class="col-xl-9 col-lg-8 col-md-7 col-sm-6 mb-3">
-				<label for="search"
-						id="search-label"
-						class="{{ search ? 'text-success' : 'text-muted' }} mb-0">
-					Game name:
-				</label>
-				<div class="input-group">
-					<input type="search"
-						id="search"
-						name="search"
-						ng-model="search"
-						ng-required="true"
-						class="form-control"
-						placeholder="e.g., &quot;catan&quot;"
-						aria-describedby="search-label" />
-					<div class="input-group-append">
-						<button type="button"
-								ng-disabled="!search"
-								ng-click="clearField('search')"
-								class="btn btn-outline-secondary">
-							<i class="fas fa-times"></i>
-						</button>
-						<button type="submit"
-								ng-disabled="!search"
-								class="btn btn-primary">
-							Search
-						</button>
-					</div>
+			class="form form-row align-items-end">
+		<div class="col-xl-9 col-lg-8 col-md-7 col-sm-6 mb-3">
+			<label for="search"
+					id="search-label"
+					class="{{ search ? 'text-success' : 'text-muted' }} mb-0">
+				Game name:
+			</label>
+			<div class="input-group">
+				<input type="search"
+					id="search"
+					name="search"
+					ng-model="search"
+					ng-required="true"
+					class="form-control"
+					placeholder="e.g., &quot;catan&quot;"
+					aria-describedby="search-label" />
+				<div class="input-group-append">
+					<button type="button"
+							ng-disabled="!search"
+							ng-click="clearField('search')"
+							class="btn btn-outline-secondary">
+						<i class="fas fa-times"></i>
+					</button>
+					<button type="submit"
+							ng-disabled="!search"
+							class="btn btn-primary">
+						Search
+					</button>
 				</div>
 			</div>
-			<div class="col-xl-3 col-lg-4 col-md-5 col-sm-6 mb-3 text-right">
-				<div class="btn-group btn-group-sm" role="group" aria-label="Filters">
-					<button type="button"
-							class="btn btn-outline-secondary"
-							ng-click="clearFilters()">
-						Clear filters
-					</button>
-					<button type="button"
-							class="btn btn-outline-primary"
-							ng-click="renderSlider()"
-							data-toggle="collapse"
-							data-target="#filter-game-form"
-							aria-expanded="false"
-							aria-controls="filter-game-form">
-						<span ng-if="filtersActive()"
-								class="badge badge-primary">
-							{{ filtersActive() }}
-						</span>
-						Advanced
-						<i class="far fa-plus-square" id="filter-toggle-icon"></i>
-					</button>
-				</div>
+		</div>
+		<div class="col-xl-3 col-lg-4 col-md-5 col-sm-6 mb-3 text-right">
+			<div class="btn-group btn-group-sm" role="group" aria-label="Filters">
+				<button type="button"
+						class="btn btn-outline-secondary"
+						ng-click="clearFilters()">
+					Clear filters
+				</button>
+				<button type="button"
+						class="btn btn-outline-primary"
+						ng-click="renderSlider()"
+						data-toggle="collapse"
+						data-target="#filter-game-form"
+						aria-expanded="false"
+						aria-controls="filter-game-form">
+					<span ng-if="filtersActive()"
+							class="badge badge-primary">
+						{{ filtersActive() }}
+					</span>
+					Advanced
+					<i class="far fa-plus-square" id="filter-toggle-icon"></i>
+				</button>
 			</div>
 		</div>
 	</form>

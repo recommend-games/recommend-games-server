@@ -278,6 +278,13 @@ ludojApp.controller('ListController', function ListController(
                     .on('hide.bs.collapse', function () {
                         $('#filter-toggle-icon').removeClass('fa-minus-square').addClass('fa-plus-square');
                     });
+                $('#select-games')
+                    .on('show.bs.collapse', function () {
+                        $('#select-games-icon').removeClass('fa-plus-square').addClass('fa-minus-square');
+                    })
+                    .on('hide.bs.collapse', function () {
+                        $('#select-games-icon').removeClass('fa-minus-square').addClass('fa-plus-square');
+                    });
                 $('#form-exclude-filters')
                     .on('show.bs.collapse', function () {
                         $('#exclude-filters-icon').removeClass('fa-caret-down').addClass('fa-caret-up');
@@ -287,6 +294,14 @@ ludojApp.controller('ListController', function ListController(
                     });
             });
             renderSlider();
+        });
+
+    gamesService.getGames(1, {
+        'ordering': '-num_votes',
+        'compilation': 'False'
+    }, true)
+        .then(function (response) {
+            $scope.popularGames = _.take(response.results, 12);
         });
 
     gamesService.setTitle(params.for ? 'Recommendations for ' + params.for : null);
