@@ -7,7 +7,8 @@
     vertical-align: super;
 }
 
-.game {
+.game,
+.article {
     background-color: #0C6;
     background-position: center top;
     background-repeat: no-repeat;
@@ -19,12 +20,19 @@
     position: relative;
 }
 
-.game-more {
+.article {
+    color: white;
+    text-shadow: 0 0 3px black;
+}
+
+.game-more,
+.article-more {
     background-color: #C06;
     cursor: pointer;
 }
 
-.game > div {
+.game > div,
+.article > div {
     background-image: linear-gradient(
         to bottom,
         transparent,
@@ -32,8 +40,45 @@
         black);
     border-radius: 5px;
     height: 100%;
+    overflow: hidden;
     position: absolute;
     width: 100%;
+}
+
+.article > div,
+.article.article-more > div,
+.article.article-more > div:hover,
+.article.article-more > div.selected {
+    background-image: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(0, 0, 0, .4),
+        rgba(0, 0, 0, .6),
+        rgba(0, 0, 0, .8));
+    transition: background-image .4s;
+}
+
+.article > div:hover,
+.article > div.selected {
+    background-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, .5),
+        rgba(0, 0, 0, .7),
+        rgba(0, 0, 0, .8),
+        rgba(0, 0, 0, .9));
+}
+
+.article-fade {
+    background-image: linear-gradient(
+        to bottom,
+        transparent,
+        black);
+    bottom: 0;
+    height: 2rem;
+    left: 0;
+    position: absolute;
+    width: 100%;
+    z-index: 5;
 }
 
 .game-rank {
@@ -52,7 +97,21 @@
     font-size: .7rem;
 }
 
-.game-title {
+.article-title {
+    font-size: 1.4rem;
+    padding-top: 50%;
+    transition: padding .4s;
+}
+
+.article > div:hover .article-title,
+.article > div.selected .article-title {
+    padding-top: 0;
+}
+
+.game-title,
+.article.article-more > div .article-title,
+.article.article-more > div:hover .article-title,
+.article.article-more > div.selected .article-title {
     bottom: 0;
     color: white;
     font-size: 1.2rem;

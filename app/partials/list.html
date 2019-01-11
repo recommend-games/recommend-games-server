@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <section xmlns="http://www.w3.org/1999/xhtml"
 		id="games-list">
-	<h1 class="display-1 text-nowrap">
+	<!-- <h1 class="display-1 text-nowrap">
 		Ludoj
 		<sup class="beta text-muted">βeta</sup>
-	</h1>
-	<p class="lead">
+	</h1> -->
+	<p class="lead mt-3">
 		Top-rated board games as evaluated by our <a href="https://gitlab.com/mshepherd/ludoj-recommender" target="_blank">recommendation engine <i class="fas fa-external-link-alt"></i></a>. Read more <a href="#/about">about Ludoj</a>.
 	</p>
 
@@ -51,9 +51,9 @@
 			</div>
 		</div>
 		<div id="form-exclude-filters" class="collapse">
-			<label class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
+			<div class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
 				Exclude games from recommendations:
-			</label>
+			</div>
 			<div class="{{ user ? 'form-exclude-enabled' : 'form-exclude-disabled' }}">
 				<div class="form-check form-check-inline"
 						data-toggle="tooltip"
@@ -550,7 +550,7 @@
 
 	<h2 ng-if="currUser">
 		Recommended games for <strong>
-			<a ng-href="https://boardgamegeek.com/user/{{ currUser }}" target="_blank">{{ currUser }}</a>
+			<a ng-href="https://boardgamegeek.com/user/{{ currUser }}" target="_blank">{{ currUser }} <i class="fas fa-external-link-alt"></i></a>
 		</strong>
 	</h2>
 	<p ng-if="currUser">
