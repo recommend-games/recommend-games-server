@@ -32,6 +32,13 @@ def _url_elements(url, ids, lastmod=None):
     )
 
     yield ELM.url(
+        ELM.loc(f'{url}#/news'),
+        ELM.lastmod(lastmod),
+        ELM.changefreq('hourly'),
+        ELM.priority(1),
+    )
+
+    yield ELM.url(
         ELM.loc(f'{url}#/about'),
         ELM.lastmod(lastmod),
         ELM.changefreq('weekly'),
@@ -49,9 +56,10 @@ def _url_elements(url, ids, lastmod=None):
 def sitemap(url, limit=None):
     ''' return sitemap XML element '''
 
+    limit = limit or 50000
     # pylint: disable=no-member
-    ids = Game.objects.values_list('bgg_id', flat=True)[:50000]
-    ids = ids[:max(limit - 2, 0)] if limit else ids
+    ids = Game.objects.values_list('bgg_id', flat=True)
+    ids = ids[:max(limit - 3, 0)]
     return ELM.urlset(*_url_elements(url, ids))
 
 
