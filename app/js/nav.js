@@ -4,7 +4,11 @@
 
 'use strict';
 
-ludojApp.controller('NavController', function NavController($location, $route, $rootScope, $scope) {
+ludojApp.controller('NavController', function NavController(
+    $location,
+    $rootScope,
+    $scope
+) {
     function updatePath() {
         $scope.path = $location.path();
     }

@@ -32,6 +32,7 @@
         black);
     border-radius: 5px;
     height: 100%;
+    overflow: hidden;
     position: absolute;
     width: 100%;
 }
