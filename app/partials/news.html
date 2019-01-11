@@ -15,19 +15,19 @@
 			ng-href="{{ article.url_mobile || article.url_amp || article.url_canonical }}"
 			target="_blank"
 			class="col-lg-4 col-md-6"></a>
-	</div>
-	<div ng-if="nextPage"
-			ng-click="fetchNews(nextPage)"
-			class="col-lg-4 col-md-6">
-		<div class="game game-more">
-			<div>
-				<h2 class="game-title">
-					More...
-					<small ng-if="total"
-							class="text-secondary">
-						({{ total }} games in total)
-					</small>
-				</h2>
+		<div ng-if="nextPage"
+				ng-click="fetchNews(nextPage)"
+				class="col-lg-4 col-md-6">
+			<div class="article article-more">
+				<div class="p-2">
+					<h2 class="article-title">
+						More...
+						<small ng-if="total"
+								class="text-secondary">
+							({{ total }} articles in total)
+						</small>
+					</h2>
+				</div>
 			</div>
 		</div>
 	</div>

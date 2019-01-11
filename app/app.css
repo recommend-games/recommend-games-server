@@ -25,7 +25,8 @@
     text-shadow: 0 0 3px black;
 }
 
-.game-more {
+.game-more,
+.article-more {
     background-color: #C06;
     cursor: pointer;
 }
@@ -44,7 +45,10 @@
     width: 100%;
 }
 
-.article > div {
+.article > div,
+.article.article-more > div,
+.article.article-more > div:hover,
+.article.article-more > div.selected {
     background-image: linear-gradient(
         to bottom,
         transparent,
@@ -93,15 +97,6 @@
     font-size: .7rem;
 }
 
-.game-title {
-    bottom: 0;
-    color: white;
-    font-size: 1.2rem;
-    padding: 0 10px;
-    position: absolute;
-    text-shadow: 0 0 3px black;
-}
-
 .article-title {
     font-size: 1.4rem;
     padding-top: 50%;
@@ -111,6 +106,18 @@
 .article > div:hover .article-title,
 .article > div.selected .article-title {
     padding-top: 0;
+}
+
+.game-title,
+.article.article-more > div .article-title,
+.article.article-more > div:hover .article-title,
+.article.article-more > div.selected .article-title {
+    bottom: 0;
+    color: white;
+    font-size: 1.2rem;
+    padding: 0 10px;
+    position: absolute;
+    text-shadow: 0 0 3px black;
 }
 
 .game-small .game-title {
