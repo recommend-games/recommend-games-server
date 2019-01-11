@@ -155,7 +155,7 @@ ludojApp.factory('gamesService', function gamesService(
                 response.data.results = games;
                 response.data.page = page;
 
-                if (!params.user) {
+                if (!params.user && _.isEmpty(params.like)) {
                     _.forEach(games, function (game) {
                         var id = _.get(game, 'bgg_id');
                         if (id) {
