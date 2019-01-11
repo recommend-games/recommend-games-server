@@ -245,7 +245,7 @@ class GameViewSet(PermissionsModelViewSet):
         ''' recommend games '''
 
         user = request.query_params.get('user')
-        like = request.query_params.get('like')
+        like = request.query_params.getlist('like')
 
         if not user and not like:
             return self.list(request)
@@ -260,7 +260,7 @@ class GameViewSet(PermissionsModelViewSet):
             self._recommend_rating(user, recommender, dict(request.query_params))
             if user else self._recommend_similar(like, recommender))
 
-        del user, like, path, recommender
+        del like, path, recommender
 
         page = self.paginate_queryset(recommendation)
         if page is None:
@@ -276,8 +276,8 @@ class GameViewSet(PermissionsModelViewSet):
         for game in games:
             rec = recommendation[game.bgg_id]
             game.rec_rank = rec['rank']
-            game.rec_rating = rec['score']
-            game.rec_stars = rec.get('stars')
+            game.rec_rating = rec['score'] if user else None
+            game.rec_stars = rec.get('stars') if user else None
         del recommendation
 
         serializer = self.get_serializer(
