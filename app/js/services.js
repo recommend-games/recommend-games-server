@@ -1,6 +1,6 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global ludojApp, _, $ */
+/*global ludojApp, _, $, moment */
 
 'use strict';
 
@@ -399,6 +399,42 @@ ludojApp.factory('gamesService', function gamesService(
             '<meta name="twitter:description" content="' + description + '" />'
         );
     };
+
+    return service;
+});
+
+ludojApp.factory('newsService', function newsService(
+    $http,
+    API_URL
+) {
+    var service = {};
+
+    function formatUrl(page) {
+        return API_URL + 'news/news_' + _.padStart(page, 5, '0') + '.json';
+    }
+
+    function processNews(article) {
+        article = article || {};
+        article.published_at_str = article.published_at ? moment(article.published_at).calendar() : null;
+        return article;
+    }
+
+    function getNews(page, noblock) {
+        page = _.parseInt(page) || 0;
+
+        return $http.get(formatUrl(page), {'noblock': !!noblock})
+            .then(function (response) {
+                var articles = _.map(_.get(response, 'data.results'), processNews);
+                return {
+                    'page': page,
+                    'articles': articles,
+                    'nextPage': _.get(response, 'data.next'),
+                    'total': _.get(response, 'data.count')
+                };
+            });
+    }
+
+    service.getNews = getNews;
 
     return service;
 });

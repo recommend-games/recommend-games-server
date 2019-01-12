@@ -10,7 +10,12 @@
 				({{ article.source_name }})
 			</small>
 		</h2>
-		<p>{{ article.description }}</p>
+		<p>
+			<span ng-if="article.published_at_str">
+				<em>{{ article.published_at_str }}</em> &middot;
+			</span>
+			{{ article.description }}
+		</p>
 		<div class="article-fade"></div>
 	</div>
 </div>
