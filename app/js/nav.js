@@ -1,6 +1,6 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global ludojApp */
+/*global ludojApp, $ */
 
 'use strict';
 
@@ -12,7 +12,12 @@ ludojApp.controller('NavController', function NavController(
     function updatePath() {
         $scope.path = $location.path();
     }
-    $rootScope.$on('$locationChangeSuccess', updatePath);
+
+    $rootScope.$on('$locationChangeSuccess', function () {
+        $('.navbar-collapse').collapse('hide');
+        updatePath();
+    });
+
     updatePath();
 });
 
