@@ -405,9 +405,16 @@ ludojApp.factory('gamesService', function gamesService(
 
 ludojApp.factory('newsService', function newsService(
     $http,
+    $locale,
+    $log,
+    $window,
     API_URL
 ) {
-    var service = {};
+    var service = {},
+        locale = _.get($window, 'navigator.languages') || _.get($window, 'navigator.language') || $locale.id,
+        momentLocale = moment.locale(locale);
+
+    $log.info('trying to change Moment.js locale to', locale, ', received locale', momentLocale);
 
     function formatUrl(page) {
         return API_URL + 'news/news_' + _.padStart(page, 5, '0') + '.json';
