@@ -5,25 +5,18 @@
 'use strict';
 
 ludojApp.controller('NewsController', function NewsController(
-    $http,
     $location,
     $scope,
-    API_URL,
-    gamesService
+    gamesService,
+    newsService
 ) {
-    function formatUrl(page) {
-        return API_URL + 'news/news_' + _.padStart(page, 5, '0') + '.json';
-    }
-
     function fetchNews(page) {
-        page = _.parseInt(page) || 0;
-
-        return $http.get(formatUrl(page))
+        return newsService.getNews(page)
             .then(function (response) {
-                var articles = _.get(response, 'data.results');
-                $scope.articles = page === 0 || _.isEmpty($scope.articles) ? articles : _.concat($scope.articles, articles);
-                $scope.nextPage = _.get(response, 'data.next');
-                $scope.total = _.get(response, 'data.count');
+                $scope.articles = response.page === 0 || _.isEmpty($scope.articles) ? response.articles
+                    : _.concat($scope.articles, response.articles);
+                $scope.nextPage = response.nextPage;
+                $scope.total = response.total;
             });
     }
 
