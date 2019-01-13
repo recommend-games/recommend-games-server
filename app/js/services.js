@@ -421,7 +421,10 @@ ludojApp.factory('gamesService', function gamesService(
 ludojApp.factory('newsService', function newsService(
     $http,
     $locale,
+    $localStorage,
     $log,
+    $q,
+    $sessionStorage,
     $window,
     API_URL
 ) {
@@ -430,6 +433,8 @@ ludojApp.factory('newsService', function newsService(
         momentLocale = moment.locale(locale);
 
     $log.info('trying to change Moment.js locale to', locale, ', received locale', momentLocale);
+
+    $sessionStorage.news = [];
 
     function formatUrl(page) {
         return API_URL + 'news/news_' + _.padStart(page, 5, '0') + '.json';
@@ -441,22 +446,52 @@ ludojApp.factory('newsService', function newsService(
         return article;
     }
 
-    function getNews(page, noblock) {
+    service.getNews = function getNews(page, noblock) {
         page = _.parseInt(page) || 0;
+
+        if (!_.isEmpty($sessionStorage.news[page])) {
+            return $q.resolve($sessionStorage.news[page]);
+        }
 
         return $http.get(formatUrl(page), {'noblock': !!noblock})
             .then(function (response) {
-                var articles = _.map(_.get(response, 'data.results'), processNews);
+                var articles = _.map(_.get(response, 'data.results'), processNews),
+                    result = {
+                        'page': page,
+                        'articles': articles,
+                        'nextPage': _.get(response, 'data.next'),
+                        'total': _.get(response, 'data.count')
+                    };
+                if (!_.isEmpty(articles)) {
+                    $sessionStorage.news[page] = result;
+                }
+                return result;
+            })
+            .catch(function (response) {
+                $log.error(response);
                 return {
                     'page': page,
-                    'articles': articles,
-                    'nextPage': _.get(response, 'data.next'),
-                    'total': _.get(response, 'data.count')
+                    'articles': [],
+                    'nextPage': null,
+                    'total': null
                 };
             });
-    }
+    };
 
-    service.getNews = getNews;
+    service.setLastVisit = function setLastVisit(date) {
+        date = moment(date || undefined);
+        date = date.isValid() ? date : moment();
+        $localStorage.lastVisitNews = date;
+        return date;
+    };
+
+    service.getLastVisit = function getLastVisit() {
+        if (!$localStorage.lastVisitNews) {
+            return null;
+        }
+        var date = moment($localStorage.lastVisitNews);
+        return date.isValid() ? date : null;
+    };
 
     return service;
 });

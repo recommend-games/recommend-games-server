@@ -183,6 +183,10 @@
 						<a href="#/news"
 								class="nav-link">
 							News aggregator
+							<span ng-if="newsCount"
+									class="badge badge-light">
+								{{ newsCount &gt; 9 ? '9+' : newsCount }}
+							</span>
 						</a>
 					</li>
 					<li class="nav-item {{ path === '/about' ? 'active' : '' }}">
