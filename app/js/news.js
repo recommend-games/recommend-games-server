@@ -30,4 +30,6 @@ ludojApp.controller('NewsController', function NewsController(
     gamesService.setTitle('News aggregator');
     gamesService.setDescription('News about board games, aggregated for you from the top sources of the hobby.');
     gamesService.setCanonicalUrl($location.path());
+
+    newsService.setLastVisit();
 });
