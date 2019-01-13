@@ -159,7 +159,10 @@
 	</p>
 
 	<div id="select-games" class="collapse">
-		<p class="mb-1">Select games you like and we will recommend games for your taste!</p>
+		<p class="mb-1">
+			Select games you like and we will recommend games for your taste!
+			<em>Note</em>: You can also select games from the recommendations below.
+		</p>
 		<div ng-hide="isEmpty(likedGames)"
 				class="row selectable-games mb-0">
 			<p class="col-12 mb-0"><strong>Liked games:</strong></p>
@@ -199,13 +202,19 @@
 
 	<div ng-show="selectionActive"
 			class="text-right pt-1 mb-0 rec-button-container">
-		<!-- TODO add cancel button; point out that games below can be selected as well -->
-		<button type="button"
-			ng-disabled="!selectionActive || isEmpty(likedGames)"
-			ng-click="clearUser()"
-			class="btn btn-primary">
-			Find recommendations
-		</button>
+		<!-- TODO add cancel button -->
+		<div id="rec-button-tooltip"
+				data-toggle="tooltip"
+				data-placement="bottom"
+				title="You can also select games you like in the list below"
+				class="d-inline-block">
+			<button type="button"
+				ng-disabled="!selectionActive || isEmpty(likedGames)"
+				ng-click="clearUser()"
+				class="btn btn-primary">
+				Find recommendations
+			</button>
+		</div>
 	</div>
 
 	<form ng-submit="updateParams()"

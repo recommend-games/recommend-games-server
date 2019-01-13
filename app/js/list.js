@@ -268,7 +268,9 @@ ludojApp.controller('ListController', function ListController(
     $scope.toggleSelection = function toggleSelection() {
         $scope.selectionActive = !$scope.selectionActive;
         if ($scope.selectionActive) {
-            $scope.user = null;
+            $timeout(function () {
+                $('#rec-button-tooltip').tooltip('show');
+            }, 1000);
         }
     };
 
