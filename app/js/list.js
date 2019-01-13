@@ -298,9 +298,32 @@ ludojApp.controller('ListController', function ListController(
         });
     }
 
+    function cleanLikedGames(games) {
+        _.forEach(games, function (game) {
+            if (game) {
+                likeGame(game);
+            }
+        });
+        return games;
+    }
+
+    function fetchPopularGames(page) {
+        page = _.isNumber(page) ? page : 1;
+        var start = (page - 1) * 11,
+            end = page * 11;
+        return gamesService.getPopularGames(start, end, true)
+            .then(function (games) {
+                $scope.popularGames = _.isEmpty($scope.popularGames) ? games : _.concat($scope.popularGames, games);
+                $scope.popularGamesPage = page + 1;
+                cleanLikedGames($scope.likedGames);
+                return games;
+            });
+    }
+
     $scope.contains = contains;
     $scope.likeGame = likeGame;
     $scope.unlikeGame = unlikeGame;
+    $scope.fetchPopularGames = fetchPopularGames;
 
     $scope.$watch('count.enabled', renderSlider);
     $scope.$watch('time.enabled', renderSlider);
@@ -329,10 +352,8 @@ ludojApp.controller('ListController', function ListController(
             renderSlider();
         });
 
-    gamesService.getPopularGames(true)
-        .then(function (games) {
-            $scope.popularGames = _.take(games, 12);
-
+    fetchPopularGames(1)
+        .then(function () {
             var promises = _.map(params.like, function (id) {
                 return gamesService.getGame(id, false, true)
                     .catch(_.constant());
@@ -341,11 +362,7 @@ ludojApp.controller('ListController', function ListController(
             return $q.all(promises);
         })
         .then(function (games) {
-            _.forEach(games, function (game) {
-                if (game) {
-                    likeGame(game);
-                }
-            });
+            cleanLikedGames(games);
             $scope.likedGames = _($scope.likedGames)
                 .sortBy('num_votes')
                 .reverse()

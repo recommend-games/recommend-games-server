@@ -183,11 +183,23 @@
 				href=""
 				class="col-xl-2 col-md-3 col-sm-4 col-6 game-small"
 				add-class="game-zoomable game-selectable"></a>
+			<div ng-if="popularGamesPage"
+					ng-click="fetchPopularGames(popularGamesPage)"
+					class="col-xl-2 col-md-3 col-sm-4 col-6 game-small">
+				<div class="game game-more">
+					<div>
+						<h2 class="game-title">
+							More...
+						</h2>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 
 	<div ng-show="selectionActive"
 			class="text-right pt-1 mb-0 rec-button-container">
+		<!-- TODO add cancel button; point out that games below can be selected as well -->
 		<button type="button"
 			ng-disabled="!selectionActive || isEmpty(likedGames)"
 			ng-click="clearUser()"
