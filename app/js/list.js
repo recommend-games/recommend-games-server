@@ -268,9 +268,12 @@ ludojApp.controller('ListController', function ListController(
     $scope.toggleSelection = function toggleSelection() {
         $scope.selectionActive = !$scope.selectionActive;
         if ($scope.selectionActive) {
+            $('#select-games').collapse('show');
             $timeout(function () {
                 $('#rec-button-tooltip').tooltip('show');
             }, 1000);
+        } else {
+            $('#select-games').collapse('hide');
         }
     };
 

@@ -144,8 +144,6 @@
 		<button type="button"
 				ng-disabled="isEmpty(likedGames) &amp;&amp; isEmpty(popularGames)"
 				class="btn btn-sm btn-primary"
-				data-toggle="collapse"
-				data-target="#select-games"
 				ng-click="toggleSelection()"
 				aria-expanded="false"
 				aria-controls="select-games">
@@ -202,17 +200,21 @@
 
 	<div ng-show="selectionActive"
 			class="text-right pt-1 mb-0 rec-button-container">
-		<!-- TODO add cancel button -->
 		<div id="rec-button-tooltip"
 				data-toggle="tooltip"
 				data-placement="bottom"
 				title="You can also select games you like in the list below"
-				class="d-inline-block">
+				class="btn-group rec-button-tooltip" role="group">
+			<button type="button"
+					ng-click="toggleSelection()"
+					class="btn btn-secondary">
+				Cancel
+			</button>
 			<button type="button"
 				ng-disabled="!selectionActive || isEmpty(likedGames)"
 				ng-click="clearUser()"
 				class="btn btn-primary">
-				Find recommendations
+				Recommend!
 			</button>
 		</div>
 	</div>
