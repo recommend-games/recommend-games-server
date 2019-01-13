@@ -172,8 +172,14 @@
     max-height: 0;
 }
 
-.rec-button-container button {
+.rec-button-tooltip {
+    border-radius: .25rem;
     box-shadow: 0 0 4px 1px white;
+}
+
+.rec-button-container button:disabled,
+.rec-button-container button[disabled] {
+    pointer-events: none;
 }
 
 .img-person {

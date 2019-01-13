@@ -218,20 +218,35 @@ ludojApp.factory('gamesService', function gamesService(
         $sessionStorage.games = games;
     };
 
-    service.getPopularGames = function getPopularGames(noblock) {
-        if (!_.isEmpty($sessionStorage.popularGames)) {
-            return $q.resolve($sessionStorage.popularGames);
+    service.getPopularGames = function getPopularGames(start, end, noblock) {
+        start = _.isNumber(start) ? start : 0;
+        end = _.isNumber(end) ? end : 11;
+
+        if (end <= _.size($sessionStorage.popularGames)) {
+            return $q.resolve(_.slice($sessionStorage.popularGames, start, end));
         }
 
-        return getGames(1, {
-            'ordering': '-num_votes',
-            'compilation': 'False'
-        }, !!noblock)
-            .then(function (response) {
-                var games = _.get(response, 'results');
-                $sessionStorage.popularGames = games;
-                return games;
-            });
+        function fetchGames(page) {
+            return getGames(page, {
+                'ordering': '-num_votes',
+                'compilation': 'False'
+            }, !!noblock)
+                .then(function (response) {
+                    var games = _.get(response, 'results');
+
+                    $sessionStorage.popularGames = page === 1 || _.isEmpty($sessionStorage.popularGames) ? games
+                        : _.concat($sessionStorage.popularGames, games);
+                    $sessionStorage.popularGamesPage = page + 1;
+
+                    if (end <= _.size($sessionStorage.popularGames)) {
+                        return $q.resolve(_.slice($sessionStorage.popularGames, start, end));
+                    }
+
+                    return fetchGames(page + 1);
+                });
+        }
+
+        return fetchGames($sessionStorage.popularGamesPage || 1);
     };
 
     service.getSimilarGames = function getSimilarGames(gameId, page, noblock) {

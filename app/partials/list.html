@@ -144,8 +144,6 @@
 		<button type="button"
 				ng-disabled="isEmpty(likedGames) &amp;&amp; isEmpty(popularGames)"
 				class="btn btn-sm btn-primary"
-				data-toggle="collapse"
-				data-target="#select-games"
 				ng-click="toggleSelection()"
 				aria-expanded="false"
 				aria-controls="select-games">
@@ -159,7 +157,10 @@
 	</p>
 
 	<div id="select-games" class="collapse">
-		<p class="mb-1">Select games you like and we will recommend games for your taste!</p>
+		<p class="mb-1">
+			Select games you like and we will recommend games for your taste!
+			<em>Note</em>: You can also select games from the recommendations below.
+		</p>
 		<div ng-hide="isEmpty(likedGames)"
 				class="row selectable-games mb-0">
 			<p class="col-12 mb-0"><strong>Liked games:</strong></p>
@@ -183,17 +184,39 @@
 				href=""
 				class="col-xl-2 col-md-3 col-sm-4 col-6 game-small"
 				add-class="game-zoomable game-selectable"></a>
+			<div ng-if="popularGamesPage"
+					ng-click="fetchPopularGames(popularGamesPage)"
+					class="col-xl-2 col-md-3 col-sm-4 col-6 game-small">
+				<div class="game game-more">
+					<div>
+						<h2 class="game-title">
+							More...
+						</h2>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 
 	<div ng-show="selectionActive"
 			class="text-right pt-1 mb-0 rec-button-container">
-		<button type="button"
-			ng-disabled="!selectionActive || isEmpty(likedGames)"
-			ng-click="clearUser()"
-			class="btn btn-primary">
-			Find recommendations
-		</button>
+		<div id="rec-button-tooltip"
+				data-toggle="tooltip"
+				data-placement="bottom"
+				title="You can also select games you like in the list below"
+				class="btn-group rec-button-tooltip" role="group">
+			<button type="button"
+					ng-click="toggleSelection()"
+					class="btn btn-secondary">
+				Cancel
+			</button>
+			<button type="button"
+				ng-disabled="!selectionActive || isEmpty(likedGames)"
+				ng-click="clearUser()"
+				class="btn btn-primary">
+				Recommend!
+			</button>
+		</div>
 	</div>
 
 	<form ng-submit="updateParams()"
@@ -266,38 +289,36 @@
 		<div class="form-row mb-3"
 				data-toggle="tooltip"
 				title="Filter by number of players">
-			<div class="col-xl-4 col-lg-5 col-md-6">
-				<div class="input-group">
-					<div class="input-group-prepend">
-						<div class="input-group-text">
-							<label class="switch mb-0">
-								<input type="checkbox"
-									id="filter-count-enable"
-									name="filter-count-enable"
-									ng-model="count.enabled" />
-								<span class="slider {{ count.enabled ? 'bg-success' : 'bg-secondary' }}"></span>
-							</label>
-						</div>
-						<div class="input-group-text">
-							<label for="filter-count-enable"
-									class="form-check-label form-label-game {{ count.enabled ? 'text-success' : 'text-muted' }}">
-								Player count:
-								<strong class="text-monospace {{ count.enabled ? '' : 'invisible' }}">
-									{{ pad(count.value, 2, '&nbsp;') }}
-								</strong>
-							</label>
-						</div>
+			<div class="col-xl-4 col-lg-5 col-md-6 input-group">
+				<div class="input-group-prepend">
+					<div class="input-group-text">
+						<label class="switch mb-0">
+							<input type="checkbox"
+								id="filter-count-enable"
+								name="filter-count-enable"
+								ng-model="count.enabled" />
+							<span class="slider {{ count.enabled ? 'bg-success' : 'bg-secondary' }}"></span>
+						</label>
 					</div>
-					<select name="filter-count-type"
-							ng-disabled="!count.enabled"
-							ng-model="count.type"
-							class="custom-select"
-							id="filter-count-type">
-						<option value="box">box</option>
-						<option value="recommended" selected="selected">recommended</option>
-						<option value="best">best</option>
-					</select>
+					<div class="input-group-text">
+						<label for="filter-count-enable"
+								class="form-check-label form-label-game {{ count.enabled ? 'text-success' : 'text-muted' }}">
+							Player count:
+							<strong class="text-monospace {{ count.enabled ? '' : 'invisible' }}">
+								{{ pad(count.value, 2, '&nbsp;') }}
+							</strong>
+						</label>
+					</div>
 				</div>
+				<select name="filter-count-type"
+						ng-disabled="!count.enabled"
+						ng-model="count.type"
+						class="custom-select"
+						id="filter-count-type">
+					<option value="box">box</option>
+					<option value="recommended" selected="selected">recommended</option>
+					<option value="best">best</option>
+				</select>
 			</div>
 			<div class="col-xl-8 col-lg-7 col-md-6">
 				<rzslider id="filter-count"
@@ -311,37 +332,35 @@
 		<div class="form-row mb-3"
 				data-toggle="tooltip"
 				title="Filter by the time a game takes">
-			<div class="col-xl-4 col-lg-5 col-md-6">
-				<div class="input-group">
-					<div class="input-group-prepend">
-						<div class="input-group-text">
-							<label class="switch mb-0">
-								<input type="checkbox"
-									id="filter-time-enable"
-									name="filter-time-enable"
-									ng-model="time.enabled" />
-								<span class="slider {{ time.enabled ? 'bg-success' : 'bg-secondary' }}"></span>
-							</label>
-						</div>
-						<div class="input-group-text">
-							<label for="filter-time-enable"
-									class="form-check-label form-label-game {{ time.enabled ? 'text-success' : 'text-muted' }}">
-								Play time:
-								<span class="{{ time.enabled ? '' : 'invisible' }}">
-									<strong class="text-monospace">{{ pad(time.value, 3, '&nbsp;') }}</strong> minutes
-								</span>
-							</label>
-						</div>
+			<div class="col-xl-4 col-lg-5 col-md-6 input-group">
+				<div class="input-group-prepend">
+					<div class="input-group-text">
+						<label class="switch mb-0">
+							<input type="checkbox"
+								id="filter-time-enable"
+								name="filter-time-enable"
+								ng-model="time.enabled" />
+							<span class="slider {{ time.enabled ? 'bg-success' : 'bg-secondary' }}"></span>
+						</label>
 					</div>
-					<select name="filter-time-type"
-							ng-disabled="!time.enabled"
-							ng-model="time.type"
-							class="custom-select"
-							id="filter-time-type">
-						<option value="min">min</option>
-						<option value="max" selected="selected">max</option>
-					</select>
+					<div class="input-group-text">
+						<label for="filter-time-enable"
+								class="form-check-label form-label-game {{ time.enabled ? 'text-success' : 'text-muted' }}">
+							Play time:
+							<span class="{{ time.enabled ? '' : 'invisible' }}">
+								<strong class="text-monospace">{{ pad(time.value, 3, '&nbsp;') }}</strong> minutes
+							</span>
+						</label>
+					</div>
 				</div>
+				<select name="filter-time-type"
+						ng-disabled="!time.enabled"
+						ng-model="time.type"
+						class="custom-select"
+						id="filter-time-type">
+					<option value="min">min</option>
+					<option value="max" selected="selected">max</option>
+				</select>
 			</div>
 			<div class="col-xl-8 col-lg-7 col-md-6">
 				<rzslider id="filter-time"
@@ -355,37 +374,35 @@
 		<div class="form-row mb-3"
 				data-toggle="tooltip"
 				title="Filter by minimum player age">
-			<div class="col-xl-4 col-lg-5 col-md-6">
-				<div class="input-group">
-					<div class="input-group-prepend">
-						<div class="input-group-text">
-							<label class="switch mb-0">
-								<input type="checkbox"
-									id="filter-age-enable"
-									name="filter-age-enable"
-									ng-model="age.enabled" />
-								<span class="slider {{ age.enabled ? 'bg-success' : 'bg-secondary' }}"></span>
-							</label>
-						</div>
-						<div class="input-group-text">
-							<label for="filter-age-enable"
-									class="form-check-label form-label-game {{ age.enabled ? 'text-success' : 'text-muted' }}">
-								Player age:
-								<span class="{{ age.enabled ? '' : 'invisible' }}">
-									<strong class="text-monospace">{{ pad(age.value, 2, '&nbsp;') }}</strong> years
-								</span>
-							</label>
-						</div>
+			<div class="col-xl-4 col-lg-5 col-md-6 input-group">
+				<div class="input-group-prepend">
+					<div class="input-group-text">
+						<label class="switch mb-0">
+							<input type="checkbox"
+								id="filter-age-enable"
+								name="filter-age-enable"
+								ng-model="age.enabled" />
+							<span class="slider {{ age.enabled ? 'bg-success' : 'bg-secondary' }}"></span>
+						</label>
 					</div>
-					<select name="filter-age-type"
-							ng-disabled="!age.enabled"
-							ng-model="age.type"
-							class="custom-select"
-							id="filter-age-type">
-						<option value="box">box</option>
-						<option value="recommended" selected="selected">recommended</option>
-					</select>
+					<div class="input-group-text">
+						<label for="filter-age-enable"
+								class="form-check-label form-label-game {{ age.enabled ? 'text-success' : 'text-muted' }}">
+							Player age:
+							<span class="{{ age.enabled ? '' : 'invisible' }}">
+								<strong class="text-monospace">{{ pad(age.value, 2, '&nbsp;') }}</strong> years
+							</span>
+						</label>
+					</div>
 				</div>
+				<select name="filter-age-type"
+						ng-disabled="!age.enabled"
+						ng-model="age.type"
+						class="custom-select"
+						id="filter-age-type">
+					<option value="box">box</option>
+					<option value="recommended" selected="selected">recommended</option>
+				</select>
 			</div>
 			<div class="col-xl-8 col-lg-7 col-md-6">
 				<rzslider id="filter-age"
@@ -399,29 +416,27 @@
 		<div class="form-row mb-3"
 				data-toggle="tooltip"
 				title="Filter by game complexity, from light to heavy">
-			<div class="col-xl-4 col-lg-5 col-md-6">
-				<div class="input-group">
-					<div class="input-group-prepend">
-						<div class="input-group-text">
-							<label class="switch mb-0">
-								<input type="checkbox"
-									id="filter-complexity-enable"
-									name="filter-complexity-enable"
-									ng-model="complexity.enabled" />
-								<span class="slider {{ complexity.enabled ? 'bg-success' : 'bg-secondary' }}"></span>
-							</label>
-						</div>
+			<div class="col-xl-4 col-lg-5 col-md-6 input-group">
+				<div class="input-group-prepend">
+					<div class="input-group-text">
+						<label class="switch mb-0">
+							<input type="checkbox"
+								id="filter-complexity-enable"
+								name="filter-complexity-enable"
+								ng-model="complexity.enabled" />
+							<span class="slider {{ complexity.enabled ? 'bg-success' : 'bg-secondary' }}"></span>
+						</label>
 					</div>
-					<div class="input-group-append">
-						<div class="input-group-text">
-							<label for="filter-complexity-enable"
-									class="form-check-label form-label-game {{ complexity.enabled ? 'text-success' : 'text-muted' }}">
-								Complexity:
-								<strong class="text-monospace {{ complexity.enabled ? '' : 'invisible' }}">
-									{{ complexity.min | number:1 }}&mdash;{{ complexity.max | number:1 }}
-								</strong>
-							</label>
-						</div>
+				</div>
+				<div class="input-group-append">
+					<div class="input-group-text">
+						<label for="filter-complexity-enable"
+								class="form-check-label form-label-game {{ complexity.enabled ? 'text-success' : 'text-muted' }}">
+							Complexity:
+							<strong class="text-monospace {{ complexity.enabled ? '' : 'invisible' }}">
+								{{ complexity.min | number:1 }}&mdash;{{ complexity.max | number:1 }}
+							</strong>
+						</label>
 					</div>
 				</div>
 			</div>
@@ -438,31 +453,29 @@
 		<div class="form-row mb-3"
 				data-toggle="tooltip"
 				title="Filter by publication year">
-			<div class="col-xl-4 col-lg-5 col-md-6">
-				<div class="input-group">
-					<div class="input-group-prepend">
-						<div class="input-group-text">
-							<label class="switch mb-0">
-								<input type="checkbox"
-									id="filter-year-enable"
-									name="filter-year-enable"
-									ng-model="year.enabled" />
-								<span class="slider {{ year.enabled ? 'bg-success' : 'bg-secondary' }}"></span>
-							</label>
-						</div>
+			<div class="col-xl-4 col-lg-5 col-md-6 input-group">
+				<div class="input-group-prepend">
+					<div class="input-group-text">
+						<label class="switch mb-0">
+							<input type="checkbox"
+								id="filter-year-enable"
+								name="filter-year-enable"
+								ng-model="year.enabled" />
+							<span class="slider {{ year.enabled ? 'bg-success' : 'bg-secondary' }}"></span>
+						</label>
 					</div>
-					<div class="input-group-append">
-						<div class="input-group-text">
-							<label for="filter-year-enable"
-									class="form-check-label form-label-game {{ year.enabled ? 'text-success' : 'text-muted' }}">
-								Year:
-								<span class="{{ year.enabled ? '' : 'invisible' }}">
-									<strong class="text-monospace">{{ year.min == year.options.floor ? '&le;' : '&nbsp;' }}{{ year.min }}</strong>
-									to
-									<strong class="text-monospace">{{ year.max == year.options.ceil ? '&ge;' : '&nbsp;' }}{{ year.max }}</strong>
-								</span>
-							</label>
-						</div>
+				</div>
+				<div class="input-group-append">
+					<div class="input-group-text">
+						<label for="filter-year-enable"
+								class="form-check-label form-label-game {{ year.enabled ? 'text-success' : 'text-muted' }}">
+							Year:
+							<span class="{{ year.enabled ? '' : 'invisible' }}">
+								<strong class="text-monospace">{{ year.min == year.options.floor ? '&le;' : '&nbsp;' }}{{ year.min }}</strong>
+								to
+								<strong class="text-monospace">{{ year.max == year.options.ceil ? '&ge;' : '&nbsp;' }}{{ year.max }}</strong>
+							</span>
+						</label>
 					</div>
 				</div>
 			</div>
@@ -477,60 +490,56 @@
 		</div>
 
 		<div class="form-row">
-			<div class="col-12 mb-3"
+			<div class="col-12 input-group mb-3"
 					data-toggle="tooltip"
 					title="Display only cooperative, only competitive, or all games">
-				<div class="input-group">
-					<div class="input-group-prepend">
-						<div class="input-group-text">
-							<label for="filter-cooperative"
-									class="form-check-label {{ cooperative ? 'text-success' : 'text-muted' }}">
-								Cooperative:
-							</label>
-						</div>
+				<div class="input-group-prepend">
+					<div class="input-group-text">
+						<label for="filter-cooperative"
+								class="form-check-label {{ cooperative ? 'text-success' : 'text-muted' }}">
+							Cooperative:
+						</label>
 					</div>
-					<select name="filter-cooperative"
-							ng-model="cooperative"
-							class="custom-select"
-							id="filter-cooperative">
-						<option selected="selected" ng-value="null">[all]</option>
-						<option value="True">only cooperative</option>
-						<option value="False">only competitive</option>
-					</select>
 				</div>
+				<select name="filter-cooperative"
+						ng-model="cooperative"
+						class="custom-select"
+						id="filter-cooperative">
+					<option selected="selected" ng-value="null">[all]</option>
+					<option value="True">only cooperative</option>
+					<option value="False">only competitive</option>
+				</select>
 			</div>
 		</div>
 
 		<div class="form-row">
-			<div class="col-md-6 mb-3"
+			<div class="col-md-6 input-group mb-3"
 					data-toggle="tooltip"
 					title="Select the ordering of the results">
-				<div class="input-group">
-					<div class="input-group-prepend">
-						<div class="input-group-text">
-							<label for="filter-ordering"
-									class="form-check-label {{ user || !isEmpty(likedGames) ? 'text-muted' : 'text-success' }}">
-								Sort by:
-							</label>
-						</div>
+				<div class="input-group-prepend">
+					<div class="input-group-text">
+						<label for="filter-ordering"
+								class="form-check-label {{ user || !isEmpty(likedGames) ? 'text-muted' : 'text-success' }}">
+							Sort by:
+						</label>
 					</div>
-					<select name="filter-ordering"
-							ng-model="ordering"
-							ng-disabled="user || !isEmpty(likedGames)"
-							class="custom-select"
-							id="filter-ordering">
-						<option selected="selected" value="ludoj">Ludoj ranking</option>
-						<option value="bgg">BoardGameGeek ranking</option>
-						<option value="-year">newest first</option>
-						<option value="year">oldest first</option>
-						<option value="complex">least complex first</option>
-						<option value="-complex">most complex first</option>
-						<option value="time">shortest first</option>
-						<option value="-time">longest first</option>
-						<option value="age">youngest age first</option>
-						<option value="-age">oldest age first</option>
-					</select>
 				</div>
+				<select name="filter-ordering"
+						ng-model="ordering"
+						ng-disabled="user || !isEmpty(likedGames)"
+						class="custom-select"
+						id="filter-ordering">
+					<option selected="selected" value="ludoj">Ludoj ranking</option>
+					<option value="bgg">BoardGameGeek ranking</option>
+					<option value="-year">newest first</option>
+					<option value="year">oldest first</option>
+					<option value="complex">least complex first</option>
+					<option value="-complex">most complex first</option>
+					<option value="time">shortest first</option>
+					<option value="-time">longest first</option>
+					<option value="age">youngest age first</option>
+					<option value="-age">oldest age first</option>
+				</select>
 			</div>
 			<div class="col-md-3 col-6 mb-3">
 				<button type="button"
