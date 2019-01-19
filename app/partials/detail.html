@@ -16,7 +16,6 @@
 	</h1>
 	<p>
 		View on <a ng-href="{{ game.url }}" target="_blank">BoardGameGeek <i class="fas fa-external-link-alt"></i></a>.
-		<a href="#/?filters">Back to overview</a>.
 		Buy from
 		<a ng-href="https://www.amazon.com/gp/search?ie=UTF8&amp;tag=ludoj0f-20&amp;index=toys-and-games&amp;keywords={{ game.name_url }}"
 			target="_blank"
@@ -107,23 +106,51 @@
 		<div class="row align-items-end related-games">
 			<div ng-repeat="game in compilationOf" class="col-xl-2 col-md-3 col-sm-4 col-6">
 				<strong ng-if="$first">Contains:</strong>
-				<game-square game="game" class="game-small"></game-square>
+				<a game-square=""
+					game="game"
+					show-ranking="true"
+					ng-href="#/game/{{ game.bgg_id }}"
+					class="game-small"></a>
 			</div>
 			<div ng-repeat="game in integratesWith" class="col-xl-2 col-md-3 col-sm-4 col-6">
 				<strong ng-if="$first">Integrates with:</strong>
-				<game-square game="game" class="game-small"></game-square>
+				<a game-square=""
+					game="game"
+					show-ranking="true"
+					ng-href="#/game/{{ game.bgg_id }}"
+					class="game-small"></a>
 			</div>
 			<div ng-repeat="game in implementationOf" class="col-xl-2 col-md-3 col-sm-4 col-6">
 				<strong ng-if="$first">Reimplements:</strong>
-				<game-square game="game" class="game-small"></game-square>
+				<a game-square=""
+					game="game"
+					show-ranking="true"
+					ng-href="#/game/{{ game.bgg_id }}"
+					class="game-small"></a>
 			</div>
 			<div ng-repeat="game in implementedBy" class="col-xl-2 col-md-3 col-sm-4 col-6">
 				<strong ng-if="$first">Reimplemented by:</strong>
-				<game-square game="game" class="game-small"></game-square>
+				<a game-square=""
+					game="game"
+					show-ranking="true"
+					ng-href="#/game/{{ game.bgg_id }}"
+					class="game-small"></a>
 			</div>
 			<div ng-repeat="game in containedIn" class="col-xl-2 col-md-3 col-sm-4 col-6">
 				<strong ng-if="$first">Contained in:</strong>
-				<game-square game="game" class="game-small"></game-square>
+				<a game-square=""
+					game="game"
+					show-ranking="true"
+					ng-href="#/game/{{ game.bgg_id }}"
+					class="game-small"></a>
+			</div>
+			<div ng-repeat="game in similarGames" class="col-xl-2 col-md-3 col-sm-4 col-6">
+				<strong ng-if="$first">You might also like:</strong>
+				<a game-square=""
+					game="game"
+					show-ranking="true"
+					ng-href="#/game/{{ game.bgg_id }}"
+					class="game-small"></a>
 			</div>
 		</div>
 	</section>
@@ -135,7 +162,7 @@
 				<img src="/assets/bgg-color.svg"
 					class="img-fluid img-icon-stats"
 					alt="BoardGameGeek ranking" />
-				BGG ranking
+				<a ng-href="{{ game.url }}" target="_blank">BGG <i class="fas fa-external-link-alt"></i></a> ranking
 			</dt>
 			<dd ng-if="game.bgg_rank || game.bayes_rating || game.avg_rating"
 					class="col-md-9 col-sm-8 col-12">

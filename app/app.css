@@ -7,8 +7,10 @@
     vertical-align: super;
 }
 
-.game {
-    background-color: #0C6;
+.game,
+.article {
+    background-color: lightgrey;
+    background-color: rgba(192, 192, 192, .5);
     background-position: center top;
     background-repeat: no-repeat;
     background-size: cover;
@@ -19,11 +21,20 @@
     position: relative;
 }
 
-.game-more {
-    background-color: #C06;
+.article {
+    color: white;
+    text-shadow: 0 0 3px black;
 }
 
-.game > div {
+.game-more,
+.article-more {
+    background-color: grey;
+    background-color: rgba(0, 0, 0, .5);
+    cursor: pointer;
+}
+
+.game > div,
+.article > div {
     background-image: linear-gradient(
         to bottom,
         transparent,
@@ -31,8 +42,45 @@
         black);
     border-radius: 5px;
     height: 100%;
+    overflow: hidden;
     position: absolute;
     width: 100%;
+}
+
+.article > div,
+.article.article-more > div,
+.article.article-more > div:hover,
+.article.article-more > div.selected {
+    background-image: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(0, 0, 0, .4),
+        rgba(0, 0, 0, .6),
+        rgba(0, 0, 0, .8));
+    transition: background-image .4s;
+}
+
+.article > div:hover,
+.article > div.selected {
+    background-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, .5),
+        rgba(0, 0, 0, .7),
+        rgba(0, 0, 0, .8),
+        rgba(0, 0, 0, .9));
+}
+
+.article-fade {
+    background-image: linear-gradient(
+        to bottom,
+        transparent,
+        black);
+    bottom: 0;
+    height: 2rem;
+    left: 0;
+    position: absolute;
+    width: 100%;
+    z-index: 5;
 }
 
 .game-rank {
@@ -51,7 +99,21 @@
     font-size: .7rem;
 }
 
-.game-title {
+.article-title {
+    font-size: 1.4rem;
+    padding-top: 50%;
+    transition: padding .4s;
+}
+
+.article > div:hover .article-title,
+.article > div.selected .article-title {
+    padding-top: 0;
+}
+
+.game-title,
+.article.article-more > div .article-title,
+.article.article-more > div:hover .article-title,
+.article.article-more > div.selected .article-title {
     bottom: 0;
     color: white;
     font-size: 1.2rem;
@@ -64,8 +126,62 @@
     font-size: 1rem;
 }
 
+.game-zoomable {
+    transition: all .2s;
+}
+
+.game-selectable {
+    opacity: .5;
+}
+
+.game-zoomable:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.game-liked .game-selectable {
+    opacity: 1;
+}
+
+.game-thumb {
+    color: white;
+    font-size: 2rem;
+    left: 0;
+    position: absolute;
+    text-shadow: 0 0 5px black;
+    top: 0;
+}
+
 .game-img {
     max-height: 250px;
+}
+
+.rec-button-container {
+    max-height: 50px;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.rec-button-container.ng-hide-add,
+.rec-button-container.ng-hide-remove {
+    overflow: hidden;
+    transition: all 0.2s linear;
+}
+
+.rec-button-container.ng-hide {
+    max-height: 0;
+}
+
+.rec-button-tooltip {
+    border-radius: .25rem;
+    box-shadow: 0 0 4px 1px white;
+}
+
+.rec-button-container button:disabled,
+.rec-button-container button[disabled] {
+    pointer-events: none;
 }
 
 .img-person {
@@ -253,7 +369,8 @@ input:checked + .slider:before {
     text-decoration: underline dotted;
 }
 
-.related-games {
+.related-games,
+.selectable-games {
     line-height: 1;
 }
 

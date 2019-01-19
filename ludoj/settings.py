@@ -147,6 +147,11 @@ REST_FRAMEWORK = {
     ),
 }
 
+# REST proxy
+REST_PROXY = {
+    'HOST': 'http://news.recommend.games',
+}
+
 # Custom
 
 RECOMMENDER_PATH = os.path.join(BASE_DIR, '.tc')

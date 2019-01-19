@@ -36,6 +36,9 @@ ludojApp.config(function (
     $routeProvider.when('/game/:id', {
         templateUrl: '/partials/detail.html',
         controller: 'DetailController'
+    }).when('/news', {
+        templateUrl: '/partials/news.html',
+        controller: 'NewsController'
     }).when('/about', {
         templateUrl: '/partials/about.html',
         controller: 'AboutController'

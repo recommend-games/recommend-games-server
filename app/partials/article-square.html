@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<div xmlns="http://www.w3.org/1999/xhtml"
+		class="article {{ addClass }}"
+		ng-style="bgImage(article.url_thumbnail[0])">
+	<div class="p-2">
+		<h2 class="article-title mb-5">
+			{{ article.title_short }}
+			<small ng-if="article.source_name"
+					class="text-secondaryx">
+				({{ article.source_name }})
+			</small>
+		</h2>
+		<p>
+			<span ng-if="article.published_at_str">
+				<em>{{ article.published_at_str }}</em> &middot;
+			</span>
+			{{ article.description }}
+		</p>
+		<div class="article-fade"></div>
+	</div>
+</div>
