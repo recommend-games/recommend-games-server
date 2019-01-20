@@ -2,9 +2,9 @@
 
 ''' serializers '''
 
-from __future__ import absolute_import, division, print_function, unicode_literals, with_statement
-
-from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField, StringRelatedField
+from rest_framework.serializers import (
+    CharField, IntegerField, ListField, ModelSerializer,
+    PrimaryKeyRelatedField, StringRelatedField, URLField)
 
 from .models import Category, Collection, Game, Mechanic, Person, User
 
@@ -18,6 +18,18 @@ class GameSerializer(ModelSerializer):
     mechanic_name = StringRelatedField(source='mechanic', many=True, read_only=True)
     contained_in = PrimaryKeyRelatedField(many=True, read_only=True)
     implemented_by = PrimaryKeyRelatedField(many=True, read_only=True)
+
+    alt_name = ListField(child=CharField(), required=False)
+    image_url = ListField(child=URLField(), required=False)
+    video_url = ListField(child=URLField(), required=False)
+    external_link = ListField(child=URLField(), required=False)
+
+    freebase_id = ListField(child=CharField(), required=False)
+    wikidata_id = ListField(child=CharField(), required=False)
+    wikipedia_id = ListField(child=CharField(), required=False)
+    dbpedia_id = ListField(child=CharField(), required=False)
+    luding_id = ListField(child=IntegerField(min_value=1), required=False)
+    spielen_id = ListField(child=CharField(), required=False)
 
     class Meta:
         ''' meta '''

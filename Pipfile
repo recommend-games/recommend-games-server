@@ -15,6 +15,7 @@ ludoj-recommender = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-
 gunicorn = "*"
 whitenoise = {extras = ["brotli"], version = "*"}
 django-rest-framework-proxy = "*"
+django-extensions = "*"
 
 [dev-packages]
 pylint = "*"
