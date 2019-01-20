@@ -18,7 +18,8 @@ ludojApp.constant('API_URL', '/api/')
     .constant('CANONICAL_URL', 'https://recommend.games/')
     .constant('DEFAULT_IMAGE', 'assets/android-chrome-512x512.png')
     .constant('SITE_DESCRIPTION', 'Top-rated board games as evaluated by our recommendation engine. ' +
-        'Find the best board and card games with personal recommendations for your taste!');
+        'Find the best board and card games with personal recommendations for your taste!')
+    .constant('GA_TRACKING_ID', 'UA-128891980-1');
 
 ludojApp.config(function (
     $locationProvider,

@@ -11,10 +11,12 @@ ludojApp.factory('gamesService', function gamesService(
     $http,
     $q,
     $sessionStorage,
+    $window,
     API_URL,
     APP_TITLE,
     CANONICAL_URL,
     DEFAULT_IMAGE,
+    GA_TRACKING_ID,
     SITE_DESCRIPTION
 ) {
     var service = {},
@@ -341,16 +343,16 @@ ludojApp.factory('gamesService', function gamesService(
         };
     };
 
-    function canonicalUrl(path, params) {
-        var url = CANONICAL_URL + '#' + (path || '/'),
-            qString = _(_.toPairs(params))
+    function canonicalPath(path, params) {
+        path = '#' + (path || '/');
+        var qString = _(_.toPairs(params))
                 .filter(1)
                 .sortBy(0)
                 .map(function (v) {
                     return v[0] + '=' + encodeURIComponent(v[1]);
                 })
                 .join('&');
-        return qString ? url + '?' + qString : url;
+        return qString ? path + '?' + qString : path;
     }
 
     service.setCanonicalUrl = function setCanonicalUrl(path, params) {
@@ -361,12 +363,17 @@ ludojApp.factory('gamesService', function gamesService(
             return;
         }
 
-        var url = canonicalUrl(path, params);
+        path = canonicalPath(path, params);
+        var url = CANONICAL_URL + path;
 
         $('head').append(
             '<link rel="canonical" href="' + url + '" />',
             '<meta property="og:url" content="' + url + '" />'
         );
+
+        if (GA_TRACKING_ID && $window.gtag) {
+            $window.gtag('config', GA_TRACKING_ID, {'page_path': path});
+        }
 
         return url;
     };
