@@ -311,7 +311,7 @@ ludojApp.factory('gamesService', function gamesService(
             'name': game.name,
             'description': game.description,
             'url': CANONICAL_URL + '#/game/' + game.bgg_id,
-            'image': game.image_url,
+            'image': _.head(game.image_url),
             'author': _.map(game.designer_name, function (designer) {
                 return {
                     '@type': 'Person',

@@ -43,8 +43,8 @@
 			class="product-link product-link-flag">🇪🇸</a>
 	</p>
 	<div class="game-description {{ expandable ? 'expandable' : '' }} {{ expandDescription ? 'expanded' : '' }} clearfix">
-		<img ng-if="game.image_url"
-			ng-src="{{ game.image_url }}"
+		<img ng-if="game.image_url &amp;&amp; game.image_url.length"
+			ng-src="{{ game.image_url[0] }}"
 			class="img-fluid game-img d-block float-md-right mb-3 mx-auto ml-md-3"
 			alt="{{ game.name }}"
 			title="{{ game.name }}" />
