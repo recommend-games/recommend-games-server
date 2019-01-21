@@ -331,6 +331,7 @@ class Command(BaseCommand):
     help = 'Loads files to the database'
 
     game_fields = frozenset({
+        'alt_name',
         'avg_rating',
         'bayes_rating',
         'bgg_id',
@@ -339,8 +340,11 @@ class Command(BaseCommand):
         'complexity',
         'cooperative',
         'created_at',
+        'dbpedia_id',
         'description',
+        'freebase_id',
         'language_dependency',
+        'luding_id',
         'max_age',
         'max_age_rec',
         'max_players',
@@ -359,16 +363,28 @@ class Command(BaseCommand):
         'rec_rank',
         'rec_rating',
         'scraped_at',
+        'spielen_id',
         'stddev_rating',
         'url',
+        'wikidata_id',
+        'wikipedia_id',
         'year',
     })
 
     game_fields_mapping = {
         'rank': 'bgg_rank',
-        'image_url': take_first,
-        'video_url': take_first,
-        'external_link': take_first,
+        # 'image_url': take_first,
+        # 'video_url': take_first,
+        # 'external_link': take_first,
+    }
+
+    game_item_mapping = {
+        'freebase_id': TODO,
+        'wikidata_id': TODO,
+        'wikipedia_id': TODO,
+        'dbpedia_id': TODO,
+        'luding_id': TODO,
+        'spielen_id': TODO,
     }
 
     game_fields_foreign = {
@@ -434,6 +450,7 @@ class Command(BaseCommand):
             items=items,
             fields=self.game_fields,
             fields_mapping=self.game_fields_mapping,
+            item_mapping=self.game_item_mapping,
             add_data=add_data,
             batch_size=kwargs['batch'],
         )
