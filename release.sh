@@ -28,7 +28,8 @@ python3 manage.py filldb \
     --collection-paths "${WORK_SPACE}/ludoj-scraper/results/bgg_ratings.jl" \
     --in-format jl \
     --batch 100000 \
-    --recommender "${WORK_SPACE}/ludoj-recommender/.tc"
+    --recommender "${WORK_SPACE}/ludoj-recommender/.tc" \
+    --links "${WORK_SPACE}/ludoj-scraper/results/links.json"
 
 # update recommender
 rm --recursive --force .tc* .temp* static

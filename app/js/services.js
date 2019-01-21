@@ -20,7 +20,8 @@ ludojApp.factory('gamesService', function gamesService(
     SITE_DESCRIPTION
 ) {
     var service = {},
-        cache = $cacheFactory('ludoj', {'capacity': 1024});
+        cache = $cacheFactory('ludoj', {'capacity': 1024}),
+        linkedSites = ['wikidata', 'wikipedia', 'luding', 'spielen'];
 
     function join(array, sep, lastSep) {
         sep = sep || ', ';
@@ -50,9 +51,41 @@ ludojApp.factory('gamesService', function gamesService(
         });
     }
 
+    function externalLink(site, id) {
+        site = _.head(_.split(site, '_', 1));
+
+        if (!site || !id) {
+            return null;
+        }
+
+        var result = {'site': site};
+
+        if (site === 'wikidata') {
+            result.url = 'https://www.wikidata.org/wiki/' + id;
+            result.label = 'Wikidata';
+            result.icon_url = '/assets/wikidata.svg';
+        } else if (site === 'wikipedia') {
+            result.url = 'https://en.wikipedia.org/wiki/' + id;
+            result.label = 'Wikipedia';
+            result.icon_class = 'fab fa-wikipedia-w';
+        } else if (site === 'luding') {
+            result.url = 'http://www.luding.org/cgi-bin/GameData.py/ENgameid/' + id;
+            result.label = 'Luding';
+        } else if (site === 'spielen') {
+            result.url = 'https://gesellschaftsspiele.spielen.de/alle-brettspiele/' + id + '/';
+            result.label = 'spielen.de';
+            result.icon_url = '/assets/spielen.png';
+        } else {
+            return null;
+        }
+
+        return result;
+    }
+
     function processGame(game) {
         game.name_short = _.size(game.name) > 50 ? _.truncate(game.name, {'length': 50, 'separator': /,? +/}) : null;
         game.name_url = encodeURIComponent(_.toLower(game.name));
+        game.alt_name = _.without(game.alt_name, game.name);
 
         // filter out '(Uncredited)' / #3
         game.designer = _.without(game.designer, 3);
@@ -102,7 +135,15 @@ ludojApp.factory('gamesService', function gamesService(
                 'moderate in-game text',
                 'extensive use of text',
                 'unplayable in another language'
-            ];
+            ],
+            externalLinks = _.flatMap(linkedSites, function (site) {
+                return _(game[site + '_id'])
+                    .map(function (id) {
+                        return externalLink(site, id);
+                    })
+                    .filter()
+                    .value();
+            });
 
         game.counts = _.map(counts, function (rec, count) {
             count += 1;
@@ -126,6 +167,7 @@ ludojApp.factory('gamesService', function gamesService(
                 language_dependencies[_.round(game.language_dependency)] : null;
         game.cooperative_string = game.cooperative === true ? 'cooperative' : game.cooperative === false ? 'competitive' : null;
         game.star_classes = starClasses(game.rec_stars);
+        game.external_links = _.isEmpty(externalLinks) ? null : externalLinks;
 
         return game;
     }
@@ -313,7 +355,7 @@ ludojApp.factory('gamesService', function gamesService(
             'name': game.name,
             'description': game.description,
             'url': CANONICAL_URL + '#/game/' + game.bgg_id,
-            'image': game.image_url,
+            'image': _.head(game.image_url),
             'author': _.map(game.designer_name, function (designer) {
                 return {
                     '@type': 'Person',

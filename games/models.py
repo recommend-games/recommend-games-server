@@ -5,6 +5,7 @@
 from django.db.models import (
     CASCADE, BooleanField, CharField, FloatField, ForeignKey, Index, ManyToManyField, Model,
     PositiveIntegerField, PositiveSmallIntegerField, SmallIntegerField, TextField, URLField)
+from django_extensions.db.fields.json import JSONField
 
 
 class Game(Model):
@@ -12,7 +13,7 @@ class Game(Model):
 
     bgg_id = PositiveIntegerField(primary_key=True)
     name = CharField(max_length=255, db_index=True)
-    # alt_name = ListField(CharField(), blank=True)
+    alt_name = JSONField(default=list)
     year = SmallIntegerField(blank=True, null=True, db_index=True)
     description = TextField(blank=True, null=True)
 
@@ -21,9 +22,9 @@ class Game(Model):
     # publisher = ListField(CharField(), blank=True)
 
     url = URLField(blank=True, null=True)
-    image_url = URLField(blank=True, null=True) # should be list
-    video_url = URLField(blank=True, null=True) # should be list
-    external_link = URLField(blank=True, null=True) # should be list
+    image_url = JSONField(default=list)
+    video_url = JSONField(default=list)
+    external_link = JSONField(default=list)
     # list_price = CharField(max_length=100, blank=True, null=True)
 
     min_players = PositiveSmallIntegerField(blank=True, null=True, db_index=True)
@@ -64,6 +65,13 @@ class Game(Model):
 
     complexity = FloatField(blank=True, null=True, db_index=True)
     language_dependency = FloatField(blank=True, null=True, db_index=True)
+
+    freebase_id = JSONField(default=list)
+    wikidata_id = JSONField(default=list)
+    wikipedia_id = JSONField(default=list)
+    dbpedia_id = JSONField(default=list)
+    luding_id = JSONField(default=list)
+    spielen_id = JSONField(default=list)
 
     class Meta:
         ''' meta '''

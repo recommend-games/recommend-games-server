@@ -8,6 +8,7 @@ import re
 import sys
 
 from collections import defaultdict
+from functools import partial
 from itertools import groupby
 
 from django.conf import settings
@@ -20,6 +21,7 @@ from ...utils import (
 
 LOGGER = logging.getLogger(__name__)
 VALUE_ID_REGEX = re.compile(r'^(.*?)(:(\d+))?$')
+LINK_ID_REGEX = re.compile(r'^([a-z]+):(.+)$')
 
 
 def _load_json(path):
@@ -325,12 +327,52 @@ def _create_secondary_instances(
     LOGGER.info('done processing')
 
 
+def _parse_link_id(string, regex=LINK_ID_REGEX):
+    if not string:
+        return None, None
+
+    match = regex.match(string)
+
+    if not match:
+        return None, None
+
+    site = match.group(1) or None
+    id_str = match.group(2) or None
+    id_int = parse_int(id_str)
+    id_ = id_str if id_int is None else id_int
+
+    return site, id_
+
+
+def _parse_link_ids(data, regex=LINK_ID_REGEX):
+    result = defaultdict(lambda: defaultdict(list))
+    for origin, links in data.items():
+        _, id_orig = _parse_link_id(origin, regex)
+        if id_orig is None:
+            continue
+        for site, id_dest in map(_parse_link_id, arg_to_iter(links)):
+            if site and id_dest is not None:
+                result[id_orig][site].append(id_dest)
+    LOGGER.info('found links for %d items', len(result))
+    return result
+
+
+def _parse_link_file(file, regex=LINK_ID_REGEX):
+    if isinstance(file, str):
+        LOGGER.info('loading links from <%s>', file)
+        with open(file, 'r') as file_obj:
+            return _parse_link_file(file_obj, regex)
+    data = json.load(file)
+    return _parse_link_ids(data, regex)
+
+
 class Command(BaseCommand):
     ''' Loads a file to the database '''
 
     help = 'Loads files to the database'
 
     game_fields = frozenset({
+        'alt_name',
         'avg_rating',
         'bayes_rating',
         'bgg_id',
@@ -340,6 +382,8 @@ class Command(BaseCommand):
         'cooperative',
         'created_at',
         'description',
+        'external_link',
+        'image_url',
         'language_dependency',
         'max_age',
         'max_age_rec',
@@ -361,15 +405,15 @@ class Command(BaseCommand):
         'scraped_at',
         'stddev_rating',
         'url',
+        'video_url',
         'year',
     })
 
     game_fields_mapping = {
         'rank': 'bgg_rank',
-        'image_url': take_first,
-        'video_url': take_first,
-        'external_link': take_first,
     }
+
+    game_item_mapping = {}
 
     game_fields_foreign = {
         'artist': (Person, 'name'),
@@ -401,6 +445,15 @@ class Command(BaseCommand):
             or item.get('bgg_user_preordered')),
     }
 
+    linked_sites = (
+        'freebase',
+        'wikidata',
+        'wikipedia',
+        'dbpedia',
+        'luding',
+        'spielen',
+    )
+
     def add_arguments(self, parser):
         parser.add_argument('paths', nargs='+', help='game file(s) to be processed')
         parser.add_argument(
@@ -412,6 +465,7 @@ class Command(BaseCommand):
         parser.add_argument(
             '--recommender', '-r', default=getattr(settings, 'RECOMMENDER_PATH', None),
             help='path to recommender model')
+        parser.add_argument('--links', '-l', help='links JSON file location')
 
     def handle(self, *args, **kwargs):
         logging.basicConfig(
@@ -428,12 +482,21 @@ class Command(BaseCommand):
             recommender_path=kwargs['recommender'],
             pk_field=Game._meta.pk.name,
         )
+        game_item_mapping = dict(self.game_item_mapping or {})
+
+        if kwargs['links'] and self.linked_sites:
+            links = _parse_link_file(kwargs['links'])
+            def _find_links(item, site, links=links):
+                return links[item.get('bgg_id')][site]
+            for site in self.linked_sites:
+                game_item_mapping[f'{site}_id'] = partial(_find_links, site=site, links=links)
 
         _create_from_items(
             model=Game,
             items=items,
             fields=self.game_fields,
             fields_mapping=self.game_fields_mapping,
+            item_mapping=game_item_mapping,
             add_data=add_data,
             batch_size=kwargs['batch'],
         )

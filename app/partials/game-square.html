@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <div xmlns="http://www.w3.org/1999/xhtml"
 		class="game {{ addClass }}"
-		ng-style="bgImage(game.image_url)">
+		ng-style="bgImage(game.image_url[0])">
 	<div>
 		<i ng-if="thumb"
 			class="{{thumb === 'solid' ? 'fas' : 'far'}} fa-thumbs-up game-thumb p-2"></i>
