@@ -39,6 +39,7 @@ ludojApp.controller('DetailController', function DetailController(
     gamesService.getGame($routeParams.id)
         .then(function (game) {
             $scope.game = game;
+            $scope.emailSubject = encodeURIComponent('Bad link for "' + game.name + '" (' + game.bgg_id + ')');
 
             gamesService.setTitle(game.name);
             gamesService.setImage(_.head(game.image_url));
