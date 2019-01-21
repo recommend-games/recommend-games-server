@@ -372,7 +372,7 @@ ludojApp.factory('gamesService', function gamesService(
         );
 
         if (GA_TRACKING_ID && $window.gtag) {
-            $window.gtag('config', GA_TRACKING_ID, {'page_path': path});
+            $window.gtag('config', GA_TRACKING_ID, {'page_path': '/' + path});
         }
 
         return url;
