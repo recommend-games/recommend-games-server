@@ -116,3 +116,4 @@ recommender/
 *.sqlite3*
 requirements.txt
 sitemap.xml
+*.pid

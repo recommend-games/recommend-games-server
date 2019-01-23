@@ -27,3 +27,5 @@ lxml = "*"
 requests = "*"
 rcssmin = "*"
 rjsmin = "*"
+# apache-airflow = "*"
+ludoj-scraper = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-scraper.git"}

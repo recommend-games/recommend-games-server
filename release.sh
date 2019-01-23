@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # before starting, make sure that
-# - results are sync'ed and merged to "${WORK_SPACE}/ludoj-scraper/results/"
+# - results are sync'ed and merged to "${WORK_SPACE}/ludoj-data/scraped/"
 # - recommender models have been trained to "${WORK_SPACE}/ludoj-recommender/.tc/"
 # - pipenv update --dev in "${WORK_SPACE}/ludoj-server"
 # - python3 manage.py makemigrations
@@ -24,21 +24,24 @@ python3 manage.py migrate
 # fill database
 echo 'Uploading games, persons, and recommendations to database...'
 python3 manage.py filldb \
-    "${WORK_SPACE}/ludoj-scraper/results/bgg.jl" \
-    --collection-paths "${WORK_SPACE}/ludoj-scraper/results/bgg_ratings.jl" \
+    "${WORK_SPACE}/ludoj-data/scraped/bgg.jl" \
+    --collection-paths "${WORK_SPACE}/ludoj-data/scraped/bgg_ratings.jl" \
     --in-format jl \
     --batch 100000 \
     --recommender "${WORK_SPACE}/ludoj-recommender/.tc" \
-    --links "${WORK_SPACE}/ludoj-scraper/results/links.json"
+    --links "${WORK_SPACE}/ludoj-data/links.json"
+
+# clean up and compress database
+sqlite3 db.sqlite3 'VACUUM;'
 
 # update recommender
 rm --recursive --force .tc* .temp* static
 mkdir --parents .tc
 cp --recursive \
-    "${WORK_SPACE}"/ludoj-recommender/.tc/recommender \
-    "${WORK_SPACE}"/ludoj-recommender/.tc/similarity \
-    "${WORK_SPACE}"/ludoj-recommender/.tc/clusters \
-    "${WORK_SPACE}"/ludoj-recommender/.tc/compilations \
+    "${WORK_SPACE}/ludoj-recommender/.tc/recommender" \
+    "${WORK_SPACE}/ludoj-recommender/.tc/similarity" \
+    "${WORK_SPACE}/ludoj-recommender/.tc/clusters" \
+    "${WORK_SPACE}/ludoj-recommender/.tc/compilations" \
     .tc/
 
 # minify static
@@ -62,9 +65,6 @@ python3 manage.py sitemap \
 # static files
 DEBUG='' python3 manage.py collectstatic --no-input
 rm --recursive --force .temp
-
-# clean up database
-sqlite3 db.sqlite3 'VACUUM;'
 
 # release
 echo 'Building, pushing, and releasing container to Heroku'
