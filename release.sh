@@ -34,7 +34,12 @@ python3 manage.py filldb \
 # clean up and compress database
 sqlite3 db.sqlite3 'VACUUM;'
 
+# clean up database
+echo 'Making database more compact...'
+sqlite3 db.sqlite3 'VACUUM;'
+
 # update recommender
+echo 'Copying recommender model files...'
 rm --recursive --force .tc* .temp* static
 mkdir --parents .tc
 cp --recursive \
@@ -45,15 +50,12 @@ cp --recursive \
     .tc/
 
 # minify static
-mkdir --parents .temp
-cp --recursive app/* .temp/
-for FILE in $(find app -name '*.css'); do
-    python3 -m rcssmin < "${FILE}" > ".temp/${FILE#app/}"
-done
-for FILE in $(find app -name '*.js'); do
-    python3 -m rjsmin < "${FILE}" > ".temp/${FILE#app/}"
-done
-# TODO minify HTML
+echo 'Copying files and minifying HTML, CSS, and JS...'
+python3 manage.py minify \
+    'app' \
+    '.temp' \
+    --delete \
+    --exclude-dot
 
 # sitemap
 echo 'Generating sitemap...'
@@ -63,11 +65,12 @@ python3 manage.py sitemap \
     --output .temp/sitemap.xml
 
 # static files
+echo 'Collecting static files...'
 DEBUG='' python3 manage.py collectstatic --no-input
 rm --recursive --force .temp
 
 # release
-echo 'Building, pushing, and releasing container to Heroku'
+echo 'Building, pushing, and releasing container to Heroku...'
 heroku container:push web --app ludoj
 heroku container:release web --app ludoj
 
