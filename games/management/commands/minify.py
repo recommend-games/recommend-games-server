@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
-''' minify static files '''
+''' Minify static files '''
 
 import logging
 import os
-# import re
-# import sys
+import re
+import sys
 
 from functools import partial
-from shutil import copyfileobj
+from shutil import copyfileobj, rmtree
 
-# from django.conf import settings
-# from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand
 from rcssmin import cssmin
 from rjsmin import jsmin
 
@@ -67,11 +66,15 @@ def _walk_files(path, exclude_files=None):
 
 def minify(src, dst, exclude_files=None, file_processors=None):
     ''' copy file from src to dst and minify web files along the way '''
+
+    LOGGER.info('copying files in <%s> to <%s>', src, dst)
+
     file_processors = DEFAULT_PROCESSORS if file_processors is None else file_processors
     prefix = os.path.join(src, '')
 
     for src_path in _walk_files(src, exclude_files):
         assert src_path.startswith(prefix)
+
         dst_path = os.path.join(dst, src_path[len(prefix):])
         dst_dir, dst_file = os.path.split(dst_path)
         os.makedirs(dst_dir, exist_ok=True)
@@ -80,7 +83,48 @@ def minify(src, dst, exclude_files=None, file_processors=None):
         ext = ext[1:].lower() if ext else None
         processor = file_processors.get(ext, copyfileobj)
 
-        LOGGER.info('copying file <%s> to <%s> using processor %r', src_path, dst_path, processor)
+        LOGGER.debug('copying file <%s> to <%s> using processor %r', src_path, dst_path, processor)
 
         with open(src_path, 'rb') as fsrc, open(dst_path, 'wb') as fdst:
             processor(fsrc, fdst)
+
+
+class Command(BaseCommand):
+    ''' Minify static files '''
+
+    help = 'Minify static files'
+
+    def add_arguments(self, parser):
+        parser.add_argument('source', help='source path')
+        parser.add_argument('destination', help='destination path')
+        parser.add_argument(
+            '--delete', '-d', action='store_true', help='delete destination before copying')
+        parser.add_argument('--exclude', '-e', nargs='+', help='exclude these file names')
+        parser.add_argument(
+            '--exclude-dot', '-E', action='store_true',
+            help='exclude dot (hidden and system) files')
+
+    def handle(self, *args, **kwargs):
+        logging.basicConfig(
+            stream=sys.stderr,
+            level=logging.DEBUG if kwargs['verbosity'] > 1 else logging.INFO,
+            format='%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s',
+        )
+
+        LOGGER.info(kwargs)
+
+        if kwargs['delete']:
+            LOGGER.info('deleting destination dir <%s>', kwargs['destination'])
+            rmtree(kwargs['destination'], ignore_errors=True)
+
+        exclude = tuple(arg_to_iter(kwargs['exclude']))
+        exclude = exclude + (re.compile(r'^\.'),) if kwargs['exclude_dot'] else exclude
+
+        LOGGER.info('excluding files: %s', exclude)
+
+        minify(
+            src=kwargs['source'],
+            dst=kwargs['destination'],
+            exclude_files=exclude,
+            file_processors=DEFAULT_PROCESSORS,
+        )
