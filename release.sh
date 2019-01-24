@@ -32,9 +32,6 @@ python3 manage.py filldb \
     --links "${WORK_SPACE}/ludoj-data/links.json"
 
 # clean up and compress database
-sqlite3 db.sqlite3 'VACUUM;'
-
-# clean up database
 echo 'Making database more compact...'
 sqlite3 db.sqlite3 'VACUUM;'
 
