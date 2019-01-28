@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # before starting, make sure that
-# - results are sync'ed and merged to "${WORK_SPACE}/ludoj-scraper/results/"
+# - results are sync'ed and merged to "${WORK_SPACE}/ludoj-data/scraped/"
 # - recommender models have been trained to "${WORK_SPACE}/ludoj-recommender/.tc/"
 # - pipenv update --dev in "${WORK_SPACE}/ludoj-server"
 # - python3 manage.py makemigrations
@@ -24,14 +24,14 @@ python3 manage.py migrate
 # fill database
 echo 'Uploading games, persons, and recommendations to database...'
 python3 manage.py filldb \
-    "${WORK_SPACE}/ludoj-scraper/results/bgg.jl" \
-    --collection-paths "${WORK_SPACE}/ludoj-scraper/results/bgg_ratings.jl" \
+    "${WORK_SPACE}/ludoj-data/scraped/bgg.jl" \
+    --collection-paths "${WORK_SPACE}/ludoj-data/scraped/bgg_ratings.jl" \
     --in-format jl \
     --batch 100000 \
     --recommender "${WORK_SPACE}/ludoj-recommender/.tc" \
-    --links "${WORK_SPACE}/ludoj-scraper/results/links.json"
+    --links "${WORK_SPACE}/ludoj-data/links.json"
 
-# clean up database
+# clean up and compress database
 echo 'Making database more compact...'
 sqlite3 db.sqlite3 'VACUUM;'
 
