@@ -17,8 +17,13 @@ export URL_LIVE='https://recommend.games/'
 ### SERVER ###
 cd "${WORK_SPACE}/ludoj-server"
 
+VERSION="$(tr -d '[:space:]' < VERSION)"
+echo "Building Ludoj server v${VERSION}..."
+
 # fresh database
-mv db.sqlite3 db.sqlite3.bk || true
+rm --recursive --force data.bk .temp* static
+mv data data.bk || true
+mkdir --parents data/recommender
 python3 manage.py migrate
 
 # fill database
@@ -33,18 +38,16 @@ python3 manage.py filldb \
 
 # clean up and compress database
 echo 'Making database more compact...'
-sqlite3 db.sqlite3 'VACUUM;'
+sqlite3 data/db.sqlite3 'VACUUM;'
 
 # update recommender
 echo 'Copying recommender model files...'
-rm --recursive --force .tc* .temp* static
-mkdir --parents .tc
 cp --recursive \
     "${WORK_SPACE}/ludoj-recommender/.tc/recommender" \
     "${WORK_SPACE}/ludoj-recommender/.tc/similarity" \
     "${WORK_SPACE}/ludoj-recommender/.tc/clusters" \
     "${WORK_SPACE}/ludoj-recommender/.tc/compilations" \
-    .tc/
+    data/recommender/
 
 # minify static
 echo 'Copying files and minifying HTML, CSS, and JS...'
@@ -66,9 +69,13 @@ echo 'Collecting static files...'
 DEBUG='' python3 manage.py collectstatic --no-input
 rm --recursive --force .temp
 
+# build
+echo 'Building Docker image...'
+docker build --tag 'ludoj-server:${VERSION}' 'ludoj-server:latest' .
+
 # release
-echo 'Building, pushing, and releasing container to Heroku...'
-heroku container:push web --app ludoj
-heroku container:release web --app ludoj
+# echo 'Building, pushing, and releasing container to Heroku...'
+# heroku container:push web --app ludoj
+# heroku container:release web --app ludoj
 
 echo 'Done.'
