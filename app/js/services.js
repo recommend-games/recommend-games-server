@@ -21,7 +21,7 @@ ludojApp.factory('gamesService', function gamesService(
 ) {
     var service = {},
         cache = $cacheFactory('ludoj', {'capacity': 1024}),
-        linkedSites = ['wikidata', 'wikipedia', 'luding', 'spielen'];
+        linkedSites = ['wikidata', 'wikipedia', 'luding', 'spielen', 'bga'];
 
     function join(array, sep, lastSep) {
         sep = sep || ', ';
@@ -75,6 +75,10 @@ ludojApp.factory('gamesService', function gamesService(
             result.url = 'https://gesellschaftsspiele.spielen.de/alle-brettspiele/' + id + '/';
             result.label = 'spielen.de';
             result.icon_url = '/assets/spielen.png';
+        } else if (site === 'bga') {
+            result.url = 'https://www.boardgameatlas.com/search/game/' + id + '?amazonTag=ludoj0f-20';
+            result.label = 'Board Game Atlas';
+            result.icon_url = '/assets/bga.png';
         } else {
             return null;
         }

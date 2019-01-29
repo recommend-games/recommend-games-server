@@ -452,6 +452,7 @@ class Command(BaseCommand):
         'dbpedia',
         'luding',
         'spielen',
+        'bga',
     )
 
     def add_arguments(self, parser):
