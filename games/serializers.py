@@ -30,6 +30,7 @@ class GameSerializer(ModelSerializer):
     dbpedia_id = ListField(child=CharField(), required=False)
     luding_id = ListField(child=IntegerField(min_value=1), required=False)
     spielen_id = ListField(child=CharField(), required=False)
+    bga_id = ListField(child=CharField(), required=False)
 
     class Meta:
         ''' meta '''
