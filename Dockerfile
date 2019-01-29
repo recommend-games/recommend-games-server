@@ -28,6 +28,6 @@ COPY ludoj ludoj
 COPY games games
 COPY static static
 
-USER ludoj
+# USER ludoj
 
 CMD gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 16 ludoj.wsgi
