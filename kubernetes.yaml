@@ -16,11 +16,8 @@ spec:
     spec:
       containers:
         - name: ludoj-server
-          image: localhost:5000/ludoj-server # gcr.io/recommend-games/ludoj-server
-          # This setting makes nodes pull the docker image every time before
-          # starting the pod. This is useful when debugging, but should be turned
-          # off in production.
-          imagePullPolicy: Always
+          image: gcr.io/recommend-games/ludoj-server:latest # localhost:5000/ludoj-server
+          imagePullPolicy: IfNotPresent # Always
           env:
             - name: DEBUG
               value: ''
@@ -30,9 +27,6 @@ spec:
             - containerPort: 8080
 ---
 
-# The polls service provides a load-balancing proxy over the polls app
-# pods. By specifying the type as a 'LoadBalancer', Container Engine will
-# create an external HTTP load balancer.
 # For more information about Services see:
 #   https://cloud.google.com/container-engine/docs/services/
 # For more information about external HTTP load balancing see:
