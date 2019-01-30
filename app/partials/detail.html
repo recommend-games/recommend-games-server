@@ -14,7 +14,7 @@
 			<span ng-if="game.year">({{ game.year }})</span>
 		</small>
 	</h1>
-	<p>
+	<!--<p>
 		View on <a ng-href="{{ game.url }}" target="_blank">BoardGameGeek <i class="fas fa-external-link-alt"></i></a>.
 		Buy from
 		<a ng-href="https://www.amazon.com/gp/search?ie=UTF8&amp;tag=ludoj0f-20&amp;index=toys-and-games&amp;keywords={{ game.name_url }}"
@@ -41,7 +41,7 @@
 			target="_blank"
 			title="Buy from Amazon.es"
 			class="product-link product-link-flag">🇪🇸</a>
-	</p>
+	</p>-->
 	<div class="game-description {{ expandable ? 'expandable' : '' }} {{ expandDescription ? 'expanded' : '' }} clearfix">
 		<img ng-if="game.image_url &amp;&amp; game.image_url.length"
 			ng-src="{{ game.image_url[0] }}"
