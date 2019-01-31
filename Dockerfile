@@ -19,8 +19,6 @@ RUN apt-get -y update && \
 COPY Pipfile* ./
 RUN pipenv install --deploy --system --verbose
 
-COPY db.sqlite3 ./
-COPY .tc .tc
 COPY ludoj ludoj
 COPY games games
 COPY static static

@@ -6,7 +6,7 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+DATA_DIR = os.path.join(BASE_DIR, 'data')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
@@ -87,7 +87,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(DATA_DIR, 'db.sqlite3'),
     }
 }
 
@@ -155,5 +155,5 @@ REST_PROXY = {
 
 # Custom
 
-RECOMMENDER_PATH = os.path.join(BASE_DIR, '.tc')
+RECOMMENDER_PATH = os.path.join(DATA_DIR, 'recommender')
 STAR_PERCENTILES = (.165, .365, .615, .815, .915, .965, .985, .995)
