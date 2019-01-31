@@ -13,6 +13,8 @@ set -euxo pipefail
 export DEBUG=''
 export WORK_SPACE="${HOME}/Workspace"
 export URL_LIVE='https://recommend.games/'
+export GC_PROJECT="${GC_PROJECT:-recommend-games}"
+export GS_BUCKET="${GS_BUCKET:-"${GC_PROJECT}-data"}"
 
 ### SERVER ###
 cd "${WORK_SPACE}/ludoj-server"
@@ -21,7 +23,7 @@ VERSION="$(tr -d '[:space:]' < VERSION)"
 echo "Building Ludoj server v${VERSION}..."
 
 # fresh database
-rm --recursive --force data.bk .temp* static
+rm --recursive --force data.bk* .temp* static
 mv data data.bk || true
 mkdir --parents data/recommender
 python3 manage.py migrate
@@ -49,6 +51,10 @@ cp --recursive \
     "${WORK_SPACE}/ludoj-recommender/.tc/compilations" \
     data/recommender/
 
+# Sync data to GCS
+gsutil -m -o GSUtil:parallel_composite_upload_threshold=100M \
+    rsync -r data/ "gs://${GS_BUCKET}/"
+
 # minify static
 echo 'Copying files and minifying HTML, CSS, and JS...'
 python3 manage.py minify \
@@ -71,11 +77,18 @@ rm --recursive --force .temp
 
 # build
 echo 'Building Docker image...'
-docker build --tag 'ludoj-server:${VERSION}' 'ludoj-server:latest' .
-
-# release
-# echo 'Building, pushing, and releasing container to Heroku...'
-# heroku container:push web --app ludoj
-# heroku container:release web --app ludoj
+docker build \
+    --tag "ludoj-server:${VERSION}" \
+    --tag 'ludoj-server:latest' \
+    --tag "gcr.io/${GC_PROJECT}/ludoj-server:${VERSION}" \
+    --tag "gcr.io/${GC_PROJECT}/ludoj-server:latest" \
+    .
+docker push "gcr.io/${GC_PROJECT}/ludoj-server:${VERSION}"
+gcloud app deploy \
+    --project "${GC_PROJECT}" \
+    --image-url "gcr.io/${GC_PROJECT}/ludoj-server:${VERSION}" \
+    --version "${VERSION}" \
+    --promote \
+    --quiet
 
 echo 'Done.'
