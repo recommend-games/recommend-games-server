@@ -10,6 +10,7 @@ if [[ -d "${TARGET}" ]] && [[ "$(find "${TARGET}" -type f | wc -m)" != '0' ]]; t
 else
 	echo "Directory ${TARGET} is empty, syncing with <gs://${GS_BUCKET}/>..."
 	mkdir --parent "${TARGET}"
+	gsutil -D version -l
 	gsutil -m rsync -r "gs://${GS_BUCKET}/" "${TARGET}"
 fi
 

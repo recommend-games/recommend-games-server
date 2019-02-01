@@ -18,12 +18,12 @@ RUN apt-get -y update && \
     pip2 install --upgrade gsutil && \
     pip3 install --upgrade pip pipenv
 COPY Pipfile* ./
-RUN pipenv install --deploy --system --verbose
+RUN pipenv install --deploy
 
-COPY startup.sh ./
+COPY startup.sh .boto ./
 COPY ludoj ludoj
 COPY games games
 COPY static static
 
-ENTRYPOINT ["/bin/bash", "startup.sh"]
+ENTRYPOINT ["pipenv", "run", "/bin/bash", "startup.sh"]
 CMD ["gunicorn", "--bind", ":8080", "--workers", "1", "--threads", "16", "ludoj.wsgi:application"]
