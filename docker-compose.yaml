@@ -10,6 +10,7 @@ services:
         environment:
             - DEBUG=
             - PORT=8080
+            - BOTO_CONFIG=/app/.boto
         ports:
             - '8080:8080'
         volumes:

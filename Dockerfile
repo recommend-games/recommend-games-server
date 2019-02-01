@@ -20,7 +20,7 @@ RUN apt-get -y update && \
 COPY Pipfile* ./
 RUN pipenv install --deploy
 
-COPY startup.sh .boto ./
+COPY .boto gs.json startup.sh ./
 COPY ludoj ludoj
 COPY games games
 COPY static static
