@@ -52,8 +52,9 @@ cp --recursive \
     data/recommender/
 
 # Sync data to GCS
-gsutil -m -o GSUtil:parallel_composite_upload_threshold=100M \
-    rsync -r data/ "gs://${GS_BUCKET}/"
+CLOUDSDK_PYTHON='' gsutil -m -o GSUtil:parallel_composite_upload_threshold=100M \
+    rsync -d -r \
+    data/ "gs://${GS_BUCKET}/"
 
 # minify static
 echo 'Copying files and minifying HTML, CSS, and JS...'

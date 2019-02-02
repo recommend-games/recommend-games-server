@@ -9,8 +9,10 @@ automatic_scaling:
     cpu_utilization:
         target_utilization: 0.8
 env_variables:
+    ENVIRONMENT: production
     DEBUG: ''
-    SECRET_KEY: DtWd%M$etFfQu%CQQN9Lf*R5&$3g#wO!bPQLSs8ia&Ixkyai!0
     BOTO_CONFIG: /app/.boto
+    SECRET_KEY: DtWd%M$etFfQu%CQQN9Lf*R5&$3g#wO!bPQLSs8ia&Ixkyai!0
+    SECURE_SSL_REDIRECT: ''
 readiness_check:
     app_start_timeout_sec: 1800
