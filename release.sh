@@ -52,8 +52,10 @@ cp --recursive \
     data/recommender/
 
 # Sync data to GCS
+# TODO exclude dot files
 gsutil -m -o GSUtil:parallel_composite_upload_threshold=100M \
-    rsync -r data/ "gs://${GS_BUCKET}/"
+    rsync -d -r \
+    data/ "gs://${GS_BUCKET}/"
 
 # minify static
 echo 'Copying files and minifying HTML, CSS, and JS...'
@@ -72,8 +74,14 @@ python3 manage.py sitemap \
 
 # static files
 echo 'Collecting static files...'
-DEBUG='' python3 manage.py collectstatic --no-input
+DEBUG='' ENVIRONMENT='development' python3 manage.py collectstatic --no-input
 rm --recursive --force .temp
+
+# sync static files to GCS
+gsutil defacl set public-read "gs://${GC_PROJECT}.appspot.com"
+# TODO exclude dot files
+gsutil -m rsync -d -r \
+    static/ "gs://${GC_PROJECT}.appspot.com/"
 
 # build
 echo 'Building Docker image...'

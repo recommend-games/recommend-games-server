@@ -17,7 +17,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', '+*6x!0^!j^&h4+l-w7h!)pk=1m7gie&@&0cjq7)19%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.getenv('DEBUG'))
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'development' if DEBUG else 'production')
-READ_ONLY = ENVIRONMENT == 'production'
+PRODUCTION = ENVIRONMENT == 'production'
+READ_ONLY = PRODUCTION
 
 ALLOWED_HOSTS = [
     '0.0.0.0',
@@ -49,7 +50,6 @@ if DEBUG:
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -57,6 +57,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+if not PRODUCTION:
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
 ROOT_URLCONF = 'ludoj.urls'
 
@@ -125,13 +128,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
-STATIC_URL = '/'
+STATIC_URL = 'https://storage.googleapis.com/recommend-games.appspot.com/' if PRODUCTION else '/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'app' if DEBUG else 'static')
 STATICFILES_DIRS = [] if DEBUG else [
     os.path.join(BASE_DIR, '.temp'),
 ]
 STATICFILES_STORAGE = (
-    'django.contrib.staticfiles.storage.StaticFilesStorage' if DEBUG
+    'django.contrib.staticfiles.storage.ManifestStaticFilesStorage' if PRODUCTION
+    else 'django.contrib.staticfiles.storage.StaticFilesStorage' if DEBUG
     else 'whitenoise.storage.CompressedManifestStaticFilesStorage')
 
 # WhiteNoise
