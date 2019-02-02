@@ -114,5 +114,6 @@ recommender/
 .storage/
 
 *.sqlite3*
+gs.json
 requirements.txt
 sitemap.xml

@@ -13,12 +13,19 @@ set -euxo pipefail
 export DEBUG=''
 export WORK_SPACE="${HOME}/Workspace"
 export URL_LIVE='https://recommend.games/'
+export GC_PROJECT="${GC_PROJECT:-recommend-games}"
+export GS_BUCKET="${GS_BUCKET:-"${GC_PROJECT}-data"}"
 
 ### SERVER ###
 cd "${WORK_SPACE}/ludoj-server"
 
+VERSION="$(tr -d '[:space:]' < VERSION)"
+echo "Building Ludoj server v${VERSION}..."
+
 # fresh database
-mv db.sqlite3 db.sqlite3.bk || true
+rm --recursive --force data.bk* .temp* static
+mv data data.bk || true
+mkdir --parents data/recommender
 python3 manage.py migrate
 
 # fill database
@@ -33,18 +40,21 @@ python3 manage.py filldb \
 
 # clean up and compress database
 echo 'Making database more compact...'
-sqlite3 db.sqlite3 'VACUUM;'
+sqlite3 data/db.sqlite3 'VACUUM;'
 
 # update recommender
 echo 'Copying recommender model files...'
-rm --recursive --force .tc* .temp* static
-mkdir --parents .tc
 cp --recursive \
     "${WORK_SPACE}/ludoj-recommender/.tc/recommender" \
     "${WORK_SPACE}/ludoj-recommender/.tc/similarity" \
     "${WORK_SPACE}/ludoj-recommender/.tc/clusters" \
     "${WORK_SPACE}/ludoj-recommender/.tc/compilations" \
-    .tc/
+    data/recommender/
+
+# Sync data to GCS
+CLOUDSDK_PYTHON='' gsutil -m -o GSUtil:parallel_composite_upload_threshold=100M \
+    rsync -d -r \
+    data/ "gs://${GS_BUCKET}/"
 
 # minify static
 echo 'Copying files and minifying HTML, CSS, and JS...'
@@ -66,9 +76,20 @@ echo 'Collecting static files...'
 DEBUG='' python3 manage.py collectstatic --no-input
 rm --recursive --force .temp
 
-# release
-echo 'Building, pushing, and releasing container to Heroku...'
-heroku container:push web --app ludoj
-heroku container:release web --app ludoj
+# build
+echo 'Building Docker image...'
+docker build \
+    --tag "ludoj-server:${VERSION}" \
+    --tag 'ludoj-server:latest' \
+    --tag "gcr.io/${GC_PROJECT}/ludoj-server:${VERSION}" \
+    --tag "gcr.io/${GC_PROJECT}/ludoj-server:latest" \
+    .
+docker push "gcr.io/${GC_PROJECT}/ludoj-server:${VERSION}"
+gcloud app deploy \
+    --project "${GC_PROJECT}" \
+    --image-url "gcr.io/${GC_PROJECT}/ludoj-server:${VERSION}" \
+    --version "${VERSION}" \
+    --promote \
+    --quiet
 
 echo 'Done.'

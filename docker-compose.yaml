@@ -9,9 +9,12 @@ services:
             dockerfile: Dockerfile
         environment:
             - DEBUG=
-            - PORT=8000
+            - PORT=8080
+            - BOTO_CONFIG=/app/.boto
         ports:
-            - '8000:8000'
+            - '8080:8080'
+        volumes:
+            - ./data:/app/data
         restart: always
         networks:
             - ludoj

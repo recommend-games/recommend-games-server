@@ -1,4 +1,4 @@
-FROM python:3.6-slim
+FROM gcr.io/google-appengine/python:latest
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
@@ -15,17 +15,15 @@ RUN apt-get -y update && \
     apt-get -y autoremove && \
     apt-get -y clean && \
     rm -rf /var/lib/apt/lists/* && \
+    pip2 install --upgrade gsutil && \
     pip3 install --upgrade pip pipenv
 COPY Pipfile* ./
-RUN pipenv install --deploy --system --verbose
+RUN pipenv install --deploy
 
-COPY db.sqlite3 ./
-COPY .tc .tc
-
+COPY .boto gs.json startup.sh ./
 COPY ludoj ludoj
 COPY games games
 COPY static static
 
-USER ludoj
-
-CMD gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 16 ludoj.wsgi
+ENTRYPOINT ["pipenv", "run", "/bin/bash", "startup.sh"]
+CMD ["gunicorn", "--bind", ":8080", "--workers", "1", "--threads", "16", "ludoj.wsgi:application"]
