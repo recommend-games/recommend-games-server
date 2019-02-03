@@ -43,6 +43,8 @@ ludojApp.config(function (
     }).when('/about', {
         templateUrl: '/partials/about.html',
         controller: 'AboutController'
+    }).when('/faq', {
+        templateUrl: '/partials/faq.html'
     }).when('/', {
         templateUrl: '/partials/list.html',
         controller: 'ListController'

@@ -195,6 +195,12 @@
 							About
 						</a>
 					</li>
+					<li class="nav-item {{ path === '/faq' ? 'active' : '' }}">
+						<a href="#/faq"
+								class="nav-link">
+							FAQ
+						</a>
+					</li>
 					<li class="nav-item">
 						<a href="https://gitlab.com/mshepherd/ludoj-server"
 								target="_blank"
@@ -211,9 +217,9 @@
 		autoscroll=""
 		class="container"></div>
 
-	<div ng-if="angularError" class="container">
+	<div ng-if="angularError" class="container angular-error">
 		<h1 class="display-1">Ludoj</h1>
-		<div class="alert alert-danger angular-error" role="alert">
+		<div class="alert alert-danger" role="alert">
 			<h2 class="alert-heading">Error loading the app</h2>
 			<p class="lead">Unfortunately, the app could not be loaded properly.</p>
 			<p>This site requires JavaScript. If you have disabled it, please enable JavaScript from your settings and try again.</p>
