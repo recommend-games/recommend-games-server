@@ -42,10 +42,13 @@
 					GO!
 				</button>
 				<button type="button"
+						id="exclude-filters-button"
 						ng-disabled="!user"
 						class="btn btn-outline-primary"
 						data-toggle="collapse"
-						data-target="#form-exclude-filters">
+						data-target="#form-exclude-filters"
+						data-toggle-tooltip="tooltip"
+						title="You can refine your recommendations with these filters">
 					<i class="fas fa-caret-down" id="exclude-filters-icon"></i>
 				</button>
 			</div>
@@ -57,6 +60,7 @@
 			<div class="{{ user ? 'form-exclude-enabled' : 'form-exclude-disabled' }}">
 				<div class="form-check form-check-inline"
 						data-toggle="tooltip"
+						data-placement="bottom"
 						title="Don't recommend games the user has rated">
 					<label class="switch mb-0">
 						<input type="checkbox"
@@ -73,6 +77,7 @@
 				</div>
 				<div class="form-check form-check-inline"
 						data-toggle="tooltip"
+						data-placement="bottom"
 						title="Don't recommend games the user owns, has previously owned, or preordered">
 					<label class="switch mb-0">
 						<input type="checkbox"
@@ -89,6 +94,7 @@
 				</div>
 				<div class="form-check form-check-inline"
 						data-toggle="tooltip"
+						data-placement="bottom"
 						title="Don't recommend games the user has on their wishlist">
 					<label class="switch mb-0">
 						<input type="checkbox"
@@ -105,6 +111,7 @@
 				</div>
 				<div class="form-check form-check-inline"
 						data-toggle="tooltip"
+						data-placement="bottom"
 						title="Don't recommend games the user has played">
 					<label class="switch mb-0">
 						<input type="checkbox"
@@ -121,6 +128,7 @@
 				</div>
 				<div class="form-check form-check-inline"
 						data-toggle="tooltip"
+						data-placement="bottom"
 						title="Don't recommend games that are implementations of other excluded games">
 					<label class="switch mb-0">
 						<input type="checkbox"

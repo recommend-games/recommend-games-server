@@ -12,6 +12,7 @@ ludojApp.controller('ListController', function ListController(
     $route,
     $routeParams,
     $scope,
+    $sessionStorage,
     $timeout,
     filterService,
     gamesService,
@@ -112,7 +113,8 @@ ludojApp.controller('ListController', function ListController(
             .then(function () {
                 $(function () {
                     $('.tooltip').remove();
-                    $('[data-toggle="tooltip"]').tooltip();
+                    $('[data-toggle~="tooltip"]').tooltip();
+                    $('[data-toggle-tooltip~="tooltip"]').tooltip();
                 });
             });
     }
@@ -354,7 +356,15 @@ ludojApp.controller('ListController', function ListController(
                         $('#exclude-filters-icon').removeClass('fa-caret-up').addClass('fa-caret-down');
                     });
             });
+
             renderSlider();
+
+            if (params.for && !$sessionStorage.filterTooltipShown) {
+                $timeout(function () {
+                    $('#exclude-filters-button').tooltip('show');
+                    $sessionStorage.filterTooltipShown = true;
+                }, 1000);
+            }
         });
 
     fetchPopularGames(1)
