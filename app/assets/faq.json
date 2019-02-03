@@ -1,0 +1,7 @@
+[{
+    "question": "Why are there games recommended I've rated / in my collection?",
+    "answer": "If you recently rated games on BoardGameGeek or made changes to your collection, there's a good chance that these have not been updated in our system yet. Because the recommender needs to be trained on all the ratings on BGG, we need to gather all of them and retrain the model every time we want to update the database. This is why updates you make on BGG might take a week or more before they show up here."
+}, {
+    "question": "Why does it say \"user cannot be found\" when I type in my BoardGameGeek user name?",
+    "answer": "The recommendations are based on your ratings. If you haven't rated any games on BGG, we cannot make personal recommendations for you. Try instead to click the \"Select games\" button and add games you like, so we can find recommendations based on those.\nIf you have started rating games on recently, your ratings might not be in the system yet, see the previous question."
+}]
