@@ -491,3 +491,13 @@ input:checked + .slider:before {
         opacity: 1;
     }
 }
+
+.faq-headline .faq-anchor {
+    visibility: hidden;
+}
+
+.faq-headline:hover .faq-anchor,
+.faq-headline:focus .faq-anchor,
+.faq-headline:active .faq-anchor {
+    visibility: visible;
+}

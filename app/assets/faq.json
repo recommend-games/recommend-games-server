@@ -1,0 +1,43 @@
+[{
+	"question": "Why are there games in my recommendations that I have rated or already own?",
+	"answer": "If you recently rated games on BoardGameGeek or made changes to your collection, there's a good chance that these have not been updated in our system yet. Because the recommender needs to be trained on all the ratings on BGG, we need to gather all of them and retrain the model every time we want to update the database. This is why updates you make on BGG might take a week or more before they show up here."
+}, {
+	"question": "Why does it say \"user cannot be found\" when I type in my BoardGameGeek user name?",
+	"answer": "The recommendations are based on your ratings. If you haven't rated any games on BGG, we cannot make personal recommendations for you. Try instead to click the \"Select games\" button and add games you like, so we can find recommendations based on those.\nIf you have started rating games on BGG recently, your ratings might not be in the system yet, see the previous question."
+}, {
+	"question": "I've updated my ratings on BoardGameGeek, but I still see the same recommendations. Why?",
+	"answer": "Ratings are scraped in the background, and as such any changes need time before they go through our system. You will need to be patient (possibly a week or so) before you can see your changes affecting your recommendations. Also see the previous two questions."
+}, {
+	"question": "I get recommendations for games I've already played. How can I filter these games out?",
+	"answer": "There is a triangle next to the \"GO!\" button. Click on it to see more collection filters, including for games you've played."
+}, {
+	"question": "I don't like cooperative games. How can I filter those out?",
+	"answer": "There is a button labelled \"Advanced\" near the search box. When you click on it, you see a bunch of possible filters, including for cooperative games."
+}, {
+	"question": "My recommendations look very different from my last visit. Why have they changed so much?",
+	"answer": "Every time we update the system and retrain the recommender, the outcome will be slightly different, even if the data wouldn't change at all. We are spoilt by choice these days and there are many excellent games out there which will receive high scores, so small variations will lead to significantly different rankings. This does cause some instability in the recommendations – but we prefer to see it as something positive: more variability, more games to check out…"
+}, {
+	"question": "The #1 game keeps changing – can't you make up your mind?",
+	"answer": "Unlike the ranking at BoardGameGeek, our ranking is not calculated, but merely approximated. This is because there is no simple mathematical formula, but it is based on a recommender model. To get a good approximation in a reasonable time, the algorithm uses some randomness, which means the ranking will be slightly different every time, even when using the exact same data. This instability is something we have to live with.\nIn case you are curious: the algorithm uses stochastic gradient descent for its approximation."
+}, {
+	"question": "Are the rating scores supposed to represent a BGG rating? Do they predict what I would rate a game?",
+	"answer": "Kinda, but not really. The algorithm we use is optimised to rank the games in a useful order – with no particular interpretation of the scores –, and not to predict your rating. There are models that would do that, the recommendations are just usually (a little) less useful.\nScores can actually go from negative values to well above 10. The stars are more useful, as they indicate if a game is amongst the top 0.5%, top 3.5% etc."
+}, {
+	"question": "How does it work?",
+	"answer": "Short answer: we take the user ratings from BoardGameGeek and use them to find games that users with a similar taste rate highly.\nLonger answer: read the <a href='/#/about'>About</a> page."
+}, {
+	"question": "Why do you do this?",
+	"answer": "Honestly: just so it exists. Take it or leave it… 😎"
+}, {
+	"question": "But I want different recommendations!",
+	"answer": "Not really a question, but sure! There's a list of different board game recommenders <a href='https://boardgamegeek.com/thread/2013276/list-all-recommenders' target='_blank'>on BoardGameGeek <i class='fas fa-external-link-alt'></i></a>."
+}, {
+	"question": "Publishers pay you to put their games high on the list, right?",
+	"answer": "Nope. If you don't take my word for it, you can take a look at the <a href='https://gitlab.com/mshepherd/ludoj-recommender' target='_blank'>source code <i class='fas fa-external-link-alt'></i></a> yourself."
+}, {
+	"question": "Why don't you add affiliate links or ads?",
+	"answer": "Ads are pretty disruptive, so as long as there is no financial need for them, we'll stay ad-free.\nAffiliate links to online stores would actually be a nice service to the users who want to act on a recommendation, but including those would make this site commercial which would violate BoardGameGeek's terms of service.\nAs an alternative, we recommend <a href='https://www.boardgameatlas.com/' target='_blank'>Board Game Atlas <i class='fas fa-external-link-alt'></i></a> which is a great source for board games and offers a variety of links to online stores including prices."
+}, {
+	"question": "I like what you're doing. How can I contribute?",
+	"answer": "Really? Why, thank you! 😳 You can help us in many ways, in order from least to most effort:<ul><li>Share the love! Tell others about recommend.games on your blog, your channel, your feed, or wherever kids these days are spending their time.</li><li>Give us feedback! Found a bug? Miss a feature? Write an <a href='mailto:recommend.ludoj@gmail.com'>email</a>, post in the <a href='https://www.boardgamegeek.com/thread/2102058/board-game-recommendation-engine' target='_blank'>BGG forums <i class='fas fa-external-link-alt'></i></a>, raise a <a href='https://gitlab.com/mshepherd/ludoj-server/issues/new' target='_blank'>ticket <i class='fas fa-external-link-alt'></i></a>, <a href='https://twitter.com/recommend_games' target='_blank'>tweet <i class='fas fa-external-link-alt'></i></a> to us – your pick.</li><li>Contribute to the source code! This site is <a href='https://gitlab.com/mshepherd/ludoj-server' target='_blank'>open source <i class='fas fa-external-link-alt'></i></a> and requires your help to grow and improve. So whether you found a typo, want to fix a bug or implement a new feature, do get involved!</li></ul>"
+}]
