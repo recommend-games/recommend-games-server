@@ -63,10 +63,9 @@ ludojApp.controller('ListController', function ListController(
                     return $q.reject(response);
                 }
 
-                toastr.error(
-                    "Sorry, this user cannot be found. We'll show general recommendations instead.",
-                    'Unable to create recommendations for ' + filters.user
-                );
+                toastr.error('Unable to create recommendations for "' + filters.user + '"');
+
+                $scope.userNotFound = true;
 
                 filters.user = null;
                 return gamesService.getGames(page, filters);
@@ -244,6 +243,7 @@ ludojApp.controller('ListController', function ListController(
     $scope.filtersActive = filtersActive;
     $scope.updateParams = updateParams;
     $scope.selectionActive = false;
+    $scope.userNotFound = false;
     $scope.hideScore = params.for && params.similarity;
 
     $scope.clearFilters = function clearFilters() {
