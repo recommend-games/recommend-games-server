@@ -648,6 +648,7 @@ ludojApp.factory('filterService', function filterService(
             excludeWishlist = booleanDefault(params.excludeWishlist, false, !user),
             excludePlayed = booleanDefault(params.excludePlayed, false, !user),
             excludeClusters = booleanDefault(params.excludeClusters, true, !user),
+            similarity = booleanDefault(params.similarity, false, !user),
             yearMin = _.parseInt(params.yearMin),
             yearMax = _.parseInt(params.yearMax),
             ordering = validateOrdering(params.ordering),
@@ -666,6 +667,7 @@ ludojApp.factory('filterService', function filterService(
             'excludeWishlist': excludeWishlist === true ? true : null,
             'excludePlayed': excludePlayed === true ? true : null,
             'excludeClusters': excludeClusters === false ? false : null,
+            'similarity': similarity === true ? true : null,
             'like': !_.isEmpty(like) && !user ? like : null,
             'search': _.trim(params.search) || null,
             'playerCount': playerCount,
@@ -739,12 +741,14 @@ ludojApp.factory('filterService', function filterService(
             result.excludeWishlist = parseBoolean(_.get(scope, 'exclude.wishlist'));
             result.excludePlayed = parseBoolean(_.get(scope, 'exclude.played'));
             result.excludeClusters = parseBoolean(_.get(scope, 'exclude.clusters'));
+            result.similarity = parseBoolean(scope.similarity);
         } else {
             result.excludeRated = null;
             result.excludeOwned = null;
             result.excludeWishlist = null;
             result.excludePlayed = null;
             result.excludeClusters = null;
+            result.similarity = null;
         }
 
         result.like = !_.isEmpty(scope.likedGames) && !scope.user ? _.map(scope.likedGames, 'bgg_id') : null;
@@ -775,6 +779,7 @@ ludojApp.factory('filterService', function filterService(
             result.exclude_wishlist = booleanDefault(params.excludeWishlist, false) ? 5 : null;
             result.exclude_play_count = booleanDefault(params.excludePlayed, false) ? 1 : null;
             result.exclude_clusters = booleanString(booleanDefault(params.excludeClusters, true));
+            result.model = params.similarity ? 'similarity' : null;
         } else if (!_.isEmpty(params.like)) {
             result.like = params.like;
         } else {

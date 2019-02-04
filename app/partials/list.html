@@ -57,7 +57,7 @@
 			<div class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
 				Exclude games from recommendations:
 			</div>
-			<div class="{{ user ? 'form-exclude-enabled' : 'form-exclude-disabled' }}">
+			<div class="{{ user ? 'form-exclude-enabled' : 'form-exclude-disabled' }} mb-1">
 				<div class="form-check form-check-inline"
 						data-toggle="tooltip"
 						data-placement="bottom"
@@ -141,6 +141,32 @@
 					<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.clusters ? 'text-success' : 'text-muted' }} ml-1"
 							for="filter-exclude-clusters">
 						implementations
+					</label>
+				</div>
+			</div>
+			<div class="{{ user ? '' : 'text-muted' }} mb-0">
+				Use recommender model:
+			</div>
+			<div class="{{ user ? 'form-exclude-enabled' : 'form-exclude-disabled' }}">
+				<div class="form-check form-check-inline"
+						data-toggle="tooltip"
+						data-placement="bottom"
+						title="Use the default or similarity based model for recommendations">
+					<label class="form-check-label form-label-exclude {{ user &amp;&amp; !similarity ? 'text-success' : 'text-muted' }} mr-1"
+							for="recommender-similarity">
+						default
+					</label>
+					<label class="switch mb-0">
+						<input type="checkbox"
+							id="recommender-similarity"
+							name="recommender-similarity"
+							ng-model="similarity"
+							ng-disabled="!user" />
+						<span class="slider bg-secondary"></span>
+					</label>
+					<label class="form-check-label form-label-exclude {{ user &amp;&amp; similarity ? 'text-success' : 'text-muted' }} ml-1"
+							for="recommender-similarity">
+						similarity
 					</label>
 				</div>
 			</div>
@@ -594,6 +620,7 @@
 			game-square=""
 			game="game"
 			show-ranking="true"
+			hide-score="hideScore"
 			ng-href="#/game/{{ game.bgg_id }}"
 			class="col-lg-3 col-md-4 col-sm-6"></a>
 		<a ng-repeat="game in games"
@@ -601,6 +628,7 @@
 			game-square=""
 			game="game"
 			show-ranking="true"
+			hide-score="hideScore"
 			thumb="{{ contains(likedGames, game) ? 'solid' : 'outline' }}"
 			ng-click="contains(likedGames, game) ? unlikeGame(game) : likeGame(game)"
 			href=""
