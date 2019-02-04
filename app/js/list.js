@@ -146,6 +146,8 @@ ludojApp.controller('ListController', function ListController(
         'clusters': filterService.booleanDefault(params.excludeClusters, true)
     };
 
+    $scope.similarity = params.similarity;
+
     $scope.search = params.search;
 
     $scope.count = {
@@ -242,6 +244,7 @@ ludojApp.controller('ListController', function ListController(
     $scope.filtersActive = filtersActive;
     $scope.updateParams = updateParams;
     $scope.selectionActive = false;
+    $scope.hideScore = params.for && params.similarity;
 
     $scope.clearFilters = function clearFilters() {
         $scope.user = null;

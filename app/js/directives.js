@@ -15,6 +15,7 @@ ludojApp.directive('gameSquare', function gameSquare() {
         'scope': {
             'game': '=',
             'showRanking': '=',
+            'hideScore': '=',
             'thumb': '@',
             'addClass': '@'
         },
