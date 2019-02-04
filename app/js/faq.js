@@ -8,12 +8,14 @@ ludojApp.controller('FaqController', function FaqController(
     $anchorScroll,
     $http,
     $location,
+    $sce,
     $scope,
     $timeout,
-    FAQ_URL
+    FAQ_URL,
+    gamesService
 ) {
     function parseQuestion(question) {
-        question.answer_paragraphs = _.split(question.answer, /\n+/);
+        question.answer_paragraphs = _(question.answer).split(/\n+/).map($sce.trustAsHtml).value();
         question.id = question.id || _.kebabCase(question.question);
         return question;
     }
@@ -26,4 +28,9 @@ ludojApp.controller('FaqController', function FaqController(
 
     $scope.path = $location.path();
     $scope.scroll = $anchorScroll;
+
+    gamesService.setTitle('FAQ');
+    gamesService.setCanonicalUrl($location.path());
+    gamesService.setImage();
+    gamesService.setDescription('Frequently asked questions – and their answers.');
 });

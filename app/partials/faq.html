@@ -3,9 +3,8 @@
 		id="ludoj-faq">
 	<h1>FAQ</h1>
 	<p class="lead">
-		Answers to frequently asked questions.
-		Didn't find what you were looking for?
-		<a href="mailto:recommend.ludoj@gmail.com">Send us an email</a>!
+		Answers to frequently asked questions. Didn't find what you were looking for?
+		<a href="mailto:recommend.ludoj@gmail.com">Send us an email</a> or post into this <a href="https://www.boardgamegeek.com/thread/2102058/board-game-recommendation-engine" target="_blank">BoardGameGeek thread <i class="fas fa-external-link-alt"></i></a>!
 	</p>
 	<section id="toc" class="mb-3">
 		<h2>Contents</h2>
@@ -26,8 +25,7 @@
 				<i class="fas fa-link"></i>
 			</a>
 		</h2>
-		<p ng-repeat="paragraph in question.answer_paragraphs">
-			{{ paragraph }}
-		</p>
+		<p ng-repeat="paragraph in question.answer_paragraphs"
+			ng-bind-html="paragraph"></p>
 	</section>
 </article>
