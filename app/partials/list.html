@@ -205,7 +205,7 @@
 				class="form-control"
 				placeholder="Search for a game you like" />
 			<div class="dropdown-menu" id="select-games-dropdown">
-				<a ng-repeat="game in searchGames | filter:{'name':searchLikedGames}:false | orderBy:'name' | limitTo:10"
+				<a ng-repeat="game in searchGames | filter:{'name':searchLikedGames} | orderBy:['rec_rank','bgg_rank','name'] | limitTo:8"
 						ng-click="likeGame(game)"
 						class="dropdown-item"
 						href="">

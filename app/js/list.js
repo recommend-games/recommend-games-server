@@ -19,7 +19,8 @@ ludojApp.controller('ListController', function ListController(
     toastr
 ) {
     var params = filterService.getParams($routeParams),
-        searchGames = [];
+        searchGames = [],
+        searchPromise = null;
 
     function filtersActive() {
         return _.sum([
@@ -30,6 +31,35 @@ ludojApp.controller('ListController', function ListController(
             !!$scope.year.enabled,
             !!$scope.cooperative
         ]);
+    }
+
+    function addSearchGames(games) {
+        if (!_.isEmpty(games)) {
+            searchGames = _.uniqBy(_.concat(searchGames, games), 'bgg_id');
+            $scope.searchGames = searchGames;
+        }
+    }
+
+    function fetchSearchGames(search) {
+        search = search || _.trim($scope.searchLikedGames);
+        return gamesService.getGames(1, {'search': search}, true)
+            .then(function (response) {
+                addSearchGames(response.results);
+            });
+    }
+
+    function updateSearchGames(search) {
+        search = search || _.trim($scope.searchLikedGames);
+        var isShown = $('#select-games-dropdown').hasClass('show');
+        if (_.isEmpty(search) === isShown) {
+            // ugly hack because hide / show don't work
+            $('#select-games-search').dropdown('toggle');
+        }
+        $scope.searchGames = searchGames;
+        $timeout.cancel(searchPromise);
+        if (!_.isEmpty(search)) {
+            searchPromise = $timeout(fetchSearchGames, 500, true, search);
+        }
     }
 
     function fetchGames(page) {
@@ -95,6 +125,8 @@ ludojApp.controller('ListController', function ListController(
                     $('#games-list')
                         .append('<script type="application/ld+json">' + $filter('json')(gamesService.jsonLD(_.slice(games, 0, 10)), 0) + '</script>');
                 }
+
+                addSearchGames(games);
 
                 return games;
             })
@@ -319,25 +351,10 @@ ludojApp.controller('ListController', function ListController(
         return games;
     }
 
-    function updateSearchGames() {
-        var search = _.trim($scope.searchLikedGames),
-            isShown = $('#select-games-dropdown').hasClass('show');
-        if (_.isEmpty(search) === isShown) {
-            // ugly hack because hide / show don't work
-            $('#select-games-search').dropdown('toggle');
-        }
-        $scope.searchGames = _.isEmpty(search) ? null : searchGames;
-    }
-
-    function addSearchGames(games) {
-        searchGames = _.uniqBy(_.concat(searchGames, games), 'bgg_id');
-        updateSearchGames();
-    }
-
     function fetchPopularGames(page) {
         page = _.isNumber(page) ? page : 1;
-        var start = (page - 1) * 11,
-            end = page * 11;
+        var start = (page - 1) * 5,
+            end = page * 5;
         return gamesService.getPopularGames(start, end, true)
             .then(function (games) {
                 $scope.popularGames = _.isEmpty($scope.popularGames) ? games : _.concat($scope.popularGames, games);
