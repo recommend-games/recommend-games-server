@@ -18,7 +18,8 @@ ludojApp.controller('ListController', function ListController(
     gamesService,
     toastr
 ) {
-    var params = filterService.getParams($routeParams);
+    var params = filterService.getParams($routeParams),
+        searchGames = [];
 
     function filtersActive() {
         return _.sum([
@@ -265,9 +266,10 @@ ludojApp.controller('ListController', function ListController(
         updateParams();
     };
 
-    $scope.clearField = function clearField(field) {
+    $scope.clearField = function clearField(field, id) {
         $scope[field] = null;
-        $('#' + field).focus();
+        id = id || field;
+        $('#' + id).focus();
     };
 
     $scope.toggleSelection = function toggleSelection() {
@@ -317,6 +319,21 @@ ludojApp.controller('ListController', function ListController(
         return games;
     }
 
+    function updateSearchGames() {
+        var search = _.trim($scope.searchLikedGames),
+            isShown = $('#select-games-dropdown').hasClass('show');
+        if (_.isEmpty(search) === isShown) {
+            // ugly hack because hide / show don't work
+            $('#select-games-search').dropdown('toggle');
+        }
+        $scope.searchGames = _.isEmpty(search) ? null : searchGames;
+    }
+
+    function addSearchGames(games) {
+        searchGames = _.uniqBy(_.concat(searchGames, games), 'bgg_id');
+        updateSearchGames();
+    }
+
     function fetchPopularGames(page) {
         page = _.isNumber(page) ? page : 1;
         var start = (page - 1) * 11,
@@ -326,6 +343,7 @@ ludojApp.controller('ListController', function ListController(
                 $scope.popularGames = _.isEmpty($scope.popularGames) ? games : _.concat($scope.popularGames, games);
                 $scope.popularGamesPage = page + 1;
                 cleanLikedGames($scope.likedGames);
+                addSearchGames(games);
                 return games;
             });
     }
@@ -334,6 +352,7 @@ ludojApp.controller('ListController', function ListController(
     $scope.likeGame = likeGame;
     $scope.unlikeGame = unlikeGame;
     $scope.fetchPopularGames = fetchPopularGames;
+    $scope.updateSearchGames = updateSearchGames;
 
     $scope.$watch('count.enabled', renderSlider);
     $scope.$watch('time.enabled', renderSlider);

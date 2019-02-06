@@ -195,6 +195,36 @@
 			Select games you like and we will recommend games for your taste!
 			<em>Note</em>: You can also select games from the recommendations below.
 		</p>
+		<div class="form-group input-group dropdown">
+			<input type="search"
+				id="select-games-search"
+				name="select-games-search"
+				ng-model="searchLikedGames"
+				ng-change="updateSearchGames()"
+				data-toggle="dropdown"
+				class="form-control"
+				placeholder="Search for a game you like" />
+			<div class="dropdown-menu" id="select-games-dropdown">
+				<a ng-repeat="game in searchGames | filter:{'name':searchLikedGames}:false | orderBy:'name' | limitTo:10"
+						ng-click="likeGame(game)"
+						class="dropdown-item"
+						href="">
+					{{ game.name_short || game.name }}
+					<small ng-if="game.year" class="text-muted">({{ game.year }})</small>
+				</a>
+				<p class="mb-0 mx-3 text-muted">
+					<em>Type to search for games</em>
+				</p>
+			</div>
+			<div class="input-group-append">
+				<button type="button"
+						ng-disabled="!searchLikedGames"
+						ng-click="clearField('searchLikedGames', 'select-games-search')"
+						class="btn btn-outline-secondary">
+					<i class="fas fa-times"></i>
+				</button>
+			</div>
+		</div>
 		<div ng-hide="isEmpty(likedGames)"
 				class="row selectable-games mb-0">
 			<p class="col-12 mb-0"><strong>Liked games:</strong></p>
