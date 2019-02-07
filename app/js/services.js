@@ -21,7 +21,7 @@ ludojApp.factory('gamesService', function gamesService(
 ) {
     var service = {},
         cache = $cacheFactory('rg', {'capacity': 1024}),
-        linkedSites = ['wikidata', 'wikipedia', 'luding', 'spielen', 'bga'];
+        linkedSites = ['bgg', 'bga', 'wikidata', 'wikipedia', 'luding', 'spielen'];
 
     function join(array, sep, lastSep) {
         sep = sep || ', ';
@@ -60,7 +60,15 @@ ludojApp.factory('gamesService', function gamesService(
 
         var result = {'site': site};
 
-        if (site === 'wikidata') {
+        if (site === 'bgg') {
+            result.url = 'https://boardgamegeek.com/boardgame/' + id + '/';
+            result.label = 'BoardGameGeek';
+            result.icon_url = '/assets/bgg-color.svg';
+        } else if (site === 'bga') {
+            result.url = 'https://www.boardgameatlas.com/search/game/' + id + '?amazonTag=ludoj0f-20';
+            result.label = 'Board Game Atlas';
+            result.icon_url = '/assets/bga.png';
+        } else if (site === 'wikidata') {
             result.url = 'https://www.wikidata.org/wiki/' + id;
             result.label = 'Wikidata';
             result.icon_url = '/assets/wikidata.svg';
@@ -75,10 +83,6 @@ ludojApp.factory('gamesService', function gamesService(
             result.url = 'https://gesellschaftsspiele.spielen.de/alle-brettspiele/' + id + '/';
             result.label = 'spielen.de';
             result.icon_url = '/assets/spielen.png';
-        } else if (site === 'bga') {
-            result.url = 'https://www.boardgameatlas.com/search/game/' + id + '?amazonTag=ludoj0f-20';
-            result.label = 'Board Game Atlas';
-            result.icon_url = '/assets/bga.png';
         } else {
             return null;
         }
@@ -141,7 +145,9 @@ ludojApp.factory('gamesService', function gamesService(
                 'unplayable in another language'
             ],
             externalLinks = _.flatMap(linkedSites, function (site) {
-                return _(game[site + '_id'])
+                return _([game[site + '_id']])
+                    .flatten()
+                    .filter()
                     .map(function (id) {
                         return externalLink(site, id);
                     })
