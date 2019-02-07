@@ -48,13 +48,28 @@ ludojApp.controller('ListController', function ListController(
             });
     }
 
-    function updateSearchGames(search) {
-        search = search || _.trim($scope.searchLikedGames);
-        var isShown = $('#select-games-dropdown').hasClass('show');
-        if (_.isEmpty(search) === isShown) {
+    function toggleDropdown(show) {
+        var isShown = !!$('#select-games-dropdown').hasClass('show');
+        show = !!show;
+        if (show !== isShown) {
             // ugly hack because hide / show don't work
             $('#select-games-search').dropdown('toggle');
+            isShown = !isShown;
         }
+        return isShown;
+    }
+
+    function fetchAndUpdate(search) {
+        search = search || _.trim($scope.searchLikedGames);
+        $timeout.cancel(searchPromise);
+        toggleDropdown(true);
+        search = search || _.trim($scope.searchLikedGames);
+        return fetchSearchGames(search);
+    }
+
+    function updateSearchGames(search) {
+        search = search || _.trim($scope.searchLikedGames);
+        toggleDropdown(!_.isEmpty(search));
         $scope.searchGames = searchGames;
         $timeout.cancel(searchPromise);
         if (!_.isEmpty(search)) {
@@ -369,6 +384,7 @@ ludojApp.controller('ListController', function ListController(
     $scope.likeGame = likeGame;
     $scope.unlikeGame = unlikeGame;
     $scope.fetchPopularGames = fetchPopularGames;
+    $scope.fetchAndUpdate = fetchAndUpdate;
     $scope.updateSearchGames = updateSearchGames;
 
     $scope.$watch('count.enabled', renderSlider);

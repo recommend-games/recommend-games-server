@@ -195,7 +195,12 @@
 			Select games you like and we will recommend games for your taste!
 			<em>Note</em>: You can also select games from the recommendations below.
 		</p>
-		<div class="form-group input-group dropdown">
+		<form ng-submit="fetchAndUpdate()"
+				id="select-games-search-form"
+				name="select-games-search-form"
+				novalidate="novalidate"
+				role="form"
+				class="form form-group input-group dropdown">
 			<input type="search"
 				id="select-games-search"
 				name="select-games-search"
@@ -203,7 +208,8 @@
 				ng-change="updateSearchGames()"
 				data-toggle="dropdown"
 				class="form-control"
-				placeholder="Search for a game you like" />
+				placeholder="Search for a game you like"
+				autocomplete="off" />
 			<div class="dropdown-menu" id="select-games-dropdown">
 				<a ng-repeat="game in searchGames | filter:{'name':searchLikedGames} | orderBy:['rec_rank','bgg_rank','name'] | limitTo:8"
 						ng-click="likeGame(game)"
@@ -223,8 +229,13 @@
 						class="btn btn-outline-secondary">
 					<i class="fas fa-times"></i>
 				</button>
+				<button type="submit"
+						ng-disabled="!searchLikedGames"
+						class="btn btn-primary">
+					<i class="fas fa-search"></i>
+				</button>
 			</div>
-		</div>
+		</form>
 		<div ng-hide="isEmpty(likedGames)"
 				class="row selectable-games mb-0">
 			<p class="col-12 mb-0"><strong>Liked games:</strong></p>
