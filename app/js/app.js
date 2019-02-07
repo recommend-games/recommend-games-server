@@ -14,7 +14,7 @@ var ludojApp = angular.module('ludojApp', [
 ]);
 
 ludojApp.constant('API_URL', '/api/')
-    .constant('APP_TITLE', 'Ludoj – board game recommendations on recommend.games')
+    .constant('APP_TITLE', 'Recommend.Games – board game recommendations')
     .constant('CANONICAL_URL', 'https://recommend.games/')
     .constant('DEFAULT_IMAGE', 'assets/android-chrome-512x512.png')
     .constant('SITE_DESCRIPTION', 'Top-rated board games as evaluated by our recommendation engine. ' +

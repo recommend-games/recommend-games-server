@@ -109,7 +109,7 @@
 				<a game-square=""
 					game="game"
 					show-ranking="true"
-					ng-href="#/game/{{ game.bgg_id }}"
+					ng-href="/#/game/{{ game.bgg_id }}"
 					class="game-small"></a>
 			</div>
 			<div ng-repeat="game in integratesWith" class="col-xl-2 col-md-3 col-sm-4 col-6">
@@ -117,7 +117,7 @@
 				<a game-square=""
 					game="game"
 					show-ranking="true"
-					ng-href="#/game/{{ game.bgg_id }}"
+					ng-href="/#/game/{{ game.bgg_id }}"
 					class="game-small"></a>
 			</div>
 			<div ng-repeat="game in implementationOf" class="col-xl-2 col-md-3 col-sm-4 col-6">
@@ -125,7 +125,7 @@
 				<a game-square=""
 					game="game"
 					show-ranking="true"
-					ng-href="#/game/{{ game.bgg_id }}"
+					ng-href="/#/game/{{ game.bgg_id }}"
 					class="game-small"></a>
 			</div>
 			<div ng-repeat="game in implementedBy" class="col-xl-2 col-md-3 col-sm-4 col-6">
@@ -133,7 +133,7 @@
 				<a game-square=""
 					game="game"
 					show-ranking="true"
-					ng-href="#/game/{{ game.bgg_id }}"
+					ng-href="/#/game/{{ game.bgg_id }}"
 					class="game-small"></a>
 			</div>
 			<div ng-repeat="game in containedIn" class="col-xl-2 col-md-3 col-sm-4 col-6">
@@ -141,7 +141,7 @@
 				<a game-square=""
 					game="game"
 					show-ranking="true"
-					ng-href="#/game/{{ game.bgg_id }}"
+					ng-href="/#/game/{{ game.bgg_id }}"
 					class="game-small"></a>
 			</div>
 			<div ng-repeat="game in similarGames" class="col-xl-2 col-md-3 col-sm-4 col-6">
@@ -149,7 +149,7 @@
 				<a game-square=""
 					game="game"
 					show-ranking="true"
-					ng-href="#/game/{{ game.bgg_id }}"
+					ng-href="/#/game/{{ game.bgg_id }}"
 					class="game-small"></a>
 			</div>
 		</div>
@@ -177,8 +177,8 @@
 					class="col-md-3 col-sm-4 col-12">
 				<img src="/assets/favicon.svg"
 					class="img-fluid img-icon-stats"
-					alt="Ludoj ranking" />
-				Ludoj ranking
+					alt="Recommend.Games ranking" />
+				<span class="recommend-games">R.G</span> ranking
 			</dt>
 			<dd ng-if="game.rec_rank"
 					class="col-md-9 col-sm-8 col-12">

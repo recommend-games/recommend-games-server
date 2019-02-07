@@ -20,7 +20,7 @@ ludojApp.factory('gamesService', function gamesService(
     SITE_DESCRIPTION
 ) {
     var service = {},
-        cache = $cacheFactory('ludoj', {'capacity': 1024}),
+        cache = $cacheFactory('rg', {'capacity': 1024}),
         linkedSites = ['wikidata', 'wikipedia', 'luding', 'spielen', 'bga'];
 
     function join(array, sep, lastSep) {
@@ -559,7 +559,7 @@ ludojApp.factory('filterService', function filterService(
             'yearNow': yearNow
         },
         orderingValues = {
-            'ludoj': '-rec_rating,-bayes_rating,-avg_rating',
+            'rg': '-rec_rating,-bayes_rating,-avg_rating',
             'bgg': '-bayes_rating,-rec_rating,-avg_rating',
             'complex': 'complexity,-rec_rating,-bayes_rating,-avg_rating',
             '-complex': '-complexity,-rec_rating,-bayes_rating,-avg_rating',
@@ -629,11 +629,11 @@ ludojApp.factory('filterService', function filterService(
     }
 
     function validateOrdering(ordering) {
-        return orderingValues[ordering] ? ordering : 'ludoj';
+        return orderingValues[ordering] ? ordering : 'rg';
     }
 
     function orderingParams(ordering) {
-        return orderingValues[ordering] || orderingValues.ludoj;
+        return orderingValues[ordering] || orderingValues.rg;
     }
 
     function parseParams(params) {
@@ -681,7 +681,7 @@ ludojApp.factory('filterService', function filterService(
             'yearMin': yearMin && yearMin > yearFloor ? yearMin : null,
             'yearMax': yearMax && yearMax <= yearNow ? yearMax : null,
             'cooperative': validateBoolean(params.cooperative),
-            'ordering': user || !_.isEmpty(like) || ordering === 'ludoj' ? null : ordering
+            'ordering': user || !_.isEmpty(like) || ordering === 'rg' ? null : ordering
         };
     }
 

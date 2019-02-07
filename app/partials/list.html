@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <section xmlns="http://www.w3.org/1999/xhtml"
 		id="games-list">
-	<!-- <h1 class="display-1 text-nowrap">
-		Ludoj
-		<sup class="beta text-muted">βeta</sup>
-	</h1> -->
 	<p class="lead mt-3">
-		Top-rated board games as evaluated by our <a href="https://gitlab.com/mshepherd/ludoj-recommender" target="_blank">recommendation engine <i class="fas fa-external-link-alt"></i></a>. Read more <a href="#/about">about Ludoj</a>.
+		Top-rated board games as evaluated by our <a href="https://gitlab.com/mshepherd/ludoj-recommender" target="_blank">recommendation engine <i class="fas fa-external-link-alt"></i></a>.
+		Read more <a href="/#/about">about <span class="recommend-games">Recommend.Games</span></a>.
 	</p>
 
 	<form ng-submit="updateParams()"
@@ -604,7 +601,7 @@
 						ng-disabled="user || !isEmpty(likedGames)"
 						class="custom-select"
 						id="filter-ordering">
-					<option selected="selected" value="ludoj">Ludoj ranking</option>
+					<option selected="selected" value="rg">Recommend.Games ranking</option>
 					<option value="bgg">BoardGameGeek ranking</option>
 					<option value="-year">newest first</option>
 					<option value="year">oldest first</option>
@@ -669,7 +666,7 @@
 			game="game"
 			show-ranking="true"
 			hide-score="hideScore"
-			ng-href="#/game/{{ game.bgg_id }}"
+			ng-href="/#/game/{{ game.bgg_id }}"
 			class="col-lg-3 col-md-4 col-sm-6"></a>
 		<a ng-repeat="game in games"
 			ng-if="selectionActive"

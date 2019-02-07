@@ -1,3 +1,8 @@
+.recommend-games {
+    font-variant: small-caps;
+    white-space: nowrap;
+}
+
 .beta {
     font-size: 20%;
     font-style: italic;
