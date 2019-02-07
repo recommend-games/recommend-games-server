@@ -40,6 +40,7 @@ ludojApp.controller('DetailController', function DetailController(
     gamesService.getGame($routeParams.id)
         .then(function (game) {
             var ids = [],
+                without = _.spread(_.without, 1),
                 promises;
 
             $scope.game = game;
@@ -54,13 +55,13 @@ ludojApp.controller('DetailController', function DetailController(
 
             compilationOf = game.compilation_of || [];
             ids.push(...compilationOf);
-            integratesWith = _.without(game.integrates_with || [], ...ids);
+            integratesWith = without(game.integrates_with || [], ids);
             ids.push(...integratesWith);
-            implementationOf = _.without(game.implements || [], ...ids);
+            implementationOf = without(game.implements || [], ids);
             ids.push(...implementationOf);
-            implementedBy = _.without(game.implemented_by || [], ...ids);
+            implementedBy = without(game.implemented_by || [], ids);
             ids.push(...implementedBy);
-            containedIn = _.without(game.contained_in || [], ...ids);
+            containedIn = without(game.contained_in || [], ids);
             ids.push(...containedIn);
 
             promises = _.map(ids, function (id) {
