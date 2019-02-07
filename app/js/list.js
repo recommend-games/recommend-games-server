@@ -280,7 +280,7 @@ ludojApp.controller('ListController', function ListController(
 
     $scope.cooperative = params.cooperative;
 
-    $scope.ordering = params.ordering || 'ludoj';
+    $scope.ordering = params.ordering || 'rg';
 
     $scope.fetchGames = fetchGames;
     $scope.pad = _.padStart;
@@ -304,7 +304,7 @@ ludojApp.controller('ListController', function ListController(
         $scope.complexity.enabled = false;
         $scope.year.enabled = false;
         $scope.cooperative = null;
-        $scope.ordering = 'ludoj';
+        $scope.ordering = 'rg';
         updateParams();
     };
 
