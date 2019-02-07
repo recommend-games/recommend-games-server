@@ -23,6 +23,9 @@
 	"question": "Are the rating scores supposed to represent a BGG rating? Do they predict what I would rate a game?",
 	"answer": "Kinda, but not really. The algorithm we use is optimised to rank the games in a useful order – with no particular interpretation of the scores –, and not to predict your rating. There are models that would do that, the recommendations are just usually (a little) less useful.\nScores can actually go from negative values to well above 10. The stars are more useful, as they indicate if a game is amongst the top 0.5%, top 3.5% etc."
 }, {
+	"question": "What are the \"standard\" and \"similarity\" models in the recommendation settings?",
+	"answer": "The short, but very technical answer is that they're Turi Create's <a href='https://apple.github.io/turicreate/docs/api/generated/turicreate.recommender.ranking_factorization_recommender.RankingFactorizationRecommender.html' target='_blank'>RankingFactorizationRecommender <i class='fas fa-external-link-alt'></i></a> and <a href='https://apple.github.io/turicreate/docs/api/generated/turicreate.recommender.item_similarity_recommender.ItemSimilarityRecommender.html' target='_blank'>ItemSimilarityRecommender <i class='fas fa-external-link-alt'></i></a>, respectively. Anyone curious can read all about the details there.\nThe slightly longer answer is that the default model takes a user's ratings and \"tries to learn their taste\", while the similarity model looks for users that have rated games similarly. The former tends to give more interesting recommendations, while the latter is used for users without BoardGameGeek account and also to find the similar games at the bottom of a game's page."
+}, {
 	"question": "How does it work?",
 	"answer": "Short answer: we take the user ratings from BoardGameGeek and use them to find games that users with a similar taste rate highly.\nLonger answer: read the <a href='/#/about'>About</a> page."
 }, {
