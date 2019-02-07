@@ -16,7 +16,8 @@ ludojApp.controller('DetailController', function DetailController(
         containedIn = [],
         implementationOf = [],
         implementedBy = [],
-        integratesWith = [];
+        integratesWith = [],
+        similarPromise = gamesService.getSimilarGames($routeParams.id, 1, true);
 
     $scope.implementations = false;
     $scope.expandable = false;
@@ -38,6 +39,9 @@ ludojApp.controller('DetailController', function DetailController(
 
     gamesService.getGame($routeParams.id)
         .then(function (game) {
+            var ids = [],
+                promises;
+
             $scope.game = game;
             $scope.emailSubject = encodeURIComponent('Bad link for "' + game.name + '" (' + game.bgg_id + ')');
 
@@ -49,18 +53,30 @@ ludojApp.controller('DetailController', function DetailController(
                 .append('<script type="application/ld+json">' + $filter('json')(gamesService.jsonLD(game), 0) + '</script>');
 
             compilationOf = game.compilation_of || [];
-            containedIn = game.contained_in || [];
-            implementationOf = game.implements || [];
-            implementedBy = game.implemented_by || [];
-            integratesWith = game.integrates_with || [];
+            ids.push(...compilationOf);
+            integratesWith = _.without(game.integrates_with || [], ...ids);
+            ids.push(...integratesWith);
+            implementationOf = _.without(game.implements || [], ...ids);
+            ids.push(...implementationOf);
+            implementedBy = _.without(game.implemented_by || [], ...ids);
+            ids.push(...implementedBy);
+            containedIn = _.without(game.contained_in || [], ...ids);
+            ids.push(...containedIn);
 
-            var promises = _(_.concat(compilationOf, containedIn, implementationOf, implementedBy, integratesWith))
-                .uniq()
-                .map(function (id) {
-                    return gamesService.getGame(id, false, true)
-                        .catch(_.constant());
-                })
-                .value();
+            promises = _.map(ids, function (id) {
+                return gamesService.getGame(id, false, true)
+                    .catch(_.constant());
+            });
+
+            similarPromise.then(function (response) {
+                $scope.similarGames = _(response.results)
+                    .filter(function (game) {
+                        return !_.includes(ids, game.bgg_id);
+                    })
+                    .take(12)
+                    .value();
+            })
+            .then(updateImplementations);
 
             return $q.all(promises);
         })
@@ -96,12 +112,6 @@ ludojApp.controller('DetailController', function DetailController(
             });
         });
         // TODO catch errors
-
-    gamesService.getSimilarGames($routeParams.id, 1, true)
-        .then(function (response) {
-            $scope.similarGames = _.take(_.get(response, 'results'), 5);
-        })
-        .then(updateImplementations);
 
     gamesService.setCanonicalUrl($location.path());
 });
