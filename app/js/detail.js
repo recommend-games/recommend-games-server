@@ -39,8 +39,8 @@ ludojApp.controller('DetailController', function DetailController(
 
     gamesService.getGame($routeParams.id)
         .then(function (game) {
-            var ids = [],
-                without = _.spread(_.without, 1),
+            var without = _.spread(_.without, 1),
+                ids,
                 promises;
 
             $scope.game = game;
@@ -54,30 +54,31 @@ ludojApp.controller('DetailController', function DetailController(
                 .append('<script type="application/ld+json">' + $filter('json')(gamesService.jsonLD(game), 0) + '</script>');
 
             compilationOf = game.compilation_of || [];
-            ids.push(...compilationOf);
+            ids = compilationOf;
             integratesWith = without(game.integrates_with || [], ids);
-            ids.push(...integratesWith);
+            ids = _.concat(ids, integratesWith);
             implementationOf = without(game.implements || [], ids);
-            ids.push(...implementationOf);
+            ids = _.concat(ids, implementationOf);
             implementedBy = without(game.implemented_by || [], ids);
-            ids.push(...implementedBy);
+            ids = _.concat(ids, implementedBy);
             containedIn = without(game.contained_in || [], ids);
-            ids.push(...containedIn);
+            ids = _.concat(ids, containedIn);
 
             promises = _.map(ids, function (id) {
                 return gamesService.getGame(id, false, true)
                     .catch(_.constant());
             });
 
-            similarPromise.then(function (response) {
-                $scope.similarGames = _(response.results)
-                    .filter(function (game) {
-                        return !_.includes(ids, game.bgg_id);
-                    })
-                    .take(12)
-                    .value();
-            })
-            .then(updateImplementations);
+            similarPromise
+                .then(function (response) {
+                    $scope.similarGames = _(response.results)
+                        .filter(function (game) {
+                            return !_.includes(ids, game.bgg_id);
+                        })
+                        .take(12)
+                        .value();
+                })
+                .then(updateImplementations);
 
             return $q.all(promises);
         })
