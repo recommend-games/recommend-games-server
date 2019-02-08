@@ -233,18 +233,16 @@
 				</button>
 			</div>
 		</form>
-		<div ng-hide="isEmpty(likedGames)"
-				class="row selectable-games mb-0">
-			<p class="col-12 mb-0"><strong>Liked games:</strong></p>
+		<p ng-hide="isEmpty(likedGames)">
+			<strong>Liked games:</strong>
 			<a ng-repeat="game in likedGames"
-				game-square=""
-				game="game"
-				thumb="solid"
-				ng-click="unlikeGame(game)"
-				href=""
-				class="col-xl-2 col-md-3 col-sm-4 col-6 game-small game-liked"
-				add-class="game-zoomable game-selectable"></a>
-		</div>
+					ng-click="unlikeGame(game)"
+					href=""
+					class="badge badge-success badge-liked-game mr-1"">
+				<i class="fas fa-thumbs-up"></i>
+				{{ game.name_short || game.name }}
+			</a>
+		</p>
 		<div ng-hide="isEmpty(popularGames)"
 				class="row selectable-games mb-0">
 			<p class="col-12 mb-0"><strong>Select games you like:</strong></p>
