@@ -5,8 +5,8 @@
 'use strict';
 
 ludojApp.factory('gamesService', function gamesService(
-    $cacheFactory,
     $document,
+    $localStorage,
     $log,
     $http,
     $q,
@@ -17,11 +17,44 @@ ludojApp.factory('gamesService', function gamesService(
     CANONICAL_URL,
     DEFAULT_IMAGE,
     GA_TRACKING_ID,
+    MAX_AGE_CACHE,
     SITE_DESCRIPTION
 ) {
+    if (_.isNil($localStorage.cache)) {
+        $localStorage.cache = {};
+    }
+
     var service = {},
-        cache = $cacheFactory('rg', {'capacity': 1024}),
+        cache = $localStorage.cache,
         linkedSites = ['bgg', 'bga', 'wikidata', 'wikipedia', 'luding', 'spielen'];
+
+    function putCache(game, id) {
+        if (_.isEmpty(game)) {
+            return;
+        }
+        id = id || game.bgg_id;
+        if (!id) {
+            return;
+        }
+        game = _.clone(game);
+        game._added = _.now() / 1000;
+        cache[id] = game;
+    }
+
+    function getCache(id, maxAge) {
+        var game = cache[id];
+        if (_.isEmpty(game)) {
+            return null;
+        }
+        if (!maxAge) {
+            return game;
+        }
+        return (!game._added) || (game._added + maxAge < _.now() / 1000) ? null : game;
+    }
+
+    service.allGames = function allGames() {
+        return _.values(cache);
+    };
 
     function join(array, sep, lastSep) {
         sep = sep || ', ';
@@ -211,12 +244,7 @@ ludojApp.factory('gamesService', function gamesService(
 
                 if (!params.user && _.isEmpty(params.like)) {
                     _.forEach(games, function (game) {
-                        var id = _.get(game, 'bgg_id');
-                        if (id) {
-                            cache.put(id, game);
-                        } else {
-                            $log.warn('invalid game', game);
-                        }
+                        putCache(game);
                     });
                 }
 
@@ -237,7 +265,7 @@ ludojApp.factory('gamesService', function gamesService(
 
     service.getGame = function getGame(id, forceRefresh, noblock) {
         id = _.parseInt(id);
-        var cached = forceRefresh ? null : cache.get(id);
+        var cached = forceRefresh ? null : getCache(id, MAX_AGE_CACHE);
 
         if (!_.isEmpty(cached)) {
             return $q.resolve(cached);
@@ -253,7 +281,7 @@ ludojApp.factory('gamesService', function gamesService(
                 }
 
                 game = processGame(response.data);
-                cache.put(id, game);
+                putCache(game, id);
                 return game;
             })
             .catch(function (reason) {
@@ -322,12 +350,7 @@ ludojApp.factory('gamesService', function gamesService(
 
                 if (!params.user) {
                     _.forEach(games, function (game) {
-                        var id = _.get(game, 'bgg_id');
-                        if (id) {
-                            cache.put(id, game);
-                        } else {
-                            $log.warn('invalid game', game);
-                        }
+                        putCache(game);
                     });
                 }
 

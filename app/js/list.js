@@ -19,7 +19,6 @@ ludojApp.controller('ListController', function ListController(
     toastr
 ) {
     var params = filterService.getParams($routeParams),
-        searchGames = [],
         searchPromise = null;
 
     function filtersActive() {
@@ -33,19 +32,14 @@ ludojApp.controller('ListController', function ListController(
         ]);
     }
 
-    function addSearchGames(games) {
-        if (!_.isEmpty(games)) {
-            searchGames = _.uniqBy(_.concat(searchGames, games), 'bgg_id');
-            $scope.searchGames = searchGames;
-        }
+    function addSearchGames() {
+        $scope.searchGames = gamesService.allGames();
     }
 
     function fetchSearchGames(search) {
         search = search || _.trim($scope.searchLikedGames);
         return gamesService.getGames(1, {'search': search}, true)
-            .then(function (response) {
-                addSearchGames(response.results);
-            });
+            .then(addSearchGames);
     }
 
     function toggleDropdown(show) {
@@ -69,12 +63,12 @@ ludojApp.controller('ListController', function ListController(
 
     function updateSearchGames(search) {
         search = search || _.trim($scope.searchLikedGames);
-        toggleDropdown(!_.isEmpty(search));
-        $scope.searchGames = searchGames;
         $timeout.cancel(searchPromise);
         if (!_.isEmpty(search)) {
             searchPromise = $timeout(fetchSearchGames, 500, true, search);
         }
+        addSearchGames();
+        toggleDropdown(!_.isEmpty(search));
     }
 
     function fetchGames(page) {
