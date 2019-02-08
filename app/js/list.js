@@ -321,6 +321,7 @@ ludojApp.controller('ListController', function ListController(
                 $('#rec-button-tooltip').tooltip('show');
             }, 1000);
         } else {
+            $('.tooltip').remove();
             $('#select-games').collapse('hide');
         }
     };
