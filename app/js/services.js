@@ -26,7 +26,6 @@ ludojApp.factory('gamesService', function gamesService(
 
     var service = {},
         cache = $localStorage.cache,
-        // searchGames = [],
         linkedSites = ['bgg', 'bga', 'wikidata', 'wikipedia', 'luding', 'spielen'];
 
     function putCache(game, id) {
@@ -52,6 +51,10 @@ ludojApp.factory('gamesService', function gamesService(
         }
         return (!game._added) || (game._added + maxAge < _.now() / 1000) ? null : game;
     }
+
+    service.allGames = function allGames() {
+        return _.values(cache);
+    };
 
     function join(array, sep, lastSep) {
         sep = sep || ', ';
