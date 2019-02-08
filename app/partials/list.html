@@ -209,9 +209,10 @@
 				autocomplete="off" />
 			<div class="dropdown-menu" id="select-games-dropdown">
 				<a ng-repeat="game in searchGames | filter:{'name':searchLikedGames} | orderBy:['rec_rank','bgg_rank','name'] | limitTo:8"
-						ng-click="likeGame(game)"
+						ng-click="contains(likedGames, game) ? unlikeGame(game) : likeGame(game)"
 						class="dropdown-item"
 						href="">
+					<i ng-if="contains(likedGames, game)" class="fas fa-thumbs-up"></i>
 					{{ game.name_short || game.name }}
 					<small ng-if="game.year" class="text-muted">({{ game.year }})</small>
 				</a>
@@ -238,7 +239,7 @@
 			<a ng-repeat="game in likedGames"
 					ng-click="unlikeGame(game)"
 					href=""
-					class="badge badge-success badge-liked-game mr-1"">
+					class="badge badge-success badge-liked-game mr-1">
 				<i class="fas fa-thumbs-up"></i>
 				{{ game.name_short || game.name }}
 			</a>
