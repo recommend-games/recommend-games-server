@@ -313,9 +313,10 @@ ludojApp.controller('ListController', function ListController(
         $('#' + id).focus();
     };
 
-    $scope.toggleSelection = function toggleSelection() {
-        $scope.selectionActive = !$scope.selectionActive;
-        if ($scope.selectionActive) {
+    function toggleSelection(active) {
+        active = _.isBoolean(active) ? active : !$scope.selectionActive;
+        $scope.selectionActive = active;
+        if (active) {
             $('#select-games').collapse('show');
             $timeout(function () {
                 $('#rec-button-tooltip').tooltip('show');
@@ -323,6 +324,19 @@ ludojApp.controller('ListController', function ListController(
         } else {
             $('.tooltip').remove();
             $('#select-games').collapse('hide');
+        }
+    }
+
+    $scope.toggleSelection = toggleSelection;
+
+    $scope.showPane = function showPane(pane) {
+        $log.info(pane);
+        if (pane === 'bgg') {
+            $('#bgg-tab').tab('show');
+            toggleSelection(false);
+        } else if (pane === 'select') {
+            $('#select-games-tab').tab('show');
+            toggleSelection(true);
         }
     };
 
