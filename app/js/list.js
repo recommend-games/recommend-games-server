@@ -339,6 +339,13 @@ ludojApp.controller('ListController', function ListController(
         }
     };
 
+    $scope.toggleCollapse = function toggleCollapse(target, show) {
+        if (_.isBoolean(show)) {
+            return $(target).collapse(show ? 'show' : 'hide');
+        }
+        return $(target).collapse('toggle');
+    };
+
     function contains(array, game) {
         return _.some(array, ['bgg_id', game.bgg_id]);
     }
