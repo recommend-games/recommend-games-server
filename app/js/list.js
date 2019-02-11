@@ -330,7 +330,6 @@ ludojApp.controller('ListController', function ListController(
     $scope.toggleSelection = toggleSelection;
 
     $scope.showPane = function showPane(pane) {
-        $log.info(pane);
         if (pane === 'bgg') {
             $('#bgg-tab').tab('show');
             toggleSelection(false);
@@ -345,11 +344,16 @@ ludojApp.controller('ListController', function ListController(
     }
 
     function likeGame(game) {
+        if (_.isEmpty(game)) {
+            return;
+        }
+
         if (_.isEmpty($scope.likedGames)) {
             $scope.likedGames = [game];
         } else if (!contains($scope.likedGames, game)) {
             $scope.likedGames.push(game);
         }
+
         _.remove($scope.popularGames, function (g) {
             return g.bgg_id === game.bgg_id;
         });
@@ -367,11 +371,7 @@ ludojApp.controller('ListController', function ListController(
     }
 
     function cleanLikedGames(games) {
-        _.forEach(games, function (game) {
-            if (game) {
-                likeGame(game);
-            }
-        });
+        _.forEach(games, likeGame);
         return games;
     }
 
