@@ -9,6 +9,8 @@ import timeit
 from functools import lru_cache
 from itertools import groupby
 
+from django.conf import settings
+
 ITERABLE_SINGLE_VALUES = (dict, str, bytes)
 LOGGER = logging.getLogger(__name__)
 
@@ -83,6 +85,48 @@ def load_recommender(path):
         return GamesRecommender.load(path=path)
     except Exception:
         LOGGER.exception('unable to load recommender model from <%s>', path)
+    return None
+
+
+@lru_cache(maxsize=8)
+def pubsub_client():
+    ''' Google Cloud PubSub client '''
+    try:
+        from google.cloud import pubsub
+        return pubsub.PublisherClient()
+    except Exception:
+        LOGGER.exception('unable to initialise PubSub client')
+    return None
+
+
+def pubsub_push(
+        message,
+        project=settings.PUBSUB_QUEUE_PROJECT,
+        topic=settings.PUBSUB_QUEUE_TOPIC,
+        encoding='utf-8',
+        **kwargs,
+    ):
+    ''' publish message '''
+
+    if not project or not topic:
+        return None
+
+    client = pubsub_client()
+
+    if client is None:
+        return None
+
+    if isinstance(message, str):
+        message = message.encode(encoding)
+    assert isinstance(message, bytes)
+
+    # pylint: disable=no-member
+    path = client.topic_path(project, topic)
+
+    try:
+        return client.publish(topic=path, data=message, **kwargs)
+    except Exception:
+        LOGGER.exception('unable to send message %r', message)
     return None
 
 
