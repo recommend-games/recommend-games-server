@@ -23,7 +23,9 @@ from .permissions import ReadOnly
 from .serializers import (
     CategorySerializer, CollectionSerializer, GameSerializer,
     MechanicSerializer, PersonSerializer, UserSerializer)
-from .utils import arg_to_iter, load_recommender, parse_bool, parse_int, pubsub_push, take_first
+from .utils import (
+    arg_to_iter, load_recommender, model_updated_at,
+    parse_bool, parse_int, pubsub_push, take_first)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -333,6 +335,15 @@ class GameViewSet(PermissionsModelViewSet):
             self.get_paginated_response(serializer.data) if paginate
             else Response(serializer.data)
         )
+
+    # pylint: disable=no-self-use
+    @action(detail=False)
+    def updated_at(self, request):
+        ''' recommend games '''
+        updated_at = model_updated_at()
+        if not updated_at:
+            raise NotFound('unable to retrieve latest update')
+        return Response({'updated_at': updated_at})
 
 
 class PersonViewSet(PermissionsModelViewSet):
