@@ -51,7 +51,11 @@ cp --recursive \
     "${WORK_SPACE}/ludoj-recommender/.tc/compilations" \
     data/recommender/
 
-# Sync data to GCS
+# last update flag
+echo 'Creating last update flag...'
+date --utc +'%Y-%m-%dT%H-%M-%S' > data/last_update
+
+# sync data to GCS
 CLOUDSDK_PYTHON='' gsutil -m -o GSUtil:parallel_composite_upload_threshold=100M \
     rsync -d -r \
     data/ "gs://${GS_BUCKET}/"
