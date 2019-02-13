@@ -16,6 +16,7 @@ google-cloud-pubsub = "*"
 gunicorn = "*"
 ludoj-recommender = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-recommender.git"}
 markdown = "*"
+python-dateutil = "*"
 whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
