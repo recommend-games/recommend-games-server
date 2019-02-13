@@ -23,7 +23,7 @@ from .permissions import ReadOnly
 from .serializers import (
     CategorySerializer, CollectionSerializer, GameSerializer,
     MechanicSerializer, PersonSerializer, UserSerializer)
-from .utils import arg_to_iter, load_recommender, parse_bool, parse_int, take_first
+from .utils import arg_to_iter, load_recommender, parse_bool, parse_int, pubsub_push, take_first
 
 LOGGER = logging.getLogger(__name__)
 
@@ -249,6 +249,9 @@ class GameViewSet(PermissionsModelViewSet):
 
         if not user and not like:
             return self.list(request)
+
+        if settings.PUBSUB_PUSH_ENABLED and user:
+            pubsub_push(user)
 
         path = getattr(settings, 'RECOMMENDER_PATH', None)
         recommender = load_recommender(path)

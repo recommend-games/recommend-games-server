@@ -123,6 +123,8 @@ def pubsub_push(
     # pylint: disable=no-member
     path = client.topic_path(project, topic)
 
+    LOGGER.debug('pushing message %r to <%s>', message, path)
+
     try:
         return client.publish(topic=path, data=message, **kwargs)
     except Exception:
