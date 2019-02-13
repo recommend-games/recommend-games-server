@@ -189,7 +189,7 @@ class GameViewSet(PermissionsModelViewSet):
             if queries:
                 query = reduce(or_, queries)
                 return tuple(
-                    User.objects.get(name__iexact=user)
+                    User.objects.get(name=user)
                     .collection_set
                     .order_by()
                     .filter(query)

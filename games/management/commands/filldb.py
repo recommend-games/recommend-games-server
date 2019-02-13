@@ -432,13 +432,15 @@ class Command(BaseCommand):
 
     collection_fields_mapping = {
         'bgg_id': 'game_id',
-        'bgg_user_name': 'user_id',
+        # 'bgg_user_name': 'user_id',
         'bgg_user_rating': 'rating',
         'bgg_user_wishlist': 'wishlist',
         'bgg_user_play_count': 'play_count',
     }
 
     collection_item_mapping = {
+        'user_id': lambda item: (
+            item['bgg_user_name'].lower() if item.get('bgg_user_name') else None),
         'owned': lambda item: bool(
             item.get('bgg_user_owned')
             or item.get('bgg_user_prev_owned')
