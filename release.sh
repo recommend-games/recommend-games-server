@@ -53,7 +53,7 @@ cp --recursive \
 
 # last update flag
 echo 'Creating last update flag...'
-date --utc +'%Y-%m-%dT%H:%M:%SZ' > data/last_update
+date --utc +'%Y-%m-%dT%H:%M:%SZ' > data/updated_at
 
 # sync data to GCS
 CLOUDSDK_PYTHON='' gsutil -m -o GSUtil:parallel_composite_upload_threshold=100M \
