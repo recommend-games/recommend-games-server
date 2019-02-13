@@ -157,3 +157,7 @@ REST_PROXY = {
 
 RECOMMENDER_PATH = os.path.join(DATA_DIR, 'recommender')
 STAR_PERCENTILES = (.165, .365, .615, .815, .915, .965, .985, .995)
+
+PUBSUB_PUSH_ENABLED = True
+PUBSUB_QUEUE_PROJECT = os.getenv('PUBSUB_QUEUE_PROJECT') or 'recommend-games'
+PUBSUB_QUEUE_TOPIC = os.getenv('PUBSUB_QUEUE_TOPIC') or 'users'
