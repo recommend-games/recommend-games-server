@@ -20,7 +20,8 @@ ludojApp.controller('ListController', function ListController(
     usersService
 ) {
     var params = filterService.getParams($routeParams),
-        searchPromise = null;
+        searchPromise = null,
+        userStats = {};
 
     function filtersActive() {
         return _.sum([
@@ -288,6 +289,8 @@ ludojApp.controller('ListController', function ListController(
     $scope.selectionActive = false;
     $scope.userNotFound = false;
     $scope.hideScore = params.for && params.similarity;
+    $scope.statsActive = false;
+    $scope.userStats = {};
 
     $scope.clearFilters = function clearFilters() {
         $scope.user = null;
@@ -376,12 +379,28 @@ ludojApp.controller('ListController', function ListController(
             });
     }
 
+    function updateStats(site) {
+        if (_.isEmpty(userStats[site])) {
+            $scope.statsActive = false;
+            $scope.userStats = {};
+        } else {
+            $scope.statsActive = site;
+            $scope.userStats = userStats[site];
+        }
+        $timeout(function () {
+            _.forEach($scope.userStats, function (value, key) {
+                $('#progress-bar-' + key).css('width', value + '%');
+            });
+        });
+    }
+
     $scope.contains = contains;
     $scope.likeGame = likeGame;
     $scope.unlikeGame = unlikeGame;
     $scope.fetchPopularGames = fetchPopularGames;
     $scope.fetchAndUpdate = fetchAndUpdate;
     $scope.updateSearchGames = updateSearchGames;
+    $scope.updateStats = updateStats;
 
     $scope.$watch('count.enabled', renderSlider);
     $scope.$watch('time.enabled', renderSlider);
@@ -438,7 +457,9 @@ ludojApp.controller('ListController', function ListController(
     if (params.for) {
         usersService.getUserStats(params.for, true)
             .then(function (stats) {
-                $scope.userStats = stats;
+                userStats.rg = stats.rg_top_100;
+                userStats.bgg = stats.bgg_top_100;
+                return updateStats('rg');
             })
             .catch($log.error);
     }

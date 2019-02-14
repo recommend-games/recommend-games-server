@@ -697,37 +697,66 @@
 		</div>
 	</div>
 
-	<section ng-if="currUser &amp;&amp; !isEmpty(userStats)"
-			class="mb-3">
+	<section ng-if="statsActive &amp;&amp; !isEmpty(userStats)">
 		<h2>
 			Statistics for <strong>
 				<a ng-href="https://boardgamegeek.com/user/{{ currUser }}"
 					target="_blank">{{ currUser }} <i class="fas fa-external-link-alt"></i></a>
 			</strong>
 		</h2>
-		<div class="progress bg-secondary mb-1">
-			<div class="progress-bar bg-success"
-				role="progressbar"
-				ng-style="{width: userStats.rg_top_100.played + '%'}"
-				aria-valuenow="{{ userStats.rg_top_100.played }}"
-				aria-valuemin="0"
-				aria-valuemax="100">Played: {{ userStats.rg_top_100.played }}%</div>
-		</div>
-		<div class="progress bg-secondary mb-1">
-			<div class="progress-bar bg-success"
-				role="progressbar"
-				ng-style="{width: userStats.rg_top_100.owned + '%'}"
-				aria-valuenow="{{ userStats.rg_top_100.owned }}"
-				aria-valuemin="0"
-				aria-valuemax="100">Owned: {{ userStats.rg_top_100.owned }}%</div>
-		</div>
-		<div class="progress bg-secondary">
-			<div class="progress-bar bg-success"
-				role="progressbar"
-				ng-style="{width: userStats.rg_top_100.rated + '%'}"
-				aria-valuenow="{{ userStats.rg_top_100.rated }}"
-				aria-valuemin="0"
-				aria-valuemax="100">Rated: {{ userStats.rg_top_100.rated }}%</div>
+		<div class="card mb-3">
+			<div class="card-header">
+				<nav class="nav nav-tabs nav-justified card-header-tabs">
+					<a id="stats-rg-tab"
+							ng-click="updateStats('rg')"
+							href=""
+							role="tab"
+							aria-selected="{{ statsActive == 'rg' }}"
+							class="nav-item nav-link {{ statsActive == 'rg' ? 'active' : '' }}">
+						<abbr title="Recommend.Games">R.G</abbr> top 100
+					</a>
+					<a id="stats-bgg-tab"
+							ng-click="updateStats('bgg')"
+							href=""
+							role="tab"
+							aria-selected="{{ statsActive == 'bgg' }}"
+							class="nav-item nav-link {{ statsActive == 'bgg' ? 'active' : '' }}">
+						<abbr title="BoardGameGeek">BGG</abbr> top 100
+					</a>
+				</nav>
+			</div>
+			<div class="card-body">
+				<div class="progress bg-secondary mb-1">
+					<div id="progress-bar-played"
+							class="progress-bar bg-success"
+							role="progressbar"
+							aria-valuenow="{{ userStats.played }}"
+							aria-valuemin="0"
+							aria-valuemax="100">
+						<strong>&nbsp;Played: {{ userStats.played }}%&nbsp;</strong>
+					</div>
+				</div>
+				<div class="progress bg-secondary mb-1">
+					<div id="progress-bar-owned"
+							class="progress-bar bg-success"
+							role="progressbar"
+							aria-valuenow="{{ userStats.owned }}"
+							aria-valuemin="0"
+							aria-valuemax="100">
+						<strong>&nbsp;Owned: {{ userStats.owned }}%&nbsp;</strong>
+					</div>
+				</div>
+				<div class="progress bg-secondary">
+					<div id="progress-bar-rated"
+							class="progress-bar bg-success"
+							role="progressbar"
+							aria-valuenow="{{ userStats.rated }}"
+							aria-valuemin="0"
+							aria-valuemax="100">
+						<strong>&nbsp;Rated: {{ userStats.rated }}%&nbsp;</strong>
+					</div>
+				</div>
+			</div>
 		</div>
 	</section>
 
