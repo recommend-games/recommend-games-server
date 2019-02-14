@@ -16,7 +16,8 @@ ludojApp.controller('ListController', function ListController(
     $timeout,
     filterService,
     gamesService,
-    toastr
+    toastr,
+    usersService
 ) {
     var params = filterService.getParams($routeParams),
         searchPromise = null;
@@ -433,6 +434,14 @@ ludojApp.controller('ListController', function ListController(
                 .reverse()
                 .value();
         });
+
+    if (params.for) {
+        usersService.getUserStats(params.for, true)
+            .then(function (stats) {
+                $scope.userStats = stats;
+            })
+            .catch($log.error);
+    }
 
     gamesService.setTitle(params.for ? 'Recommendations for ' + params.for : null);
     gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));

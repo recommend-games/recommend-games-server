@@ -500,6 +500,48 @@ ludojApp.factory('gamesService', function gamesService(
     return service;
 });
 
+ludojApp.factory('usersService', function usersService(
+    $log,
+    $http,
+    $q,
+    $sessionStorage,
+    API_URL
+) {
+    var service = {};
+
+    service.getUserStats = function getUserStats(user, noblock) {
+        if (!user) {
+            return $q.reject('User name is required.');
+        }
+
+        user = _.toLower(user);
+
+        if (!_.isEmpty($sessionStorage['user_stats_' + user])) {
+            return $q.resolve($sessionStorage['stats_' + user]);
+        }
+
+        var userUri = encodeURIComponent(user);
+
+        return $http.get(API_URL + 'users/' + userUri + '/stats/', {'noblock': !!noblock})
+            .then(function (response) {
+                var stats = response.data;
+                if (_.isEmpty(stats)) {
+                    return $q.reject('Unable to load stats for "' + user + '".');
+                }
+                $sessionStorage['user_stats_' + user] = stats;
+                return stats;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to load stats for "' + user + '".';
+                return $q.reject(response);
+            });
+    };
+
+    return service;
+});
+
 ludojApp.factory('newsService', function newsService(
     $http,
     $locale,
