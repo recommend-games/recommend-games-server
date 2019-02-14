@@ -631,7 +631,8 @@
 
 	<h2 ng-if="currUser">
 		Recommended games for <strong>
-			<a ng-href="https://boardgamegeek.com/user/{{ currUser }}" target="_blank">{{ currUser }} <i class="fas fa-external-link-alt"></i></a>
+			<a ng-href="https://boardgamegeek.com/user/{{ currUser }}"
+				target="_blank">{{ currUser }} <i class="fas fa-external-link-alt"></i></a>
 		</strong>
 	</h2>
 	<p ng-if="currUser &amp;&amp; !userNotFound">
@@ -695,6 +696,40 @@
 			</div>
 		</div>
 	</div>
+
+	<section ng-if="currUser &amp;&amp; !isEmpty(userStats)"
+			class="mb-3">
+		<h2>
+			Statistics for <strong>
+				<a ng-href="https://boardgamegeek.com/user/{{ currUser }}"
+					target="_blank">{{ currUser }} <i class="fas fa-external-link-alt"></i></a>
+			</strong>
+		</h2>
+		<div class="progress bg-secondary mb-1">
+			<div class="progress-bar bg-success"
+				role="progressbar"
+				ng-style="{width: userStats.rg_top_100.played + '%'}"
+				aria-valuenow="{{ userStats.rg_top_100.played }}"
+				aria-valuemin="0"
+				aria-valuemax="100">Played: {{ userStats.rg_top_100.played }}%</div>
+		</div>
+		<div class="progress bg-secondary mb-1">
+			<div class="progress-bar bg-success"
+				role="progressbar"
+				ng-style="{width: userStats.rg_top_100.owned + '%'}"
+				aria-valuenow="{{ userStats.rg_top_100.owned }}"
+				aria-valuemin="0"
+				aria-valuemax="100">Owned: {{ userStats.rg_top_100.owned }}%</div>
+		</div>
+		<div class="progress bg-secondary">
+			<div class="progress-bar bg-success"
+				role="progressbar"
+				ng-style="{width: userStats.rg_top_100.rated + '%'}"
+				aria-valuenow="{{ userStats.rg_top_100.rated }}"
+				aria-valuemin="0"
+				aria-valuemax="100">Rated: {{ userStats.rg_top_100.rated }}%</div>
+		</div>
+	</section>
 
 	<script type="application/ld+json">
 		{

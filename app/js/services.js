@@ -517,7 +517,7 @@ ludojApp.factory('usersService', function usersService(
         user = _.toLower(user);
 
         if (!_.isEmpty($sessionStorage['user_stats_' + user])) {
-            return $q.resolve($sessionStorage['stats_' + user]);
+            return $q.resolve($sessionStorage['user_stats_' + user]);
         }
 
         var userUri = encodeURIComponent(user);
