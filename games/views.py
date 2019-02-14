@@ -420,16 +420,39 @@ class MechanicViewSet(PermissionsModelViewSet):
         return Response(serializer.data)
 
 
-class UserViewSet(ModelViewSet):
+class UserViewSet(PermissionsModelViewSet):
     ''' user view set '''
 
     # pylint: disable=no-member
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    lookup_field = 'name__iexact'
+    lookup_url_kwarg = 'pk'
 
-    def get_permissions(self):
-        cls = AllowAny if settings.DEBUG else IsAuthenticated
-        return (cls(),)
+    # pylint: disable=unused-argument,invalid-name
+    @action(detail=True)
+    def stats(self, request, pk=None):
+        ''' get user stats '''
+        user = self.get_object()
+
+        rg_top_100 = user.collection_set.filter(game__rec_rank__lte=100)
+        bgg_top_100 = user.collection_set.filter(game__bgg_rank__lte=100)
+
+        data = {
+            'user': user.name,
+            'rg_top_100': {
+                'owned': rg_top_100.filter(owned=True).count(),
+                'played': rg_top_100.filter(play_count__gt=0).count(),
+                'rated': rg_top_100.filter(rating__isnull=False).count(),
+            },
+            'bgg_top_100': {
+                'owned': bgg_top_100.filter(owned=True).count(),
+                'played': bgg_top_100.filter(play_count__gt=0).count(),
+                'rated': bgg_top_100.filter(rating__isnull=False).count(),
+            },
+        }
+
+        return Response(data)
 
 
 class CollectionViewSet(ModelViewSet):
