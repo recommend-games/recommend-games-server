@@ -137,7 +137,7 @@ ludojApp.controller('ListController', function ListController(
                         .append('<script type="application/ld+json">' + $filter('json')(gamesService.jsonLD(_.slice(games, 0, 10)), 0) + '</script>');
                 }
 
-                addSearchGames(games);
+                addSearchGames();
 
                 return games;
             })
