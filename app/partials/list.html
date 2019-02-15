@@ -144,6 +144,7 @@
 						ng-model="user"
 						ng-required="true"
 						ng-change="toggleCollapse('#form-exclude-filters', !!user)"
+						ng-focus="toggleCollapse('#form-exclude-filters', !!user)"
 						class="form-control"
 						placeholder="BoardGameGeek user name"
 						aria-describedby="bgg-user-label" />
@@ -161,7 +162,7 @@
 						</button>
 					</div>
 				</div>
-				<div id="form-exclude-filters" class="collapse {{ currUser ? 'show' : '' }}">
+				<div id="form-exclude-filters" class="collapse">
 					<div class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
 						Exclude games from recommendations:
 					</div>

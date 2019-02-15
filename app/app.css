@@ -140,7 +140,7 @@
 }
 
 .badge-liked-game {
-    font-size: 110%;
+    font-size: unset;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
