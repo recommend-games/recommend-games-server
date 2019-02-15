@@ -100,7 +100,7 @@
 						{{ game.name_short || game.name }}
 					</a>
 				</p>
-				<div ng-hide="isEmpty(popularGames)"
+				<div ng-hide="isEmpty(popularGames) &amp;&amp; !popularGamesPage"
 						class="row selectable-games mb-0">
 					<p class="col-12 mb-0"><strong>Select games you like:</strong></p>
 					<a ng-repeat="game in popularGames"

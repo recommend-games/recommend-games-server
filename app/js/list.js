@@ -12,7 +12,6 @@ ludojApp.controller('ListController', function ListController(
     $route,
     $routeParams,
     $scope,
-    $sessionStorage,
     $timeout,
     filterService,
     gamesService,
@@ -21,7 +20,8 @@ ludojApp.controller('ListController', function ListController(
 ) {
     var params = filterService.getParams($routeParams),
         searchPromise = null,
-        userStats = {};
+        userStats = {},
+        fetchPopularGames;
 
     function filtersActive() {
         return _.sum([
@@ -374,6 +374,10 @@ ludojApp.controller('ListController', function ListController(
         _.remove($scope.popularGames, function (g) {
             return g.bgg_id === game.bgg_id;
         });
+
+        if (_.isEmpty($scope.popularGames)) {
+            fetchPopularGames($scope.popularGamesPage);
+        }
     }
 
     function unlikeGame(game) {
@@ -394,7 +398,7 @@ ludojApp.controller('ListController', function ListController(
         return games;
     }
 
-    function fetchPopularGames(page) {
+    fetchPopularGames = function fetchPopularGames(page) {
         page = _.isNumber(page) ? page : 1;
         var start = (page - 1) * 5,
             end = page * 5;
@@ -406,7 +410,7 @@ ludojApp.controller('ListController', function ListController(
                 addSearchGames(games);
                 return games;
             });
-    }
+    };
 
     function updateStats(site) {
         if (_.isEmpty(userStats[site])) {
