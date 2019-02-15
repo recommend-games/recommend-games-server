@@ -28,7 +28,7 @@
 						role="tab"
 						aria-controls="select-games"
 						aria-selected="false"
-						class="nav-item nav-link {{ isEmpty(likedGames) &amp;&amp; isEmpty(popularGames) ? 'disabled' : '' }}">
+						class="nav-item nav-link {{ isEmpty(searchGames) &amp;&amp; isEmpty(likedGames) &amp;&amp; isEmpty(popularGames) ? 'disabled' : '' }}">
 					<span ng-hide="isEmpty(likedGames)"
 							class="badge badge-primary">
 						{{ likedGames.length }}
@@ -300,23 +300,6 @@
 		</div>
 	</div>
 
-	<!-- <p class="text-right mb-0">
-		<em>No BoardGameGeek account? Tell us what games you like instead!</em>
-		<button type="button"
-				ng-disabled="isEmpty(likedGames) &amp;&amp; isEmpty(popularGames)"
-				class="btn btn-sm btn-primary"
-				ng-click="toggleSelection()"
-				aria-expanded="false"
-				aria-controls="select-games">
-			<span ng-hide="isEmpty(likedGames)"
-					class="badge badge-light">
-				{{ likedGames.length }}
-			</span>
-			Select games
-			<i class="far {{ selectionActive ? 'fa-minus-square' : 'fa-plus-square' }}" id="select-games-icon"></i>
-		</button>
-	</p> -->
-
 	<!-- TODO -->
 	<div ng-show="selectionActive"
 			class="text-right pt-1 mb-0 rec-button-container">
@@ -326,12 +309,12 @@
 				title="You can also select games you like in the list below"
 				class="btn-group rec-button-tooltip" role="group">
 			<button type="button"
-					ng-click="toggleSelection()"
+					ng-click="toggleSelection(false)"
 					class="btn btn-secondary">
 				Cancel
 			</button>
 			<button type="button"
-				ng-disabled="!selectionActive || isEmpty(likedGames)"
+				ng-disabled="isEmpty(likedGames)"
 				ng-click="clearUser()"
 				class="btn btn-primary">
 				Recommend!

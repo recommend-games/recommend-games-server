@@ -321,27 +321,28 @@ ludojApp.controller('ListController', function ListController(
         active = _.isBoolean(active) ? active : !$scope.selectionActive;
         $scope.selectionActive = active;
         if (active) {
-            $('#select-games').collapse('show');
+            // $('#select-games').collapse('show');
             $timeout(function () {
                 $('#rec-button-tooltip').tooltip('show');
             }, 1000);
         } else {
             $('.tooltip').remove();
-            $('#select-games').collapse('hide');
+            // $('#select-games').collapse('hide');
+        }
+    }
+
+    function showPane(pane) {
+        if (pane === 'bgg') {
+            $('#bgg-tab').tab('show');
+            // toggleSelection(false);
+        } else if (pane === 'select') {
+            $('#select-games-tab').tab('show');
+            // toggleSelection(true);
         }
     }
 
     $scope.toggleSelection = toggleSelection;
-
-    $scope.showPane = function showPane(pane) {
-        if (pane === 'bgg') {
-            $('#bgg-tab').tab('show');
-            toggleSelection(false);
-        } else if (pane === 'select') {
-            $('#select-games-tab').tab('show');
-            toggleSelection(true);
-        }
-    };
+    $scope.showPane = showPane;
 
     $scope.toggleCollapse = function toggleCollapse(target, show) {
         if (_.isBoolean(show)) {
@@ -354,7 +355,11 @@ ludojApp.controller('ListController', function ListController(
         return _.some(array, ['bgg_id', game.bgg_id]);
     }
 
-    function likeGame(game) {
+    function likeGame(game, noToggle) {
+        if (!noToggle && !$scope.selectionActive) {
+            toggleSelection(true);
+        }
+
         if (_.isEmpty(game)) {
             return;
         }
@@ -382,7 +387,9 @@ ludojApp.controller('ListController', function ListController(
     }
 
     function cleanLikedGames(games) {
-        _.forEach(games, likeGame);
+        _.forEach(games, function (game) {
+            likeGame(game, true);
+        });
         return games;
     }
 
@@ -475,6 +482,9 @@ ludojApp.controller('ListController', function ListController(
                 .sortBy('num_votes')
                 .reverse()
                 .value();
+            if (!params.for && !_.isEmpty(params.like)) {
+                showPane('select');
+            }
         });
 
     if (params.for) {
