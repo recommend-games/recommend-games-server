@@ -459,13 +459,6 @@ ludojApp.controller('ListController', function ListController(
             });
 
             renderSlider();
-
-            if (params.for && !$sessionStorage.filterTooltipShown) {
-                $timeout(function () {
-                    $('#exclude-filters-button').tooltip('show');
-                    $sessionStorage.filterTooltipShown = true;
-                }, 1000);
-            }
         });
 
     fetchPopularGames(1)
