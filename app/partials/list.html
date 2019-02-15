@@ -8,27 +8,23 @@
 
 	<div class="card">
 		<div class="card-header">
-			<nav class="nav nav-tabs nav-justified card-header-tabs"><!-- role="tablist" -->
+			<nav class="nav nav-tabs nav-justified card-header-tabs">
 				<a id="bgg-tab"
-						ng-click="toggleSelection(false)"
-						data-toggle="tab"
-						data-target="#fetch-game-form"
+						ng-click="showPane('bgg'); toggleSelection(false)"
 						href=""
 						role="tab"
 						aria-controls="fetch-game-form"
-						aria-selected="false"
-						class="nav-item nav-link active">
+						aria-selected="{{ !activePane || activePane == 'bgg' }}"
+						class="nav-item nav-link {{ !activePane || activePane == 'bgg' ? 'active' : '' }}">
 					<abbr title="BoardGameGeek">BGG</abbr> account
 				</a>
 				<a id="select-games-tab"
-						ng-click="toggleSelection(true)"
-						data-toggle="tab"
-						data-target="#select-games"
+						ng-click="showPane('select'); toggleSelection(true)"
 						href=""
 						role="tab"
 						aria-controls="select-games"
-						aria-selected="false"
-						class="nav-item nav-link {{ isEmpty(searchGames) &amp;&amp; isEmpty(likedGames) &amp;&amp; isEmpty(popularGames) ? 'disabled' : '' }}">
+						aria-selected="{{ activePane == 'select' }}"
+						class="nav-item nav-link {{ activePane == 'select' ? 'active' : '' }}">
 					<span ng-hide="isEmpty(likedGames)"
 							class="badge badge-primary">
 						{{ likedGames.length }}
@@ -37,23 +33,10 @@
 				</a>
 			</nav>
 		</div>
-		<div class="card-body tab-content">
-			<!-- <p role="tabpanel"
-					class="card-text tab-pane fade show active mb-0">
-				<em>
-					Get personal recommendations by either<!-/- $('#select-games-tab').tab('show'); toggleSelection(true) -/->
-					<a ng-click="showPane('select')"
-						class="{{ isEmpty(likedGames) &amp;&amp; isEmpty(popularGames) ? 'disabled' : '' }}"
-						href="">telling us what games you like</a>
-					or entering your
-					<a ng-click="showPane('bgg')"
-						href="">BoardGameGeek user name</a>!
-				</em>
-			</p> -->
+		<div class="card-body">
 			<div id="select-games"
-					role="tabpanel"
-					aria-labelledby="select-games-tab"
-					class="tab-pane fade">
+					ng-show="activePane == 'select'"
+					aria-labelledby="select-games-tab">
 				<p class="card-text mb-1">
 					Select games you like and we will recommend games for your taste!
 					<em>Note</em>: You can also select games from the recommendations below.
@@ -100,8 +83,14 @@
 						</button>
 					</div>
 				</form>
-				<p ng-hide="isEmpty(likedGames)">
-					<strong>Liked games:</strong>
+				<p class="clearfix">
+					<button type="button"
+						ng-disabled="isEmpty(likedGames)"
+						ng-click="clearUser()"
+						class="btn btn-primary float-right">
+						Recommend!
+					</button>
+					<strong ng-hide="isEmpty(likedGames)">Liked games:</strong>
 					<a ng-repeat="game in likedGames"
 							ng-click="unlikeGame(game)"
 							href=""
@@ -135,13 +124,14 @@
 				</div>
 			</div>
 
-			<form ng-submit="updateParams()"
+			<form ng-show="!activePane || activePane == 'bgg'"
+					ng-submit="updateParams()"
 					id="fetch-game-form"
 					name="fetch-game-form"
 					novalidate="novalidate"
-					role="form tabpanel"
+					role="form"
 					aria-labelledby="bgg-tab"
-					class="form tab-pane show active">
+					class="form">
 				<label for="user"
 						id="bgg-user-label"
 						class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
@@ -300,7 +290,6 @@
 		</div>
 	</div>
 
-	<!-- TODO -->
 	<div ng-show="selectionActive"
 			class="text-right pt-1 mb-0 rec-button-container">
 		<div id="rec-button-tooltip"

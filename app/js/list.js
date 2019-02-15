@@ -332,13 +332,14 @@ ludojApp.controller('ListController', function ListController(
     }
 
     function showPane(pane) {
-        if (pane === 'bgg') {
-            $('#bgg-tab').tab('show');
-            // toggleSelection(false);
-        } else if (pane === 'select') {
-            $('#select-games-tab').tab('show');
-            // toggleSelection(true);
-        }
+        $scope.activePane = pane;
+        // if (pane === 'bgg') {
+        //     $('#bgg-tab').tab('show');
+        //     toggleSelection(false);
+        // } else if (pane === 'select') {
+        //     $('#select-games-tab').tab('show');
+        //     toggleSelection(true);
+        // }
     }
 
     $scope.toggleSelection = toggleSelection;
