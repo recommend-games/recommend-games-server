@@ -440,6 +440,7 @@ class UserViewSet(PermissionsModelViewSet):
 
         data = {
             'user': user.name,
+            'updated_at': user.updated_at,
             'rg_top_100': {
                 'owned': rg_top_100.filter(owned=True).count(),
                 'played': rg_top_100.filter(play_count__gt=0).count(),
