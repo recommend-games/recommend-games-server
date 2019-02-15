@@ -566,7 +566,7 @@ ludojApp.factory('newsService', function newsService(
 
     function processNews(article) {
         article = article || {};
-        article.published_at_str = article.published_at ? moment(article.published_at).calendar() : null;
+        article.published_at_str = article.published_at ? moment.utc(article.published_at).calendar() : null;
         return article;
     }
 
@@ -603,8 +603,8 @@ ludojApp.factory('newsService', function newsService(
     };
 
     service.setLastVisit = function setLastVisit(date) {
-        date = moment(date || undefined);
-        date = date.isValid() ? date : moment();
+        date = moment.utc(date || undefined);
+        date = date.isValid() ? date : moment.utc();
         $localStorage.lastVisitNews = date;
         return date;
     };
@@ -613,7 +613,7 @@ ludojApp.factory('newsService', function newsService(
         if (!$localStorage.lastVisitNews) {
             return null;
         }
-        var date = moment($localStorage.lastVisitNews);
+        var date = moment.utc($localStorage.lastVisitNews);
         return date.isValid() ? date : null;
     };
 
