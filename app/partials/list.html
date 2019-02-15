@@ -635,20 +635,34 @@
 				target="_blank">{{ currUser }} <i class="fas fa-external-link-alt"></i></a>
 		</strong>
 	</h2>
-	<p ng-if="currUser &amp;&amp; !userNotFound">
-		See recommendations <a href="" ng-click="clearUser()">for all users</a> instead.
-	</p>
-	<p ng-if="currUser &amp;&amp; userNotFound"
-			class="text-danger">
-		We didn't find any ratings for "{{currUser}}".
-		Recommendations are based on BoardGameGeek user ratings, so we were unable to find personal recommendations.
-		Read <a href="/#/faq#why-does-it-say-user-cannot-be-found-when-i-type-in-my-board-game-geek-user-name" class="text-danger"><strong>more about this</strong></a>.
-		Below are general recommendations.
-	</p>
-
 	<h2 ng-if="!isEmpty(likedGames)">
 		Recommended games based on your taste
 	</h2>
+
+	<p>
+		<span ng-if="currUser &amp;&amp; !userNotFound">
+			See recommendations <a href="" ng-click="clearUser()">for all users</a> instead.
+		</span>
+		<span ng-if="currUser &amp;&amp; userNotFound" class="text-danger">
+			We didn't find any ratings for "{{currUser}}".
+			Recommendations are based on BoardGameGeek user ratings, so we were unable to find personal recommendations.
+			Read <a href="/#/faq#why-does-it-say-user-cannot-be-found-when-i-type-in-my-board-game-geek-user-name" class="text-danger"><strong>more about this</strong></a>.
+			Below are general recommendations.
+		</span>
+		<em ng-if="modelUpdatedAt">
+			Latest database update: {{ modelUpdatedAt }}.
+		</em>
+		<em ng-if="userUpdatedAt">
+			Latest user collection update: {{ userUpdatedAt }}.
+			<a href="/#/faq#ive-updated-my-ratings-on-board-game-geek-but-i-still-see-the-same-recommendations-why"
+					data-toggle="tooltip"
+					data-placement="bottom"
+					title="Read more about scraping and processing your collection"
+					class="text-muted">
+				<i class="fas fa-info-circle"></i>
+			</a>
+		</em>
+	</p>
 
 	<div ng-if="empty"
 			class="alert alert-warning"
