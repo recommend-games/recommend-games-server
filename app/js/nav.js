@@ -26,7 +26,7 @@ ludojApp.controller('NavController', function NavController(
                 } else {
                     count = _(response.articles)
                         .filter(function (article) {
-                            var publishedAt = article.published_at ? moment.utc(article.published_at) : null;
+                            var publishedAt = article.published_at ? moment(article.published_at) : null;
                             return publishedAt && publishedAt.isValid() && publishedAt >= lastVisit;
                         })
                         .size();

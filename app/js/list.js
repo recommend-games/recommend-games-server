@@ -401,6 +401,8 @@ ludojApp.controller('ListController', function ListController(
     $scope.fetchAndUpdate = fetchAndUpdate;
     $scope.updateSearchGames = updateSearchGames;
     $scope.updateStats = updateStats;
+    $scope.modelUpdatedAt = null;
+    $scope.userUpdatedAt = null;
 
     $scope.$watch('count.enabled', renderSlider);
     $scope.$watch('time.enabled', renderSlider);
@@ -457,12 +459,19 @@ ludojApp.controller('ListController', function ListController(
     if (params.for) {
         usersService.getUserStats(params.for, true)
             .then(function (stats) {
+                $scope.userUpdatedAt = stats.updated_at_str;
                 userStats.rg = stats.rg_top_100;
                 userStats.bgg = stats.bgg_top_100;
                 return updateStats('rg');
             })
             .catch($log.error);
     }
+
+    gamesService.getModelUpdatedAt(true)
+        .then(function (updatedAt) {
+            $scope.modelUpdatedAt = updatedAt;
+        })
+        .catch($log.error);
 
     gamesService.setTitle(params.for ? 'Recommendations for ' + params.for : null);
     gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
