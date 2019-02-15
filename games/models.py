@@ -3,8 +3,9 @@
 ''' models '''
 
 from django.db.models import (
-    CASCADE, BooleanField, CharField, FloatField, ForeignKey, Index, ManyToManyField, Model,
-    PositiveIntegerField, PositiveSmallIntegerField, SmallIntegerField, TextField, URLField)
+    CASCADE, BooleanField, CharField, DateTimeField, FloatField, ForeignKey, Index,
+    ManyToManyField, Model, PositiveIntegerField, PositiveSmallIntegerField,
+    SmallIntegerField, TextField, URLField)
 from django_extensions.db.fields.json import JSONField
 
 
@@ -142,6 +143,7 @@ class User(Model):
 
     name = CharField(primary_key=True, max_length=255)
     games = ManyToManyField(Game, through='Collection', blank=True)
+    updated_at = DateTimeField(blank=True, null=True, db_index=True)
 
     class Meta:
         ''' meta '''

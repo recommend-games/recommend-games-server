@@ -367,6 +367,30 @@ ludojApp.factory('gamesService', function gamesService(
             });
     };
 
+    service.getModelUpdatedAt = function getModelUpdatedAt(noblock) {
+        if (!_.isEmpty($sessionStorage.model_updated_at)) {
+            return $q.resolve($sessionStorage.model_updated_at);
+        }
+
+        return $http.get(API_URL + 'games/updated_at/', {'noblock': !!noblock})
+            .then(function (response) {
+                var updatedAt = moment(_.get(response, 'data.updated_at')),
+                    updatedAtStr;
+                if (!updatedAt.isValid()) {
+                    return $q.reject('Unable to retrieve last update.');
+                }
+                updatedAtStr = updatedAt.calendar();
+                $sessionStorage.model_updated_at = updatedAtStr;
+                return updatedAtStr;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to retrieve last update.';
+                return $q.reject(response);
+            });
+    };
+
     service.jsonLD = function jsonLD(game) {
         if (_.isArray(game)) {
             return {
@@ -495,6 +519,60 @@ ludojApp.factory('gamesService', function gamesService(
             '<meta property="og:description" content="' + description + '" />',
             '<meta name="twitter:description" content="' + description + '" />'
         );
+    };
+
+    return service;
+});
+
+ludojApp.factory('usersService', function usersService(
+    $log,
+    $http,
+    $q,
+    $sessionStorage,
+    API_URL
+) {
+    var service = {};
+
+    function processStats(stats) {
+        var updatedAt = moment(stats.updated_at);
+        if (updatedAt.isValid()) {
+            stats.updated_at_str = updatedAt.calendar();
+        } else {
+            stats.updated_at = null;
+            stats.updated_at_str = null;
+        }
+        return stats;
+    }
+
+    service.getUserStats = function getUserStats(user, noblock) {
+        if (!user) {
+            return $q.reject('User name is required.');
+        }
+
+        user = _.toLower(user);
+
+        if (!_.isEmpty($sessionStorage['user_stats_' + user])) {
+            return $q.resolve($sessionStorage['user_stats_' + user]);
+        }
+
+        var userUri = encodeURIComponent(user);
+
+        return $http.get(API_URL + 'users/' + userUri + '/stats/', {'noblock': !!noblock})
+            .then(function (response) {
+                var stats = response.data;
+                if (_.isEmpty(stats)) {
+                    return $q.reject('Unable to load stats for "' + user + '".');
+                }
+                stats = processStats(stats);
+                $sessionStorage['user_stats_' + user] = stats;
+                return stats;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to load stats for "' + user + '".';
+                return $q.reject(response);
+            });
     };
 
     return service;

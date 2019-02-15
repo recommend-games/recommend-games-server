@@ -366,6 +366,26 @@ def _parse_link_file(file, regex=LINK_ID_REGEX):
     return _parse_link_ids(data, regex)
 
 
+def _load_add_data(files, id_field, *fields, in_format=None):
+    objs = _load(*arg_to_iter(files), in_format=in_format)
+    result = {
+        o.get(id_field): {
+            field: o[field] for field in fields if field in o
+        } for o in objs
+    }
+    LOGGER.info('loaded %d data items', len(result))
+    return result
+
+
+def _make_user(name, add_data):
+    if not name:
+        return None
+    name = name.lower()
+    data = add_data.get(name) or {}
+    data['name'] = name
+    return User(**data)
+
+
 class Command(BaseCommand):
     ''' Loads a file to the database '''
 
@@ -432,13 +452,15 @@ class Command(BaseCommand):
 
     collection_fields_mapping = {
         'bgg_id': 'game_id',
-        'bgg_user_name': 'user_id',
+        # 'bgg_user_name': 'user_id',
         'bgg_user_rating': 'rating',
         'bgg_user_wishlist': 'wishlist',
         'bgg_user_play_count': 'play_count',
     }
 
     collection_item_mapping = {
+        'user_id': lambda item: (
+            item['bgg_user_name'].lower() if item.get('bgg_user_name') else None),
         'owned': lambda item: bool(
             item.get('bgg_user_owned')
             or item.get('bgg_user_prev_owned')
@@ -459,6 +481,8 @@ class Command(BaseCommand):
         parser.add_argument('paths', nargs='+', help='game file(s) to be processed')
         parser.add_argument(
             '--collection-paths', '-c', nargs='+', help='collection file(s) to be processed')
+        parser.add_argument(
+            '--user-paths', '-u', nargs='+', help='user file(s) to be processed')
         parser.add_argument(
             '--in-format', '-f', choices=('json', 'jsonl', 'jl'), help='input format')
         parser.add_argument(
@@ -517,9 +541,13 @@ class Command(BaseCommand):
             items = _load(*kwargs['collection_paths'], in_format=kwargs['in_format'])
             items = (item for item in items if item.get('bgg_id') in game_pks)
 
+            add_data = _load_add_data(
+                kwargs['user_paths'], 'bgg_user_name', 'updated_at', in_format=kwargs['in_format'])
+            user_function = partial(_make_user, add_data=add_data) if add_data else User
+
             _create_secondary_instances(
                 model=Collection,
-                secondary={'model': User, 'from': 'user_id', 'to': 'name'},
+                secondary={'model': user_function, 'from': 'user_id', 'to': 'name'},
                 items=items,
                 models_order=(User, Collection),
                 fields=self.collection_fields,

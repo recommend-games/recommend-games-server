@@ -23,7 +23,9 @@ from .permissions import ReadOnly
 from .serializers import (
     CategorySerializer, CollectionSerializer, GameSerializer,
     MechanicSerializer, PersonSerializer, UserSerializer)
-from .utils import arg_to_iter, load_recommender, parse_bool, parse_int, take_first
+from .utils import (
+    arg_to_iter, load_recommender, model_updated_at,
+    parse_bool, parse_int, pubsub_push, take_first)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -189,7 +191,7 @@ class GameViewSet(PermissionsModelViewSet):
             if queries:
                 query = reduce(or_, queries)
                 return tuple(
-                    User.objects.get(name__iexact=user)
+                    User.objects.get(name=user)
                     .collection_set
                     .order_by()
                     .filter(query)
@@ -249,6 +251,9 @@ class GameViewSet(PermissionsModelViewSet):
 
         if not user and not like:
             return self.list(request)
+
+        if settings.PUBSUB_PUSH_ENABLED and user:
+            pubsub_push(user)
 
         path = getattr(settings, 'RECOMMENDER_PATH', None)
         recommender = load_recommender(path)
@@ -331,6 +336,15 @@ class GameViewSet(PermissionsModelViewSet):
             else Response(serializer.data)
         )
 
+    # pylint: disable=no-self-use
+    @action(detail=False)
+    def updated_at(self, request):
+        ''' recommend games '''
+        updated_at = model_updated_at()
+        if not updated_at:
+            raise NotFound('unable to retrieve latest update')
+        return Response({'updated_at': updated_at})
+
 
 class PersonViewSet(PermissionsModelViewSet):
     ''' person view set '''
@@ -406,16 +420,40 @@ class MechanicViewSet(PermissionsModelViewSet):
         return Response(serializer.data)
 
 
-class UserViewSet(ModelViewSet):
+class UserViewSet(PermissionsModelViewSet):
     ''' user view set '''
 
     # pylint: disable=no-member
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    lookup_field = 'name__iexact'
+    lookup_url_kwarg = 'pk'
 
-    def get_permissions(self):
-        cls = AllowAny if settings.DEBUG else IsAuthenticated
-        return (cls(),)
+    # pylint: disable=unused-argument,invalid-name
+    @action(detail=True)
+    def stats(self, request, pk=None):
+        ''' get user stats '''
+        user = self.get_object()
+
+        rg_top_100 = user.collection_set.filter(game__rec_rank__lte=100)
+        bgg_top_100 = user.collection_set.filter(game__bgg_rank__lte=100)
+
+        data = {
+            'user': user.name,
+            'updated_at': user.updated_at,
+            'rg_top_100': {
+                'owned': rg_top_100.filter(owned=True).count(),
+                'played': rg_top_100.filter(play_count__gt=0).count(),
+                'rated': rg_top_100.filter(rating__isnull=False).count(),
+            },
+            'bgg_top_100': {
+                'owned': bgg_top_100.filter(owned=True).count(),
+                'played': bgg_top_100.filter(play_count__gt=0).count(),
+                'rated': bgg_top_100.filter(rating__isnull=False).count(),
+            },
+        }
+
+        return Response(data)
 
 
 class CollectionViewSet(ModelViewSet):

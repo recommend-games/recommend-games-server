@@ -33,6 +33,7 @@ echo 'Uploading games, persons, and recommendations to database...'
 python3 manage.py filldb \
     "${WORK_SPACE}/ludoj-data/scraped/bgg.jl" \
     --collection-paths "${WORK_SPACE}/ludoj-data/scraped/bgg_ratings.jl" \
+    --user-paths "${WORK_SPACE}/ludoj-data/scraped/bgg_users.jl" \
     --in-format jl \
     --batch 100000 \
     --recommender "${WORK_SPACE}/ludoj-recommender/.tc" \
@@ -51,7 +52,11 @@ cp --recursive \
     "${WORK_SPACE}/ludoj-recommender/.tc/compilations" \
     data/recommender/
 
-# Sync data to GCS
+# last update flag
+echo 'Creating last update flag...'
+date --utc +'%Y-%m-%dT%H:%M:%SZ' > data/updated_at
+
+# sync data to GCS
 CLOUDSDK_PYTHON='' gsutil -m -o GSUtil:parallel_composite_upload_threshold=100M \
     rsync -d -r \
     data/ "gs://${GS_BUCKET}/"
