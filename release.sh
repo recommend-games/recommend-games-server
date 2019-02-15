@@ -33,6 +33,7 @@ echo 'Uploading games, persons, and recommendations to database...'
 python3 manage.py filldb \
     "${WORK_SPACE}/ludoj-data/scraped/bgg.jl" \
     --collection-paths "${WORK_SPACE}/ludoj-data/scraped/bgg_ratings.jl" \
+    --user-paths "${WORK_SPACE}/ludoj-data/scraped/bgg_users.jl" \
     --in-format jl \
     --batch 100000 \
     --recommender "${WORK_SPACE}/ludoj-recommender/.tc" \
