@@ -207,15 +207,15 @@
 				class="form-control"
 				placeholder="Search for a game you like"
 				autocomplete="off" />
-			<div class="dropdown-menu" id="select-games-dropdown">
+			<div class="dropdown-menu mw-100 py-1" id="select-games-dropdown">
 				<a ng-repeat="game in searchGames | filter:{'name':searchLikedGames} | orderBy:['rec_rank','bgg_rank','name'] | limitTo:8"
 						ng-click="likeGame(game)"
-						class="dropdown-item"
+						class="dropdown-item text-truncate py-0"
 						href="">
 					{{ game.name_short || game.name }}
 					<small ng-if="game.year" class="text-muted">({{ game.year }})</small>
 				</a>
-				<p class="mb-0 mx-3 text-muted">
+				<p class="dropdown-item text-muted text-truncate mb-0 py-0">
 					<em>Type to search for games</em>
 				</p>
 			</div>
