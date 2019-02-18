@@ -98,6 +98,7 @@ sitepackages/
 .DS_Store
 .~*
 ._*
+*.bk
 bin/
 data/
 include/
