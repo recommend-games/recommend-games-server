@@ -6,7 +6,7 @@ from rest_framework.serializers import (
     CharField, IntegerField, ListField, ModelSerializer,
     PrimaryKeyRelatedField, StringRelatedField, URLField)
 
-from .models import Category, Collection, Game, Mechanic, Person, User
+from .models import Category, Collection, Game, GameType, Mechanic, Person, User
 
 
 class GameSerializer(ModelSerializer):
@@ -44,6 +44,15 @@ class PersonSerializer(ModelSerializer):
     class Meta:
         ''' meta '''
         model = Person
+        fields = '__all__'
+
+
+class GameTypeSerializer(ModelSerializer):
+    ''' game type serializer '''
+
+    class Meta:
+        ''' meta '''
+        model = GameType
         fields = '__all__'
 
 
