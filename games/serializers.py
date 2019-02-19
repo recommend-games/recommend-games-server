@@ -14,6 +14,7 @@ class GameSerializer(ModelSerializer):
 
     designer_name = StringRelatedField(source='designer', many=True, read_only=True)
     artist_name = StringRelatedField(source='artist', many=True, read_only=True)
+    game_type_name = StringRelatedField(source='game_type', many=True, read_only=True)
     category_name = StringRelatedField(source='category', many=True, read_only=True)
     mechanic_name = StringRelatedField(source='mechanic', many=True, read_only=True)
     contained_in = PrimaryKeyRelatedField(many=True, read_only=True)
