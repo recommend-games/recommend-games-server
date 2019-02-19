@@ -18,10 +18,10 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from .models import Category, Collection, Game, Mechanic, Person, User
+from .models import Category, Collection, Game, GameType, Mechanic, Person, User
 from .permissions import ReadOnly
 from .serializers import (
-    CategorySerializer, CollectionSerializer, GameSerializer,
+    CategorySerializer, CollectionSerializer, GameSerializer, GameTypeSerializer,
     MechanicSerializer, PersonSerializer, UserSerializer)
 from .utils import (
     arg_to_iter, load_recommender, model_updated_at,
@@ -41,6 +41,26 @@ class PermissionsModelViewSet(ModelViewSet):
         if settings.READ_ONLY and isinstance(exc, (NotAuthenticated, PermissionDenied)):
             exc = MethodNotAllowed(self.request.method)
         return super().handle_exception(exc)
+
+
+class GamesActionViewSet(PermissionsModelViewSet):
+    ''' add a games action '''
+
+    # pylint: disable=unused-argument,invalid-name
+    @action(detail=True)
+    def games(self, request, pk=None):
+        ''' find all games '''
+
+        obj = self.get_object()
+        queryset = self.filter_queryset(obj.games.all())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = GameSerializer(page, many=True, context=self.get_serializer_context())
+            return self.get_paginated_response(serializer.data)
+
+        serializer = GameSerializer(queryset, many=True, context=self.get_serializer_context())
+        return Response(serializer.data)
 
 
 def _exclude(user=None, ids=None):
@@ -372,52 +392,28 @@ class PersonViewSet(PermissionsModelViewSet):
         return Response(serializer.data)
 
 
-class CategoryViewSet(PermissionsModelViewSet):
+class GameTypeViewSet(GamesActionViewSet):
+    ''' game type view set '''
+
+    # pylint: disable=no-member
+    queryset = GameType.objects.all()
+    serializer_class = GameTypeSerializer
+
+
+class CategoryViewSet(GamesActionViewSet):
     ''' category view set '''
 
     # pylint: disable=no-member
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
-    # pylint: disable=unused-argument,invalid-name
-    @action(detail=True)
-    def games(self, request, pk=None):
-        ''' find all games in a category '''
 
-        category = self.get_object()
-        queryset = self.filter_queryset(category.games.all())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = GameSerializer(page, many=True, context=self.get_serializer_context())
-            return self.get_paginated_response(serializer.data)
-
-        serializer = GameSerializer(queryset, many=True, context=self.get_serializer_context())
-        return Response(serializer.data)
-
-
-class MechanicViewSet(PermissionsModelViewSet):
+class MechanicViewSet(GamesActionViewSet):
     ''' mechanic view set '''
 
     # pylint: disable=no-member
     queryset = Mechanic.objects.all()
     serializer_class = MechanicSerializer
-
-    # pylint: disable=unused-argument,invalid-name
-    @action(detail=True)
-    def games(self, request, pk=None):
-        ''' find all games with a mechanic '''
-
-        mechanic = self.get_object()
-        queryset = self.filter_queryset(mechanic.games.all())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = GameSerializer(page, many=True, context=self.get_serializer_context())
-            return self.get_paginated_response(serializer.data)
-
-        serializer = GameSerializer(queryset, many=True, context=self.get_serializer_context())
-        return Response(serializer.data)
 
 
 class UserViewSet(PermissionsModelViewSet):

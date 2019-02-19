@@ -6,7 +6,6 @@
 
 ludojApp.factory('gamesService', function gamesService(
     $document,
-    $localStorage,
     $log,
     $http,
     $q,
@@ -17,15 +16,10 @@ ludojApp.factory('gamesService', function gamesService(
     CANONICAL_URL,
     DEFAULT_IMAGE,
     GA_TRACKING_ID,
-    MAX_AGE_CACHE,
     SITE_DESCRIPTION
 ) {
-    if (_.isNil($localStorage.cache)) {
-        $localStorage.cache = {};
-    }
-
     var service = {},
-        cache = $localStorage.cache,
+        cache = {},
         linkedSites = ['bgg', 'bga', 'wikidata', 'wikipedia', 'luding', 'spielen'];
 
     function putCache(game, id) {
@@ -33,23 +27,14 @@ ludojApp.factory('gamesService', function gamesService(
             return;
         }
         id = id || game.bgg_id;
-        if (!id) {
-            return;
+        if (id) {
+            cache[id] = game;
         }
-        game = _.clone(game);
-        game._added = _.now() / 1000;
-        cache[id] = game;
     }
 
-    function getCache(id, maxAge) {
+    function getCache(id) {
         var game = cache[id];
-        if (_.isEmpty(game)) {
-            return null;
-        }
-        if (!maxAge) {
-            return game;
-        }
-        return (!game._added) || (game._added + maxAge < _.now() / 1000) ? null : game;
+        return !_.isEmpty(game) ? game : null;
     }
 
     service.allGames = function allGames() {
@@ -126,7 +111,7 @@ ludojApp.factory('gamesService', function gamesService(
     function processGame(game) {
         game.name_short = _.size(game.name) > 50 ? _.truncate(game.name, {'length': 50, 'separator': /,? +/}) : null;
         game.name_url = encodeURIComponent(_.toLower(game.name));
-        game.alt_name = _.without(game.alt_name, game.name);
+        game.alt_name = game.name_short ? _.uniq(_.concat(game.name, game.alt_name)) : _.without(game.alt_name, game.name);
 
         // filter out '(Uncredited)' / #3
         game.designer = _.without(game.designer, 3);
@@ -265,7 +250,7 @@ ludojApp.factory('gamesService', function gamesService(
 
     service.getGame = function getGame(id, forceRefresh, noblock) {
         id = _.parseInt(id);
-        var cached = forceRefresh ? null : getCache(id, MAX_AGE_CACHE);
+        var cached = forceRefresh ? null : getCache(id);
 
         if (!_.isEmpty(cached)) {
             return $q.resolve(cached);
@@ -580,19 +565,13 @@ ludojApp.factory('usersService', function usersService(
 
 ludojApp.factory('newsService', function newsService(
     $http,
-    $locale,
     $localStorage,
     $log,
     $q,
     $sessionStorage,
-    $window,
     API_URL
 ) {
-    var service = {},
-        locale = _.get($window, 'navigator.languages') || _.get($window, 'navigator.language') || $locale.id,
-        momentLocale = moment.locale(locale);
-
-    $log.info('trying to change Moment.js locale to', locale, ', received locale', momentLocale);
+    var service = {};
 
     $sessionStorage.news = [];
 

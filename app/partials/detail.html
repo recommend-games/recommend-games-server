@@ -53,7 +53,7 @@
 			<player-count ng-if="game" game="game"></player-count>
 			<span ng-if="game.time_string"
 					class="game-time">
-				<i class="fas fa-clock"></i> {{ game.time_string }}
+				<i class="fas fa-hourglass-half"></i> {{ game.time_string }}
 			</span>
 			<span ng-if="game.min_age_rec || game.min_age"
 					class="game-age">
@@ -78,13 +78,21 @@
 				class="{{ $first ? 'lead' : '' }}">
 			{{ description }}
 		</p>
-		<p ng-if="(game.category_name &amp;&amp; game.category_name.length) || (game.mechanic_name &amp;&amp; game.mechanic_name.length)">
+		<!-- TODO super uply – this should be done in controller -->
+		<p ng-if="(game.game_type_name &amp;&amp; game.game_type_name.length) || (game.category_name &amp;&amp; game.category_name.length) || (game.mechanic_name &amp;&amp; game.mechanic_name.length)">
+			<span ng-repeat="game_type in game.game_type_name"
+					class="badge badge-dark mr-1">
+				<i class="fas fa-user-ninja"></i>
+				{{ game_type }}
+			</span>
 			<span ng-repeat="category in game.category_name"
 					class="badge badge-secondary mr-1">
+				<i class="fas fa-scroll"></i>
 				{{ category }}
 			</span>
 			<span ng-repeat="mechanic in game.mechanic_name"
-					class="badge badge-dark mr-1">
+					class="badge badge-light mr-1">
+				<i class="fas fa-cogs"></i>
 				{{ mechanic }}
 			</span>
 		</p>
