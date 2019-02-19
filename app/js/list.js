@@ -395,11 +395,18 @@ ludojApp.controller('ListController', function ListController(
     }
 
     function unlikeGame(game) {
+        if (_.isEmpty(game)) {
+            return;
+        }
+
+        $('#like-' + game.bgg_id).tooltip('dispose');
+
         if (_.isEmpty($scope.popularGames)) {
             $scope.popularGames = [game];
         } else if (!contains($scope.popularGames, game)) {
             $scope.popularGames.push(game);
         }
+
         _.remove($scope.likedGames, function (g) {
             return g.bgg_id === game.bgg_id;
         });
