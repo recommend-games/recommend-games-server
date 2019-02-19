@@ -111,7 +111,7 @@ ludojApp.factory('gamesService', function gamesService(
     function processGame(game) {
         game.name_short = _.size(game.name) > 50 ? _.truncate(game.name, {'length': 50, 'separator': /,? +/}) : null;
         game.name_url = encodeURIComponent(_.toLower(game.name));
-        game.alt_name = _.without(game.alt_name, game.name);
+        game.alt_name = game.name_short ? _.uniq(_.concat(game.name, game.alt_name)) : _.without(game.alt_name, game.name);
 
         // filter out '(Uncredited)' / #3
         game.designer = _.without(game.designer, 3);
