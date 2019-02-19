@@ -46,7 +46,7 @@
 						name="select-games-search-form"
 						novalidate="novalidate"
 						role="form"
-						class="form form-group input-group dropdown">
+						class="form mb-1 input-group dropdown">
 					<input type="search"
 						id="select-games-search"
 						name="select-games-search"
@@ -83,13 +83,23 @@
 						</button>
 					</div>
 				</form>
-				<p class="clearfix">
+				<p class="clearfix mb-0">
 					<button type="button"
-						ng-disabled="isEmpty(likedGames)"
-						ng-click="clearUser()"
-						class="btn btn-primary float-right ml-1 mb-1">
+							ng-disabled="isEmpty(likedGames)"
+							ng-click="clearUser()"
+							class="btn btn-primary float-right ml-1 mb-1">
 						<i class="fas fa-dice"></i>
 						Recommend!
+					</button>
+					<button type="button"
+							data-toggle="collapse"
+							data-target="#selectable-games"
+							aria-expanded="false"
+							aria-controls="selectable-games"
+							class="btn btn-outline-primary btn-sm float-right ml-1 mb-1"
+							style="clear: right;">
+						<i class="fas fa-fire"></i>
+						Load popular games
 					</button>
 					<strong ng-hide="isEmpty(likedGames)">Liked games:</strong>
 					<a ng-repeat="game in likedGames"
@@ -104,9 +114,7 @@
 						{{ game.name_short || game.name }}
 					</a>
 				</p>
-				<div ng-hide="isEmpty(popularGames) &amp;&amp; !popularGamesPage"
-						class="row selectable-games mb-0">
-					<p class="col-12 mb-0"><strong>Select games you like:</strong></p>
+				<div id="selectable-games" class="collapse row selectable-games">
 					<a ng-repeat="game in popularGames"
 						game-square=""
 						game="game"
