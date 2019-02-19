@@ -356,7 +356,25 @@ ludojApp.controller('ListController', function ListController(
         return _.some(array, ['bgg_id', game.bgg_id]);
     }
 
-    function likeGame(game, noToggle) {
+    function cleanGames(games) {
+        games = _.isArray(games) ? games : [games];
+        games = _.reject(games, _.isEmpty);
+        var ids = _(games).map('bgg_id').filter().value();
+
+        _.remove($scope.popularGames, function (g) {
+            return _.includes(ids, g.bgg_id);
+        });
+
+        if (_.isEmpty($scope.popularGames)) {
+            fetchPopularGames($scope.popularGamesPage);
+        }
+
+        $timeout(function () {
+            $(_.size(ids) === 1 ? '#like-' + ids[0] : '.badge-liked-game').tooltip();
+        });
+    }
+
+    function likeGame(game, noToggle, noClean) {
         if (!noToggle && !$scope.selectionActive) {
             toggleSelection(true);
         }
@@ -371,12 +389,8 @@ ludojApp.controller('ListController', function ListController(
             $scope.likedGames.push(game);
         }
 
-        _.remove($scope.popularGames, function (g) {
-            return g.bgg_id === game.bgg_id;
-        });
-
-        if (_.isEmpty($scope.popularGames)) {
-            fetchPopularGames($scope.popularGamesPage);
+        if (!noClean) {
+            cleanGames(game);
         }
     }
 
@@ -393,8 +407,9 @@ ludojApp.controller('ListController', function ListController(
 
     function cleanLikedGames(games) {
         _.forEach(games, function (game) {
-            likeGame(game, true);
+            likeGame(game, true, true);
         });
+        cleanGames(games);
         return games;
     }
 

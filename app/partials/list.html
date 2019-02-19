@@ -94,8 +94,12 @@
 					<strong ng-hide="isEmpty(likedGames)">Liked games:</strong>
 					<a ng-repeat="game in likedGames"
 							ng-click="unlikeGame(game)"
+							id="like-{{ game.bgg_id }}"
 							href=""
-							class="badge badge-success badge-liked-game mr-1">
+							class="badge badge-success badge-liked-game mr-1"
+							title="&quot;{{ game.name }}&quot; {{ game.designer_display ? 'by ' + game.designer_display : '' }} {{ game.year ? '(' + game.year + ')' : '' }}"
+							data-toggle="tooltip"
+							data-placement="bottom">
 						<i class="fas fa-thumbs-up"></i>
 						{{ game.name_short || game.name }}
 					</a>
