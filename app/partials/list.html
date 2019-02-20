@@ -83,24 +83,25 @@
 						</button>
 					</div>
 				</form>
-				<p class="clearfix mb-0">
-					<button type="button"
-							ng-disabled="isEmpty(likedGames)"
-							ng-click="clearUser()"
-							class="btn btn-primary float-right ml-1 mb-1">
-						<i class="fas fa-dice"></i>
-						Recommend!
-					</button>
-					<button type="button"
-							data-toggle="collapse"
-							data-target="#selectable-games"
-							aria-expanded="false"
-							aria-controls="selectable-games"
-							class="btn btn-outline-primary btn-sm float-right ml-1 mb-1"
-							style="clear: right;">
-						<i class="fas fa-fire"></i>
-						Load popular games
-					</button>
+				<div class="clearfix">
+					<div class="btn-group-vertical float-right ml-1 mb-1">
+						<button type="button"
+								ng-disabled="isEmpty(likedGames)"
+								ng-click="clearUser()"
+								class="btn btn-primary">
+							<i class="fas fa-dice"></i>
+							Recommend!
+						</button>
+						<button type="button"
+								data-toggle="collapse"
+								data-target="#selectable-games"
+								aria-expanded="false"
+								aria-controls="selectable-games"
+								class="btn btn-outline-primary btn-sm">
+							<i class="fas fa-fire"></i>
+							Load popular games
+						</button>
+					</div>
 					<strong ng-hide="isEmpty(likedGames)">Liked games:</strong>
 					<a ng-repeat="game in likedGames"
 							ng-click="unlikeGame(game)"
@@ -113,7 +114,7 @@
 						<i class="fas fa-thumbs-up"></i>
 						{{ game.name_short || game.name }}
 					</a>
-				</p>
+				</div>
 				<div id="selectable-games" class="collapse row selectable-games">
 					<a ng-repeat="game in popularGames"
 						game-square=""
