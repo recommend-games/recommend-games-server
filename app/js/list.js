@@ -12,7 +12,6 @@ ludojApp.controller('ListController', function ListController(
     $route,
     $routeParams,
     $scope,
-    $sessionStorage,
     $timeout,
     filterService,
     gamesService,
@@ -21,7 +20,8 @@ ludojApp.controller('ListController', function ListController(
 ) {
     var params = filterService.getParams($routeParams),
         searchPromise = null,
-        userStats = {};
+        userStats = {},
+        fetchPopularGames;
 
     function filtersActive() {
         return _.sum([
@@ -137,7 +137,7 @@ ludojApp.controller('ListController', function ListController(
                         .append('<script type="application/ld+json">' + $filter('json')(gamesService.jsonLD(_.slice(games, 0, 10)), 0) + '</script>');
                 }
 
-                addSearchGames(games);
+                addSearchGames();
 
                 return games;
             })
@@ -317,40 +317,96 @@ ludojApp.controller('ListController', function ListController(
         $('#' + id).focus();
     };
 
-    $scope.toggleSelection = function toggleSelection() {
-        $scope.selectionActive = !$scope.selectionActive;
-        if ($scope.selectionActive) {
-            $('#select-games').collapse('show');
+    function toggleSelection(active) {
+        active = _.isBoolean(active) ? active : !$scope.selectionActive;
+        $scope.selectionActive = active;
+        if (active) {
+            // $('#select-games').collapse('show');
             $timeout(function () {
                 $('#rec-button-tooltip').tooltip('show');
             }, 1000);
         } else {
             $('.tooltip').remove();
-            $('#select-games').collapse('hide');
+            // $('#select-games').collapse('hide');
         }
+    }
+
+    function showPane(pane) {
+        $scope.activePane = pane;
+        // if (pane === 'bgg') {
+        //     $('#bgg-tab').tab('show');
+        //     toggleSelection(false);
+        // } else if (pane === 'select') {
+        //     $('#select-games-tab').tab('show');
+        //     toggleSelection(true);
+        // }
+    }
+
+    $scope.toggleSelection = toggleSelection;
+    $scope.showPane = showPane;
+
+    $scope.toggleCollapse = function toggleCollapse(target, show) {
+        if (_.isBoolean(show)) {
+            return $(target).collapse(show ? 'show' : 'hide');
+        }
+        return $(target).collapse('toggle');
     };
 
     function contains(array, game) {
         return _.some(array, ['bgg_id', game.bgg_id]);
     }
 
-    function likeGame(game) {
+    function cleanGames(games) {
+        games = _.isArray(games) ? games : [games];
+        games = _.reject(games, _.isEmpty);
+        var ids = _(games).map('bgg_id').filter().value();
+
+        _.remove($scope.popularGames, function (g) {
+            return _.includes(ids, g.bgg_id);
+        });
+
+        if (_.isEmpty($scope.popularGames)) {
+            fetchPopularGames($scope.popularGamesPage);
+        }
+
+        $timeout(function () {
+            $(_.size(ids) === 1 ? '#like-' + ids[0] : '.badge-liked-game').tooltip();
+        });
+    }
+
+    function likeGame(game, noToggle, noClean) {
+        if (!noToggle && !$scope.selectionActive) {
+            toggleSelection(true);
+        }
+
+        if (_.isEmpty(game)) {
+            return;
+        }
+
         if (_.isEmpty($scope.likedGames)) {
             $scope.likedGames = [game];
         } else if (!contains($scope.likedGames, game)) {
             $scope.likedGames.push(game);
         }
-        _.remove($scope.popularGames, function (g) {
-            return g.bgg_id === game.bgg_id;
-        });
+
+        if (!noClean) {
+            cleanGames(game);
+        }
     }
 
     function unlikeGame(game) {
+        if (_.isEmpty(game)) {
+            return;
+        }
+
+        $('#like-' + game.bgg_id).tooltip('dispose');
+
         if (_.isEmpty($scope.popularGames)) {
             $scope.popularGames = [game];
         } else if (!contains($scope.popularGames, game)) {
             $scope.popularGames.push(game);
         }
+
         _.remove($scope.likedGames, function (g) {
             return g.bgg_id === game.bgg_id;
         });
@@ -358,14 +414,13 @@ ludojApp.controller('ListController', function ListController(
 
     function cleanLikedGames(games) {
         _.forEach(games, function (game) {
-            if (game) {
-                likeGame(game);
-            }
+            likeGame(game, true, true);
         });
+        cleanGames(games);
         return games;
     }
 
-    function fetchPopularGames(page) {
+    fetchPopularGames = function fetchPopularGames(page) {
         page = _.isNumber(page) ? page : 1;
         var start = (page - 1) * 5,
             end = page * 5;
@@ -377,7 +432,7 @@ ludojApp.controller('ListController', function ListController(
                 addSearchGames(games);
                 return games;
             });
-    }
+    };
 
     function updateStats(site) {
         if (_.isEmpty(userStats[site])) {
@@ -430,13 +485,6 @@ ludojApp.controller('ListController', function ListController(
             });
 
             renderSlider();
-
-            if (params.for && !$sessionStorage.filterTooltipShown) {
-                $timeout(function () {
-                    $('#exclude-filters-button').tooltip('show');
-                    $sessionStorage.filterTooltipShown = true;
-                }, 1000);
-            }
         });
 
     fetchPopularGames(1)
@@ -454,6 +502,9 @@ ludojApp.controller('ListController', function ListController(
                 .sortBy('num_votes')
                 .reverse()
                 .value();
+            if (!params.for && !_.isEmpty(params.like)) {
+                showPane('select');
+            }
         });
 
     if (params.for) {
