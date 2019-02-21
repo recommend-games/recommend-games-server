@@ -600,7 +600,7 @@
 		</div>
 
 		<div class="form-row">
-			<div class="col-12 input-group mb-3"
+			<div class="col-md-6 input-group mb-3"
 					data-toggle="tooltip"
 					title="Display only cooperative, only competitive, or all games">
 				<div class="input-group-prepend">
@@ -618,6 +618,29 @@
 					<option selected="selected" ng-value="null">[all]</option>
 					<option value="True">only cooperative</option>
 					<option value="False">only competitive</option>
+				</select>
+			</div>
+			<div class="col-md-6 input-group mb-3"
+					data-toggle="tooltip"
+					title="TODO">
+				<div class="input-group-prepend">
+					<div class="input-group-text">
+						<label for="filter-types"
+								class="form-check-label {{ gameType ? 'text-success' : 'text-muted' }}">
+							Type:
+						</label>
+					</div>
+				</div>
+				<select name="filter-types"
+						ng-model="gameType"
+						ng-disabled="isEmpty(gameTypes)"
+						class="custom-select"
+						id="filter-types">
+					<option selected="selected" ng-value="null">[all]</option>
+					<option ng-repeat="type in gameTypes"
+							ng-value="type.bgg_id">
+						{{ type.name }}
+					</option>
 				</select>
 			</div>
 		</div>

@@ -6,6 +6,7 @@
 
 ludojApp.factory('gamesService', function gamesService(
     $document,
+    $localStorage,
     $log,
     $http,
     $q,
@@ -349,6 +350,30 @@ ludojApp.factory('gamesService', function gamesService(
                     'reason': response,
                     'status': _.get(reason, 'status')
                 });
+            });
+    };
+
+    service.getList = function getList(model, noblock) {
+        if (!_.isEmpty($localStorage[model])) {
+            return $q.resolve($localStorage[model]);
+        }
+
+        return $http.get(API_URL + model + '/', {'noblock': !!noblock})
+            .then(function (response) {
+                var results = _.get(response, 'data.results');
+
+                if (_.isEmpty(results)) {
+                    return $q.reject('Unable to load list "' + model + '".');
+                }
+
+                $localStorage[model] = results;
+                return results;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to load list "' + model + '".';
+                return $q.reject(response);
             });
     };
 
@@ -767,6 +792,7 @@ ludojApp.factory('filterService', function filterService(
             'yearMin': yearMin && yearMin > yearFloor ? yearMin : null,
             'yearMax': yearMax && yearMax <= yearNow ? yearMax : null,
             'cooperative': validateBoolean(params.cooperative),
+            'gameType': _.parseInt(params.gameType) || null,
             'ordering': user || !_.isEmpty(like) || ordering === 'rg' ? null : ordering
         };
     }
@@ -778,6 +804,7 @@ ludojApp.factory('filterService', function filterService(
             'for': scope.user,
             'search': scope.search,
             'cooperative': scope.cooperative,
+            'gameType': scope.gameType,
             'ordering': scope.ordering
         };
 
@@ -915,6 +942,10 @@ ludojApp.factory('filterService', function filterService(
 
         if (params.cooperative) {
             result.cooperative = params.cooperative;
+        }
+
+        if (params.gameType) {
+            result.game_type = params.gameType;
         }
 
         return result;

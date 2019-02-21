@@ -30,7 +30,8 @@ ludojApp.controller('ListController', function ListController(
             !!$scope.age.enabled,
             !!$scope.complexity.enabled,
             !!$scope.year.enabled,
-            !!$scope.cooperative
+            !!$scope.cooperative,
+            !!$scope.gameType
         ]);
     }
 
@@ -275,7 +276,7 @@ ludojApp.controller('ListController', function ListController(
     };
 
     $scope.cooperative = params.cooperative;
-
+    $scope.gameType = params.gameType;
     $scope.ordering = params.ordering || 'rg';
 
     $scope.fetchGames = fetchGames;
@@ -302,6 +303,7 @@ ludojApp.controller('ListController', function ListController(
         $scope.complexity.enabled = false;
         $scope.year.enabled = false;
         $scope.cooperative = null;
+        $scope.gameType = null;
         $scope.ordering = 'rg';
         updateParams();
     };
@@ -505,7 +507,14 @@ ludojApp.controller('ListController', function ListController(
             if (!params.for && !_.isEmpty(params.like)) {
                 showPane('select');
             }
-        });
+        })
+        .catch($log.error);
+
+    gamesService.getList('types', true)
+        .then(function (gameTypes) {
+            $scope.gameTypes = gameTypes;
+        })
+        .catch($log.error);
 
     if (params.for) {
         usersService.getUserStats(params.for, true)
