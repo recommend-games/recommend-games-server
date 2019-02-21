@@ -8,7 +8,7 @@ from functools import reduce
 from operator import or_
 
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Count, Q
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
@@ -401,7 +401,10 @@ class GameTypeViewSet(GamesActionViewSet):
     ''' game type view set '''
 
     # pylint: disable=no-member
-    queryset = GameType.objects.all()
+    queryset = GameType.objects \
+        .annotate(count=Count('games')) \
+        .filter(count__gt=100) \
+        .order_by('-count')
     serializer_class = GameTypeSerializer
 
 
@@ -409,7 +412,10 @@ class CategoryViewSet(GamesActionViewSet):
     ''' category view set '''
 
     # pylint: disable=no-member
-    queryset = Category.objects.all()
+    queryset = Category.objects \
+        .annotate(count=Count('games')) \
+        .filter(count__gt=5) \
+        .order_by('-count')
     serializer_class = CategorySerializer
 
 
@@ -417,7 +423,10 @@ class MechanicViewSet(GamesActionViewSet):
     ''' mechanic view set '''
 
     # pylint: disable=no-member
-    queryset = Mechanic.objects.all()
+    queryset = Mechanic.objects \
+        .annotate(count=Count('games')) \
+        .filter(count__gt=10) \
+        .order_by('-count')
     serializer_class = MechanicSerializer
 
 
