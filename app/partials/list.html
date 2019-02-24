@@ -781,33 +781,33 @@
 			</div>
 			<div class="card-body">
 				<div class="progress bg-secondary mb-1">
-					<div id="progress-bar-played"
+					<div id="progress-bar-played_pct"
 							class="progress-bar bg-success"
 							role="progressbar"
-							aria-valuenow="{{ userStats.played }}"
+							aria-valuenow="{{ userStats.played_pct }}"
 							aria-valuemin="0"
 							aria-valuemax="100">
-						<strong>&nbsp;Played: {{ userStats.played }}%&nbsp;</strong>
+						<strong>&nbsp;Played: {{ userStats.played_pct | number:0 }}%&nbsp;</strong>
 					</div>
 				</div>
 				<div class="progress bg-secondary mb-1">
-					<div id="progress-bar-owned"
+					<div id="progress-bar-owned_pct"
 							class="progress-bar bg-success"
 							role="progressbar"
-							aria-valuenow="{{ userStats.owned }}"
+							aria-valuenow="{{ userStats.owned_pct }}"
 							aria-valuemin="0"
 							aria-valuemax="100">
-						<strong>&nbsp;Owned: {{ userStats.owned }}%&nbsp;</strong>
+						<strong>&nbsp;Owned: {{ userStats.owned_pct | number:0 }}%&nbsp;</strong>
 					</div>
 				</div>
 				<div class="progress bg-secondary">
-					<div id="progress-bar-rated"
+					<div id="progress-bar-rated_pct"
 							class="progress-bar bg-success"
 							role="progressbar"
-							aria-valuenow="{{ userStats.rated }}"
+							aria-valuenow="{{ userStats.rated_pct }}"
 							aria-valuemin="0"
 							aria-valuemax="100">
-						<strong>&nbsp;Rated: {{ userStats.rated }}%&nbsp;</strong>
+						<strong>&nbsp;Rated: {{ userStats.rated_pct | number:0 }}%&nbsp;</strong>
 					</div>
 				</div>
 			</div>

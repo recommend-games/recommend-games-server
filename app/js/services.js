@@ -376,6 +376,40 @@ ludojApp.factory('gamesService', function gamesService(
             });
     };
 
+    function processStats(stats) {
+        var updatedAt = moment(stats.updated_at);
+        if (updatedAt.isValid()) {
+            stats.updated_at_str = updatedAt.calendar();
+        } else {
+            stats.updated_at = null;
+            stats.updated_at_str = null;
+        }
+        return stats;
+    }
+
+    service.getGamesStats = function getGamesStats(noblock) {
+        if (!_.isEmpty($sessionStorage.games_stats)) {
+            return $q.resolve($sessionStorage.games_stats);
+        }
+
+        return $http.get(API_URL + 'games/stats/', {'noblock': !!noblock})
+            .then(function (response) {
+                var stats = response.data;
+                if (_.isEmpty(stats)) {
+                    return $q.reject('Unable to load games stats.');
+                }
+                stats = processStats(stats);
+                $sessionStorage.games_stats = stats;
+                return stats;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to load games stats.';
+                return $q.reject(response);
+            });
+    };
+
     service.jsonLD = function jsonLD(game) {
         if (_.isArray(game)) {
             return {
@@ -526,6 +560,13 @@ ludojApp.factory('usersService', function usersService(
             stats.updated_at = null;
             stats.updated_at_str = null;
         }
+        _.forEach(['rg_top', 'bgg_top'], function (site) {
+            var total = _.get(stats, site + '.total', 0);
+            _.forEach(['owned', 'played', 'rated'], function (item) {
+                var value = _.get(stats, site + '.' + item, 0);
+                stats[site][item + '_pct'] = total ? 100 * value / total : 0;
+            });
+        });
         return stats;
     }
 
