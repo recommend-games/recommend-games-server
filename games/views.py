@@ -394,7 +394,8 @@ class GameViewSet(PermissionsModelViewSet):
                 .filter(**site_filters)
                 .order_by(site_rank)[:top_games]
                 .values_list('bgg_id', flat=True))
-            site_result = {'total': len(games)}
+            total = len(games)
+            site_result = {'total': total}
             result[site_key] = site_result
 
             for key, queryset, field, serializer_class in self.stats_models:
@@ -407,6 +408,7 @@ class GameViewSet(PermissionsModelViewSet):
                     objs, many=True, context=self.get_serializer_context())
                 for d, obj in zip(serializer.data, objs):
                     d['count'] = obj.top
+                    d['pct'] = 100 * obj.top / total if total else 0
                 site_result[key] = serializer.data
 
         return Response(result)
