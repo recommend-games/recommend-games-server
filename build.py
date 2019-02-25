@@ -123,6 +123,11 @@ def dateflag(dst=os.path.join(DATA_DIR, 'updated_at'), date=None):
         file.write(date_str)
 
 
+@task(cleandata, filldb, compressdb, cpdirs, dateflag)
+def builddb():
+    ''' build a new database '''
+
+
 @task()
 def syncdata(src=os.path.join(DATA_DIR, ''), bucket='recommend-games-data'):
     ''' sync data with GCS '''
@@ -133,7 +138,7 @@ def syncdata(src=os.path.join(DATA_DIR, ''), bucket='recommend-games-data'):
         'rsync', '-d', '-r', src, f'gs://{bucket}/')
 
 
-@task(cleandata, filldb, compressdb, cpdirs, dateflag, syncdata)
+@task(builddb, syncdata)
 def releasedb():
     ''' build and release database '''
 
@@ -181,11 +186,11 @@ def collectstatic(delete=True):
 
 
 @task(collectstatic)
-def builddocker(images=None, tags=None):
+def buildserver(images=None, tags=None):
     ''' build Docker image '''
 
     images = images or ('ludoj-server', f'gcr.io/{GC_PROJECT}/ludoj-server')
-    tags = tags or ('latest', f'v{_server_version()}')
+    tags = tags or ('latest', _server_version())
     all_tags = [f'{i}:{t}' for i in images if i for t in tags if t]
 
     LOGGER.info('Building Docker image with tags %s...', all_tags)
@@ -197,6 +202,40 @@ def builddocker(images=None, tags=None):
 
     with safe_cd(BASE_DIR):
         execute(*command)
+
+
+@task()
+def pushserver(image=None, version=None):
+    ''' push Docker image to remote repo '''
+    image = image or f'gcr.io/{GC_PROJECT}/ludoj-server'
+    version = version or _server_version()
+    LOGGER.info('Pushing Docker image <%s:%s> to repo...', image, version)
+    execute('docker', 'push', f'{image}:{version}')
+
+
+@task(buildserver, pushserver)
+def releaseserver(image=None, version=None):
+    ''' build, push, and deploy new server version '''
+    image = image or f'gcr.io/{GC_PROJECT}/ludoj-server'
+    version = version or _server_version()
+    LOGGER.info('Deploying server v%s...', version)
+    execute(
+        'gcloud', 'app', 'deploy',
+        '--project', GC_PROJECT,
+        '--image-url', f'{image}:{version}',
+        '--version', version,
+        '--promote',
+        '--quiet')
+
+
+@task(builddb, buildserver)
+def build():
+    ''' build database and server '''
+
+
+@task(releasedb, releaseserver)
+def release():
+    ''' release database and server '''
 
 
 @task()
