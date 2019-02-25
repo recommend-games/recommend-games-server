@@ -11,10 +11,12 @@ import django
 from dotenv import load_dotenv
 from pynt import task
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 load_dotenv(verbose=True)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ludoj.settings')
-os.environ.setdefault('PYTHONPATH', '.')
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+os.environ.setdefault('PYTHONPATH', BASE_DIR)
+sys.path.insert(0, BASE_DIR)
 django.setup()
 
 
