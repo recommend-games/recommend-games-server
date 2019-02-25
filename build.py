@@ -12,7 +12,7 @@ import django
 
 from dotenv import load_dotenv
 from pynt import task
-from pyntcontrib import execute # safe_cd
+from pyntcontrib import execute, safe_cd
 
 from games.utils import parse_date, serialize_date
 
@@ -122,4 +122,17 @@ def releasedb():
     ''' build and release database '''
 
 
-# __DEFAULT__ = command
+@task()
+def lintpy(*modules):
+    ''' lint Python files '''
+    modules = modules or ('ludoj', 'games', 'build', 'manage')
+    with safe_cd(BASE_DIR):
+        execute('pylint', '--exit-zero', *modules)
+
+
+@task(lintpy)
+def lint():
+    ''' lint everything '''
+
+
+__DEFAULT__ = lint
