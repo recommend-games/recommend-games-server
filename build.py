@@ -180,6 +180,31 @@ def collectstatic(delete=True):
         shutil.rmtree(static_dir, ignore_errors=True)
 
 
+@task(collectstatic)
+def builddocker(images=None, tags=None):
+    ''' build Docker image '''
+
+    images = images or ('ludoj-server', f'gcr.io/{GC_PROJECT}/ludoj-server')
+    tags = tags or ('latest', f'v{_server_version()}')
+    all_tags = [f'{i}:{t}' for i in images if i for t in tags if t]
+
+    LOGGER.info('Building Docker image with tags %s...', all_tags)
+
+    command = ['docker', 'build']
+    for tag in all_tags:
+        command.extend(('--tag', tag))
+    command.append('.')
+
+    with safe_cd(BASE_DIR):
+        execute(*command)
+
+
+@task()
+def lintshell(base_dir=BASE_DIR):
+    ''' lint Shell scripts '''
+    execute('find', base_dir, '-name', '*.sh', '-ls', '-exec', 'shellcheck', '{}', ';')
+
+
 @task()
 def lintpy(*modules):
     ''' lint Python files '''
@@ -211,7 +236,7 @@ def lintcss():
         execute('csslint', 'app.css')
 
 
-@task(lintpy, linthtml, lintjs, lintcss)
+@task(lintshell, lintpy, linthtml, lintjs, lintcss)
 def lint():
     ''' lint everything '''
 
