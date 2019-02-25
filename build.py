@@ -14,8 +14,6 @@ from dotenv import load_dotenv
 from pynt import task
 from pyntcontrib import execute, safe_cd
 
-from games.utils import parse_date, serialize_date
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 load_dotenv(verbose=True)
@@ -23,6 +21,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ludoj.settings')
 os.environ.setdefault('PYTHONPATH', BASE_DIR)
 sys.path.insert(0, BASE_DIR)
 django.setup()
+
+from games.utils import parse_date, serialize_date
 
 LOGGER = logging.getLogger(__name__)
 SETTINGS = django.conf.settings
@@ -130,7 +130,30 @@ def lintpy(*modules):
         execute('pylint', '--exit-zero', *modules)
 
 
-@task(lintpy)
+@task()
+def linthtml():
+    ''' lint HTML files '''
+    with safe_cd(os.path.join(BASE_DIR, 'app')):
+        execute('htmlhint', '--ignore', 'google*.html,yandex*.html')
+        # execute('htmllint')
+
+
+@task()
+def lintjs():
+    ''' lint JavaScript files '''
+    with safe_cd(os.path.join(BASE_DIR, 'app')):
+        execute('jslint', 'js/*.js')
+        execute('jshint', 'js')
+
+
+@task()
+def lintcss():
+    ''' lint JavaScript files '''
+    with safe_cd(os.path.join(BASE_DIR, 'app')):
+        execute('csslint', 'app.css')
+
+
+@task(lintpy, linthtml, lintjs, lintcss)
 def lint():
     ''' lint everything '''
 
