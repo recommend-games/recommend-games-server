@@ -21,9 +21,12 @@ whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
 ipython = "*"
+ludoj-scraper = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-scraper.git"}
 lxml = "*"
 mypy = "*"
 pylint = "*"
+pynt = "*"
+pynt-contrib = "*"
 pytest = "*"
 python-dotenv = "*"
 rcssmin = "*"
