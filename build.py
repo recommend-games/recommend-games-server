@@ -19,6 +19,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(verbose=True)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ludoj.settings')
 os.environ.setdefault('PYTHONPATH', BASE_DIR)
+os.environ['DEBUG'] = ''
 sys.path.insert(0, BASE_DIR)
 django.setup()
 
@@ -27,6 +28,15 @@ from games.utils import parse_date, serialize_date
 LOGGER = logging.getLogger(__name__)
 SETTINGS = django.conf.settings
 DATA_DIR = SETTINGS.DATA_DIR
+SCRAPER_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'ludoj-scraper'))
+RECOMMENDER_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'ludoj-scraper'))
+SCRAPED_DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'ludoj-data'))
+
+logging.basicConfig(
+    stream=sys.stderr,
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s',
+)
 
 
 @task()
@@ -48,13 +58,14 @@ def cleandata(src_dir=DATA_DIR, bk_dir=f'{DATA_DIR}.bk'):
 @task()
 def migrate():
     ''' database migration '''
+    assert not SETTINGS.DEBUG
     django.core.management.call_command('migrate')
 
 
 @task(cleandata, migrate)
 def filldb(
-        src_dir=os.path.join(BASE_DIR, '..', 'ludoj-data'),
-        rec_dir=os.path.join(BASE_DIR, '..', 'ludoj-recommender', '.tc'),
+        src_dir=SCRAPED_DATA_DIR,
+        rec_dir=os.path.join(RECOMMENDER_DIR, '.tc'),
     ):
     ''' fill database '''
 
@@ -84,7 +95,7 @@ def compressdb(db_file=os.path.join(DATA_DIR, 'db.sqlite3')):
 
 @task()
 def cpdirs(
-        src_dir=os.path.join(BASE_DIR, '..', 'ludoj-recommender', '.tc'),
+        src_dir=os.path.join(RECOMMENDER_DIR, '.tc'),
         dst_dir=os.path.join(DATA_DIR, 'recommender'),
         sub_dirs=('recommender', 'similarity', 'clusters', 'compilations'),
     ):
