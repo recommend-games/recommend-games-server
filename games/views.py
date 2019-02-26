@@ -188,18 +188,18 @@ class GameViewSet(PermissionsModelViewSet):
         'owned',
     )
 
-    stats_sites = (
-        ('rg_top', 'rec_rank'),
-        ('bgg_top', 'bgg_rank'),
-    )
+    stats_sites = {
+        'rg_top': 'rec_rank',
+        'bgg_top': 'bgg_rank',
+    }
 
-    stats_models = (
-        ('designer', Person.objects.exclude(bgg_id=3), 'designer_of', PersonSerializer),
-        ('artist', Person.objects.exclude(bgg_id=3), 'artist_of', PersonSerializer),
-        ('game_type', GameType.objects.all(), 'games', GameTypeSerializer),
-        ('category', Category.objects.all(), 'games', CategorySerializer),
-        ('mechanic', Mechanic.objects.all(), 'games', MechanicSerializer),
-    )
+    stats_models = {
+        'designer': (Person.objects.exclude(bgg_id=3), 'designer_of', PersonSerializer),
+        'artist': (Person.objects.exclude(bgg_id=3), 'artist_of', PersonSerializer),
+        'game_type': (GameType.objects.all(), 'games', GameTypeSerializer),
+        'category': (Category.objects.all(), 'games', CategorySerializer),
+        'mechanic': (Mechanic.objects.all(), 'games', MechanicSerializer),
+    }
 
     def _excluded_games(self, user, params):
         params = params or {}
@@ -387,7 +387,7 @@ class GameViewSet(PermissionsModelViewSet):
         top_games = next(_parse_ints(request.query_params.get('top_games')), 100)
         top_items = next(_parse_ints(request.query_params.get('top_items')), 10)
 
-        for site_key, site_rank in self.stats_sites:
+        for site_key, site_rank in self.stats_sites.items():
             site_filters = {f'{site_rank}__isnull': False}
             games = frozenset(
                 self.filter_queryset(self.get_queryset())
@@ -398,7 +398,7 @@ class GameViewSet(PermissionsModelViewSet):
             site_result = {'total': total}
             result[site_key] = site_result
 
-            for key, queryset, field, serializer_class in self.stats_models:
+            for key, (queryset, field, serializer_class) in self.stats_models.items():
                 filters = {f'{field}__in': games}
                 objs = (
                     queryset.annotate(top=Count(field, filter=Q(**filters)))
@@ -487,7 +487,7 @@ class UserViewSet(PermissionsModelViewSet):
 
         top_games = next(_parse_ints(request.query_params.get('top_games')), 100)
 
-        for key, rank in self.stats_sites:
+        for key, rank in self.stats_sites.items():
             games = frozenset(
                 Game.objects
                 .filter(**{f'{rank}__lte': top_games})
