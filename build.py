@@ -25,8 +25,6 @@ os.environ['DEBUG'] = ''
 sys.path.insert(0, BASE_DIR)
 django.setup()
 
-from games.utils import parse_bool, parse_date, parse_int, serialize_date
-
 LOGGER = logging.getLogger(__name__)
 SETTINGS = django.conf.settings
 DATA_DIR = SETTINGS.DATA_DIR
@@ -42,13 +40,31 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s',
 )
 
-# TODO: sync and merge scraped files, retrain recommender
+# TODO: merge scraped files, retrain recommender
 
 @lru_cache(maxsize=8)
 def _server_version(path=os.path.join(BASE_DIR, 'VERSION')):
     with open(path) as file:
         version = file.read()
     return version.strip()
+
+
+@task()
+def rsync(
+        host='ludoj-hq',
+        port=2222,
+        src=os.path.join(SCRAPER_DIR, 'feeds', ''),
+        dst=os.path.join(SCRAPER_DIR, 'feeds', ''),
+    ):
+    ''' sync remote files '''
+    LOGGER.info('Syncing with <%s:%d> from <%s> to <%s>...', host, port, src, dst)
+    os.makedirs(dst, exist_ok=True)
+    execute(
+        'rsync', '--archive',
+        '--verbose', '--human-readable', '--progress',
+        '--rsh', f'ssh -p {port}',
+        f'{host}:{src}', dst,
+    )
 
 
 @task()
@@ -116,6 +132,7 @@ def cpdirs(
 @task()
 def dateflag(dst=os.path.join(DATA_DIR, 'updated_at'), date=None):
     ''' write date to file '''
+    from games.utils import parse_date, serialize_date
     date = parse_date(date) or django.utils.timezone.now()
     date_str = serialize_date(date, tzinfo=django.utils.timezone.utc)
     LOGGER.info('Writing date <%s> to <%s>...', date_str, dst)
@@ -163,6 +180,7 @@ def minify(src=os.path.join(BASE_DIR, 'app'), dst=os.path.join(BASE_DIR, '.temp'
 @task()
 def sitemap(url=URL_LIVE, dst=os.path.join(BASE_DIR, '.temp', 'sitemap.xml'), limit=50_000):
     ''' generate sitemap.xml '''
+    from games.utils import parse_int
     limit = parse_int(limit) or 50_000
     LOGGER.info('Generating sitemap with URL <%s> to <%s>, limit to %d...', url, dst, limit)
     django.core.management.call_command('sitemap', url=url, limit=limit, output=dst)
@@ -171,6 +189,8 @@ def sitemap(url=URL_LIVE, dst=os.path.join(BASE_DIR, '.temp', 'sitemap.xml'), li
 @task(cleanstatic, minify, sitemap)
 def collectstatic(delete=True):
     ''' generate sitemap.xml '''
+
+    from games.utils import parse_bool
     assert not SETTINGS.DEBUG
 
     static_dirs = SETTINGS.STATICFILES_DIRS
