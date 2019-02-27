@@ -51,6 +51,8 @@ class PersonSerializer(ModelSerializer):
 class GameTypeSerializer(ModelSerializer):
     ''' game type serializer '''
 
+    count = IntegerField(read_only=True)
+
     class Meta:
         ''' meta '''
         model = GameType
@@ -60,6 +62,8 @@ class GameTypeSerializer(ModelSerializer):
 class CategorySerializer(ModelSerializer):
     ''' category serializer '''
 
+    count = IntegerField(read_only=True)
+
     class Meta:
         ''' meta '''
         model = Category
@@ -68,6 +72,8 @@ class CategorySerializer(ModelSerializer):
 
 class MechanicSerializer(ModelSerializer):
     ''' mechanic serializer '''
+
+    count = IntegerField(read_only=True)
 
     class Meta:
         ''' meta '''
