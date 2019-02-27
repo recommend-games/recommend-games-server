@@ -622,7 +622,7 @@
 			</div>
 			<div class="col-md-6 input-group mb-3"
 					data-toggle="tooltip"
-					title="TODO">
+					title="Filter by game type">
 				<div class="input-group-prepend">
 					<div class="input-group-text">
 						<label for="filter-types"
@@ -640,6 +640,55 @@
 					<option ng-repeat="type in gameTypes"
 							ng-value="type.bgg_id">
 						{{ type.name }}
+					</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="form-row">
+			<div class="col-md-6 input-group mb-3"
+					data-toggle="tooltip"
+					title="Filter by category">
+				<div class="input-group-prepend">
+					<div class="input-group-text">
+						<label for="filter-categories"
+								class="form-check-label {{ category ? 'text-success' : 'text-muted' }}">
+							Category:
+						</label>
+					</div>
+				</div>
+				<select name="filter-categories"
+						ng-model="category"
+						ng-disabled="isEmpty(categories)"
+						class="custom-select"
+						id="filter-categories">
+					<option selected="selected" ng-value="null">[all]</option>
+					<option ng-repeat="cat in categories"
+							ng-value="cat.bgg_id">
+						{{ cat.name }}
+					</option>
+				</select>
+			</div>
+			<div class="col-md-6 input-group mb-3"
+					data-toggle="tooltip"
+					title="Filter by mechanic">
+				<div class="input-group-prepend">
+					<div class="input-group-text">
+						<label for="filter-mechanics"
+								class="form-check-label {{ mechanic ? 'text-success' : 'text-muted' }}">
+							Mechanic:
+						</label>
+					</div>
+				</div>
+				<select name="filter-mechanics"
+						ng-model="mechanic"
+						ng-disabled="isEmpty(mechanics)"
+						class="custom-select"
+						id="filter-mechanics">
+					<option selected="selected" ng-value="null">[all]</option>
+					<option ng-repeat="mec in mechanics"
+							ng-value="mec.bgg_id">
+						{{ mec.name }}
 					</option>
 				</select>
 			</div>

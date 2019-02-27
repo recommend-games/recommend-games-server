@@ -793,6 +793,8 @@ ludojApp.factory('filterService', function filterService(
             'yearMax': yearMax && yearMax <= yearNow ? yearMax : null,
             'cooperative': validateBoolean(params.cooperative),
             'gameType': _.parseInt(params.gameType) || null,
+            'category': _.parseInt(params.category) || null,
+            'mechanic': _.parseInt(params.mechanic) || null,
             'ordering': user || !_.isEmpty(like) || ordering === 'rg' ? null : ordering
         };
     }
@@ -805,6 +807,8 @@ ludojApp.factory('filterService', function filterService(
             'search': scope.search,
             'cooperative': scope.cooperative,
             'gameType': scope.gameType,
+            'category': scope.category,
+            'mechanic': scope.mechanic,
             'ordering': scope.ordering
         };
 
@@ -946,6 +950,14 @@ ludojApp.factory('filterService', function filterService(
 
         if (params.gameType) {
             result.game_type = params.gameType;
+        }
+
+        if (params.category) {
+            result.category = params.category;
+        }
+
+        if (params.mechanic) {
+            result.mechanic = params.mechanic;
         }
 
         return result;

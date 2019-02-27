@@ -31,7 +31,9 @@ ludojApp.controller('ListController', function ListController(
             !!$scope.complexity.enabled,
             !!$scope.year.enabled,
             !!$scope.cooperative,
-            !!$scope.gameType
+            !!$scope.gameType,
+            !!$scope.category,
+            !!$scope.mechanic
         ]);
     }
 
@@ -277,6 +279,8 @@ ludojApp.controller('ListController', function ListController(
 
     $scope.cooperative = params.cooperative;
     $scope.gameType = params.gameType;
+    $scope.category = params.category;
+    $scope.mechanic = params.mechanic;
     $scope.ordering = params.ordering || 'rg';
 
     $scope.fetchGames = fetchGames;
@@ -304,6 +308,8 @@ ludojApp.controller('ListController', function ListController(
         $scope.year.enabled = false;
         $scope.cooperative = null;
         $scope.gameType = null;
+        $scope.category = null;
+        $scope.mechanic = null;
         $scope.ordering = 'rg';
         updateParams();
     };
@@ -513,6 +519,18 @@ ludojApp.controller('ListController', function ListController(
     gamesService.getList('types', true)
         .then(function (gameTypes) {
             $scope.gameTypes = gameTypes;
+        })
+        .catch($log.error);
+
+    gamesService.getList('categories', true)
+        .then(function (categories) {
+            $scope.categories = categories;
+        })
+        .catch($log.error);
+
+    gamesService.getList('mechanics', true)
+        .then(function (mechanics) {
+            $scope.mechanics = mechanics;
         })
         .catch($log.error);
 
