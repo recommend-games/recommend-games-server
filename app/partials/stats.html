@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<section xmlns="http://www.w3.org/1999/xhtml"
+		id="ludoj-stats">
+	<h1>Statistics</h1>
+	<p class="lead">
+		TODO.
+	</p>
+	<ol ng-if="data.rg_top.designer">
+		<li ng-repeat="designer in data.rg_top.designer">{{ designer.name }} ({{ designer.count }} games)</li>
+	</ol>
+</section>
