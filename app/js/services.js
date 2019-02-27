@@ -352,21 +352,38 @@ ludojApp.factory('gamesService', function gamesService(
             });
     };
 
+    function processDate(data, field) {
+        field = field || 'updated_at';
+
+        if (_.isEmpty(data)) {
+            data = {};
+            data[field] = null;
+            data[field + '_str'] = null;
+            return data;
+        }
+
+        var date = moment(_.get(data, field));
+        data[field + '_str'] = date.isValid() ? date.calendar() : null;
+        return data;
+    }
+
     service.getModelUpdatedAt = function getModelUpdatedAt(noblock) {
         if (!_.isEmpty($sessionStorage.model_updated_at)) {
             return $q.resolve($sessionStorage.model_updated_at);
         }
 
+        if (!_.isEmpty(_.get($sessionStorage, 'games_stats.updated_at_str'))) {
+            return $q.resolve($sessionStorage.games_stats.updated_at_str);
+        }
+
         return $http.get(API_URL + 'games/updated_at/', {'noblock': !!noblock})
             .then(function (response) {
-                var updatedAt = moment(_.get(response, 'data.updated_at')),
-                    updatedAtStr;
-                if (!updatedAt.isValid()) {
+                var data = processDate(response.data, 'updated_at');
+                if (!data.updated_at_str) {
                     return $q.reject('Unable to retrieve last update.');
                 }
-                updatedAtStr = updatedAt.calendar();
-                $sessionStorage.model_updated_at = updatedAtStr;
-                return updatedAtStr;
+                $sessionStorage.model_updated_at = data.updated_at_str;
+                return data.updated_at_str;
             })
             .catch(function (reason) {
                 $log.error('There has been an error', reason);
@@ -377,14 +394,7 @@ ludojApp.factory('gamesService', function gamesService(
     };
 
     function processStats(stats) {
-        var updatedAt = moment(stats.updated_at);
-        if (updatedAt.isValid()) {
-            stats.updated_at_str = updatedAt.calendar();
-        } else {
-            stats.updated_at = null;
-            stats.updated_at_str = null;
-        }
-        return stats;
+        return processDate(stats, 'updated_at');
     }
 
     service.getGamesStats = function getGamesStats(noblock) {
