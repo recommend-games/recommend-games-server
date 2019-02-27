@@ -8,6 +8,7 @@ import os
 import shutil
 import sys
 
+from datetime import timedelta
 from functools import lru_cache
 
 import django
@@ -36,7 +37,7 @@ GC_PROJECT = 'recommend-games'
 
 logging.basicConfig(
     stream=sys.stderr,
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s',
 )
 
@@ -47,6 +48,13 @@ def _server_version(path=os.path.join(BASE_DIR, 'VERSION')):
     with open(path) as file:
         version = file.read()
     return version.strip()
+
+
+def _remove(path):
+    try:
+        os.remove(path)
+    except OSError:
+        shutil.rmtree(path, ignore_errors=True)
 
 
 @task()
@@ -65,6 +73,61 @@ def rsync(
         '--rsh', f'ssh -p {port}',
         f'{host}:{src}', dst,
     )
+
+
+@task()
+def merge(in_paths, out_path, **kwargs):
+    ''' merge scraped files '''
+    from ludoj_scraper.merge import merge_files
+    from ludoj_scraper.utils import now
+
+    kwargs.setdefault('log_level', 'WARN')
+    out_path = out_path.format(date=now().strftime('%Y-%m-%dT%H-%M-%S'))
+
+    LOGGER.info('Merging files <%s> into <%s> with args %r...', in_paths, out_path, kwargs)
+
+    _remove(out_path)
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+
+    merge_files(
+        in_paths=in_paths,
+        out_path=out_path,
+        **kwargs,
+    )
+
+
+def _merge_kwargs(site, in_paths=None, out_path=None, full=False):
+    from ludoj_scraper.utils import now, parse_bool, parse_date, to_str
+
+    kwargs = {
+        'in_paths': in_paths or os.path.join(SCRAPER_DIR, 'feeds', site, 'GameItem', '*'),
+        'keys': (f'{site}_id',),
+        'key_parsers': (to_str,),
+        'latest': ('scraped_at',),
+        'latest_parsers': (parse_date,),
+        'latest_min': now() - timedelta(days=30),
+        'concat_output': True,
+    }
+
+    if parse_bool(full):
+        kwargs['out_path'] = out_path or os.path.join(
+            SCRAPER_DIR, 'feeds', site, 'GameItem', '{date}_merged.jl')
+
+    else:
+        kwargs['out_path'] = out_path or os.path.join(SCRAPED_DATA_DIR, 'scraped', f'{site}.jl')
+        kwargs['fieldnames_exclude'] = (
+            'image_file', 'rules_file', 'published_at', 'updated_at', 'scraped_at')
+        kwargs['sort_output'] = True
+
+    # TODO site specific settings
+
+    return kwargs
+
+
+@task()
+def mergebga(in_paths=None, out_path=None, full=False):
+    ''' merge Board Game Atlas game data '''
+    merge(**_merge_kwargs(site='bga', in_paths=in_paths, out_path=out_path, full=full))
 
 
 @task()
