@@ -99,12 +99,12 @@ def merge(in_paths, out_path, **kwargs):
 
 
 def _merge_kwargs(site, in_paths=None, out_path=None, full=False):
-    from ludoj_scraper.utils import now, parse_bool, parse_date, to_str
+    from ludoj_scraper.utils import now, parse_bool, parse_date, parse_int, to_str
 
     kwargs = {
         'in_paths': in_paths or os.path.join(SCRAPER_DIR, 'feeds', site, 'GameItem', '*'),
         'keys': (f'{site}_id',),
-        'key_parsers': (to_str,),
+        'key_parsers': (parse_int,) if site in ('bgg', 'luding') else (to_str,),
         'latest': ('scraped_at',),
         'latest_parsers': (parse_date,),
         'latest_min': now() - timedelta(days=30),
@@ -121,8 +121,6 @@ def _merge_kwargs(site, in_paths=None, out_path=None, full=False):
             'image_file', 'rules_file', 'published_at', 'updated_at', 'scraped_at')
         kwargs['sort_output'] = True
 
-    # TODO site specific settings
-
     return kwargs
 
 
@@ -130,6 +128,36 @@ def _merge_kwargs(site, in_paths=None, out_path=None, full=False):
 def mergebga(in_paths=None, out_path=None, full=False):
     ''' merge Board Game Atlas game data '''
     merge(**_merge_kwargs(site='bga', in_paths=in_paths, out_path=out_path, full=full))
+
+
+@task()
+def mergebgg(in_paths=None, out_path=None, full=False):
+    ''' merge BoardGameGeek game data '''
+    merge(**_merge_kwargs(site='bgg', in_paths=in_paths, out_path=out_path, full=full))
+
+
+@task()
+def mergedbpedia(in_paths=None, out_path=None, full=False):
+    ''' merge DBpedia game data '''
+    merge(**_merge_kwargs(site='dbpedia', in_paths=in_paths, out_path=out_path, full=full))
+
+
+@task()
+def mergeluding(in_paths=None, out_path=None, full=False):
+    ''' merge Luding.org game data '''
+    merge(**_merge_kwargs(site='luding', in_paths=in_paths, out_path=out_path, full=full))
+
+
+@task()
+def mergespielen(in_paths=None, out_path=None, full=False):
+    ''' merge Spielen.de game data '''
+    merge(**_merge_kwargs(site='spielen', in_paths=in_paths, out_path=out_path, full=full))
+
+
+@task()
+def mergewikidata(in_paths=None, out_path=None, full=False):
+    ''' merge Wikidata game data '''
+    merge(**_merge_kwargs(site='wikidata', in_paths=in_paths, out_path=out_path, full=full))
 
 
 @task()
