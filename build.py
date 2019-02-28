@@ -65,6 +65,8 @@ def rsync(
         dst=os.path.join(SCRAPER_DIR, 'feeds', ''),
     ):
     ''' sync remote files '''
+    from games.utils import parse_int
+    port = parse_int(port)
     LOGGER.info('Syncing with <%s:%d> from <%s> to <%s>...', host, port, src, dst)
     os.makedirs(dst, exist_ok=True)
     execute(
