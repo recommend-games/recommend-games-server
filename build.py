@@ -98,28 +98,28 @@ def merge(in_paths, out_path, **kwargs):
     )
 
 
-def _merge_kwargs(site, in_paths=None, out_path=None, full=False):
+def _merge_kwargs(site, item='GameItem', in_paths=None, out_path=None, full=False, **kwargs):
     from ludoj_scraper.utils import now, parse_bool, parse_date, parse_int, to_str
 
-    kwargs = {
-        'in_paths': in_paths or os.path.join(SCRAPER_DIR, 'feeds', site, 'GameItem', '*'),
-        'keys': (f'{site}_id',),
-        'key_parsers': (parse_int,) if site in ('bgg', 'luding') else (to_str,),
-        'latest': ('scraped_at',),
-        'latest_parsers': (parse_date,),
-        'latest_min': now() - timedelta(days=30),
-        'concat_output': True,
-    }
+    kwargs['in_paths'] = in_paths or os.path.join(SCRAPER_DIR, 'feeds', site, item, '*')
+    kwargs.setdefault('keys', (f'{site}_id',))
+    kwargs.setdefault('key_parsers', (parse_int,) if site in ('bgg', 'luding') else (to_str,))
+    kwargs.setdefault('latest', ('scraped_at',))
+    kwargs.setdefault('latest_parsers', (parse_date,))
+    kwargs.setdefault('latest_min', now() - timedelta(days=30))
+    kwargs.setdefault('concat_output', True)
 
     if parse_bool(full):
         kwargs['out_path'] = out_path or os.path.join(
-            SCRAPER_DIR, 'feeds', site, 'GameItem', '{date}_merged.jl')
+            SCRAPER_DIR, 'feeds', site, item, '{date}_merged.jl')
 
     else:
-        kwargs['out_path'] = out_path or os.path.join(SCRAPED_DATA_DIR, 'scraped', f'{site}.jl')
-        kwargs['fieldnames_exclude'] = (
-            'image_file', 'rules_file', 'published_at', 'updated_at', 'scraped_at')
-        kwargs['sort_output'] = True
+        kwargs['out_path'] = out_path or os.path.join(
+            SCRAPED_DATA_DIR, 'scraped', f'{site}_{item}.jl')
+        kwargs.setdefault(
+            'fieldnames_exclude',
+            ('image_file', 'rules_file', 'published_at', 'updated_at', 'scraped_at'))
+        kwargs.setdefault('sort_output', True)
 
     return kwargs
 
@@ -134,6 +134,39 @@ def mergebga(in_paths=None, out_path=None, full=False):
 def mergebgg(in_paths=None, out_path=None, full=False):
     ''' merge BoardGameGeek game data '''
     merge(**_merge_kwargs(site='bgg', in_paths=in_paths, out_path=out_path, full=full))
+
+
+@task()
+def mergebggusers(in_paths=None, out_path=None, full=False):
+    ''' merge BoardGameGeek user data '''
+    from ludoj_scraper.merge import _to_lower # TODO rename private function
+    from ludoj_scraper.utils import parse_bool
+    merge(**_merge_kwargs(
+        site='bgg',
+        item='UserItem',
+        in_paths=in_paths,
+        out_path=out_path,
+        full=full,
+        keys=('bgg_user_name',),
+        key_parsers=(_to_lower,),
+        fieldnames_exclude=None if parse_bool(full) else ('published_at', 'scraped_at'),
+    ))
+
+
+@task()
+def mergebggratings(in_paths=None, out_path=None, full=False):
+    ''' merge BoardGameGeek rating data '''
+    from ludoj_scraper.merge import _to_lower # TODO rename private function
+    from ludoj_scraper.utils import parse_int
+    merge(**_merge_kwargs(
+        site='bgg',
+        item='RatingItem',
+        in_paths=in_paths,
+        out_path=out_path,
+        full=full,
+        keys=('bgg_user_name', 'bgg_id'),
+        key_parsers=(_to_lower, parse_int),
+    ))
 
 
 @task()
@@ -158,6 +191,34 @@ def mergespielen(in_paths=None, out_path=None, full=False):
 def mergewikidata(in_paths=None, out_path=None, full=False):
     ''' merge Wikidata game data '''
     merge(**_merge_kwargs(site='wikidata', in_paths=in_paths, out_path=out_path, full=full))
+
+
+@task()
+def mergenews(
+        in_paths=(
+            os.path.join(SCRAPER_DIR, 'feeds', 'news', '*.jl'),
+            os.path.join(SCRAPER_DIR, 'feeds', 'news', '*', '*', '*.jl')),
+        out_path=None,
+    ):
+    ''' merge news articles '''
+    from ludoj_scraper.utils import parse_date
+    merge(**_merge_kwargs(
+        site='news',
+        item='ArticleItem',
+        in_paths=in_paths,
+        out_path=out_path,
+        keys=('article_id'),
+        latest=('published_at', 'scraped_at'),
+        latest_parsers=(parse_date, parse_date),
+        latest_min=None,
+        fieldnames=(
+            'article_id', 'url_canonical', 'url_mobile', 'url_amp', 'url_thumbnail',
+            'published_at', 'title_full', 'title_short', 'author', 'description', 'summary',
+            'category', 'keyword', 'section_inferred', 'country', 'language', 'source_name'),
+        fieldnames_exclude=None,
+        sort_output=False,
+        sort_latest='desc',
+    ))
 
 
 @task()
