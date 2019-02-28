@@ -221,6 +221,18 @@ def mergenews(
     ))
 
 
+@task(
+    mergebga, mergebgg, mergedbpedia, mergeluding, mergespielen,
+    mergewikidata, mergenews, mergebggusers, mergebggratings)
+def mergeall():
+    ''' merge all sites and items '''
+
+
+@task(rsync, mergeall)
+def rsyncandmerge():
+    ''' sync and merge everything '''
+
+
 @task()
 def cleandata(src_dir=DATA_DIR, bk_dir=f'{DATA_DIR}.bk'):
     ''' clean data file '''
