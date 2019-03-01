@@ -41,7 +41,7 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s',
 )
 
-# TODO: merge scraped files, retrain recommender
+# TODO: retrain recommender
 
 @lru_cache(maxsize=8)
 def _server_version(path=os.path.join(BASE_DIR, 'VERSION')):
@@ -139,8 +139,7 @@ def mergebgg(in_paths=None, out_path=None, full=False):
 @task()
 def mergebggusers(in_paths=None, out_path=None, full=False):
     ''' merge BoardGameGeek user data '''
-    from ludoj_scraper.merge import _to_lower # TODO rename private function
-    from ludoj_scraper.utils import parse_bool
+    from ludoj_scraper.utils import parse_bool, to_lower
     merge(**_merge_kwargs(
         site='bgg',
         item='UserItem',
@@ -148,7 +147,7 @@ def mergebggusers(in_paths=None, out_path=None, full=False):
         out_path=out_path,
         full=full,
         keys=('bgg_user_name',),
-        key_parsers=(_to_lower,),
+        key_parsers=(to_lower,),
         fieldnames_exclude=None if parse_bool(full) else ('published_at', 'scraped_at'),
     ))
 
@@ -156,8 +155,7 @@ def mergebggusers(in_paths=None, out_path=None, full=False):
 @task()
 def mergebggratings(in_paths=None, out_path=None, full=False):
     ''' merge BoardGameGeek rating data '''
-    from ludoj_scraper.merge import _to_lower # TODO rename private function
-    from ludoj_scraper.utils import parse_int
+    from ludoj_scraper.utils import parse_int, to_lower
     merge(**_merge_kwargs(
         site='bgg',
         item='RatingItem',
@@ -165,7 +163,7 @@ def mergebggratings(in_paths=None, out_path=None, full=False):
         out_path=out_path,
         full=full,
         keys=('bgg_user_name', 'bgg_id'),
-        key_parsers=(_to_lower, parse_int),
+        key_parsers=(to_lower, parse_int),
     ))
 
 
@@ -226,11 +224,6 @@ def mergenews(
     mergewikidata, mergenews, mergebggusers, mergebggratings)
 def mergeall():
     ''' merge all sites and items '''
-
-
-@task(rsync, mergeall)
-def rsyncandmerge():
-    ''' sync and merge everything '''
 
 
 @task()
