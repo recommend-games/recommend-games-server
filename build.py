@@ -130,6 +130,22 @@ def mergebga(in_paths=None, out_path=None, full=False):
 
 
 @task()
+def mergebgaratings(in_paths=None, out_path=None, full=False):
+    ''' merge Board Game Atlas rating data '''
+    from ludoj_scraper.utils import parse_bool
+    merge(**_merge_kwargs(
+        site='bga',
+        item='RatingItem',
+        in_paths=in_paths,
+        out_path=out_path,
+        full=full,
+        keys=('bga_user_id', 'bga_id'),
+        fieldnames_exclude=('bgg_user_play_count',) if parse_bool(full) else (
+            'bgg_user_play_count', 'published_at', 'updated_at', 'scraped_at'),
+    ))
+
+
+@task()
 def mergebgg(in_paths=None, out_path=None, full=False):
     ''' merge BoardGameGeek game data '''
     merge(**_merge_kwargs(site='bgg', in_paths=in_paths, out_path=out_path, full=full))
@@ -220,7 +236,7 @@ def mergenews(
 
 @task(
     mergebga, mergebgg, mergedbpedia, mergeluding, mergespielen,
-    mergewikidata, mergenews, mergebggusers, mergebggratings)
+    mergewikidata, mergenews, mergebgaratings, mergebggusers, mergebggratings)
 def mergeall():
     ''' merge all sites and items '''
 
