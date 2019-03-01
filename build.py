@@ -227,6 +227,35 @@ def mergeall():
 
 
 @task()
+def link(
+        gazetteer=os.path.join(SCRAPER_DIR, 'cluster', 'gazetteer.pickle'),
+        paths=(
+            os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bgg_GameItem.jl'),
+            os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bga_GameItem.jl'),
+            os.path.join(SCRAPED_DATA_DIR, 'scraped', 'spielen_GameItem.jl'),
+            os.path.join(SCRAPED_DATA_DIR, 'scraped', 'luding_GameItem.jl'),
+            os.path.join(SCRAPED_DATA_DIR, 'scraped', 'wikidata_GameItem.jl'),
+        ),
+        id_prefixes=('bgg', 'bga', 'spielen', 'luding', 'wikidata'),
+        threshold=None,
+        recall_weight=.627,
+        output=os.path.join(SCRAPED_DATA_DIR, 'links.json'),
+    ):
+    ''' link items '''
+    from ludoj_scraper.cluster import link_games
+    from ludoj_scraper.utils import parse_float
+    LOGGER.info('Using model %r to link files %r...', gazetteer, paths)
+    link_games(
+        gazetteer=gazetteer,
+        paths=paths,
+        id_prefixes=id_prefixes,
+        threshold=parse_float(threshold),
+        recall_weight=parse_float(recall_weight),
+        output=output,
+    )
+
+
+@task()
 def cleandata(src_dir=DATA_DIR, bk_dir=f'{DATA_DIR}.bk'):
     ''' clean data file '''
     LOGGER.info(
