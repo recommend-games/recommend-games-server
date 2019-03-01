@@ -41,7 +41,6 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s',
 )
 
-# TODO: retrain recommender
 
 @lru_cache(maxsize=8)
 def _server_version(path=os.path.join(BASE_DIR, 'VERSION')):
@@ -256,6 +255,33 @@ def link(
 
 
 @task()
+def train(
+        games_file=os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bgg_GameItem.jl'),
+        ratings_file=os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bgg_RatingItem.jl'),
+        out_path=os.path.join(RECOMMENDER_DIR, '.tc'),
+        users=None,
+    ):
+    ''' train recommender model '''
+    from ludoj_recommender import GamesRecommender
+
+    LOGGER.info(
+        'Training recommender model with games <%s> and ratings <%s>...', games_file, ratings_file)
+    recommender = GamesRecommender.train_from_files(
+        games_file=games_file,
+        ratings_file=ratings_file,
+        similarity_model=True,
+        verbose=True,
+    )
+
+    recommendations = recommender.recommend(users=users, num_games=100)
+    recommendations.print_rows(num_rows=100)
+
+    LOGGER.info('Saving model %r to <%s>...', recommender, out_path)
+    shutil.rmtree(out_path, ignore_errors=True)
+    recommender.save(out_path)
+
+
+@task()
 def cleandata(src_dir=DATA_DIR, bk_dir=f'{DATA_DIR}.bk'):
     ''' clean data file '''
     LOGGER.info(
@@ -286,9 +312,9 @@ def filldb(
     srp_dir = os.path.join(src_dir, 'scraped')
     django.core.management.call_command(
         'filldb',
-        os.path.join(srp_dir, 'bgg.jl'),
-        collection_paths=[os.path.join(srp_dir, 'bgg_ratings.jl')],
-        user_paths=[os.path.join(srp_dir, 'bgg_users.jl')],
+        os.path.join(srp_dir, 'bgg_GameItem.jl'),
+        collection_paths=[os.path.join(srp_dir, 'bgg_RatingItem.jl')],
+        user_paths=[os.path.join(srp_dir, 'bgg_UserItem.jl')],
         in_format='jl',
         batch=100000,
         recommender=rec_dir,
@@ -333,6 +359,11 @@ def builddb():
     ''' build a new database '''
 
 
+@task(mergeall, link, train, builddb)
+def builddbfull():
+    ''' merge, link, train, and build all relevant files '''
+
+
 @task()
 def syncdata(src=os.path.join(DATA_DIR, ''), bucket='recommend-games-data'):
     ''' sync data with GCS '''
@@ -346,6 +377,11 @@ def syncdata(src=os.path.join(DATA_DIR, ''), bucket='recommend-games-data'):
 @task(builddb, syncdata)
 def releasedb():
     ''' build and release database '''
+
+
+@task(builddbfull, syncdata)
+def releasedbfull():
+    ''' merge, link, train, build, and release database '''
 
 
 @task()
@@ -441,9 +477,19 @@ def build():
     ''' build database and server '''
 
 
+@task(builddbfull, buildserver)
+def buildfull():
+    ''' merge, link, train, and build database and server '''
+
+
 @task(releasedb, releaseserver)
 def release():
     ''' release database and server '''
+
+
+@task(releasedbfull, releaseserver)
+def releasefull():
+    ''' merge, link, train, build, and release database and server '''
 
 
 @task()

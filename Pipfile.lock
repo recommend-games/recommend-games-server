@@ -1002,7 +1002,7 @@
         "ludoj-scraper": {
             "editable": true,
             "git": "https://gitlab.com/mshepherd/ludoj-scraper.git",
-            "ref": "10b5194ce1aa7a6a149bd8ad2bd00573cdd89888"
+            "ref": "a9199aa0dd90c6acc19bef1d634157dc014a8667"
         },
         "lxml": {
             "hashes": [
