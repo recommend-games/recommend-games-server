@@ -20,14 +20,14 @@ python-dateutil = "*"
 whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
-ipython = "*"
+# ipython = "*"
 ludoj-scraper = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-scraper.git"}
 lxml = "*"
-mypy = "*"
-pylint = "*"
+# mypy = "*"
+# pylint = "*"
 pynt = "*"
 pynt-contrib = "*"
-pytest = "*"
+# pytest = "*"
 python-dotenv = "*"
 rcssmin = "*"
 requests = "*"

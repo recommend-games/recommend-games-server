@@ -8,6 +8,7 @@ import os
 import shutil
 import sys
 
+from datetime import timedelta
 from functools import lru_cache
 
 import django
@@ -25,8 +26,6 @@ os.environ['DEBUG'] = ''
 sys.path.insert(0, BASE_DIR)
 django.setup()
 
-from games.utils import parse_bool, parse_date, parse_int, serialize_date
-
 LOGGER = logging.getLogger(__name__)
 SETTINGS = django.conf.settings
 DATA_DIR = SETTINGS.DATA_DIR
@@ -38,17 +37,248 @@ GC_PROJECT = 'recommend-games'
 
 logging.basicConfig(
     stream=sys.stderr,
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s',
 )
 
-# TODO: sync and merge scraped files, retrain recommender
 
 @lru_cache(maxsize=8)
 def _server_version(path=os.path.join(BASE_DIR, 'VERSION')):
     with open(path) as file:
         version = file.read()
     return version.strip()
+
+
+def _remove(path):
+    try:
+        os.remove(path)
+    except OSError:
+        shutil.rmtree(path, ignore_errors=True)
+
+
+@task()
+def rsync(
+        host='ludoj-hq',
+        port=2222,
+        src=os.path.join(SCRAPER_DIR, 'feeds', ''),
+        dst=os.path.join(SCRAPER_DIR, 'feeds', ''),
+    ):
+    ''' sync remote files '''
+    from games.utils import parse_int
+    port = parse_int(port)
+    LOGGER.info('Syncing with <%s:%d> from <%s> to <%s>...', host, port, src, dst)
+    os.makedirs(dst, exist_ok=True)
+    execute(
+        'rsync', '--archive',
+        '--verbose', '--human-readable', '--progress',
+        '--rsh', f'ssh -p {port}',
+        f'{host}:{src}', dst,
+    )
+
+
+@task()
+def merge(in_paths, out_path, **kwargs):
+    ''' merge scraped files '''
+    from ludoj_scraper.merge import merge_files
+    from ludoj_scraper.utils import now
+
+    kwargs.setdefault('log_level', 'WARN')
+    out_path = out_path.format(date=now().strftime('%Y-%m-%dT%H-%M-%S'))
+
+    LOGGER.info('Merging files <%s> into <%s> with args %r...', in_paths, out_path, kwargs)
+
+    _remove(out_path)
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+
+    merge_files(
+        in_paths=in_paths,
+        out_path=out_path,
+        **kwargs,
+    )
+
+
+def _merge_kwargs(site, item='GameItem', in_paths=None, out_path=None, full=False, **kwargs):
+    from ludoj_scraper.utils import now, parse_bool, parse_date, parse_int, to_str
+
+    kwargs['in_paths'] = in_paths or os.path.join(SCRAPER_DIR, 'feeds', site, item, '*')
+    kwargs.setdefault('keys', (f'{site}_id',))
+    kwargs.setdefault('key_parsers', (parse_int,) if site in ('bgg', 'luding') else (to_str,))
+    kwargs.setdefault('latest', ('scraped_at',))
+    kwargs.setdefault('latest_parsers', (parse_date,))
+    kwargs.setdefault('latest_min', now() - timedelta(days=30))
+    kwargs.setdefault('concat_output', True)
+
+    if parse_bool(full):
+        kwargs['out_path'] = out_path or os.path.join(
+            SCRAPER_DIR, 'feeds', site, item, '{date}_merged.jl')
+
+    else:
+        kwargs['out_path'] = out_path or os.path.join(
+            SCRAPED_DATA_DIR, 'scraped', f'{site}_{item}.jl')
+        kwargs.setdefault(
+            'fieldnames_exclude',
+            ('image_file', 'rules_file', 'published_at', 'updated_at', 'scraped_at'))
+        kwargs.setdefault('sort_output', True)
+
+    return kwargs
+
+
+@task()
+def mergebga(in_paths=None, out_path=None, full=False):
+    ''' merge Board Game Atlas game data '''
+    merge(**_merge_kwargs(site='bga', in_paths=in_paths, out_path=out_path, full=full))
+
+
+@task()
+def mergebgg(in_paths=None, out_path=None, full=False):
+    ''' merge BoardGameGeek game data '''
+    merge(**_merge_kwargs(site='bgg', in_paths=in_paths, out_path=out_path, full=full))
+
+
+@task()
+def mergebggusers(in_paths=None, out_path=None, full=False):
+    ''' merge BoardGameGeek user data '''
+    from ludoj_scraper.utils import parse_bool, to_lower
+    merge(**_merge_kwargs(
+        site='bgg',
+        item='UserItem',
+        in_paths=in_paths,
+        out_path=out_path,
+        full=full,
+        keys=('bgg_user_name',),
+        key_parsers=(to_lower,),
+        fieldnames_exclude=None if parse_bool(full) else ('published_at', 'scraped_at'),
+    ))
+
+
+@task()
+def mergebggratings(in_paths=None, out_path=None, full=False):
+    ''' merge BoardGameGeek rating data '''
+    from ludoj_scraper.utils import parse_int, to_lower
+    merge(**_merge_kwargs(
+        site='bgg',
+        item='RatingItem',
+        in_paths=in_paths,
+        out_path=out_path,
+        full=full,
+        keys=('bgg_user_name', 'bgg_id'),
+        key_parsers=(to_lower, parse_int),
+    ))
+
+
+@task()
+def mergedbpedia(in_paths=None, out_path=None, full=False):
+    ''' merge DBpedia game data '''
+    merge(**_merge_kwargs(site='dbpedia', in_paths=in_paths, out_path=out_path, full=full))
+
+
+@task()
+def mergeluding(in_paths=None, out_path=None, full=False):
+    ''' merge Luding.org game data '''
+    merge(**_merge_kwargs(site='luding', in_paths=in_paths, out_path=out_path, full=full))
+
+
+@task()
+def mergespielen(in_paths=None, out_path=None, full=False):
+    ''' merge Spielen.de game data '''
+    merge(**_merge_kwargs(site='spielen', in_paths=in_paths, out_path=out_path, full=full))
+
+
+@task()
+def mergewikidata(in_paths=None, out_path=None, full=False):
+    ''' merge Wikidata game data '''
+    merge(**_merge_kwargs(site='wikidata', in_paths=in_paths, out_path=out_path, full=full))
+
+
+@task()
+def mergenews(
+        in_paths=(
+            os.path.join(SCRAPER_DIR, 'feeds', 'news', '*.jl'),
+            os.path.join(SCRAPER_DIR, 'feeds', 'news', '*', '*', '*.jl')),
+        out_path=None,
+    ):
+    ''' merge news articles '''
+    from ludoj_scraper.utils import parse_date
+    merge(**_merge_kwargs(
+        site='news',
+        item='ArticleItem',
+        in_paths=in_paths,
+        out_path=out_path,
+        keys=('article_id'),
+        latest=('published_at', 'scraped_at'),
+        latest_parsers=(parse_date, parse_date),
+        latest_min=None,
+        fieldnames=(
+            'article_id', 'url_canonical', 'url_mobile', 'url_amp', 'url_thumbnail',
+            'published_at', 'title_full', 'title_short', 'author', 'description', 'summary',
+            'category', 'keyword', 'section_inferred', 'country', 'language', 'source_name'),
+        fieldnames_exclude=None,
+        sort_output=False,
+        sort_latest='desc',
+    ))
+
+
+@task(
+    mergebga, mergebgg, mergedbpedia, mergeluding, mergespielen,
+    mergewikidata, mergenews, mergebggusers, mergebggratings)
+def mergeall():
+    ''' merge all sites and items '''
+
+
+@task()
+def link(
+        gazetteer=os.path.join(SCRAPER_DIR, 'cluster', 'gazetteer.pickle'),
+        paths=(
+            os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bgg_GameItem.jl'),
+            os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bga_GameItem.jl'),
+            os.path.join(SCRAPED_DATA_DIR, 'scraped', 'spielen_GameItem.jl'),
+            os.path.join(SCRAPED_DATA_DIR, 'scraped', 'luding_GameItem.jl'),
+            os.path.join(SCRAPED_DATA_DIR, 'scraped', 'wikidata_GameItem.jl'),
+        ),
+        id_prefixes=('bgg', 'bga', 'spielen', 'luding', 'wikidata'),
+        threshold=None,
+        recall_weight=.627,
+        output=os.path.join(SCRAPED_DATA_DIR, 'links.json'),
+    ):
+    ''' link items '''
+    from ludoj_scraper.cluster import link_games
+    from ludoj_scraper.utils import parse_float
+    LOGGER.info('Using model %r to link files %r...', gazetteer, paths)
+    link_games(
+        gazetteer=gazetteer,
+        paths=paths,
+        id_prefixes=id_prefixes,
+        threshold=parse_float(threshold),
+        recall_weight=parse_float(recall_weight),
+        output=output,
+    )
+
+
+@task()
+def train(
+        games_file=os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bgg_GameItem.jl'),
+        ratings_file=os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bgg_RatingItem.jl'),
+        out_path=os.path.join(RECOMMENDER_DIR, '.tc'),
+        users=None,
+    ):
+    ''' train recommender model '''
+    from ludoj_recommender import GamesRecommender
+
+    LOGGER.info(
+        'Training recommender model with games <%s> and ratings <%s>...', games_file, ratings_file)
+    recommender = GamesRecommender.train_from_files(
+        games_file=games_file,
+        ratings_file=ratings_file,
+        similarity_model=True,
+        verbose=True,
+    )
+
+    recommendations = recommender.recommend(users=users, num_games=100)
+    recommendations.print_rows(num_rows=100)
+
+    LOGGER.info('Saving model %r to <%s>...', recommender, out_path)
+    shutil.rmtree(out_path, ignore_errors=True)
+    recommender.save(out_path)
 
 
 @task()
@@ -82,9 +312,9 @@ def filldb(
     srp_dir = os.path.join(src_dir, 'scraped')
     django.core.management.call_command(
         'filldb',
-        os.path.join(srp_dir, 'bgg.jl'),
-        collection_paths=[os.path.join(srp_dir, 'bgg_ratings.jl')],
-        user_paths=[os.path.join(srp_dir, 'bgg_users.jl')],
+        os.path.join(srp_dir, 'bgg_GameItem.jl'),
+        collection_paths=[os.path.join(srp_dir, 'bgg_RatingItem.jl')],
+        user_paths=[os.path.join(srp_dir, 'bgg_UserItem.jl')],
         in_format='jl',
         batch=100000,
         recommender=rec_dir,
@@ -116,6 +346,7 @@ def cpdirs(
 @task()
 def dateflag(dst=os.path.join(DATA_DIR, 'updated_at'), date=None):
     ''' write date to file '''
+    from games.utils import parse_date, serialize_date
     date = parse_date(date) or django.utils.timezone.now()
     date_str = serialize_date(date, tzinfo=django.utils.timezone.utc)
     LOGGER.info('Writing date <%s> to <%s>...', date_str, dst)
@@ -126,6 +357,11 @@ def dateflag(dst=os.path.join(DATA_DIR, 'updated_at'), date=None):
 @task(cleandata, filldb, compressdb, cpdirs, dateflag)
 def builddb():
     ''' build a new database '''
+
+
+@task(mergeall, link, train, builddb)
+def builddbfull():
+    ''' merge, link, train, and build all relevant files '''
 
 
 @task()
@@ -141,6 +377,11 @@ def syncdata(src=os.path.join(DATA_DIR, ''), bucket='recommend-games-data'):
 @task(builddb, syncdata)
 def releasedb():
     ''' build and release database '''
+
+
+@task(builddbfull, syncdata)
+def releasedbfull():
+    ''' merge, link, train, build, and release database '''
 
 
 @task()
@@ -163,6 +404,7 @@ def minify(src=os.path.join(BASE_DIR, 'app'), dst=os.path.join(BASE_DIR, '.temp'
 @task()
 def sitemap(url=URL_LIVE, dst=os.path.join(BASE_DIR, '.temp', 'sitemap.xml'), limit=50_000):
     ''' generate sitemap.xml '''
+    from games.utils import parse_int
     limit = parse_int(limit) or 50_000
     LOGGER.info('Generating sitemap with URL <%s> to <%s>, limit to %d...', url, dst, limit)
     django.core.management.call_command('sitemap', url=url, limit=limit, output=dst)
@@ -171,6 +413,8 @@ def sitemap(url=URL_LIVE, dst=os.path.join(BASE_DIR, '.temp', 'sitemap.xml'), li
 @task(cleanstatic, minify, sitemap)
 def collectstatic(delete=True):
     ''' generate sitemap.xml '''
+
+    from games.utils import parse_bool
     assert not SETTINGS.DEBUG
 
     static_dirs = SETTINGS.STATICFILES_DIRS
@@ -233,9 +477,19 @@ def build():
     ''' build database and server '''
 
 
+@task(builddbfull, buildserver)
+def buildfull():
+    ''' merge, link, train, and build database and server '''
+
+
 @task(releasedb, releaseserver)
 def release():
     ''' release database and server '''
+
+
+@task(releasedbfull, releaseserver)
+def releasefull():
+    ''' merge, link, train, build, and release database and server '''
 
 
 @task()
