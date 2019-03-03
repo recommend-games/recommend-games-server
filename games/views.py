@@ -108,9 +108,9 @@ class GameFilter(FilterSet):
         model = Game
         fields = {
             'year': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
-            'designer': ['exact',],
+            'designer': ['exact'],
             'designer__name': ['exact', 'iexact'],
-            'artist': ['exact',],
+            'artist': ['exact'],
             'artist__name': ['exact', 'iexact'],
             'min_players': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
             'max_players': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
@@ -124,9 +124,14 @@ class GameFilter(FilterSet):
             'max_age_rec': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
             'min_time': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
             'max_time': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
-            'cooperative': ['exact',],
-            'compilation': ['exact',],
-            'implements': ['exact',],
+            'game_type': ['exact'],
+            'category': ['exact'],
+            'mechanic': ['exact'],
+            'cooperative': ['exact'],
+            'compilation': ['exact'],
+            'compilation_of': ['exact'],
+            'implements': ['exact'],
+            'integrates_with': ['exact'],
             'bgg_rank': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
             'num_votes': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
             'avg_rating': ['exact', 'gt', 'gte', 'lt', 'lte', 'isnull'],
@@ -444,7 +449,10 @@ class GameTypeViewSet(GamesActionViewSet):
     ''' game type view set '''
 
     # pylint: disable=no-member
-    queryset = GameType.objects.all()
+    queryset = GameType.objects \
+        .annotate(count=Count('games')) \
+        .filter(count__gt=100) \
+        .order_by('-count')
     serializer_class = GameTypeSerializer
 
 
@@ -452,7 +460,10 @@ class CategoryViewSet(GamesActionViewSet):
     ''' category view set '''
 
     # pylint: disable=no-member
-    queryset = Category.objects.all()
+    queryset = Category.objects \
+        .annotate(count=Count('games')) \
+        .filter(count__gt=5) \
+        .order_by('-count')
     serializer_class = CategorySerializer
 
 
@@ -460,7 +471,10 @@ class MechanicViewSet(GamesActionViewSet):
     ''' mechanic view set '''
 
     # pylint: disable=no-member
-    queryset = Mechanic.objects.all()
+    queryset = Mechanic.objects \
+        .annotate(count=Count('games')) \
+        .filter(count__gt=10) \
+        .order_by('-count')
     serializer_class = MechanicSerializer
 
 
