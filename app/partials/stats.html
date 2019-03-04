@@ -5,7 +5,54 @@
 	<p class="lead">
 		TODO.
 	</p>
-	<ol ng-if="data.rg_top.designer">
-		<li ng-repeat="designer in data.rg_top.designer">{{ designer.name }} ({{ designer.count }} games)</li>
-	</ol>
+	<div class="card mb-3">
+		<div class="card-header">
+			<h4>Top Designers</h4>
+			<nav class="nav nav-tabs nav-justified card-header-tabs">
+				<a id="designers-rg-tab"
+						ng-disabled="!data.rg_top.designer"
+						data-toggle="tab"
+						data-target="#designers-rg"
+						href=""
+						role="tab"
+						aria-controls="designers-rg"
+						aria-selected="true"
+						class="nav-item nav-link active">
+					<abbr title="Recommend.Games">R.G</abbr> top 100
+				</a>
+				<a id="designers-bgg-tab"
+						data-toggle="tab"
+						data-target="#designers-bgg"
+						href=""
+						role="tab"
+						aria-controls="designers-bgg"
+						aria-selected="false"
+						class="nav-item nav-link">
+					<abbr title="BoardGameGeek">BGG</abbr> top 100
+				</a>
+			</nav>
+		</div>
+		<div class="card-body tab-content">
+			<div id="designers-rg"
+					class="tab-pane fade show active"
+					role="tabpanel"
+					aria-labelledby="designers-rg-tab">
+				<ol class="mb-0">
+					<li ng-repeat="designer in data.rg_top.designer">
+						{{ designer.name }} ({{ designer.count }} games)
+					</li>
+				</ol>
+			</div>
+			<div id="designers-bgg"
+					class="tab-pane fade"
+					role="tabpanel"
+					aria-labelledby="designers-bgg-tab">
+				<ol class="mb-0">
+					<li ng-repeat="designer in data.bgg_top.designer">
+						{{ designer.name }} ({{ designer.count }} games)
+					</li>
+				</ol>
+			</div>
+		</div>
+	</div>
 </section>
