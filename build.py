@@ -474,14 +474,14 @@ def pushserver(image=None, version=None):
 
 
 @task(buildserver, pushserver)
-def releaseserver(image=None, version=None):
+def releaseserver(app_file=os.path.join(BASE_DIR, 'app.yaml'), image=None, version=None):
     ''' build, push, and deploy new server version '''
     image = image or f'gcr.io/{GC_PROJECT}/ludoj-server'
     version = version or _server_version()
     date = django.utils.timezone.now().strftime('%Y%m%d%H%M%S')
-    LOGGER.info('Deploying server v%s-%s...', version, date)
+    LOGGER.info('Deploying server v%s-%s from file <%s>...', version, date, app_file)
     execute(
-        'gcloud', 'app', 'deploy',
+        'gcloud', 'app', 'deploy', app_file,
         '--project', GC_PROJECT,
         '--image-url', f'{image}:{version}',
         '--version', f'v{version}-{date}',

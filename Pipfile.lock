@@ -527,10 +527,10 @@
         },
         "awscli": {
             "hashes": [
-                "sha256:0a0180dbbc58a804438c2d58ef141e9d80cb182f3101d619ad386ab76bbeff6a",
-                "sha256:4aaafab9b301605f0c56c45428483142c9039bdeac26bfab6dc102b317ec245a"
+                "sha256:264b7d702508d07b183c8be02d2819c23b5b784fd02742046b3da18d98c0db2c",
+                "sha256:4fe13514d0a9478036fdae20ec8b28fd6b5c1faffade3273c251c2ef165e846c"
             ],
-            "version": "==1.16.116"
+            "version": "==1.16.118"
         },
         "boto": {
             "hashes": [
@@ -541,17 +541,17 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:30badbe5dab638e764e23125479e848c446a9669ef0612b8d8d305738bc442d3",
-                "sha256:c2dd70cb1ee2c49aed8bd3782fa82a766ad68921e1230620d41f4efe3b16bb75"
+                "sha256:16e093bf505ccf004ea1cab34188af8df1df02c738a6d2f46bc42e7cbda667f8",
+                "sha256:6f8bf13e39f52a13a1af6eb067723d6cf28b6c09d5b72953d729bff8a88fa0b9"
             ],
-            "version": "==1.9.106"
+            "version": "==1.9.108"
         },
         "botocore": {
             "hashes": [
-                "sha256:60f4f62075d7b274360f74f220e9e56fb404bebd592ccb221e3f5333ceb1febb",
-                "sha256:bff336cccf1ed2b7cab54bb802e135a063cb7614271c6dacd2f49ecbc26df7da"
+                "sha256:99f83ddd73abbf8c3484f0ac7ffde21a6fbd0bfc9f9b9afbf29ce52667737c49",
+                "sha256:aefb5185bd3cfd4801ed32ddd51ba6c6b7054010f907d69031f5569bebccf5be"
             ],
-            "version": "==1.12.106"
+            "version": "==1.12.108"
         },
         "btrees": {
             "hashes": [
@@ -1002,7 +1002,7 @@
         "ludoj-scraper": {
             "editable": true,
             "git": "https://gitlab.com/mshepherd/ludoj-scraper.git",
-            "ref": "d7b5e23c1d5956c94adbeb0301628de273f54d0c"
+            "ref": "950d01ca49d98bd6384e9eadfa5ca1be440bb89e"
         },
         "lxml": {
             "hashes": [
