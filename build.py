@@ -50,6 +50,7 @@ def _server_version(path=os.path.join(BASE_DIR, 'VERSION')):
 
 
 def _remove(path):
+    LOGGER.info('Removing <%s> if it exists...', path)
     try:
         os.remove(path)
     except OSError:
@@ -242,6 +243,29 @@ def mergeall():
 
 
 @task()
+def split(
+        in_file=os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bgg_RatingItem.jl'),
+        out_dir=os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bgg_RatingItem'),
+        trie_file=os.path.join(SCRAPED_DATA_DIR, 'prefixes.txt'),
+        fields='bgg_user_name',
+        limit=300_000,
+        construct=False,
+    ):
+    ''' split file along prefixes '''
+    from ludoj_scraper.prefixes import split_file
+    _remove(out_dir)
+    split_file(
+        in_file=in_file,
+        out_file=os.path.join(out_dir, '{prefix}.jl'),
+        fields=fields,
+        trie_file=trie_file,
+        limits=(limit,),
+        construct=construct,
+    )
+    _remove(in_file)
+
+
+@task()
 def link(
         gazetteer=os.path.join(SCRAPER_DIR, 'cluster', 'gazetteer.pickle'),
         paths=(
@@ -375,9 +399,9 @@ def builddb():
     ''' build a new database '''
 
 
-@task(mergeall, link, train, builddb)
+@task(mergeall, link, train, builddb, split)
 def builddbfull():
-    ''' merge, link, train, and build all relevant files '''
+    ''' merge, link, train, build, and split all relevant files '''
 
 
 @task()
