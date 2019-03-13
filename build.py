@@ -78,6 +78,31 @@ def rsync(
 
 
 @task()
+def gitprepare(repo=SCRAPED_DATA_DIR):
+    ''' check Git repo is clean and up-to-date '''
+    LOGGER.info('Preparing Git repo <%s>...', repo)
+    with safe_cd(repo):
+        execute('git', 'checkout', 'master')
+        execute('git', 'pull', '--ff-only')
+        execute('git', 'diff', 'HEAD', '--exit-code')
+
+
+@task()
+def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
+    ''' commit and push Git repo '''
+    paths = paths or ('scraped', 'links.json', 'prefixes.txt')
+    LOGGER.info('Updating paths %r in Git repo <%s>...', paths, repo)
+    with safe_cd(repo):
+        execute('git', 'add', '--', *paths)
+        try:
+            execute('git', 'commit', '--message', f'automatic commit by <{name}>')
+        except SystemExit:
+            LOGGER.info('Nothing to commit...')
+        else:
+            execute('git', 'push')
+
+
+@task()
 def merge(in_paths, out_path, **kwargs):
     ''' merge scraped files '''
     from ludoj_scraper.merge import merge_files
@@ -399,7 +424,7 @@ def builddb():
     ''' build a new database '''
 
 
-@task(mergeall, link, train, builddb, split)
+@task(gitprepare, mergeall, link, train, builddb, split, gitupdate)
 def builddbfull():
     ''' merge, link, train, build, and split all relevant files '''
 
