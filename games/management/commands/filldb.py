@@ -138,7 +138,7 @@ def _make_instances(
             yield model(**data)
         except Exception:
             LOGGER.exception('error while parsing an item: %r', item)
-        if (count + 1) % 1000 == 0:
+        if (count + 1) % 10_000 == 0:
             LOGGER.info('processed %d items so far', count + 1)
     LOGGER.info('processed %d items in total', count + 1)
 
