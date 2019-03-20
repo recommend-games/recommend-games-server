@@ -294,7 +294,7 @@ def split(
 
 @task()
 def link(
-        gazetteer=os.path.join(SCRAPER_DIR, 'cluster', 'gazetteer.pickle'),
+        gazetteer=os.path.join(BASE_DIR, 'cluster', 'gazetteer.pickle'),
         paths=(
             os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bgg_GameItem.jl'),
             os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bga_GameItem.jl'),
@@ -304,7 +304,7 @@ def link(
         ),
         id_prefixes=('bgg', 'bga', 'spielen', 'luding', 'wikidata'),
         threshold=None,
-        recall_weight=.627,
+        recall_weight=.5,
         output=os.path.join(SCRAPED_DATA_DIR, 'links.json'),
     ):
     ''' link items '''
