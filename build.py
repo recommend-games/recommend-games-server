@@ -93,14 +93,14 @@ def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
     paths = paths or ('scraped', 'links.json', 'prefixes.txt')
     LOGGER.info('Updating paths %r in Git repo <%s>...', paths, repo)
     with safe_cd(repo):
-        execute('git', 'gc')
+        execute('git', 'gc', '--prune=now')
         execute('git', 'add', '--', *paths)
         try:
             execute('git', 'commit', '--message', f'automatic commit by <{name}>')
         except SystemExit:
             LOGGER.info('Nothing to commit...')
         else:
-            execute('git', 'gc')
+            execute('git', 'gc', '--prune=now')
             execute('git', 'push')
 
 
