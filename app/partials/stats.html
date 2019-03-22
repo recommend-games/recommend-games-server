@@ -202,4 +202,67 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="card mb-3">
+		<div class="card-header">
+			<h4>Top Categories</h4>
+			<nav class="nav nav-tabs nav-justified card-header-tabs">
+				<a id="categories-rg-tab"
+						ng-disabled="!data.rg_top.category"
+						data-toggle="tab"
+						data-target="#categories-rg"
+						href=""
+						role="tab"
+						aria-controls="categories-rg"
+						aria-selected="true"
+						class="nav-item nav-link active">
+					<abbr title="Recommend.Games">R.G</abbr> top 100
+				</a>
+				<a id="categories-bgg-tab"
+						data-toggle="tab"
+						data-target="#categories-bgg"
+						href=""
+						role="tab"
+						aria-controls="categories-bgg"
+						aria-selected="false"
+						class="nav-item nav-link">
+					<abbr title="BoardGameGeek">BGG</abbr> top 100
+				</a>
+			</nav>
+		</div>
+		<div class="card-body tab-content">
+			<div id="categories-rg"
+					class="tab-pane fade show active"
+					role="tabpanel"
+					aria-labelledby="categories-rg-tab">
+				<ol class="mb-0">
+					<li ng-repeat="category in data.rg_top.category"
+							value="{{ category.rank }}">
+						<a ng-href="/#/?category={{ category.bgg_id }}">
+							<strong>
+								{{ category.name }}
+							</strong>
+						</a>
+						({{ category.count }} game{{ category.count === 1 ? '' : 's' }})
+					</li>
+				</ol>
+			</div>
+			<div id="categories-bgg"
+					class="tab-pane fade"
+					role="tabpanel"
+					aria-labelledby="categories-bgg-tab">
+				<ol class="mb-0">
+					<li ng-repeat="category in data.bgg_top.category"
+							value="{{ category.rank }}">
+						<a ng-href="/#/?category={{ category.bgg_id }}">
+							<strong>
+								{{ category.name }}
+							</strong>
+						</a>
+						({{ category.count }} game{{ category.count === 1 ? '' : 's' }})
+					</li>
+				</ol>
+			</div>
+		</div>
+	</div>
 </section>
