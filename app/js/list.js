@@ -538,8 +538,8 @@ ludojApp.controller('ListController', function ListController(
         usersService.getUserStats(params.for, true)
             .then(function (stats) {
                 $scope.userUpdatedAt = stats.updated_at_str;
-                userStats.rg = stats.rg_top_100;
-                userStats.bgg = stats.bgg_top_100;
+                userStats.rg = stats.rg_top;
+                userStats.bgg = stats.bgg_top;
                 return updateStats('rg');
             })
             .catch($log.error);

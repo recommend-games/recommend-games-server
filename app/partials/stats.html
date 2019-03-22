@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<section xmlns="http://www.w3.org/1999/xhtml"
+		id="ludoj-stats">
+	<h1>Statistics</h1>
+	<p class="lead">
+		Analyses of the <span class="recommend-games">Recommend.Games</span> and BoardGameGeek top 100 games.
+	</p>
+
+	<div class="card mb-3">
+		<div class="card-header">
+			<h4>Top Designers</h4>
+			<nav class="nav nav-tabs nav-justified card-header-tabs">
+				<a id="designers-rg-tab"
+						data-toggle="tab"
+						data-target="#designers-rg"
+						href=""
+						role="tab"
+						aria-controls="designers-rg"
+						aria-selected="true"
+						class="nav-item nav-link active">
+					<abbr title="Recommend.Games">R.G</abbr> top 100
+				</a>
+				<a id="designers-bgg-tab"
+						data-toggle="tab"
+						data-target="#designers-bgg"
+						href=""
+						role="tab"
+						aria-controls="designers-bgg"
+						aria-selected="false"
+						class="nav-item nav-link">
+					<abbr title="BoardGameGeek">BGG</abbr> top 100
+				</a>
+			</nav>
+		</div>
+		<div class="card-body tab-content">
+			<div id="designers-rg"
+					class="tab-pane fade show active"
+					role="tabpanel"
+					aria-labelledby="designers-rg-tab">
+				<ol class="mb-0">
+					<li ng-repeat="designer in data.rg_top.designer"
+							value="{{ designer.rank }}">
+						<a ng-href="https://boardgamegeek.com/boardgamedesigner/{{ designer.bgg_id }}"
+								target="_blank">
+							<strong>
+								{{ designer.name }}
+								<i class="fas fa-external-link-alt"></i>
+							</strong>
+						</a>
+						({{ designer.count }} game{{ designer.count === 1 ? '' : 's' }})
+					</li>
+				</ol>
+			</div>
+			<div id="designers-bgg"
+					class="tab-pane fade"
+					role="tabpanel"
+					aria-labelledby="designers-bgg-tab">
+				<ol class="mb-0">
+					<li ng-repeat="designer in data.bgg_top.designer"
+							value="{{ designer.rank }}">
+						<a ng-href="https://boardgamegeek.com/boardgamedesigner/{{ designer.bgg_id }}"
+								target="_blank">
+							<strong>
+								{{ designer.name }}
+								<i class="fas fa-external-link-alt"></i>
+							</strong>
+						</a>
+						({{ designer.count }} game{{ designer.count === 1 ? '' : 's' }})
+					</li>
+				</ol>
+			</div>
+		</div>
+	</div>
+
+	<div class="card mb-3">
+		<div class="card-header">
+			<h4>Top Artists</h4>
+			<nav class="nav nav-tabs nav-justified card-header-tabs">
+				<a id="artists-rg-tab"
+						data-toggle="tab"
+						data-target="#artists-rg"
+						href=""
+						role="tab"
+						aria-controls="artists-rg"
+						aria-selected="true"
+						class="nav-item nav-link active">
+					<abbr title="Recommend.Games">R.G</abbr> top 100
+				</a>
+				<a id="artists-bgg-tab"
+						data-toggle="tab"
+						data-target="#artists-bgg"
+						href=""
+						role="tab"
+						aria-controls="artists-bgg"
+						aria-selected="false"
+						class="nav-item nav-link">
+					<abbr title="BoardGameGeek">BGG</abbr> top 100
+				</a>
+			</nav>
+		</div>
+		<div class="card-body tab-content">
+			<div id="artists-rg"
+					class="tab-pane fade show active"
+					role="tabpanel"
+					aria-labelledby="artists-rg-tab">
+				<ol class="mb-0">
+					<li ng-repeat="artist in data.rg_top.artist"
+							value="{{ artist.rank }}">
+						<a ng-href="https://boardgamegeek.com/boardgameartist/{{ artist.bgg_id }}"
+								target="_blank">
+							<strong>
+								{{ artist.name }}
+								<i class="fas fa-external-link-alt"></i>
+							</strong>
+						</a>
+						({{ artist.count }} game{{ artist.count === 1 ? '' : 's' }})
+					</li>
+				</ol>
+			</div>
+			<div id="artists-bgg"
+					class="tab-pane fade"
+					role="tabpanel"
+					aria-labelledby="artists-bgg-tab">
+				<ol class="mb-0">
+					<li ng-repeat="artist in data.bgg_top.artist"
+							value="{{ artist.rank }}">
+						<a ng-href="https://boardgamegeek.com/boardgameartist/{{ artist.bgg_id }}"
+								target="_blank">
+							<strong>
+								{{ artist.name }}
+								<i class="fas fa-external-link-alt"></i>
+							</strong>
+						</a>
+						({{ artist.count }} game{{ artist.count === 1 ? '' : 's' }})
+					</li>
+				</ol>
+			</div>
+		</div>
+	</div>
+
+	<div class="card mb-3">
+		<div class="card-header">
+			<h4>Top Game Types</h4>
+			<nav class="nav nav-tabs nav-justified card-header-tabs">
+				<a id="types-rg-tab"
+						data-toggle="tab"
+						data-target="#types-rg"
+						href=""
+						role="tab"
+						aria-controls="types-rg"
+						aria-selected="true"
+						class="nav-item nav-link active">
+					<abbr title="Recommend.Games">R.G</abbr> top 100
+				</a>
+				<a id="types-bgg-tab"
+						data-toggle="tab"
+						data-target="#types-bgg"
+						href=""
+						role="tab"
+						aria-controls="types-bgg"
+						aria-selected="false"
+						class="nav-item nav-link">
+					<abbr title="BoardGameGeek">BGG</abbr> top 100
+				</a>
+			</nav>
+		</div>
+		<div class="card-body tab-content">
+			<div id="types-rg"
+					class="tab-pane fade show active"
+					role="tabpanel"
+					aria-labelledby="types-rg-tab">
+				<ol class="mb-0">
+					<li ng-repeat="type in data.rg_top.game_type"
+							value="{{ type.rank }}">
+						<a ng-href="/#/?gameType={{ type.bgg_id }}">
+							<strong>
+								{{ type.name }}
+							</strong>
+						</a>
+						({{ type.count }} game{{ type.count === 1 ? '' : 's' }})
+					</li>
+				</ol>
+			</div>
+			<div id="types-bgg"
+					class="tab-pane fade"
+					role="tabpanel"
+					aria-labelledby="types-bgg-tab">
+				<ol class="mb-0">
+					<li ng-repeat="type in data.bgg_top.game_type"
+							value="{{ type.rank }}">
+						<a ng-href="/#/?gameType={{ type.bgg_id }}">
+							<strong>
+								{{ type.name }}
+							</strong>
+						</a>
+						({{ type.count }} game{{ type.count === 1 ? '' : 's' }})
+					</li>
+				</ol>
+			</div>
+		</div>
+	</div>
+
+	<div class="card mb-3">
+		<div class="card-header">
+			<h4>Top Categories</h4>
+			<nav class="nav nav-tabs nav-justified card-header-tabs">
+				<a id="categories-rg-tab"
+						data-toggle="tab"
+						data-target="#categories-rg"
+						href=""
+						role="tab"
+						aria-controls="categories-rg"
+						aria-selected="true"
+						class="nav-item nav-link active">
+					<abbr title="Recommend.Games">R.G</abbr> top 100
+				</a>
+				<a id="categories-bgg-tab"
+						data-toggle="tab"
+						data-target="#categories-bgg"
+						href=""
+						role="tab"
+						aria-controls="categories-bgg"
+						aria-selected="false"
+						class="nav-item nav-link">
+					<abbr title="BoardGameGeek">BGG</abbr> top 100
+				</a>
+			</nav>
+		</div>
+		<div class="card-body tab-content">
+			<div id="categories-rg"
+					class="tab-pane fade show active"
+					role="tabpanel"
+					aria-labelledby="categories-rg-tab">
+				<ol class="mb-0">
+					<li ng-repeat="category in data.rg_top.category"
+							value="{{ category.rank }}">
+						<a ng-href="/#/?category={{ category.bgg_id }}">
+							<strong>
+								{{ category.name }}
+							</strong>
+						</a>
+						({{ category.count }} game{{ category.count === 1 ? '' : 's' }})
+					</li>
+				</ol>
+			</div>
+			<div id="categories-bgg"
+					class="tab-pane fade"
+					role="tabpanel"
+					aria-labelledby="categories-bgg-tab">
+				<ol class="mb-0">
+					<li ng-repeat="category in data.bgg_top.category"
+							value="{{ category.rank }}">
+						<a ng-href="/#/?category={{ category.bgg_id }}">
+							<strong>
+								{{ category.name }}
+							</strong>
+						</a>
+						({{ category.count }} game{{ category.count === 1 ? '' : 's' }})
+					</li>
+				</ol>
+			</div>
+		</div>
+	</div>
+
+	<div class="card mb-3">
+		<div class="card-header">
+			<h4>Top Mechanics</h4>
+			<nav class="nav nav-tabs nav-justified card-header-tabs">
+				<a id="mechanics-rg-tab"
+						data-toggle="tab"
+						data-target="#mechanics-rg"
+						href=""
+						role="tab"
+						aria-controls="mechanics-rg"
+						aria-selected="true"
+						class="nav-item nav-link active">
+					<abbr title="Recommend.Games">R.G</abbr> top 100
+				</a>
+				<a id="mechanics-bgg-tab"
+						data-toggle="tab"
+						data-target="#mechanics-bgg"
+						href=""
+						role="tab"
+						aria-controls="mechanics-bgg"
+						aria-selected="false"
+						class="nav-item nav-link">
+					<abbr title="BoardGameGeek">BGG</abbr> top 100
+				</a>
+			</nav>
+		</div>
+		<div class="card-body tab-content">
+			<div id="mechanics-rg"
+					class="tab-pane fade show active"
+					role="tabpanel"
+					aria-labelledby="mechanics-rg-tab">
+				<ol class="mb-0">
+					<li ng-repeat="mechanic in data.rg_top.mechanic"
+							value="{{ mechanic.rank }}">
+						<a ng-href="/#/?mechanic={{ mechanic.bgg_id }}">
+							<strong>
+								{{ mechanic.name }}
+							</strong>
+						</a>
+						({{ mechanic.count }} game{{ mechanic.count === 1 ? '' : 's' }})
+					</li>
+				</ol>
+			</div>
+			<div id="mechanics-bgg"
+					class="tab-pane fade"
+					role="tabpanel"
+					aria-labelledby="mechanics-bgg-tab">
+				<ol class="mb-0">
+					<li ng-repeat="mechanic in data.bgg_top.mechanic"
+							value="{{ mechanic.rank }}">
+						<a ng-href="/#/?mechanic={{ mechanic.bgg_id }}">
+							<strong>
+								{{ mechanic.name }}
+							</strong>
+						</a>
+						({{ mechanic.count }} game{{ mechanic.count === 1 ? '' : 's' }})
+					</li>
+				</ol>
+			</div>
+		</div>
+	</div>
+</section>

@@ -377,26 +377,84 @@ ludojApp.factory('gamesService', function gamesService(
             });
     };
 
+    function processDate(data, field) {
+        field = field || 'updated_at';
+
+        if (_.isEmpty(data)) {
+            data = {};
+            data[field] = null;
+            data[field + '_str'] = null;
+            return data;
+        }
+
+        var date = moment(_.get(data, field));
+        data[field + '_str'] = date.isValid() ? date.calendar() : null;
+        return data;
+    }
+
     service.getModelUpdatedAt = function getModelUpdatedAt(noblock) {
         if (!_.isEmpty($sessionStorage.model_updated_at)) {
             return $q.resolve($sessionStorage.model_updated_at);
         }
 
+        if (!_.isEmpty(_.get($sessionStorage, 'games_stats.updated_at_str'))) {
+            return $q.resolve($sessionStorage.games_stats.updated_at_str);
+        }
+
         return $http.get(API_URL + 'games/updated_at/', {'noblock': !!noblock})
             .then(function (response) {
-                var updatedAt = moment(_.get(response, 'data.updated_at')),
-                    updatedAtStr;
-                if (!updatedAt.isValid()) {
+                var data = processDate(response.data, 'updated_at');
+                if (!data.updated_at_str) {
                     return $q.reject('Unable to retrieve last update.');
                 }
-                updatedAtStr = updatedAt.calendar();
-                $sessionStorage.model_updated_at = updatedAtStr;
-                return updatedAtStr;
+                $sessionStorage.model_updated_at = data.updated_at_str;
+                return data.updated_at_str;
             })
             .catch(function (reason) {
                 $log.error('There has been an error', reason);
                 var response = _.get(reason, 'data.detail') || reason;
                 response = _.isString(response) ? response : 'Unable to retrieve last update.';
+                return $q.reject(response);
+            });
+    };
+
+    function addRanks(items, field) {
+        field = field || 'count';
+        _.forEach(items, function (item, i) {
+            item.rank = i === 0 || item[field] !== items[i - 1][field] ? i + 1 : items[i - 1].rank;
+        });
+        return items;
+    }
+
+    function processStats(stats) {
+        stats = processDate(stats, 'updated_at');
+        _.forEach(['rg', 'bgg'], function (site) {
+            _.forEach(['artist', 'category', 'designer', 'game_type', 'mechanic'], function (field) {
+                stats[site + '_top'][field] = addRanks(stats[site + '_top'][field]);
+            });
+        });
+        return stats;
+    }
+
+    service.getGamesStats = function getGamesStats(noblock) {
+        if (!_.isEmpty($sessionStorage.games_stats)) {
+            return $q.resolve($sessionStorage.games_stats);
+        }
+
+        return $http.get(API_URL + 'games/stats/', {'noblock': !!noblock})
+            .then(function (response) {
+                var stats = response.data;
+                if (_.isEmpty(stats)) {
+                    return $q.reject('Unable to load games stats.');
+                }
+                stats = processStats(stats);
+                $sessionStorage.games_stats = stats;
+                return stats;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to load games stats.';
                 return $q.reject(response);
             });
     };
@@ -551,6 +609,13 @@ ludojApp.factory('usersService', function usersService(
             stats.updated_at = null;
             stats.updated_at_str = null;
         }
+        _.forEach(['rg_top', 'bgg_top'], function (site) {
+            var total = _.get(stats, site + '.total', 0);
+            _.forEach(['owned', 'played', 'rated'], function (item) {
+                var value = _.get(stats, site + '.' + item, 0);
+                stats[site][item + '_pct'] = total ? 100 * value / total : 0;
+            });
+        });
         return stats;
     }
 
