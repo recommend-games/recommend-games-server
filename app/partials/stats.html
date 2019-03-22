@@ -38,8 +38,16 @@
 					role="tabpanel"
 					aria-labelledby="designers-rg-tab">
 				<ol class="mb-0">
-					<li ng-repeat="designer in data.rg_top.designer">
-						{{ designer.name }} ({{ designer.count }} games)
+					<li ng-repeat="designer in data.rg_top.designer"
+							value="{{ designer.rank }}">
+						<a ng-href="https://boardgamegeek.com/boardgamedesigner/{{ designer.bgg_id }}"
+								target="_blank">
+							<strong>
+								{{ designer.name }}
+								<i class="fas fa-external-link-alt"></i>
+							</strong>
+						</a>
+						({{ designer.count }} game{{ designer.count === 1 ? '' : 's' }})
 					</li>
 				</ol>
 			</div>
@@ -48,8 +56,16 @@
 					role="tabpanel"
 					aria-labelledby="designers-bgg-tab">
 				<ol class="mb-0">
-					<li ng-repeat="designer in data.bgg_top.designer">
-						{{ designer.name }} ({{ designer.count }} games)
+					<li ng-repeat="designer in data.bgg_top.designer"
+							value="{{ designer.rank }}">
+						<a ng-href="https://boardgamegeek.com/boardgamedesigner/{{ designer.bgg_id }}"
+								target="_blank">
+							<strong>
+								{{ designer.name }}
+								<i class="fas fa-external-link-alt"></i>
+							</strong>
+						</a>
+						({{ designer.count }} game{{ designer.count === 1 ? '' : 's' }})
 					</li>
 				</ol>
 			</div>

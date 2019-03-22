@@ -418,8 +418,22 @@ ludojApp.factory('gamesService', function gamesService(
             });
     };
 
+    function addRanks(items, field) {
+        field = field || 'count';
+        _.forEach(items, function (item, i) {
+            item.rank = i === 0 || item[field] !== items[i - 1][field] ? i + 1 : items[i - 1].rank;
+        });
+        return items;
+    }
+
     function processStats(stats) {
-        return processDate(stats, 'updated_at');
+        stats = processDate(stats, 'updated_at');
+        _.forEach(['rg', 'bgg'], function (site) {
+            _.forEach(['artist', 'category', 'designer', 'game_type', 'mechanic'], function (field) {
+                stats[site + '_top'][field] = addRanks(stats[site + '_top'][field]);
+            });
+        });
+        return stats;
     }
 
     service.getGamesStats = function getGamesStats(noblock) {
