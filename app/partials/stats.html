@@ -11,7 +11,6 @@
 			<h4>Top Designers</h4>
 			<nav class="nav nav-tabs nav-justified card-header-tabs">
 				<a id="designers-rg-tab"
-						ng-disabled="!data.rg_top.designer"
 						data-toggle="tab"
 						data-target="#designers-rg"
 						href=""
@@ -78,7 +77,6 @@
 			<h4>Top Artists</h4>
 			<nav class="nav nav-tabs nav-justified card-header-tabs">
 				<a id="artists-rg-tab"
-						ng-disabled="!data.rg_top.artist"
 						data-toggle="tab"
 						data-target="#artists-rg"
 						href=""
@@ -145,7 +143,6 @@
 			<h4>Top Game Types</h4>
 			<nav class="nav nav-tabs nav-justified card-header-tabs">
 				<a id="types-rg-tab"
-						ng-disabled="!data.rg_top.game_type"
 						data-toggle="tab"
 						data-target="#types-rg"
 						href=""
@@ -208,7 +205,6 @@
 			<h4>Top Categories</h4>
 			<nav class="nav nav-tabs nav-justified card-header-tabs">
 				<a id="categories-rg-tab"
-						ng-disabled="!data.rg_top.category"
 						data-toggle="tab"
 						data-target="#categories-rg"
 						href=""
@@ -260,6 +256,68 @@
 							</strong>
 						</a>
 						({{ category.count }} game{{ category.count === 1 ? '' : 's' }})
+					</li>
+				</ol>
+			</div>
+		</div>
+	</div>
+
+	<div class="card mb-3">
+		<div class="card-header">
+			<h4>Top Mechanics</h4>
+			<nav class="nav nav-tabs nav-justified card-header-tabs">
+				<a id="mechanics-rg-tab"
+						data-toggle="tab"
+						data-target="#mechanics-rg"
+						href=""
+						role="tab"
+						aria-controls="mechanics-rg"
+						aria-selected="true"
+						class="nav-item nav-link active">
+					<abbr title="Recommend.Games">R.G</abbr> top 100
+				</a>
+				<a id="mechanics-bgg-tab"
+						data-toggle="tab"
+						data-target="#mechanics-bgg"
+						href=""
+						role="tab"
+						aria-controls="mechanics-bgg"
+						aria-selected="false"
+						class="nav-item nav-link">
+					<abbr title="BoardGameGeek">BGG</abbr> top 100
+				</a>
+			</nav>
+		</div>
+		<div class="card-body tab-content">
+			<div id="mechanics-rg"
+					class="tab-pane fade show active"
+					role="tabpanel"
+					aria-labelledby="mechanics-rg-tab">
+				<ol class="mb-0">
+					<li ng-repeat="mechanic in data.rg_top.mechanic"
+							value="{{ mechanic.rank }}">
+						<a ng-href="/#/?mechanic={{ mechanic.bgg_id }}">
+							<strong>
+								{{ mechanic.name }}
+							</strong>
+						</a>
+						({{ mechanic.count }} game{{ mechanic.count === 1 ? '' : 's' }})
+					</li>
+				</ol>
+			</div>
+			<div id="mechanics-bgg"
+					class="tab-pane fade"
+					role="tabpanel"
+					aria-labelledby="mechanics-bgg-tab">
+				<ol class="mb-0">
+					<li ng-repeat="mechanic in data.bgg_top.mechanic"
+							value="{{ mechanic.rank }}">
+						<a ng-href="/#/?mechanic={{ mechanic.bgg_id }}">
+							<strong>
+								{{ mechanic.name }}
+							</strong>
+						</a>
+						({{ mechanic.count }} game{{ mechanic.count === 1 ? '' : 's' }})
 					</li>
 				</ol>
 			</div>
