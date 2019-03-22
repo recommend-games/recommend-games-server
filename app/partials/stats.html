@@ -5,6 +5,7 @@
 	<p class="lead">
 		TODO.
 	</p>
+
 	<div class="card mb-3">
 		<div class="card-header">
 			<h4>Top Designers</h4>
@@ -66,6 +67,73 @@
 							</strong>
 						</a>
 						({{ designer.count }} game{{ designer.count === 1 ? '' : 's' }})
+					</li>
+				</ol>
+			</div>
+		</div>
+	</div>
+
+	<div class="card mb-3">
+		<div class="card-header">
+			<h4>Top Artists</h4>
+			<nav class="nav nav-tabs nav-justified card-header-tabs">
+				<a id="artists-rg-tab"
+						ng-disabled="!data.rg_top.artist"
+						data-toggle="tab"
+						data-target="#artists-rg"
+						href=""
+						role="tab"
+						aria-controls="artists-rg"
+						aria-selected="true"
+						class="nav-item nav-link active">
+					<abbr title="Recommend.Games">R.G</abbr> top 100
+				</a>
+				<a id="artists-bgg-tab"
+						data-toggle="tab"
+						data-target="#artists-bgg"
+						href=""
+						role="tab"
+						aria-controls="artists-bgg"
+						aria-selected="false"
+						class="nav-item nav-link">
+					<abbr title="BoardGameGeek">BGG</abbr> top 100
+				</a>
+			</nav>
+		</div>
+		<div class="card-body tab-content">
+			<div id="artists-rg"
+					class="tab-pane fade show active"
+					role="tabpanel"
+					aria-labelledby="artists-rg-tab">
+				<ol class="mb-0">
+					<li ng-repeat="artist in data.rg_top.artist"
+							value="{{ artist.rank }}">
+						<a ng-href="https://boardgamegeek.com/boardgameartist/{{ artist.bgg_id }}"
+								target="_blank">
+							<strong>
+								{{ artist.name }}
+								<i class="fas fa-external-link-alt"></i>
+							</strong>
+						</a>
+						({{ artist.count }} game{{ artist.count === 1 ? '' : 's' }})
+					</li>
+				</ol>
+			</div>
+			<div id="artists-bgg"
+					class="tab-pane fade"
+					role="tabpanel"
+					aria-labelledby="artists-bgg-tab">
+				<ol class="mb-0">
+					<li ng-repeat="artist in data.bgg_top.artist"
+							value="{{ artist.rank }}">
+						<a ng-href="https://boardgamegeek.com/boardgameartist/{{ artist.bgg_id }}"
+								target="_blank">
+							<strong>
+								{{ artist.name }}
+								<i class="fas fa-external-link-alt"></i>
+							</strong>
+						</a>
+						({{ artist.count }} game{{ artist.count === 1 ? '' : 's' }})
 					</li>
 				</ol>
 			</div>
