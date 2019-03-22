@@ -17,7 +17,7 @@ ludojApp.controller('StatsController', function StatsController(
         .catch($log.error);
 
     gamesService.setTitle('Statistics');
-    gamesService.setDescription('TODO');
+    gamesService.setDescription('Analyses of the Recommend.Games and BoardGameGeek top 100 games.');
     gamesService.setCanonicalUrl($location.path());
     gamesService.setImage();
 });
