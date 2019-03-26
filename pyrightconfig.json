@@ -1,0 +1,9 @@
+{
+    "include": [
+        "ludoj",
+        "games",
+        "build.py",
+        "manage.py"
+    ],
+    "pythonVersion": "3.6"
+}
