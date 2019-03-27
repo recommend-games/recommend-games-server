@@ -8,11 +8,11 @@
 		<span ng-if="showRanking &amp;&amp; game.rec_rank"
 				class="game-rank badge badge-pill badge-success">
 			#{{ game.rec_rank }}
-			<small ng-if="game.rec_rating"
+			<small ng-if="!hideScore &amp;&amp; game.rec_rating"
 					class="text-white-50">
 				({{ game.rec_rating | number:1 }})
 			</small>
-			<span ng-if="game.rec_stars"
+			<span ng-if="!hideScore &amp;&amp; game.rec_stars"
 					class="game-stars">
 				<br />
 				<i ng-repeat="starClass in game.star_classes track by $index"

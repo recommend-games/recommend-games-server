@@ -6,8 +6,13 @@ import logging
 import os.path
 import timeit
 
+from datetime import datetime, timezone
 from functools import lru_cache
 from itertools import groupby
+
+import dateutil.parser
+
+from django.conf import settings
 
 ITERABLE_SINGLE_VALUES = (dict, str, bytes)
 LOGGER = logging.getLogger(__name__)
@@ -61,6 +66,15 @@ def parse_int(string, base=10):
     return None
 
 
+def parse_float(number):
+    ''' safely convert an object to float if possible, else return None '''
+    try:
+        return float(number)
+    except Exception:
+        pass
+    return None
+
+
 def parse_bool(item):
     ''' parses an item and converts it to a boolean '''
     if isinstance(item, int):
@@ -73,6 +87,59 @@ def parse_bool(item):
     return False
 
 
+def _add_tz(date, tzinfo=None):
+    return date if not tzinfo or not date or date.tzinfo else date.replace(tzinfo=tzinfo)
+
+
+def parse_date(date, tzinfo=None, format_str=None):
+    '''try to turn input into a datetime object'''
+
+    if not date:
+        return None
+
+    # already a datetime
+    if isinstance(date, datetime):
+        return _add_tz(date, tzinfo)
+
+    # parse as epoch time
+    timestamp = parse_float(date)
+    if timestamp is not None:
+        return datetime.fromtimestamp(timestamp, tzinfo or timezone.utc)
+
+    if format_str:
+        try:
+            # parse as string in given format
+            return _add_tz(datetime.strptime(date, format_str), tzinfo)
+        except Exception:
+            pass
+
+    try:
+        # parse as string
+        return _add_tz(dateutil.parser.parse(date), tzinfo)
+    except Exception:
+        pass
+
+    try:
+        # parse as (year, month, day, hour, minute, second, microsecond, tzinfo)
+        return datetime(*date)
+    except Exception:
+        pass
+
+    try:
+        # parse as time.struct_time
+        return datetime(*date[:6], tzinfo=tzinfo or timezone.utc)
+    except Exception:
+        pass
+
+    return None
+
+
+def serialize_date(date, tzinfo=None):
+    '''seralize a date into ISO format if possible'''
+    parsed = parse_date(date, tzinfo)
+    return parsed.strftime('%Y-%m-%dT%T%z') if parsed else str(date) if date else None
+
+
 @lru_cache(maxsize=8)
 def load_recommender(path):
     ''' load recommender from given path '''
@@ -83,6 +150,63 @@ def load_recommender(path):
         return GamesRecommender.load(path=path)
     except Exception:
         LOGGER.exception('unable to load recommender model from <%s>', path)
+    return None
+
+
+@lru_cache(maxsize=8)
+def pubsub_client():
+    ''' Google Cloud PubSub client '''
+    try:
+        from google.cloud import pubsub
+        return pubsub.PublisherClient()
+    except Exception:
+        LOGGER.exception('unable to initialise PubSub client')
+    return None
+
+
+def pubsub_push(
+        message,
+        project=settings.PUBSUB_QUEUE_PROJECT,
+        topic=settings.PUBSUB_QUEUE_TOPIC,
+        encoding='utf-8',
+        **kwargs,
+    ):
+    ''' publish message '''
+
+    if not project or not topic:
+        return None
+
+    client = pubsub_client()
+
+    if client is None:
+        return None
+
+    if isinstance(message, str):
+        message = message.encode(encoding)
+    assert isinstance(message, bytes)
+
+    # pylint: disable=no-member
+    path = client.topic_path(project, topic)
+
+    LOGGER.debug('pushing message %r to <%s>', message, path)
+
+    try:
+        return client.publish(topic=path, data=message, **kwargs)
+    except Exception:
+        LOGGER.exception('unable to send message %r', message)
+    return None
+
+
+@lru_cache(maxsize=8)
+def model_updated_at(file_path=settings.MODEL_UPDATED_FILE):
+    ''' latest model update '''
+    try:
+        with open(file_path) as file_obj:
+            updated_at = file_obj.read()
+        updated_at = ' '.join(updated_at.split())
+        return parse_date(updated_at, tzinfo=timezone.utc)
+    except Exception:
+        pass
     return None
 
 

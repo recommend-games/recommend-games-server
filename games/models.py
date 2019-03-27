@@ -3,8 +3,9 @@
 ''' models '''
 
 from django.db.models import (
-    CASCADE, BooleanField, CharField, FloatField, ForeignKey, Index, ManyToManyField, Model,
-    PositiveIntegerField, PositiveSmallIntegerField, SmallIntegerField, TextField, URLField)
+    CASCADE, BooleanField, CharField, DateTimeField, FloatField, ForeignKey, Index,
+    ManyToManyField, Model, PositiveIntegerField, PositiveSmallIntegerField,
+    SmallIntegerField, TextField, URLField)
 from django_extensions.db.fields.json import JSONField
 
 
@@ -40,6 +41,7 @@ class Game(Model):
     min_time = PositiveSmallIntegerField(blank=True, null=True, db_index=True)
     max_time = PositiveSmallIntegerField(blank=True, null=True, db_index=True)
 
+    game_type = ManyToManyField('GameType', blank=True, related_name='games')
     category = ManyToManyField('Category', blank=True, related_name='games')
     mechanic = ManyToManyField('Mechanic', blank=True, related_name='games')
     cooperative = BooleanField(default=False, db_index=True)
@@ -105,6 +107,22 @@ class Person(Model):
         return self.name
 
 
+class GameType(Model):
+    ''' game type model '''
+
+    bgg_id = PositiveIntegerField(primary_key=True)
+    name = CharField(max_length=255, db_index=True)
+
+    class Meta:
+        ''' meta '''
+        ordering = (
+            'name',
+        )
+
+    def __str__(self):
+        return self.name
+
+
 class Category(Model):
     ''' category model '''
 
@@ -142,6 +160,7 @@ class User(Model):
 
     name = CharField(primary_key=True, max_length=255)
     games = ManyToManyField(Game, through='Collection', blank=True)
+    updated_at = DateTimeField(blank=True, null=True, db_index=True)
 
     class Meta:
         ''' meta '''

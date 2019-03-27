@@ -1,200 +1,307 @@
 <!DOCTYPE html>
 <section xmlns="http://www.w3.org/1999/xhtml"
 		id="games-list">
-	<!-- <h1 class="display-1 text-nowrap">
-		Ludoj
-		<sup class="beta text-muted">βeta</sup>
-	</h1> -->
 	<p class="lead mt-3">
-		Top-rated board games as evaluated by our <a href="https://gitlab.com/mshepherd/ludoj-recommender" target="_blank">recommendation engine <i class="fas fa-external-link-alt"></i></a>. Read more <a href="#/about">about Ludoj</a>.
+		Top-rated board games as evaluated by our <a href="https://gitlab.com/mshepherd/ludoj-recommender" target="_blank">recommendation engine <i class="fas fa-external-link-alt"></i></a>.
+		Read more <a href="/#/about">about <span class="recommend-games">Recommend.Games</span></a>.
 	</p>
 
-	<form ng-submit="updateParams()"
-			id="fetch-game-form"
-			name="fetch-game-form"
-			novalidate="novalidate"
-			role="form"
-			class="form mb-3">
-		<label for="user"
-				id="bgg-user-label"
-				class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
-			Personal recommendations for:
-		</label>
-		<div class="input-group">
-			<input type="search"
-				id="user"
-				name="user"
-				ng-model="user"
-				ng-required="true"
-				class="form-control"
-				placeholder="BoardGameGeek user name"
-				aria-describedby="bgg-user-label" />
-			<div class="input-group-append">
-				<button type="button"
-						ng-disabled="!user"
-						ng-click="clearField('user')"
-						class="btn btn-outline-secondary">
-					<i class="fas fa-times"></i>
-				</button>
-				<button type="submit"
-						ng-disabled="!user"
-						class="btn btn-primary">
-					GO!
-				</button>
-				<button type="button"
-						ng-disabled="!user"
-						class="btn btn-outline-primary"
-						data-toggle="collapse"
-						data-target="#form-exclude-filters">
-					<i class="fas fa-caret-down" id="exclude-filters-icon"></i>
-				</button>
-			</div>
+	<div class="card">
+		<div class="card-header">
+			<nav class="nav nav-tabs nav-justified card-header-tabs">
+				<a id="bgg-tab"
+						ng-click="showPane('bgg'); toggleSelection(false)"
+						href=""
+						role="tab"
+						aria-controls="fetch-game-form"
+						aria-selected="{{ !activePane || activePane == 'bgg' }}"
+						class="nav-item nav-link {{ !activePane || activePane == 'bgg' ? 'active' : '' }}">
+					<abbr title="BoardGameGeek">BGG</abbr> account
+				</a>
+				<a id="select-games-tab"
+						ng-click="showPane('select'); toggleSelection(true)"
+						href=""
+						role="tab"
+						aria-controls="select-games"
+						aria-selected="{{ activePane == 'select' }}"
+						class="nav-item nav-link {{ activePane == 'select' ? 'active' : '' }}">
+					<span ng-hide="isEmpty(likedGames)"
+							class="badge badge-primary">
+						{{ likedGames.length }}
+					</span>
+					Select games
+				</a>
+			</nav>
 		</div>
-		<div id="form-exclude-filters" class="collapse">
-			<div class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
-				Exclude games from recommendations:
-			</div>
-			<div class="{{ user ? 'form-exclude-enabled' : 'form-exclude-disabled' }}">
-				<div class="form-check form-check-inline"
-						data-toggle="tooltip"
-						title="Don't recommend games the user has rated">
-					<label class="switch mb-0">
-						<input type="checkbox"
-							id="filter-exclude-rated"
-							name="filter-exclude-rated"
-							ng-model="exclude.rated"
-							ng-disabled="!user" />
-						<span class="slider {{ user &amp;&amp; exclude.rated ? 'bg-success' : 'bg-secondary' }}"></span>
-					</label>
-					<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.rated ? 'text-success' : 'text-muted' }} ml-1"
-							for="filter-exclude-rated">
-						rated
-					</label>
+		<div class="card-body">
+			<div id="select-games"
+					ng-show="activePane == 'select'"
+					aria-labelledby="select-games-tab">
+				<p class="card-text mb-1">
+					Select games you like and we will recommend games for your taste!
+					<em>Note</em>: You can also select games from the recommendations below.
+				</p>
+				<form ng-submit="fetchAndUpdate()"
+						id="select-games-search-form"
+						name="select-games-search-form"
+						novalidate="novalidate"
+						role="form"
+						class="form mb-1 input-group dropdown">
+					<input type="search"
+						id="select-games-search"
+						name="select-games-search"
+						ng-model="searchLikedGames"
+						ng-change="updateSearchGames()"
+						data-toggle="dropdown"
+						class="form-control"
+						placeholder="Search for a game you like"
+						autocomplete="off" />
+					<div class="dropdown-menu mw-100 py-1" id="select-games-dropdown">
+						<a ng-repeat="game in searchGames | filter:{'name':searchLikedGames} | orderBy:['rec_rank','bgg_rank','name'] | limitTo:8"
+								ng-click="contains(likedGames, game) ? unlikeGame(game) : likeGame(game)"
+								class="dropdown-item text-truncate py-0"
+								href="">
+							<i ng-if="contains(likedGames, game)" class="fas fa-thumbs-up"></i>
+							{{ game.name_short || game.name }}
+							<small ng-if="game.year" class="text-muted">({{ game.year }})</small>
+						</a>
+						<p class="dropdown-item text-muted text-truncate mb-0 py-0">
+							<em>Type to search for games</em>
+						</p>
+					</div>
+					<div class="input-group-append">
+						<button type="button"
+								ng-disabled="!searchLikedGames"
+								ng-click="clearField('searchLikedGames', 'select-games-search')"
+								class="btn btn-outline-secondary">
+							<i class="fas fa-times"></i>
+						</button>
+						<button type="submit"
+								ng-disabled="!searchLikedGames"
+								class="btn btn-primary">
+							<i class="fas fa-search"></i>
+						</button>
+					</div>
+				</form>
+				<div class="clearfix">
+					<div class="btn-group-vertical float-right ml-1 mb-1">
+						<button type="button"
+								ng-disabled="isEmpty(likedGames)"
+								ng-click="clearUser()"
+								class="btn btn-primary">
+							<i class="fas fa-dice"></i>
+							Recommend!
+						</button>
+						<button type="button"
+								data-toggle="collapse"
+								data-target="#selectable-games"
+								aria-expanded="false"
+								aria-controls="selectable-games"
+								class="btn btn-outline-primary btn-sm">
+							<i class="fas fa-fire"></i>
+							Load popular games
+						</button>
+					</div>
+					<strong ng-hide="isEmpty(likedGames)">Liked games:</strong>
+					<a ng-repeat="game in likedGames"
+							ng-click="unlikeGame(game)"
+							id="like-{{ game.bgg_id }}"
+							href=""
+							class="badge badge-success badge-liked-game mr-1"
+							title="&quot;{{ game.name }}&quot; {{ game.designer_display ? 'by ' + game.designer_display : '' }} {{ game.year ? '(' + game.year + ')' : '' }}"
+							data-toggle="tooltip"
+							data-placement="bottom">
+						<i class="fas fa-thumbs-up"></i>
+						{{ game.name_short || game.name }}
+					</a>
 				</div>
-				<div class="form-check form-check-inline"
-						data-toggle="tooltip"
-						title="Don't recommend games the user owns, has previously owned, or preordered">
-					<label class="switch mb-0">
-						<input type="checkbox"
-							id="filter-exclude-owned"
-							name="filter-exclude-owned"
-							ng-model="exclude.owned"
-							ng-disabled="!user" />
-						<span class="slider {{ user &amp;&amp; exclude.owned ? 'bg-success' : 'bg-secondary' }}"></span>
-					</label>
-					<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.owned ? 'text-success' : 'text-muted' }} ml-1"
-							for="filter-exclude-owned">
-						owned
-					</label>
-				</div>
-				<div class="form-check form-check-inline"
-						data-toggle="tooltip"
-						title="Don't recommend games the user has on their wishlist">
-					<label class="switch mb-0">
-						<input type="checkbox"
-							id="filter-exclude-wishlist"
-							name="filter-exclude-wishlist"
-							ng-model="exclude.wishlist"
-							ng-disabled="!user" />
-						<span class="slider {{ user &amp;&amp; exclude.wishlist ? 'bg-success' : 'bg-secondary' }}"></span>
-					</label>
-					<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.wishlist ? 'text-success' : 'text-muted' }} ml-1"
-							for="filter-exclude-wishlist">
-						wishlist
-					</label>
-				</div>
-				<div class="form-check form-check-inline"
-						data-toggle="tooltip"
-						title="Don't recommend games the user has played">
-					<label class="switch mb-0">
-						<input type="checkbox"
-							id="filter-exclude-played"
-							name="filter-exclude-played"
-							ng-model="exclude.played"
-							ng-disabled="!user" />
-						<span class="slider {{ user &amp;&amp; exclude.played ? 'bg-success' : 'bg-secondary' }}"></span>
-					</label>
-					<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.played ? 'text-success' : 'text-muted' }} ml-1"
-							for="filter-exclude-played">
-						played
-					</label>
-				</div>
-				<div class="form-check form-check-inline"
-						data-toggle="tooltip"
-						title="Don't recommend games that are implementations of other excluded games">
-					<label class="switch mb-0">
-						<input type="checkbox"
-							id="filter-exclude-clusters"
-							name="filter-exclude-clusters"
-							ng-model="exclude.clusters"
-							ng-disabled="!user" />
-						<span class="slider {{ user &amp;&amp; exclude.clusters ? 'bg-success' : 'bg-secondary' }}"></span>
-					</label>
-					<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.clusters ? 'text-success' : 'text-muted' }} ml-1"
-							for="filter-exclude-clusters">
-						implementations
-					</label>
-				</div>
-			</div>
-		</div>
-	</form>
-
-	<p class="text-right mb-0">
-		<em>No BoardGameGeek account? Tell us what games you like instead!</em>
-		<button type="button"
-				ng-disabled="isEmpty(likedGames) &amp;&amp; isEmpty(popularGames)"
-				class="btn btn-sm btn-primary"
-				ng-click="toggleSelection()"
-				aria-expanded="false"
-				aria-controls="select-games">
-			<span ng-hide="isEmpty(likedGames)"
-					class="badge badge-light">
-				{{ likedGames.length }}
-			</span>
-			Select games
-			<i class="far {{ selectionActive ? 'fa-minus-square' : 'fa-plus-square' }}" id="select-games-icon"></i>
-		</button>
-	</p>
-
-	<div id="select-games" class="collapse">
-		<p class="mb-1">
-			Select games you like and we will recommend games for your taste!
-			<em>Note</em>: You can also select games from the recommendations below.
-		</p>
-		<div ng-hide="isEmpty(likedGames)"
-				class="row selectable-games mb-0">
-			<p class="col-12 mb-0"><strong>Liked games:</strong></p>
-			<a ng-repeat="game in likedGames"
-				game-square=""
-				game="game"
-				thumb="solid"
-				ng-click="unlikeGame(game)"
-				href=""
-				class="col-xl-2 col-md-3 col-sm-4 col-6 game-small game-liked"
-				add-class="game-zoomable game-selectable"></a>
-		</div>
-		<div ng-hide="isEmpty(popularGames)"
-				class="row selectable-games mb-0">
-			<p class="col-12 mb-0"><strong>Select games you like:</strong></p>
-			<a ng-repeat="game in popularGames"
-				game-square=""
-				game="game"
-				thumb="outline"
-				ng-click="likeGame(game)"
-				href=""
-				class="col-xl-2 col-md-3 col-sm-4 col-6 game-small"
-				add-class="game-zoomable game-selectable"></a>
-			<div ng-if="popularGamesPage"
-					ng-click="fetchPopularGames(popularGamesPage)"
-					class="col-xl-2 col-md-3 col-sm-4 col-6 game-small">
-				<div class="game game-more">
-					<div>
-						<h2 class="game-title">
-							More...
-						</h2>
+				<div id="selectable-games" class="collapse row selectable-games">
+					<a ng-repeat="game in popularGames"
+						game-square=""
+						game="game"
+						thumb="outline"
+						ng-click="likeGame(game)"
+						href=""
+						class="col-xl-2 col-md-3 col-sm-4 col-6 game-small"
+						add-class="game-zoomable game-selectable"></a>
+					<div ng-if="popularGamesPage"
+							ng-click="fetchPopularGames(popularGamesPage)"
+							class="col-xl-2 col-md-3 col-sm-4 col-6 game-small">
+						<div class="game game-more">
+							<div>
+								<h2 class="game-title">
+									More...
+								</h2>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
+
+			<form ng-show="!activePane || activePane == 'bgg'"
+					ng-submit="updateParams()"
+					id="fetch-game-form"
+					name="fetch-game-form"
+					novalidate="novalidate"
+					role="form"
+					aria-labelledby="bgg-tab"
+					class="form">
+				<label for="user"
+						id="bgg-user-label"
+						class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
+					Personal recommendations for:
+				</label>
+				<div class="input-group">
+					<input type="search"
+						id="user"
+						name="user"
+						ng-model="user"
+						ng-required="true"
+						ng-change="toggleCollapse('#form-exclude-filters', !!user)"
+						ng-focus="toggleCollapse('#form-exclude-filters', !!user)"
+						class="form-control"
+						placeholder="BoardGameGeek user name"
+						aria-describedby="bgg-user-label" />
+					<div class="input-group-append">
+						<button type="button"
+								ng-disabled="!user"
+								ng-click="clearField('user'); toggleCollapse('#form-exclude-filters', false)"
+								class="btn btn-outline-secondary">
+							<i class="fas fa-times"></i>
+						</button>
+						<button type="submit"
+								ng-disabled="!user"
+								class="btn btn-primary">
+							<i class="fas fa-dice"></i>
+						</button>
+					</div>
+				</div>
+				<div id="form-exclude-filters" class="collapse">
+					<div class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
+						Exclude games from recommendations:
+					</div>
+					<div class="{{ user ? 'form-exclude-enabled' : 'form-exclude-disabled' }} mb-1">
+						<div class="form-check form-check-inline"
+								data-toggle="tooltip"
+								data-placement="bottom"
+								title="Don't recommend games the user has rated">
+							<label class="switch mb-0">
+								<input type="checkbox"
+									id="filter-exclude-rated"
+									name="filter-exclude-rated"
+									ng-model="exclude.rated"
+									ng-disabled="!user" />
+								<span class="slider {{ user &amp;&amp; exclude.rated ? 'bg-success' : 'bg-secondary' }}"></span>
+							</label>
+							<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.rated ? 'text-success' : 'text-muted' }} ml-1"
+									for="filter-exclude-rated">
+								rated
+							</label>
+						</div>
+						<div class="form-check form-check-inline"
+								data-toggle="tooltip"
+								data-placement="bottom"
+								title="Don't recommend games the user owns, has previously owned, or preordered">
+							<label class="switch mb-0">
+								<input type="checkbox"
+									id="filter-exclude-owned"
+									name="filter-exclude-owned"
+									ng-model="exclude.owned"
+									ng-disabled="!user" />
+								<span class="slider {{ user &amp;&amp; exclude.owned ? 'bg-success' : 'bg-secondary' }}"></span>
+							</label>
+							<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.owned ? 'text-success' : 'text-muted' }} ml-1"
+									for="filter-exclude-owned">
+								owned
+							</label>
+						</div>
+						<div class="form-check form-check-inline"
+								data-toggle="tooltip"
+								data-placement="bottom"
+								title="Don't recommend games the user has on their wishlist">
+							<label class="switch mb-0">
+								<input type="checkbox"
+									id="filter-exclude-wishlist"
+									name="filter-exclude-wishlist"
+									ng-model="exclude.wishlist"
+									ng-disabled="!user" />
+								<span class="slider {{ user &amp;&amp; exclude.wishlist ? 'bg-success' : 'bg-secondary' }}"></span>
+							</label>
+							<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.wishlist ? 'text-success' : 'text-muted' }} ml-1"
+									for="filter-exclude-wishlist">
+								wishlist
+							</label>
+						</div>
+						<div class="form-check form-check-inline"
+								data-toggle="tooltip"
+								data-placement="bottom"
+								title="Don't recommend games the user has played">
+							<label class="switch mb-0">
+								<input type="checkbox"
+									id="filter-exclude-played"
+									name="filter-exclude-played"
+									ng-model="exclude.played"
+									ng-disabled="!user" />
+								<span class="slider {{ user &amp;&amp; exclude.played ? 'bg-success' : 'bg-secondary' }}"></span>
+							</label>
+							<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.played ? 'text-success' : 'text-muted' }} ml-1"
+									for="filter-exclude-played">
+								played
+							</label>
+						</div>
+						<div class="form-check form-check-inline"
+								data-toggle="tooltip"
+								data-placement="bottom"
+								title="Don't recommend games that are implementations of other excluded games">
+							<label class="switch mb-0">
+								<input type="checkbox"
+									id="filter-exclude-clusters"
+									name="filter-exclude-clusters"
+									ng-model="exclude.clusters"
+									ng-disabled="!user" />
+								<span class="slider {{ user &amp;&amp; exclude.clusters ? 'bg-success' : 'bg-secondary' }}"></span>
+							</label>
+							<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.clusters ? 'text-success' : 'text-muted' }} ml-1"
+									for="filter-exclude-clusters">
+								implementations
+							</label>
+						</div>
+					</div>
+					<div class="{{ user ? '' : 'text-muted' }} mb-0">
+						Use recommender model:
+						<a href="/#/faq#what-are-the-standard-and-similarity-models-in-the-recommendation-settings"
+								data-toggle="tooltip"
+								data-placement="right"
+								title="Read more about the different models"
+								class="text-muted">
+							<i class="fas fa-info-circle"></i>
+						</a>
+					</div>
+					<div class="{{ user ? 'form-exclude-enabled' : 'form-exclude-disabled' }}">
+						<div class="form-check form-check-inline"
+								data-toggle="tooltip"
+								data-placement="bottom"
+								title="Use the default or similarity based model for recommendations">
+							<label class="form-check-label form-label-exclude {{ user &amp;&amp; !similarity ? 'text-success' : 'text-muted' }} mr-1"
+									for="recommender-similarity">
+								default
+							</label>
+							<label class="switch mb-0">
+								<input type="checkbox"
+									id="recommender-similarity"
+									name="recommender-similarity"
+									ng-model="similarity"
+									ng-disabled="!user" />
+								<span class="slider bg-secondary"></span>
+							</label>
+							<label class="form-check-label form-label-exclude {{ user &amp;&amp; similarity ? 'text-success' : 'text-muted' }} ml-1"
+									for="recommender-similarity">
+								similarity
+							</label>
+						</div>
+					</div>
+				</div>
+			</form>
 		</div>
 	</div>
 
@@ -206,14 +313,16 @@
 				title="You can also select games you like in the list below"
 				class="btn-group rec-button-tooltip" role="group">
 			<button type="button"
-					ng-click="toggleSelection()"
+					ng-click="toggleSelection(false)"
 					class="btn btn-secondary">
+				<i class="fas fa-times"></i>
 				Cancel
 			</button>
 			<button type="button"
-				ng-disabled="!selectionActive || isEmpty(likedGames)"
+				ng-disabled="isEmpty(likedGames)"
 				ng-click="clearUser()"
 				class="btn btn-primary">
+				<i class="fas fa-dice"></i>
 				Recommend!
 			</button>
 		</div>
@@ -229,7 +338,7 @@
 			<label for="search"
 					id="search-label"
 					class="{{ search ? 'text-success' : 'text-muted' }} mb-0">
-				Game name:
+				Filter games by name:
 			</label>
 			<div class="input-group">
 				<input type="search"
@@ -250,7 +359,7 @@
 					<button type="submit"
 							ng-disabled="!search"
 							class="btn btn-primary">
-						Search
+						<i class="fas fa-search"></i>
 					</button>
 				</div>
 			</div>
@@ -260,6 +369,7 @@
 				<button type="button"
 						class="btn btn-outline-secondary"
 						ng-click="clearFilters()">
+					<i class="fas fa-times"></i>
 					Clear filters
 				</button>
 				<button type="button"
@@ -490,7 +600,7 @@
 		</div>
 
 		<div class="form-row">
-			<div class="col-12 input-group mb-3"
+			<div class="col-md-6 input-group mb-3"
 					data-toggle="tooltip"
 					title="Display only cooperative, only competitive, or all games">
 				<div class="input-group-prepend">
@@ -508,6 +618,78 @@
 					<option selected="selected" ng-value="null">[all]</option>
 					<option value="True">only cooperative</option>
 					<option value="False">only competitive</option>
+				</select>
+			</div>
+			<div class="col-md-6 input-group mb-3"
+					data-toggle="tooltip"
+					title="Filter by game type">
+				<div class="input-group-prepend">
+					<div class="input-group-text">
+						<label for="filter-types"
+								class="form-check-label {{ gameType ? 'text-success' : 'text-muted' }}">
+							Type:
+						</label>
+					</div>
+				</div>
+				<select name="filter-types"
+						ng-model="gameType"
+						ng-disabled="isEmpty(gameTypes)"
+						class="custom-select"
+						id="filter-types">
+					<option selected="selected" ng-value="null">[all]</option>
+					<option ng-repeat="type in gameTypes"
+							ng-value="type.bgg_id">
+						{{ type.name }}
+					</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="form-row">
+			<div class="col-md-6 input-group mb-3"
+					data-toggle="tooltip"
+					title="Filter by category">
+				<div class="input-group-prepend">
+					<div class="input-group-text">
+						<label for="filter-categories"
+								class="form-check-label {{ category ? 'text-success' : 'text-muted' }}">
+							Category:
+						</label>
+					</div>
+				</div>
+				<select name="filter-categories"
+						ng-model="category"
+						ng-disabled="isEmpty(categories)"
+						class="custom-select"
+						id="filter-categories">
+					<option selected="selected" ng-value="null">[all]</option>
+					<option ng-repeat="cat in categories"
+							ng-value="cat.bgg_id">
+						{{ cat.name }}
+					</option>
+				</select>
+			</div>
+			<div class="col-md-6 input-group mb-3"
+					data-toggle="tooltip"
+					title="Filter by mechanic">
+				<div class="input-group-prepend">
+					<div class="input-group-text">
+						<label for="filter-mechanics"
+								class="form-check-label {{ mechanic ? 'text-success' : 'text-muted' }}">
+							Mechanic:
+						</label>
+					</div>
+				</div>
+				<select name="filter-mechanics"
+						ng-model="mechanic"
+						ng-disabled="isEmpty(mechanics)"
+						class="custom-select"
+						id="filter-mechanics">
+					<option selected="selected" ng-value="null">[all]</option>
+					<option ng-repeat="mec in mechanics"
+							ng-value="mec.bgg_id">
+						{{ mec.name }}
+					</option>
 				</select>
 			</div>
 		</div>
@@ -529,7 +711,7 @@
 						ng-disabled="user || !isEmpty(likedGames)"
 						class="custom-select"
 						id="filter-ordering">
-					<option selected="selected" value="ludoj">Ludoj ranking</option>
+					<option selected="selected" value="rg">Recommend.Games ranking</option>
 					<option value="bgg">BoardGameGeek ranking</option>
 					<option value="-year">newest first</option>
 					<option value="year">oldest first</option>
@@ -545,12 +727,14 @@
 				<button type="button"
 						ng-click="clearFilters()"
 						class="btn btn-outline-secondary btn-block">
+					<i class="fas fa-times"></i>
 					Clear
 				</button>
 			</div>
 			<div class="col-md-3 col-6 mb-3">
 				<button type="submit"
 						class="btn btn-primary btn-block">
+					<i class="fas fa-filter"></i>
 					Filter
 				</button>
 			</div>
@@ -559,16 +743,38 @@
 
 	<h2 ng-if="currUser">
 		Recommended games for <strong>
-			<a ng-href="https://boardgamegeek.com/user/{{ currUser }}" target="_blank">{{ currUser }} <i class="fas fa-external-link-alt"></i></a>
+			<a ng-href="https://boardgamegeek.com/user/{{ currUser }}"
+				target="_blank">{{ currUser }} <i class="fas fa-external-link-alt"></i></a>
 		</strong>
 	</h2>
-	<p ng-if="currUser">
-		See recommendations <a href="" ng-click="clearUser()">for all users</a> instead
-	</p>
-
 	<h2 ng-if="!isEmpty(likedGames)">
 		Recommended games based on your taste
 	</h2>
+
+	<p>
+		<span ng-if="currUser &amp;&amp; !userNotFound">
+			See recommendations <a href="" ng-click="clearUser()">for all users</a> instead.
+		</span>
+		<span ng-if="currUser &amp;&amp; userNotFound" class="text-danger">
+			We didn't find any ratings for "{{currUser}}".
+			Recommendations are based on BoardGameGeek user ratings, so we were unable to find personal recommendations.
+			Read <a href="/#/faq#why-does-it-say-user-cannot-be-found-when-i-type-in-my-board-game-geek-user-name" class="text-danger"><strong>more about this</strong></a>.
+			Below are general recommendations.
+		</span>
+		<em ng-if="modelUpdatedAt">
+			Latest database update: {{ modelUpdatedAt }}.
+		</em>
+		<em ng-if="userUpdatedAt">
+			Latest user collection update: {{ userUpdatedAt }}.
+			<a href="/#/faq#ive-updated-my-ratings-on-board-game-geek-but-i-still-see-the-same-recommendations-why"
+					data-toggle="tooltip"
+					data-placement="bottom"
+					title="Read more about scraping and processing your collection"
+					class="text-muted">
+				<i class="fas fa-info-circle"></i>
+			</a>
+		</em>
+	</p>
 
 	<div ng-if="empty"
 			class="alert alert-warning"
@@ -586,13 +792,15 @@
 			game-square=""
 			game="game"
 			show-ranking="true"
-			ng-href="#/game/{{ game.bgg_id }}"
+			hide-score="hideScore"
+			ng-href="/#/game/{{ game.bgg_id }}"
 			class="col-lg-3 col-md-4 col-sm-6"></a>
 		<a ng-repeat="game in games"
 			ng-if="selectionActive"
 			game-square=""
 			game="game"
 			show-ranking="true"
+			hide-score="hideScore"
 			thumb="{{ contains(likedGames, game) ? 'solid' : 'outline' }}"
 			ng-click="contains(likedGames, game) ? unlikeGame(game) : likeGame(game)"
 			href=""
@@ -614,6 +822,70 @@
 			</div>
 		</div>
 	</div>
+
+	<section ng-if="statsActive &amp;&amp; !isEmpty(userStats)">
+		<h2>
+			Statistics for <strong>
+				<a ng-href="https://boardgamegeek.com/user/{{ currUser }}"
+					target="_blank">{{ currUser }} <i class="fas fa-external-link-alt"></i></a>
+			</strong>
+		</h2>
+		<p>More <a href="/#/stats">stats</a>...</p>
+		<div class="card mb-3">
+			<div class="card-header">
+				<nav class="nav nav-tabs nav-justified card-header-tabs">
+					<a id="stats-rg-tab"
+							ng-click="updateStats('rg')"
+							href=""
+							role="tab"
+							aria-selected="{{ statsActive == 'rg' }}"
+							class="nav-item nav-link {{ statsActive == 'rg' ? 'active' : '' }}">
+						<abbr title="Recommend.Games">R.G</abbr> top 100
+					</a>
+					<a id="stats-bgg-tab"
+							ng-click="updateStats('bgg')"
+							href=""
+							role="tab"
+							aria-selected="{{ statsActive == 'bgg' }}"
+							class="nav-item nav-link {{ statsActive == 'bgg' ? 'active' : '' }}">
+						<abbr title="BoardGameGeek">BGG</abbr> top 100
+					</a>
+				</nav>
+			</div>
+			<div class="card-body">
+				<div class="progress bg-secondary mb-1">
+					<div id="progress-bar-played_pct"
+							class="progress-bar bg-success"
+							role="progressbar"
+							aria-valuenow="{{ userStats.played_pct }}"
+							aria-valuemin="0"
+							aria-valuemax="100">
+						<strong>&nbsp;Played: {{ userStats.played_pct | number:0 }}%&nbsp;</strong>
+					</div>
+				</div>
+				<div class="progress bg-secondary mb-1">
+					<div id="progress-bar-owned_pct"
+							class="progress-bar bg-success"
+							role="progressbar"
+							aria-valuenow="{{ userStats.owned_pct }}"
+							aria-valuemin="0"
+							aria-valuemax="100">
+						<strong>&nbsp;Owned: {{ userStats.owned_pct | number:0 }}%&nbsp;</strong>
+					</div>
+				</div>
+				<div class="progress bg-secondary">
+					<div id="progress-bar-rated_pct"
+							class="progress-bar bg-success"
+							role="progressbar"
+							aria-valuenow="{{ userStats.rated_pct }}"
+							aria-valuemin="0"
+							aria-valuemax="100">
+						<strong>&nbsp;Rated: {{ userStats.rated_pct | number:0 }}%&nbsp;</strong>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
 
 	<script type="application/ld+json">
 		{

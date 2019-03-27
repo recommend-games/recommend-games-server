@@ -2,17 +2,17 @@
 <article xmlns="http://www.w3.org/1999/xhtml"
 		id="ludoj-about">
 	<section>
-		<h1>About Ludoj</h1>
+		<h1>About <span class="recommend-games">Recommend.Games</span></h1>
 		<p class="lead">
-			<strong>Ludoj</strong> (Esperanto for <em>games</em>) strives to recommend the best board games for you.
+			<strong class="recommend-games">Recommend.Games</strong> strives to recommend the best board games for you.
 			We take the user ratings from <a href="https://boardgamegeek.com/" target="_blank">BoardGameGeek <i class="fas fa-external-link-alt"></i></a>, apply some black magic, and present recommendations that suit you.
 		</p>
 		<p>
 			BoardGameGeek (BGG) users can rate each game with a score between 1 (<em>awful – defies game description</em>) and 10 (<em>outstanding – will always enjoy playing</em>).
 			These ratings are then used to rank games on the site. But you cannot just use the average score for the ranking, else games with few ratings would shoot to the top, even if a minimum number of votes is required.
-			<span ng-if="topAvg">(At the moment, the game with the highest average rating and at least 100 votes is <em><a ng-href="#/game/{{ topAvg.bgg_id }}">{{ topAvg.name }}</a></em>.)</span>
+			<span ng-if="topAvg">(At the moment, the game with the highest average rating and at least 100 votes is <em><a ng-href="/#/game/{{ topAvg.bgg_id }}">{{ topAvg.name }}</a></em>.)</span>
 			Instead, BGG uses a weighted average by adding a number of "dummy" votes to each game. The effect is that a game's rating is drawn towards the overall average rating across all games on BGG, but as more and more users vote, this "Geek Rating" will get closer to the actual average.
-			<span ng-if="topBayes">Currently, the highest ranked game according to BoardGameGeek is <em><a ng-href="#/game/{{ topBayes.bgg_id }}">{{ topBayes.name }}</a></em>.</span>
+			<span ng-if="topBayes">Currently, the highest ranked game according to BoardGameGeek is <em><a ng-href="/#/game/{{ topBayes.bgg_id }}">{{ topBayes.name }}</a></em>.</span>
 			Read more about the ratings on the <a href="https://boardgamegeek.com/wiki/page/ratings" target="_blank">BGG Wiki <i class="fas fa-external-link-alt"></i></a>.
 		</p>
 		<p>
@@ -20,15 +20,15 @@
 		</p>
 		<p>
 			Obviously, this is a matter of opinion, but it's hard to deny that many games from <a href="https://boardgamegeek.com/browse/boardgame" target="_blank">BGG's Top 100 <i class="fas fa-external-link-alt"></i></a> are rather special interest products.
-			No doubt, they are perfectly executed if you are a fan of a particular theme, genre, or mechanic, but it's unlikely a random person would really enjoy games like <em><a href="#/game/12333">Twilight Struggle</a></em> or <em><a href="#/game/187645">Star Wars: Rebellion</a></em>.
+			No doubt, they are perfectly executed if you are a fan of a particular theme, genre, or mechanic, but it's unlikely a random person would really enjoy games like <em><a href="/#/game/12333">Twilight Struggle</a></em> or <em><a href="/#/game/187645">Star Wars: Rebellion</a></em>.
 		</p>
 		<p>
-			Ludoj takes a different approach. Instead of just calculating averages, we are trying to find good recommendations for users based on their BoardGameGeek ratings.
+			<span class="recommend-games">Recommend.Games</span> takes a different approach. Instead of just calculating averages, we are trying to find good recommendations for users based on their BoardGameGeek ratings.
 			Recommender engines using collaborative filtering have been a hot topic for some time and <a href="https://apple.github.io/turicreate/docs/userguide/recommender/" target="_blank">Turi Create <i class="fas fa-external-link-alt"></i></a> provides an excellent open source implementation.
 		</p>
 		<p>
-			The main objective of a recommender system is to predict what items a user might like given their preference for other items. We can absolutely do that – see for example recommended games for <a href="#/?for=Phelddagrif">Richard Garfield</a>.
-			But we can also find recommendations for user we don't know anything about at all – recommendations for the random person on the street. The result is the <a href="#/">default ranking</a> on the main page.
+			The main objective of a recommender system is to predict what items a user might like given their preference for other items. We can absolutely do that – see for example recommended games for <a href="/#/?for=Phelddagrif">Richard Garfield</a>.
+			But we can also find recommendations for user we don't know anything about at all – recommendations for the random person on the street. The result is the <a href="/#/">default ranking</a> on the main page.
 		</p>
 		<p>
 			<strong><em>Call us biased – but we believe this is a much better selection for anyone to (seriously) get into boardgaming today.</em></strong>
