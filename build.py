@@ -303,9 +303,12 @@ def link(
             os.path.join(SCRAPED_DATA_DIR, 'scraped', 'wikidata_GameItem.jl'),
         ),
         id_prefixes=('bgg', 'bga', 'spielen', 'luding', 'wikidata'),
+        training_file=os.path.join(BASE_DIR, 'cluster', 'training.json'),
+        manual_labelling=False,
         threshold=None,
         recall_weight=.5,
         output=os.path.join(SCRAPED_DATA_DIR, 'links.json'),
+        pretty_print=True,
     ):
     ''' link items '''
     from ludoj_scraper.cluster import link_games
@@ -315,9 +318,43 @@ def link(
         gazetteer=gazetteer,
         paths=paths,
         id_prefixes=id_prefixes,
+        training_file=training_file,
+        manual_labelling=manual_labelling,
         threshold=parse_float(threshold),
         recall_weight=parse_float(recall_weight),
         output=output,
+        pretty_print=pretty_print,
+    )
+
+
+@task()
+def labellinks(
+        gazetteer=os.path.join(BASE_DIR, 'cluster', 'gazetteer.pickle'),
+        paths=(
+            os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bgg_GameItem.jl'),
+            os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bga_GameItem.jl'),
+            os.path.join(SCRAPED_DATA_DIR, 'scraped', 'spielen_GameItem.jl'),
+            os.path.join(SCRAPED_DATA_DIR, 'scraped', 'luding_GameItem.jl'),
+            os.path.join(SCRAPED_DATA_DIR, 'scraped', 'wikidata_GameItem.jl'),
+        ),
+        id_prefixes=('bgg', 'bga', 'spielen', 'luding', 'wikidata'),
+        training_file=os.path.join(BASE_DIR, 'cluster', 'training.json'),
+        threshold=None,
+        recall_weight=.5,
+        output=os.path.join(SCRAPED_DATA_DIR, 'links.json'),
+        pretty_print=True,
+    ):
+    ''' label new training examples and link items '''
+    link(
+        gazetteer=gazetteer,
+        paths=paths,
+        id_prefixes=id_prefixes,
+        training_file=training_file,
+        manual_labelling=True,
+        threshold=threshold,
+        recall_weight=recall_weight,
+        output=output,
+        pretty_print=pretty_print,
     )
 
 
