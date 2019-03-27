@@ -6,7 +6,7 @@ from rest_framework.serializers import (
     CharField, IntegerField, ListField, ModelSerializer,
     PrimaryKeyRelatedField, StringRelatedField, URLField)
 
-from .models import Category, Collection, Game, Mechanic, Person, User
+from .models import Category, Collection, Game, GameType, Mechanic, Person, User
 
 
 class GameSerializer(ModelSerializer):
@@ -14,6 +14,7 @@ class GameSerializer(ModelSerializer):
 
     designer_name = StringRelatedField(source='designer', many=True, read_only=True)
     artist_name = StringRelatedField(source='artist', many=True, read_only=True)
+    game_type_name = StringRelatedField(source='game_type', many=True, read_only=True)
     category_name = StringRelatedField(source='category', many=True, read_only=True)
     mechanic_name = StringRelatedField(source='mechanic', many=True, read_only=True)
     contained_in = PrimaryKeyRelatedField(many=True, read_only=True)
@@ -30,6 +31,7 @@ class GameSerializer(ModelSerializer):
     dbpedia_id = ListField(child=CharField(), required=False)
     luding_id = ListField(child=IntegerField(min_value=1), required=False)
     spielen_id = ListField(child=CharField(), required=False)
+    bga_id = ListField(child=CharField(), required=False)
 
     class Meta:
         ''' meta '''
@@ -46,8 +48,21 @@ class PersonSerializer(ModelSerializer):
         fields = '__all__'
 
 
+class GameTypeSerializer(ModelSerializer):
+    ''' game type serializer '''
+
+    count = IntegerField(read_only=True)
+
+    class Meta:
+        ''' meta '''
+        model = GameType
+        fields = '__all__'
+
+
 class CategorySerializer(ModelSerializer):
     ''' category serializer '''
+
+    count = IntegerField(read_only=True)
 
     class Meta:
         ''' meta '''
@@ -57,6 +72,8 @@ class CategorySerializer(ModelSerializer):
 
 class MechanicSerializer(ModelSerializer):
     ''' mechanic serializer '''
+
+    count = IntegerField(read_only=True)
 
     class Meta:
         ''' meta '''

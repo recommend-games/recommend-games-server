@@ -8,24 +8,25 @@ python_version = "3.6"
 
 [packages]
 django = "*"
-djangorestframework = "*"
-django-filter = "*"
-markdown = "*"
-ludoj-recommender = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-recommender.git"}
-gunicorn = "*"
-whitenoise = {extras = ["brotli"], version = "*"}
-django-rest-framework-proxy = "*"
 django-extensions = "*"
+django-filter = "*"
+django-rest-framework-proxy = "*"
+djangorestframework = "*"
+google-cloud-pubsub = "*"
+gunicorn = "*"
+ludoj-recommender = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-recommender.git"}
+markdown = "*"
+python-dateutil = "*"
+turicreate = "*"
+whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
-pylint = "*"
-mypy = "*"
-pytest = "*"
-ipython = "*"
-python-dotenv = "*"
-lxml = "*"
-requests = "*"
-rcssmin = "*"
-rjsmin = "*"
 # apache-airflow = "*"
 ludoj-scraper = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-scraper.git"}
+lxml = "*"
+pynt = "*"
+pynt-contrib = "*"
+python-dotenv = "*"
+rcssmin = "*"
+requests = "*"
+rjsmin = "*"

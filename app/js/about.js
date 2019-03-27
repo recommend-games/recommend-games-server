@@ -26,10 +26,10 @@ ludojApp.controller('AboutController', function AboutController(
             $scope.topBayes = _.head(response.results);
         });
 
-    gamesService.setTitle('About Ludoj: how it all works');
+    gamesService.setTitle('About Recommend.Games: how it all works');
     gamesService.setCanonicalUrl($location.path());
     gamesService.setImage();
-    gamesService.setDescription('Ludoj strives to recommend the best board games for you. ' +
+    gamesService.setDescription('Recommend.Games strives to recommend the best board games for you. ' +
         'We take the user ratings from BoardGameGeek, apply some black magic, and present recommendations that suit you. ' +
         'Read more about how it works.');
 });

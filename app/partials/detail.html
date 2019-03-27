@@ -14,7 +14,7 @@
 			<span ng-if="game.year">({{ game.year }})</span>
 		</small>
 	</h1>
-	<p>
+	<!--<p>
 		View on <a ng-href="{{ game.url }}" target="_blank">BoardGameGeek <i class="fas fa-external-link-alt"></i></a>.
 		Buy from
 		<a ng-href="https://www.amazon.com/gp/search?ie=UTF8&amp;tag=ludoj0f-20&amp;index=toys-and-games&amp;keywords={{ game.name_url }}"
@@ -41,7 +41,7 @@
 			target="_blank"
 			title="Buy from Amazon.es"
 			class="product-link product-link-flag">🇪🇸</a>
-	</p>
+	</p>-->
 	<div class="game-description {{ expandable ? 'expandable' : '' }} {{ expandDescription ? 'expanded' : '' }} clearfix">
 		<img ng-if="game.image_url &amp;&amp; game.image_url.length"
 			ng-src="{{ game.image_url[0] }}"
@@ -53,7 +53,7 @@
 			<player-count ng-if="game" game="game"></player-count>
 			<span ng-if="game.time_string"
 					class="game-time">
-				<i class="fas fa-clock"></i> {{ game.time_string }}
+				<i class="fas fa-hourglass-half"></i> {{ game.time_string }}
 			</span>
 			<span ng-if="game.min_age_rec || game.min_age"
 					class="game-age">
@@ -78,13 +78,21 @@
 				class="{{ $first ? 'lead' : '' }}">
 			{{ description }}
 		</p>
-		<p ng-if="(game.category_name &amp;&amp; game.category_name.length) || (game.mechanic_name &amp;&amp; game.mechanic_name.length)">
+		<!-- TODO super uply – this should be done in controller -->
+		<p ng-if="(game.game_type_name &amp;&amp; game.game_type_name.length) || (game.category_name &amp;&amp; game.category_name.length) || (game.mechanic_name &amp;&amp; game.mechanic_name.length)">
+			<span ng-repeat="game_type in game.game_type_name"
+					class="badge badge-dark mr-1">
+				<i class="fas fa-user-ninja"></i>
+				{{ game_type }}
+			</span>
 			<span ng-repeat="category in game.category_name"
 					class="badge badge-secondary mr-1">
+				<i class="fas fa-scroll"></i>
 				{{ category }}
 			</span>
 			<span ng-repeat="mechanic in game.mechanic_name"
-					class="badge badge-dark mr-1">
+					class="badge badge-light mr-1">
+				<i class="fas fa-cogs"></i>
 				{{ mechanic }}
 			</span>
 		</p>
@@ -109,7 +117,7 @@
 				<a game-square=""
 					game="game"
 					show-ranking="true"
-					ng-href="#/game/{{ game.bgg_id }}"
+					ng-href="/#/game/{{ game.bgg_id }}"
 					class="game-small"></a>
 			</div>
 			<div ng-repeat="game in integratesWith" class="col-xl-2 col-md-3 col-sm-4 col-6">
@@ -117,7 +125,7 @@
 				<a game-square=""
 					game="game"
 					show-ranking="true"
-					ng-href="#/game/{{ game.bgg_id }}"
+					ng-href="/#/game/{{ game.bgg_id }}"
 					class="game-small"></a>
 			</div>
 			<div ng-repeat="game in implementationOf" class="col-xl-2 col-md-3 col-sm-4 col-6">
@@ -125,7 +133,7 @@
 				<a game-square=""
 					game="game"
 					show-ranking="true"
-					ng-href="#/game/{{ game.bgg_id }}"
+					ng-href="/#/game/{{ game.bgg_id }}"
 					class="game-small"></a>
 			</div>
 			<div ng-repeat="game in implementedBy" class="col-xl-2 col-md-3 col-sm-4 col-6">
@@ -133,7 +141,7 @@
 				<a game-square=""
 					game="game"
 					show-ranking="true"
-					ng-href="#/game/{{ game.bgg_id }}"
+					ng-href="/#/game/{{ game.bgg_id }}"
 					class="game-small"></a>
 			</div>
 			<div ng-repeat="game in containedIn" class="col-xl-2 col-md-3 col-sm-4 col-6">
@@ -141,7 +149,7 @@
 				<a game-square=""
 					game="game"
 					show-ranking="true"
-					ng-href="#/game/{{ game.bgg_id }}"
+					ng-href="/#/game/{{ game.bgg_id }}"
 					class="game-small"></a>
 			</div>
 			<div ng-repeat="game in similarGames" class="col-xl-2 col-md-3 col-sm-4 col-6">
@@ -149,7 +157,7 @@
 				<a game-square=""
 					game="game"
 					show-ranking="true"
-					ng-href="#/game/{{ game.bgg_id }}"
+					ng-href="/#/game/{{ game.bgg_id }}"
 					class="game-small"></a>
 			</div>
 		</div>
@@ -163,7 +171,7 @@
 				<img src="/assets/bgg-color.svg"
 					class="img-fluid img-icon-stats"
 					alt="BoardGameGeek ranking" />
-				<a ng-href="{{ game.url }}" target="_blank">BGG <i class="fas fa-external-link-alt"></i></a> ranking
+				BGG ranking
 			</dt>
 			<dd ng-if="game.bgg_rank || game.bayes_rating || game.avg_rating"
 					class="col-md-9 col-sm-8 col-12">
@@ -177,8 +185,8 @@
 					class="col-md-3 col-sm-4 col-12">
 				<img src="/assets/favicon.svg"
 					class="img-fluid img-icon-stats"
-					alt="Ludoj ranking" />
-				Ludoj ranking
+					alt="Recommend.Games ranking" />
+				<span class="recommend-games">R.G</span> ranking
 			</dt>
 			<dd ng-if="game.rec_rank"
 					class="col-md-9 col-sm-8 col-12">

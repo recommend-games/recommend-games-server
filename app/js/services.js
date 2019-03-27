@@ -5,8 +5,8 @@
 'use strict';
 
 ludojApp.factory('gamesService', function gamesService(
-    $cacheFactory,
     $document,
+    $localStorage,
     $log,
     $http,
     $q,
@@ -20,8 +20,27 @@ ludojApp.factory('gamesService', function gamesService(
     SITE_DESCRIPTION
 ) {
     var service = {},
-        cache = $cacheFactory('ludoj', {'capacity': 1024}),
-        linkedSites = ['wikidata', 'wikipedia', 'luding', 'spielen'];
+        cache = {},
+        linkedSites = ['bgg', 'bga', 'wikidata', 'wikipedia', 'luding', 'spielen'];
+
+    function putCache(game, id) {
+        if (_.isEmpty(game)) {
+            return;
+        }
+        id = id || game.bgg_id;
+        if (id) {
+            cache[id] = game;
+        }
+    }
+
+    function getCache(id) {
+        var game = cache[id];
+        return !_.isEmpty(game) ? game : null;
+    }
+
+    service.allGames = function allGames() {
+        return _.values(cache);
+    };
 
     function join(array, sep, lastSep) {
         sep = sep || ', ';
@@ -60,7 +79,15 @@ ludojApp.factory('gamesService', function gamesService(
 
         var result = {'site': site};
 
-        if (site === 'wikidata') {
+        if (site === 'bgg') {
+            result.url = 'https://boardgamegeek.com/boardgame/' + id + '/';
+            result.label = 'BoardGameGeek';
+            result.icon_url = '/assets/bgg-color.svg';
+        } else if (site === 'bga') {
+            result.url = 'https://www.boardgameatlas.com/search/game/' + id + '?amazonTag=ludoj0f-20';
+            result.label = 'Board Game Atlas';
+            result.icon_url = '/assets/bga.png';
+        } else if (site === 'wikidata') {
             result.url = 'https://www.wikidata.org/wiki/' + id;
             result.label = 'Wikidata';
             result.icon_url = '/assets/wikidata.svg';
@@ -85,7 +112,7 @@ ludojApp.factory('gamesService', function gamesService(
     function processGame(game) {
         game.name_short = _.size(game.name) > 50 ? _.truncate(game.name, {'length': 50, 'separator': /,? +/}) : null;
         game.name_url = encodeURIComponent(_.toLower(game.name));
-        game.alt_name = _.without(game.alt_name, game.name);
+        game.alt_name = game.name_short ? _.uniq(_.concat(game.name, game.alt_name)) : _.without(game.alt_name, game.name);
 
         // filter out '(Uncredited)' / #3
         game.designer = _.without(game.designer, 3);
@@ -137,7 +164,9 @@ ludojApp.factory('gamesService', function gamesService(
                 'unplayable in another language'
             ],
             externalLinks = _.flatMap(linkedSites, function (site) {
-                return _(game[site + '_id'])
+                return _([game[site + '_id']])
+                    .flatten()
+                    .filter()
                     .map(function (id) {
                         return externalLink(site, id);
                     })
@@ -201,12 +230,7 @@ ludojApp.factory('gamesService', function gamesService(
 
                 if (!params.user && _.isEmpty(params.like)) {
                     _.forEach(games, function (game) {
-                        var id = _.get(game, 'bgg_id');
-                        if (id) {
-                            cache.put(id, game);
-                        } else {
-                            $log.warn('invalid game', game);
-                        }
+                        putCache(game);
                     });
                 }
 
@@ -227,7 +251,7 @@ ludojApp.factory('gamesService', function gamesService(
 
     service.getGame = function getGame(id, forceRefresh, noblock) {
         id = _.parseInt(id);
-        var cached = forceRefresh ? null : cache.get(id);
+        var cached = forceRefresh ? null : getCache(id);
 
         if (!_.isEmpty(cached)) {
             return $q.resolve(cached);
@@ -243,7 +267,7 @@ ludojApp.factory('gamesService', function gamesService(
                 }
 
                 game = processGame(response.data);
-                cache.put(id, game);
+                putCache(game, id);
                 return game;
             })
             .catch(function (reason) {
@@ -312,12 +336,7 @@ ludojApp.factory('gamesService', function gamesService(
 
                 if (!params.user) {
                     _.forEach(games, function (game) {
-                        var id = _.get(game, 'bgg_id');
-                        if (id) {
-                            cache.put(id, game);
-                        } else {
-                            $log.warn('invalid game', game);
-                        }
+                        putCache(game);
                     });
                 }
 
@@ -331,6 +350,112 @@ ludojApp.factory('gamesService', function gamesService(
                     'reason': response,
                     'status': _.get(reason, 'status')
                 });
+            });
+    };
+
+    service.getList = function getList(model, noblock) {
+        if (!_.isEmpty($localStorage[model])) {
+            return $q.resolve($localStorage[model]);
+        }
+
+        return $http.get(API_URL + model + '/', {'noblock': !!noblock})
+            .then(function (response) {
+                var results = _.get(response, 'data.results');
+
+                if (_.isEmpty(results)) {
+                    return $q.reject('Unable to load list "' + model + '".');
+                }
+
+                $localStorage[model] = results;
+                return results;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to load list "' + model + '".';
+                return $q.reject(response);
+            });
+    };
+
+    function processDate(data, field) {
+        field = field || 'updated_at';
+
+        if (_.isEmpty(data)) {
+            data = {};
+            data[field] = null;
+            data[field + '_str'] = null;
+            return data;
+        }
+
+        var date = moment(_.get(data, field));
+        data[field + '_str'] = date.isValid() ? date.calendar() : null;
+        return data;
+    }
+
+    service.getModelUpdatedAt = function getModelUpdatedAt(noblock) {
+        if (!_.isEmpty($sessionStorage.model_updated_at)) {
+            return $q.resolve($sessionStorage.model_updated_at);
+        }
+
+        if (!_.isEmpty(_.get($sessionStorage, 'games_stats.updated_at_str'))) {
+            return $q.resolve($sessionStorage.games_stats.updated_at_str);
+        }
+
+        return $http.get(API_URL + 'games/updated_at/', {'noblock': !!noblock})
+            .then(function (response) {
+                var data = processDate(response.data, 'updated_at');
+                if (!data.updated_at_str) {
+                    return $q.reject('Unable to retrieve last update.');
+                }
+                $sessionStorage.model_updated_at = data.updated_at_str;
+                return data.updated_at_str;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to retrieve last update.';
+                return $q.reject(response);
+            });
+    };
+
+    function addRanks(items, field) {
+        field = field || 'count';
+        _.forEach(items, function (item, i) {
+            item.rank = i === 0 || item[field] !== items[i - 1][field] ? i + 1 : items[i - 1].rank;
+        });
+        return items;
+    }
+
+    function processStats(stats) {
+        stats = processDate(stats, 'updated_at');
+        _.forEach(['rg', 'bgg'], function (site) {
+            _.forEach(['artist', 'category', 'designer', 'game_type', 'mechanic'], function (field) {
+                stats[site + '_top'][field] = addRanks(stats[site + '_top'][field]);
+            });
+        });
+        return stats;
+    }
+
+    service.getGamesStats = function getGamesStats(noblock) {
+        if (!_.isEmpty($sessionStorage.games_stats)) {
+            return $q.resolve($sessionStorage.games_stats);
+        }
+
+        return $http.get(API_URL + 'games/stats/', {'noblock': !!noblock})
+            .then(function (response) {
+                var stats = response.data;
+                if (_.isEmpty(stats)) {
+                    return $q.reject('Unable to load games stats.');
+                }
+                stats = processStats(stats);
+                $sessionStorage.games_stats = stats;
+                return stats;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to load games stats.';
+                return $q.reject(response);
             });
     };
 
@@ -467,21 +592,76 @@ ludojApp.factory('gamesService', function gamesService(
     return service;
 });
 
+ludojApp.factory('usersService', function usersService(
+    $log,
+    $http,
+    $q,
+    $sessionStorage,
+    API_URL
+) {
+    var service = {};
+
+    function processStats(stats) {
+        var updatedAt = moment(stats.updated_at);
+        if (updatedAt.isValid()) {
+            stats.updated_at_str = updatedAt.calendar();
+        } else {
+            stats.updated_at = null;
+            stats.updated_at_str = null;
+        }
+        _.forEach(['rg_top', 'bgg_top'], function (site) {
+            var total = _.get(stats, site + '.total', 0);
+            _.forEach(['owned', 'played', 'rated'], function (item) {
+                var value = _.get(stats, site + '.' + item, 0);
+                stats[site][item + '_pct'] = total ? 100 * value / total : 0;
+            });
+        });
+        return stats;
+    }
+
+    service.getUserStats = function getUserStats(user, noblock) {
+        if (!user) {
+            return $q.reject('User name is required.');
+        }
+
+        user = _.toLower(user);
+
+        if (!_.isEmpty($sessionStorage['user_stats_' + user])) {
+            return $q.resolve($sessionStorage['user_stats_' + user]);
+        }
+
+        var userUri = encodeURIComponent(user);
+
+        return $http.get(API_URL + 'users/' + userUri + '/stats/', {'noblock': !!noblock})
+            .then(function (response) {
+                var stats = response.data;
+                if (_.isEmpty(stats)) {
+                    return $q.reject('Unable to load stats for "' + user + '".');
+                }
+                stats = processStats(stats);
+                $sessionStorage['user_stats_' + user] = stats;
+                return stats;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to load stats for "' + user + '".';
+                return $q.reject(response);
+            });
+    };
+
+    return service;
+});
+
 ludojApp.factory('newsService', function newsService(
     $http,
-    $locale,
     $localStorage,
     $log,
     $q,
     $sessionStorage,
-    $window,
     API_URL
 ) {
-    var service = {},
-        locale = _.get($window, 'navigator.languages') || _.get($window, 'navigator.language') || $locale.id,
-        momentLocale = moment.locale(locale);
-
-    $log.info('trying to change Moment.js locale to', locale, ', received locale', momentLocale);
+    var service = {};
 
     $sessionStorage.news = [];
 
@@ -555,7 +735,7 @@ ludojApp.factory('filterService', function filterService(
             'yearNow': yearNow
         },
         orderingValues = {
-            'ludoj': '-rec_rating,-bayes_rating,-avg_rating',
+            'rg': '-rec_rating,-bayes_rating,-avg_rating',
             'bgg': '-bayes_rating,-rec_rating,-avg_rating',
             'complex': 'complexity,-rec_rating,-bayes_rating,-avg_rating',
             '-complex': '-complexity,-rec_rating,-bayes_rating,-avg_rating',
@@ -625,11 +805,11 @@ ludojApp.factory('filterService', function filterService(
     }
 
     function validateOrdering(ordering) {
-        return orderingValues[ordering] ? ordering : 'ludoj';
+        return orderingValues[ordering] ? ordering : 'rg';
     }
 
     function orderingParams(ordering) {
-        return orderingValues[ordering] || orderingValues.ludoj;
+        return orderingValues[ordering] || orderingValues.rg;
     }
 
     function parseParams(params) {
@@ -644,6 +824,7 @@ ludojApp.factory('filterService', function filterService(
             excludeWishlist = booleanDefault(params.excludeWishlist, false, !user),
             excludePlayed = booleanDefault(params.excludePlayed, false, !user),
             excludeClusters = booleanDefault(params.excludeClusters, true, !user),
+            similarity = booleanDefault(params.similarity, false, !user),
             yearMin = _.parseInt(params.yearMin),
             yearMax = _.parseInt(params.yearMax),
             ordering = validateOrdering(params.ordering),
@@ -662,6 +843,7 @@ ludojApp.factory('filterService', function filterService(
             'excludeWishlist': excludeWishlist === true ? true : null,
             'excludePlayed': excludePlayed === true ? true : null,
             'excludeClusters': excludeClusters === false ? false : null,
+            'similarity': similarity === true ? true : null,
             'like': !_.isEmpty(like) && !user ? like : null,
             'search': _.trim(params.search) || null,
             'playerCount': playerCount,
@@ -675,7 +857,10 @@ ludojApp.factory('filterService', function filterService(
             'yearMin': yearMin && yearMin > yearFloor ? yearMin : null,
             'yearMax': yearMax && yearMax <= yearNow ? yearMax : null,
             'cooperative': validateBoolean(params.cooperative),
-            'ordering': user || !_.isEmpty(like) || ordering === 'ludoj' ? null : ordering
+            'gameType': _.parseInt(params.gameType) || null,
+            'category': _.parseInt(params.category) || null,
+            'mechanic': _.parseInt(params.mechanic) || null,
+            'ordering': user || !_.isEmpty(like) || ordering === 'rg' ? null : ordering
         };
     }
 
@@ -686,6 +871,9 @@ ludojApp.factory('filterService', function filterService(
             'for': scope.user,
             'search': scope.search,
             'cooperative': scope.cooperative,
+            'gameType': scope.gameType,
+            'category': scope.category,
+            'mechanic': scope.mechanic,
             'ordering': scope.ordering
         };
 
@@ -735,12 +923,14 @@ ludojApp.factory('filterService', function filterService(
             result.excludeWishlist = parseBoolean(_.get(scope, 'exclude.wishlist'));
             result.excludePlayed = parseBoolean(_.get(scope, 'exclude.played'));
             result.excludeClusters = parseBoolean(_.get(scope, 'exclude.clusters'));
+            result.similarity = parseBoolean(scope.similarity);
         } else {
             result.excludeRated = null;
             result.excludeOwned = null;
             result.excludeWishlist = null;
             result.excludePlayed = null;
             result.excludeClusters = null;
+            result.similarity = null;
         }
 
         result.like = !_.isEmpty(scope.likedGames) && !scope.user ? _.map(scope.likedGames, 'bgg_id') : null;
@@ -771,6 +961,7 @@ ludojApp.factory('filterService', function filterService(
             result.exclude_wishlist = booleanDefault(params.excludeWishlist, false) ? 5 : null;
             result.exclude_play_count = booleanDefault(params.excludePlayed, false) ? 1 : null;
             result.exclude_clusters = booleanString(booleanDefault(params.excludeClusters, true));
+            result.model = params.similarity ? 'similarity' : null;
         } else if (!_.isEmpty(params.like)) {
             result.like = params.like;
         } else {
@@ -820,6 +1011,18 @@ ludojApp.factory('filterService', function filterService(
 
         if (params.cooperative) {
             result.cooperative = params.cooperative;
+        }
+
+        if (params.gameType) {
+            result.game_type = params.gameType;
+        }
+
+        if (params.category) {
+            result.category = params.category;
+        }
+
+        if (params.mechanic) {
+            result.mechanic = params.mechanic;
         }
 
         return result;

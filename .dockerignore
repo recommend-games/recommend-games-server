@@ -110,7 +110,9 @@
 **/data/
 **/logs/
 **/tests/
+**/*.sqlite*
 **/.temp*
+**/.tc*
 **/.csslintrc*
 **/.htmllintrc*
 
