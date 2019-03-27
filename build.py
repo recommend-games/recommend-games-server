@@ -318,7 +318,7 @@ def link(
         gazetteer=gazetteer,
         paths=paths,
         id_prefixes=id_prefixes,
-        training_file=training_file,
+        training_file=training_file if manual_labelling else None,
         manual_labelling=manual_labelling,
         threshold=parse_float(threshold),
         recall_weight=parse_float(recall_weight),
