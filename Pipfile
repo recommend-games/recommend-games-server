@@ -17,17 +17,14 @@ gunicorn = "*"
 ludoj-recommender = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-recommender.git"}
 markdown = "*"
 python-dateutil = "*"
+turicreate = "*"
 whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
-# ipython = "*"
 ludoj-scraper = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-scraper.git"}
 lxml = "*"
-# mypy = "*"
-# pylint = "*"
 pynt = "*"
 pynt-contrib = "*"
-# pytest = "*"
 python-dotenv = "*"
 rcssmin = "*"
 requests = "*"
