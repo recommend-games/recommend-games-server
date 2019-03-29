@@ -366,11 +366,11 @@ def train(
         users=None,
     ):
     ''' train recommender model '''
-    from ludoj_recommender import GamesRecommender
+    from ludoj_recommender import BGGRecommender
 
     LOGGER.info(
         'Training recommender model with games <%s> and ratings <%s>...', games_file, ratings_file)
-    recommender = GamesRecommender.train_from_files(
+    recommender = BGGRecommender.train_from_files(
         games_file=games_file,
         ratings_file=ratings_file,
         similarity_model=True,
