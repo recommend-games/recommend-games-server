@@ -146,8 +146,8 @@ def load_recommender(path):
     if not path:
         return None
     try:
-        from ludoj_recommender import GamesRecommender
-        return GamesRecommender.load(path=path)
+        from ludoj_recommender import BGGRecommender
+        return BGGRecommender.load(path=path)
     except Exception:
         LOGGER.exception('unable to load recommender model from <%s>', path)
     return None
