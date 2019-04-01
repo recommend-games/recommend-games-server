@@ -440,7 +440,8 @@ def cleandata(src_dir=DATA_DIR, bk_dir=f'{DATA_DIR}.bk'):
     shutil.rmtree(bk_dir, ignore_errors=True)
     if os.path.exists(src_dir):
         os.rename(src_dir, bk_dir)
-    os.makedirs(os.path.join(src_dir, 'recommender'))
+    os.makedirs(os.path.join(src_dir, 'recommender_bgg'))
+    os.makedirs(os.path.join(src_dir, 'recommender_bga'))
 
 
 @task()
@@ -453,7 +454,7 @@ def migrate():
 @task(cleandata, migrate)
 def filldb(
         src_dir=SCRAPED_DATA_DIR,
-        rec_dir=os.path.join(RECOMMENDER_DIR, '.tc'),
+        rec_dir=os.path.join(RECOMMENDER_DIR, '.bgg'),
     ):
     ''' fill database '''
     LOGGER.info(
@@ -480,8 +481,8 @@ def compressdb(db_file=os.path.join(DATA_DIR, 'db.sqlite3')):
 
 @task()
 def cpdirs(
-        src_dir=os.path.join(RECOMMENDER_DIR, '.tc'),
-        dst_dir=os.path.join(DATA_DIR, 'recommender'),
+        src_dir=os.path.join(RECOMMENDER_DIR, '.bgg'),
+        dst_dir=os.path.join(DATA_DIR, 'recommender_bgg'),
         sub_dirs=('recommender', 'similarity', 'clusters', 'compilations'),
     ):
     ''' copy recommender files '''
@@ -491,6 +492,16 @@ def cpdirs(
         dst_path = os.path.join(dst_dir, sub_dir)
         LOGGER.info('Copying <%s> to <%s>...', src_path, dst_path)
         shutil.copytree(src_path, dst_path)
+
+
+@task()
+def cpdirsbga(
+        src_dir=os.path.join(RECOMMENDER_DIR, '.bga'),
+        dst_dir=os.path.join(DATA_DIR, 'recommender_bga'),
+        sub_dirs=('recommender', 'similarity'),
+    ):
+    ''' copy BGA recommender files '''
+    cpdirs(src_dir, dst_dir, sub_dirs)
 
 
 @task()
@@ -504,7 +515,7 @@ def dateflag(dst=os.path.join(DATA_DIR, 'updated_at'), date=None):
         file.write(date_str)
 
 
-@task(cleandata, filldb, compressdb, cpdirs, dateflag)
+@task(cleandata, filldb, compressdb, cpdirs, cpdirsbga, dateflag)
 def builddb():
     ''' build a new database '''
 

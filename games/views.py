@@ -281,8 +281,40 @@ class GameViewSet(PermissionsModelViewSet):
         return recommender.recommend_similar(games=like, items=games)
 
     @action(detail=False)
+    def recommend_bga(self, request):
+        ''' recommend games with Board Game Atlas data '''
+
+        user = request.query_params.get('user')
+        path = getattr(settings, 'BGA_RECOMMENDER_PATH', None)
+        recommender = load_recommender(path, 'bga')
+
+        if recommender is None:
+            return self.list(request)
+
+        recommendation = recommender.recommend(
+            users=(user,),
+            # similarity_model=take_first(params.get('model')) == 'similarity',
+            # exclude_known=parse_bool(take_first(params.get('exclude_known'))),
+            # exclude_clusters=parse_bool(take_first(params.get('exclude_clusters'))),
+            star_percentiles=getattr(settings, 'STAR_PERCENTILES', None),
+        )
+
+        del path, recommender
+
+        page = self.paginate_queryset(recommendation)
+        return (
+            self.get_paginated_response(page) if page is not None
+            else Response(list(recommendation[:10])))
+
+
+    @action(detail=False)
     def recommend(self, request):
         ''' recommend games '''
+
+        site = request.query_params.get('site')
+
+        if site == 'bga':
+            return self.recommend_bga(request)
 
         user = request.query_params.get('user')
         like = request.query_params.getlist('like')
@@ -294,7 +326,7 @@ class GameViewSet(PermissionsModelViewSet):
             pubsub_push(user)
 
         path = getattr(settings, 'RECOMMENDER_PATH', None)
-        recommender = load_recommender(path)
+        recommender = load_recommender(path, 'bgg')
 
         if recommender is None:
             return self.list(request)

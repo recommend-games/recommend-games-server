@@ -155,7 +155,8 @@ REST_PROXY = {
 
 # Custom
 
-RECOMMENDER_PATH = os.path.join(DATA_DIR, 'recommender')
+RECOMMENDER_PATH = os.path.join(DATA_DIR, 'recommender_bgg')
+BGA_RECOMMENDER_PATH = os.path.join(DATA_DIR, 'recommender_bga')
 STAR_PERCENTILES = (.165, .365, .615, .815, .915, .965, .985, .995)
 
 PUBSUB_PUSH_ENABLED = True

@@ -47,7 +47,7 @@ def _load(*paths, in_format=None):
 
 
 def _rating_data(recommender_path=getattr(settings, 'RECOMMENDER_PATH', None), pk_field='bgg_id'):
-    recommender = load_recommender(recommender_path)
+    recommender = load_recommender(recommender_path, 'bgg')
 
     if not recommender:
         return {}
