@@ -358,31 +358,77 @@ def labellinks(
     )
 
 
-@task()
-def train(
-        games_file=os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bgg_GameItem.jl'),
-        ratings_file=os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bgg_RatingItem.jl'),
-        out_path=os.path.join(RECOMMENDER_DIR, '.tc'),
+def _train(
+        recommender_cls,
+        games_file,
+        ratings_file,
+        out_path=None,
         users=None,
+        max_iterations=100,
     ):
-    ''' train recommender model '''
-    from ludoj_recommender import BGGRecommender
-
     LOGGER.info(
-        'Training recommender model with games <%s> and ratings <%s>...', games_file, ratings_file)
-    recommender = BGGRecommender.train_from_files(
+        'Training %r recommender model with games <%s> and ratings <%s>...',
+        recommender_cls, games_file, ratings_file)
+    recommender = recommender_cls.train_from_files(
         games_file=games_file,
         ratings_file=ratings_file,
         similarity_model=True,
+        max_iterations=max_iterations,
         verbose=True,
     )
 
     recommendations = recommender.recommend(users=users, num_games=100)
     recommendations.print_rows(num_rows=100)
 
-    LOGGER.info('Saving model %r to <%s>...', recommender, out_path)
-    shutil.rmtree(out_path, ignore_errors=True)
-    recommender.save(out_path)
+    if out_path:
+        LOGGER.info('Saving model %r to <%s>...', recommender, out_path)
+        shutil.rmtree(out_path, ignore_errors=True)
+        recommender.save(out_path)
+
+
+@task()
+def trainbgg(
+        games_file=os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bgg_GameItem.jl'),
+        ratings_file=os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bgg_RatingItem.jl'),
+        out_path=os.path.join(RECOMMENDER_DIR, '.bgg'),
+        users=None,
+        max_iterations=1000,
+    ):
+    ''' train BoardGameGeek recommender model '''
+    from ludoj_recommender import BGGRecommender
+    _train(
+        recommender_cls=BGGRecommender,
+        games_file=games_file,
+        ratings_file=ratings_file,
+        out_path=out_path,
+        users=users,
+        max_iterations=max_iterations,
+    )
+
+
+@task()
+def trainbga(
+        games_file=os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bga_GameItem.jl'),
+        ratings_file=os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bga_RatingItem.jl'),
+        out_path=os.path.join(RECOMMENDER_DIR, '.bga'),
+        users=None,
+        max_iterations=1000,
+    ):
+    ''' train Board Game Atlas recommender model '''
+    from ludoj_recommender import BGARecommender
+    _train(
+        recommender_cls=BGARecommender,
+        games_file=games_file,
+        ratings_file=ratings_file,
+        out_path=out_path,
+        users=users,
+        max_iterations=max_iterations,
+    )
+
+
+@task(trainbgg, trainbga)
+def train():
+    ''' train BoardGameGeek and Board Game Atlas recommender models '''
 
 
 @task()
