@@ -13,6 +13,7 @@ ludojApp.controller('BgaController', function BgaController(
     $routeParams,
     $scope,
     API_URL,
+    BGA_CLIENT_ID,
     filterService,
     gamesService,
     toastr
@@ -39,7 +40,7 @@ ludojApp.controller('BgaController', function BgaController(
             promise = $q.resolve(params);
         } else {
             bgaParams = {
-                'client_id': 'SB1VGnDv7M',
+                'client_id': BGA_CLIENT_ID,
                 'username': userName,
                 'limit': 1
             };
@@ -71,7 +72,7 @@ ludojApp.controller('BgaController', function BgaController(
                 games = response.results;
                 var ids = _.map(games, 'bga_id');
                 bgaParams = {
-                    'client_id': 'SB1VGnDv7M',
+                    'client_id': BGA_CLIENT_ID,
                     'ids': _.join(ids)
                 };
 
