@@ -141,11 +141,14 @@ def serialize_date(date, tzinfo=None):
 
 
 @lru_cache(maxsize=8)
-def load_recommender(path):
+def load_recommender(path, site='bgg'):
     ''' load recommender from given path '''
     if not path:
         return None
     try:
+        if site == 'bga':
+            from ludoj_recommender import BGARecommender
+            return BGARecommender.load(path=path)
         from ludoj_recommender import BGGRecommender
         return BGGRecommender.load(path=path)
     except Exception:

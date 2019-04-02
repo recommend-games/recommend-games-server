@@ -358,31 +358,77 @@ def labellinks(
     )
 
 
-@task()
-def train(
-        games_file=os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bgg_GameItem.jl'),
-        ratings_file=os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bgg_RatingItem.jl'),
-        out_path=os.path.join(RECOMMENDER_DIR, '.tc'),
+def _train(
+        recommender_cls,
+        games_file,
+        ratings_file,
+        out_path=None,
         users=None,
+        max_iterations=100,
     ):
-    ''' train recommender model '''
-    from ludoj_recommender import BGGRecommender
-
     LOGGER.info(
-        'Training recommender model with games <%s> and ratings <%s>...', games_file, ratings_file)
-    recommender = BGGRecommender.train_from_files(
+        'Training %r recommender model with games <%s> and ratings <%s>...',
+        recommender_cls, games_file, ratings_file)
+    recommender = recommender_cls.train_from_files(
         games_file=games_file,
         ratings_file=ratings_file,
         similarity_model=True,
+        max_iterations=max_iterations,
         verbose=True,
     )
 
     recommendations = recommender.recommend(users=users, num_games=100)
     recommendations.print_rows(num_rows=100)
 
-    LOGGER.info('Saving model %r to <%s>...', recommender, out_path)
-    shutil.rmtree(out_path, ignore_errors=True)
-    recommender.save(out_path)
+    if out_path:
+        LOGGER.info('Saving model %r to <%s>...', recommender, out_path)
+        shutil.rmtree(out_path, ignore_errors=True)
+        recommender.save(out_path)
+
+
+@task()
+def trainbgg(
+        games_file=os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bgg_GameItem.jl'),
+        ratings_file=os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bgg_RatingItem.jl'),
+        out_path=os.path.join(RECOMMENDER_DIR, '.bgg'),
+        users=None,
+        max_iterations=1000,
+    ):
+    ''' train BoardGameGeek recommender model '''
+    from ludoj_recommender import BGGRecommender
+    _train(
+        recommender_cls=BGGRecommender,
+        games_file=games_file,
+        ratings_file=ratings_file,
+        out_path=out_path,
+        users=users,
+        max_iterations=max_iterations,
+    )
+
+
+@task()
+def trainbga(
+        games_file=os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bga_GameItem.jl'),
+        ratings_file=os.path.join(SCRAPED_DATA_DIR, 'scraped', 'bga_RatingItem.jl'),
+        out_path=os.path.join(RECOMMENDER_DIR, '.bga'),
+        users=None,
+        max_iterations=1000,
+    ):
+    ''' train Board Game Atlas recommender model '''
+    from ludoj_recommender import BGARecommender
+    _train(
+        recommender_cls=BGARecommender,
+        games_file=games_file,
+        ratings_file=ratings_file,
+        out_path=out_path,
+        users=users,
+        max_iterations=max_iterations,
+    )
+
+
+@task(trainbgg, trainbga)
+def train():
+    ''' train BoardGameGeek and Board Game Atlas recommender models '''
 
 
 @task()
@@ -394,7 +440,8 @@ def cleandata(src_dir=DATA_DIR, bk_dir=f'{DATA_DIR}.bk'):
     shutil.rmtree(bk_dir, ignore_errors=True)
     if os.path.exists(src_dir):
         os.rename(src_dir, bk_dir)
-    os.makedirs(os.path.join(src_dir, 'recommender'))
+    os.makedirs(os.path.join(src_dir, 'recommender_bgg'))
+    os.makedirs(os.path.join(src_dir, 'recommender_bga'))
 
 
 @task()
@@ -407,7 +454,7 @@ def migrate():
 @task(cleandata, migrate)
 def filldb(
         src_dir=SCRAPED_DATA_DIR,
-        rec_dir=os.path.join(RECOMMENDER_DIR, '.tc'),
+        rec_dir=os.path.join(RECOMMENDER_DIR, '.bgg'),
     ):
     ''' fill database '''
     LOGGER.info(
@@ -434,8 +481,8 @@ def compressdb(db_file=os.path.join(DATA_DIR, 'db.sqlite3')):
 
 @task()
 def cpdirs(
-        src_dir=os.path.join(RECOMMENDER_DIR, '.tc'),
-        dst_dir=os.path.join(DATA_DIR, 'recommender'),
+        src_dir=os.path.join(RECOMMENDER_DIR, '.bgg'),
+        dst_dir=os.path.join(DATA_DIR, 'recommender_bgg'),
         sub_dirs=('recommender', 'similarity', 'clusters', 'compilations'),
     ):
     ''' copy recommender files '''
@@ -445,6 +492,16 @@ def cpdirs(
         dst_path = os.path.join(dst_dir, sub_dir)
         LOGGER.info('Copying <%s> to <%s>...', src_path, dst_path)
         shutil.copytree(src_path, dst_path)
+
+
+@task()
+def cpdirsbga(
+        src_dir=os.path.join(RECOMMENDER_DIR, '.bga'),
+        dst_dir=os.path.join(DATA_DIR, 'recommender_bga'),
+        sub_dirs=('recommender', 'similarity'),
+    ):
+    ''' copy BGA recommender files '''
+    cpdirs(src_dir, dst_dir, sub_dirs)
 
 
 @task()
@@ -458,7 +515,7 @@ def dateflag(dst=os.path.join(DATA_DIR, 'updated_at'), date=None):
         file.write(date_str)
 
 
-@task(cleandata, filldb, compressdb, cpdirs, dateflag)
+@task(cleandata, filldb, compressdb, cpdirs, cpdirsbga, dateflag)
 def builddb():
     ''' build a new database '''
 
