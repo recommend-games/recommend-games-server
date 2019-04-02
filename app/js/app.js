@@ -50,6 +50,9 @@ ludojApp.config(function (
     }).when('/faq', {
         templateUrl: '/partials/faq.html',
         controller: 'FaqController'
+    }).when('/bga', {
+        templateUrl: '/partials/bga.html',
+        controller: 'BgaController'
     }).when('/', {
         templateUrl: '/partials/list.html',
         controller: 'ListController'
