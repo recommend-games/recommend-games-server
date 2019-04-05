@@ -101,7 +101,7 @@ def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
             LOGGER.info('Nothing to commit...')
         else:
             execute('git', 'gc', '--prune=now')
-            execute('git', 'push')
+            # execute('git', 'push')
 
 
 @task()
