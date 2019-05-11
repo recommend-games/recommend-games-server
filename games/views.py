@@ -284,12 +284,14 @@ class GameViewSet(PermissionsModelViewSet):
     def recommend_bga(self, request):
         ''' recommend games with Board Game Atlas data '''
 
-        user = request.query_params.get('user')
         path = getattr(settings, 'BGA_RECOMMENDER_PATH', None)
         recommender = load_recommender(path, 'bga')
 
         if recommender is None:
             return self.list(request)
+
+        user = request.query_params.get('user')
+        like = request.query_params.getlist('like')
 
         recommendation = recommender.recommend(
             users=(user,),
@@ -297,9 +299,9 @@ class GameViewSet(PermissionsModelViewSet):
             # exclude_known=parse_bool(take_first(params.get('exclude_known'))),
             # exclude_clusters=parse_bool(take_first(params.get('exclude_clusters'))),
             star_percentiles=getattr(settings, 'STAR_PERCENTILES', None),
-        )
+        ) if user or not like else recommender.recommend_similar(games=like)
 
-        del path, recommender
+        del path, recommender, user, like
 
         page = self.paginate_queryset(recommendation)
         return (
