@@ -368,8 +368,33 @@ class GameViewSet(PermissionsModelViewSet):
 
     # pylint: disable=unused-argument,invalid-name
     @action(detail=True)
+    def similar_bga(self, request, pk=None):
+        ''' find games similar to this game with BGA data '''
+
+        path = getattr(settings, 'BGA_RECOMMENDER_PATH', None)
+        recommender = load_recommender(path, 'bga')
+
+        if recommender is None:
+            raise NotFound(f'cannot find similar games to <{pk}>')
+
+        games = recommender.similar_games(pk, num_games=0)
+
+        del path, recommender
+
+        page = self.paginate_queryset(games)
+        return (
+            self.get_paginated_response(page) if page is not None
+            else Response(list(games[:10])))
+
+    # pylint: disable=invalid-name
+    @action(detail=True)
     def similar(self, request, pk=None):
         ''' find games similar to this game '''
+
+        site = request.query_params.get('site')
+
+        if site == 'bga':
+            return self.similar_bga(request, pk)
 
         path = getattr(settings, 'RECOMMENDER_PATH', None)
         recommender = load_recommender(path)
