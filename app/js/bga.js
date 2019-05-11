@@ -18,7 +18,8 @@ ludojApp.controller('BgaController', function BgaController(
     gamesService,
     toastr
 ) {
-    var users = {};
+    var users = {},
+        routeParams = filterService.getParams($routeParams);
 
     function fetchGames(page) {
         toastr.clear();
@@ -27,11 +28,15 @@ ludojApp.controller('BgaController', function BgaController(
 
         var append = page > 1,
             url = API_URL + 'games/recommend_bga/',
-            userName = $routeParams.for || null,
+            userName = routeParams.for || null,
             params = {'page': page},
             promise,
             bgaParams,
             games;
+
+        if (routeParams.similarity) {
+            params.model = 'similarity';
+        }
 
         if (!userName) {
             promise = $q.resolve(params);
@@ -130,16 +135,19 @@ ludojApp.controller('BgaController', function BgaController(
             });
     }
 
-    $scope.user = $routeParams.for;
-    $scope.similarity = $routeParams.similarity;
+    $scope.user = routeParams.for;
+    $scope.similarity = routeParams.similarity;
 
     $scope.fetchGames = fetchGames;
     $scope.empty = false;
     $scope.total = null;
-    $scope.hideScore = $routeParams.for && $routeParams.similarity;
+    $scope.hideScore = true;
 
     $scope.updateParams = function updateParams() {
-        $route.updateParams({'for': $scope.user || null});
+        $route.updateParams({
+            'for': $scope.user || null,
+            'similarity': $scope.similarity || null
+        });
     };
 
     $scope.clearField = function clearField(field, id) {
@@ -150,7 +158,7 @@ ludojApp.controller('BgaController', function BgaController(
 
     fetchGames(1);
 
-    gamesService.setTitle();
+    gamesService.setTitle(routeParams.for ? 'BGA recommendations for ' + routeParams.for : 'BGA recommendations');
     gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
     gamesService.setImage();
     gamesService.setDescription();

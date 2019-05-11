@@ -89,7 +89,19 @@ def _exclude(user=None, ids=None):
     return sframe
 
 
+def _parse_parts(args):
+    for arg in arg_to_iter(args):
+        if isinstance(arg, str):
+            for parsed in arg.split(','):
+                parsed = parsed.strip()
+                if parsed:
+                    yield parsed
+        elif isinstance(arg, (list, tuple)):
+            yield from _parse_parts(arg)
+
+
 def _parse_ints(args):
+    # TODO use _parse_parts()
     for arg in arg_to_iter(args):
         if isinstance(arg, int):
             yield arg
@@ -284,22 +296,24 @@ class GameViewSet(PermissionsModelViewSet):
     def recommend_bga(self, request):
         ''' recommend games with Board Game Atlas data '''
 
-        user = request.query_params.get('user')
         path = getattr(settings, 'BGA_RECOMMENDER_PATH', None)
         recommender = load_recommender(path, 'bga')
 
         if recommender is None:
             return self.list(request)
 
+        user = request.query_params.get('user')
+        like = list(_parse_parts(request.query_params.getlist('like')))
+
         recommendation = recommender.recommend(
             users=(user,),
-            # similarity_model=take_first(params.get('model')) == 'similarity',
+            similarity_model=request.query_params.get('model') == 'similarity',
             # exclude_known=parse_bool(take_first(params.get('exclude_known'))),
             # exclude_clusters=parse_bool(take_first(params.get('exclude_clusters'))),
             star_percentiles=getattr(settings, 'STAR_PERCENTILES', None),
-        )
+        ) if user or not like else recommender.recommend_similar(games=like)
 
-        del path, recommender
+        del path, recommender, user, like
 
         page = self.paginate_queryset(recommendation)
         return (
@@ -368,8 +382,33 @@ class GameViewSet(PermissionsModelViewSet):
 
     # pylint: disable=unused-argument,invalid-name
     @action(detail=True)
+    def similar_bga(self, request, pk=None):
+        ''' find games similar to this game with BGA data '''
+
+        path = getattr(settings, 'BGA_RECOMMENDER_PATH', None)
+        recommender = load_recommender(path, 'bga')
+
+        if recommender is None:
+            raise NotFound(f'cannot find similar games to <{pk}>')
+
+        games = recommender.similar_games(pk, num_games=0)
+
+        del path, recommender
+
+        page = self.paginate_queryset(games)
+        return (
+            self.get_paginated_response(page) if page is not None
+            else Response(list(games[:10])))
+
+    # pylint: disable=invalid-name
+    @action(detail=True)
     def similar(self, request, pk=None):
         ''' find games similar to this game '''
+
+        site = request.query_params.get('site')
+
+        if site == 'bga':
+            return self.similar_bga(request, pk)
 
         path = getattr(settings, 'RECOMMENDER_PATH', None)
         recommender = load_recommender(path)
