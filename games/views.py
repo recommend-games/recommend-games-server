@@ -89,7 +89,19 @@ def _exclude(user=None, ids=None):
     return sframe
 
 
+def _parse_parts(args):
+    for arg in arg_to_iter(args):
+        if isinstance(arg, str):
+            for parsed in arg.split(','):
+                parsed = parsed.strip()
+                if parsed:
+                    yield parsed
+        elif isinstance(arg, (list, tuple)):
+            yield from _parse_parts(arg)
+
+
 def _parse_ints(args):
+    # TODO use _parse_parts()
     for arg in arg_to_iter(args):
         if isinstance(arg, int):
             yield arg
@@ -291,7 +303,7 @@ class GameViewSet(PermissionsModelViewSet):
             return self.list(request)
 
         user = request.query_params.get('user')
-        like = request.query_params.getlist('like')
+        like = list(_parse_parts(request.query_params.getlist('like')))
 
         recommendation = recommender.recommend(
             users=(user,),
