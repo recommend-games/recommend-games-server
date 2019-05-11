@@ -293,7 +293,7 @@ class GameViewSet(PermissionsModelViewSet):
 
         recommendation = recommender.recommend(
             users=(user,),
-            # similarity_model=take_first(params.get('model')) == 'similarity',
+            similarity_model=request.query_params.get('model') == 'similarity',
             # exclude_known=parse_bool(take_first(params.get('exclude_known'))),
             # exclude_clusters=parse_bool(take_first(params.get('exclude_clusters'))),
             star_percentiles=getattr(settings, 'STAR_PERCENTILES', None),
