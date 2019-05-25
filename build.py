@@ -83,7 +83,7 @@ def gitprepare(repo=SCRAPED_DATA_DIR):
     LOGGER.info('Preparing Git repo <%s>...', repo)
     with safe_cd(repo):
         execute('git', 'checkout', 'master')
-        execute('git', 'pull', '--ff-only')
+        # execute('git', 'pull', '--ff-only')
         execute('git', 'diff', 'HEAD', '--exit-code')
 
 
