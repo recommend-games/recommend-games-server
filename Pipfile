@@ -14,14 +14,14 @@ django-rest-framework-proxy = "*"
 djangorestframework = "*"
 google-cloud-pubsub = "*"
 gunicorn = "*"
-ludoj-recommender = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-recommender.git"}
+ludoj-recommender = {editable = true, git = "https://github.com/MarkusShepherd/ludoj-recommender.git"}
 markdown = "*"
 python-dateutil = "*"
 turicreate = "*"
 whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
-ludoj-scraper = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-scraper.git"}
+ludoj-scraper = {editable = true, git = "https://github.com/MarkusShepherd/ludoj-scraper.git"}
 lxml = "*"
 pynt = "*"
 pynt-contrib = "*"
