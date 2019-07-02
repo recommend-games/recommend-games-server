@@ -67,7 +67,7 @@
 			</span>
 			<span ng-if="game.cooperative_string"
 					class="game-cooperative">
-				<i class="fas fa-handshake"></i> {{ game.cooperative_string }}
+				<i class="fas {{ game.cooperative ? 'fa-handshake' : 'fa-fist-raised' }}"></i> {{ game.cooperative_string }}
 			</span>
 			<span ng-if="game.rec_rank"
 					class="game-ranking">
