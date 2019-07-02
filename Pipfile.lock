@@ -96,11 +96,11 @@
         },
         "django": {
             "hashes": [
-                "sha256:753d30d3eb078064d2ddadfea65083c9848074a7f93d7b4dc7fa6b1380d278f5",
-                "sha256:7cb67e8b934fab23b6daed7144da52e8a25a47eba7f360ca43d2b448506b01ad"
+                "sha256:4d23f61b26892bac785f07401bc38cbf8fa4cec993f400e9cd9ddf28fd51c0ea",
+                "sha256:6e974d4b57e3b29e4882b244d40171d6a75202ab8d2402b8e8adbd182e25cf0c"
             ],
             "index": "pypi",
-            "version": "==2.2.2"
+            "version": "==2.2.3"
         },
         "django-extensions": {
             "hashes": [
@@ -610,10 +610,10 @@
         },
         "awscli": {
             "hashes": [
-                "sha256:9cab21e0bbec93bba94c4bd9dcea204696c3337ecc57ef3c87eac48d6145255b",
-                "sha256:ae7c874d7fbc3bcfd844442381abf9db5eb186295d8df0a7e2a207b41fefa3e3"
+                "sha256:7f6123d32716eb5732bd6965af2894bd37917a56457a4f6f13d56d8151315e24",
+                "sha256:9f72f451218dcdf8c2c1bb321cd122172f6bc409ef7d60965f541a719715c454"
             ],
-            "version": "==1.16.189"
+            "version": "==1.16.191"
         },
         "boto": {
             "hashes": [
@@ -624,17 +624,17 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:031fc6b43f7132941d71fa012c404ae10d4ad6191c97580cad7f43619fb5505e",
-                "sha256:b1db8ea71b676c08c07d52a44b0b03007fc922b7618bab8c79f6fd638334bf68"
+                "sha256:5e0e3e2a520cc289a36c053974afdd416292e0e8d2a7220a575cf992d6a890cd",
+                "sha256:93625ceb73aa0eaab4fefba733562a6dfa1366b38a056edf5e53aa4fb97e0b3a"
             ],
-            "version": "==1.9.179"
+            "version": "==1.9.181"
         },
         "botocore": {
             "hashes": [
-                "sha256:0bcab3d6ee49f348169fe93744feae09aae1445f1e0cb1109caccbec487fbeb0",
-                "sha256:adbc569149432143a0d6f578c0a16417a24f7a579116d086d5cecbb70d848ddb"
+                "sha256:1a1594258b503adeb3d54b77c0b79151e546d76e8ebc62aa9258693e6cdd0f9b",
+                "sha256:6dc20c4766cb0a4ff8b0993effe2550e3b4e4606265da37bcf8949610980da40"
             ],
-            "version": "==1.12.179"
+            "version": "==1.12.181"
         },
         "btrees": {
             "hashes": [
