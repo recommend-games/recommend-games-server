@@ -520,7 +520,7 @@ def builddb():
     ''' build a new database '''
 
 
-@task(gitprepare, mergeall, link, train, builddb, split, gitupdate)
+@task(mergeall, link, train, builddb, split)
 def builddbfull():
     ''' merge, link, train, build, and split all relevant files '''
 
