@@ -637,10 +637,18 @@
 						class="custom-select"
 						id="filter-types">
 					<option selected="selected" ng-value="null">[all]</option>
-					<option ng-repeat="type in gameTypes"
-							ng-value="type.bgg_id">
-						{{ type.name }}
-					</option>
+					<optgroup label="By popularity">
+						<option ng-repeat="type in gameTypes"
+								ng-value="type.bgg_id">
+							{{ type.name }}
+						</option>
+					</optgroup>
+					<optgroup label="Alphabetically">
+						<option ng-repeat="type in gameTypesSorted"
+								ng-value="type.bgg_id">
+							{{ type.name }}
+						</option>
+					</optgroup>
 				</select>
 			</div>
 		</div>
@@ -663,10 +671,18 @@
 						class="custom-select"
 						id="filter-categories">
 					<option selected="selected" ng-value="null">[all]</option>
-					<option ng-repeat="cat in categories"
-							ng-value="cat.bgg_id">
-						{{ cat.name }}
-					</option>
+					<optgroup label="By popularity">
+						<option ng-repeat="cat in categories"
+								ng-value="cat.bgg_id">
+							{{ cat.name }}
+						</option>
+					</optgroup>
+					<optgroup label="Alphabetically">
+						<option ng-repeat="cat in categoriesSorted"
+								ng-value="cat.bgg_id">
+							{{ cat.name }}
+						</option>
+					</optgroup>
 				</select>
 			</div>
 			<div class="col-md-6 input-group mb-3"
@@ -686,10 +702,18 @@
 						class="custom-select"
 						id="filter-mechanics">
 					<option selected="selected" ng-value="null">[all]</option>
-					<option ng-repeat="mec in mechanics"
-							ng-value="mec.bgg_id">
-						{{ mec.name }}
-					</option>
+					<optgroup label="By popularity">
+						<option ng-repeat="mec in mechanics"
+								ng-value="mec.bgg_id">
+							{{ mec.name }}
+						</option>
+					</optgroup>
+					<optgroup label="Alphabetically">
+						<option ng-repeat="mec in mechanicsSorted"
+								ng-value="mec.bgg_id">
+							{{ mec.name }}
+						</option>
+					</optgroup>
 				</select>
 			</div>
 		</div>

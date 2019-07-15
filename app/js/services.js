@@ -365,7 +365,7 @@ ludojApp.factory('gamesService', function gamesService(
             return $http.get(API_URL + model + '/', {'params': {'page': page}, 'noblock': !!noblock})
                 .then(function (response) {
                     var results = _.get(response, 'data.results', []),
-                        next = _.get(results, 'data.next'),
+                        next = _.get(response, 'data.next'),
                         nextPage = !next || _.isEmpty(results) ? 'end' : page + 1;
 
                     $localStorage[model] = page === 1 || _.isEmpty($localStorage[model]) ? results
