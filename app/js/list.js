@@ -516,21 +516,24 @@ ludojApp.controller('ListController', function ListController(
         })
         .catch($log.error);
 
-    gamesService.getList('types', true)
+    gamesService.getList('types', true, 0, 250)
         .then(function (gameTypes) {
             $scope.gameTypes = gameTypes;
+            $scope.gameTypesSorted = _.sortBy(gameTypes, 'name');
         })
         .catch($log.error);
 
-    gamesService.getList('categories', true)
+    gamesService.getList('categories', true, 0, 250)
         .then(function (categories) {
             $scope.categories = categories;
+            $scope.categoriesSorted = _.sortBy(categories, 'name');
         })
         .catch($log.error);
 
-    gamesService.getList('mechanics', true)
+    gamesService.getList('mechanics', true, 0, 250)
         .then(function (mechanics) {
             $scope.mechanics = mechanics;
+            $scope.mechanicsSorted = _.sortBy(mechanics, 'name');
         })
         .catch($log.error);
 

@@ -353,22 +353,34 @@ ludojApp.factory('gamesService', function gamesService(
             });
     };
 
-    service.getList = function getList(model, noblock) {
-        if (!_.isEmpty($localStorage[model])) {
-            return $q.resolve($localStorage[model]);
+    service.getList = function getList(model, noblock, start, end) {
+        start = _.isNumber(start) ? start : 0;
+        end = _.isNumber(end) ? end : 25;
+
+        if (end <= _.size($localStorage[model]) || $localStorage[model + 'Page'] === 'end') {
+            return $q.resolve(_.slice($localStorage[model], start, end));
         }
 
-        return $http.get(API_URL + model + '/', {'noblock': !!noblock})
-            .then(function (response) {
-                var results = _.get(response, 'data.results');
+        function fetchList(page) {
+            return $http.get(API_URL + model + '/', {'params': {'page': page}, 'noblock': !!noblock})
+                .then(function (response) {
+                    var results = _.get(response, 'data.results', []),
+                        next = _.get(response, 'data.next'),
+                        nextPage = !next || _.isEmpty(results) ? 'end' : page + 1;
 
-                if (_.isEmpty(results)) {
-                    return $q.reject('Unable to load list "' + model + '".');
-                }
+                    $localStorage[model] = page === 1 || _.isEmpty($localStorage[model]) ? results
+                        : _.concat($localStorage[model], results);
+                    $localStorage[model + 'Page'] = nextPage;
 
-                $localStorage[model] = results;
-                return results;
-            })
+                    if (end <= _.size($localStorage[model]) || nextPage === 'end') {
+                        return _.slice($localStorage[model], start, end);
+                    }
+
+                    return fetchList(page + 1);
+                });
+        }
+
+        return fetchList($localStorage[model + 'Page'] || 1)
             .catch(function (reason) {
                 $log.error('There has been an error', reason);
                 var response = _.get(reason, 'data.detail') || reason;
