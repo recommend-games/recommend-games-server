@@ -27,6 +27,7 @@ ALLOWED_HOSTS = [
     'ludoj.herokuapp.com',
     'ludoj-staging.herokuapp.com',
     '.recommend-games.appspot.com',
+    '.recommend-ludoj.appspot.com',
     '.recommend.games',
 ]
 
@@ -160,7 +161,7 @@ BGA_RECOMMENDER_PATH = os.path.join(DATA_DIR, 'recommender_bga')
 STAR_PERCENTILES = (.165, .365, .615, .815, .915, .965, .985, .995)
 
 PUBSUB_PUSH_ENABLED = True
-PUBSUB_QUEUE_PROJECT = os.getenv('PUBSUB_QUEUE_PROJECT')
+PUBSUB_QUEUE_PROJECT = os.getenv('PUBSUB_QUEUE_PROJECT') or os.getenv('GC_PROJECT')
 PUBSUB_QUEUE_TOPIC = os.getenv('PUBSUB_QUEUE_TOPIC')
 
 MODEL_UPDATED_FILE = os.path.join(DATA_DIR, 'updated_at')

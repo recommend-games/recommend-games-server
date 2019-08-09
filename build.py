@@ -33,13 +33,16 @@ SCRAPER_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'ludoj-scraper'))
 RECOMMENDER_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'ludoj-recommender'))
 SCRAPED_DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'ludoj-data'))
 URL_LIVE = 'https://recommend.games/'
-GC_PROJECT = 'recommend-games'
+GC_PROJECT = os.getenv('GC_PROJECT') or 'recommend-ludoj'
+GC_DATA_BUCKET = os.getenv('GC_DATA_BUCKET') or f'{GC_PROJECT}-data'
 
 logging.basicConfig(
     stream=sys.stderr,
     level=logging.INFO,
     format='%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s',
 )
+
+LOGGER.info('currently in Google Cloud project <%s>', GC_PROJECT)
 
 
 @lru_cache(maxsize=8)
@@ -526,7 +529,7 @@ def builddbfull():
 
 
 @task()
-def syncdata(src=os.path.join(DATA_DIR, ''), bucket='recommend-games-data'):
+def syncdata(src=os.path.join(DATA_DIR, ''), bucket=GC_DATA_BUCKET):
     ''' sync data with GCS '''
     LOGGER.info('Syncing <%s> with GCS bucket <%s>...', src, bucket)
     os.environ['CLOUDSDK_PYTHON'] = ''
