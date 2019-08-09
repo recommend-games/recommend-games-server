@@ -21,8 +21,10 @@ turicreate = "*"
 whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
+gcloud = "*"
 ludoj-scraper = {editable = true, git = "https://github.com/MarkusShepherd/ludoj-scraper.git"}
 lxml = "*"
+pylint = "*"
 pynt = "*"
 pynt-contrib = "*"
 python-dotenv = "*"
