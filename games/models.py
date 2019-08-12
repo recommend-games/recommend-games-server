@@ -1,16 +1,28 @@
 # -*- coding: utf-8 -*-
 
-''' models '''
+""" models """
 
 from django.db.models import (
-    CASCADE, BooleanField, CharField, DateTimeField, FloatField, ForeignKey, Index,
-    ManyToManyField, Model, PositiveIntegerField, PositiveSmallIntegerField,
-    SmallIntegerField, TextField, URLField)
+    CASCADE,
+    BooleanField,
+    CharField,
+    DateTimeField,
+    FloatField,
+    ForeignKey,
+    Index,
+    ManyToManyField,
+    Model,
+    PositiveIntegerField,
+    PositiveSmallIntegerField,
+    SmallIntegerField,
+    TextField,
+    URLField,
+)
 from django_extensions.db.fields.json import JSONField
 
 
 class Game(Model):
-    ''' game model '''
+    """ game model """
 
     bgg_id = PositiveIntegerField(primary_key=True)
     name = CharField(max_length=255, db_index=True)
@@ -18,8 +30,8 @@ class Game(Model):
     year = SmallIntegerField(blank=True, null=True, db_index=True)
     description = TextField(blank=True, null=True)
 
-    designer = ManyToManyField('Person', blank=True, related_name='designer_of')
-    artist = ManyToManyField('Person', blank=True, related_name='artist_of')
+    designer = ManyToManyField("Person", blank=True, related_name="designer_of")
+    artist = ManyToManyField("Person", blank=True, related_name="artist_of")
     # publisher = ListField(CharField(), blank=True)
 
     url = URLField(blank=True, null=True)
@@ -41,19 +53,20 @@ class Game(Model):
     min_time = PositiveSmallIntegerField(blank=True, null=True, db_index=True)
     max_time = PositiveSmallIntegerField(blank=True, null=True, db_index=True)
 
-    game_type = ManyToManyField('GameType', blank=True, related_name='games')
-    category = ManyToManyField('Category', blank=True, related_name='games')
-    mechanic = ManyToManyField('Mechanic', blank=True, related_name='games')
+    game_type = ManyToManyField("GameType", blank=True, related_name="games")
+    category = ManyToManyField("Category", blank=True, related_name="games")
+    mechanic = ManyToManyField("Mechanic", blank=True, related_name="games")
     cooperative = BooleanField(default=False, db_index=True)
     compilation = BooleanField(default=False, db_index=True)
     compilation_of = ManyToManyField(
-        'self', symmetrical=False, blank=True, related_name='contained_in')
+        "self", symmetrical=False, blank=True, related_name="contained_in"
+    )
     # family = ListField(CharField(), blank=True)
     # expansion = ListField(CharField(), blank=True)
     implements = ManyToManyField(
-        'self', symmetrical=False, blank=True, related_name='implemented_by')
-    integrates_with = ManyToManyField(
-        'self', symmetrical=True, blank=True)
+        "self", symmetrical=False, blank=True, related_name="implemented_by"
+    )
+    integrates_with = ManyToManyField("self", symmetrical=True, blank=True)
 
     bgg_rank = PositiveIntegerField(blank=True, null=True, db_index=True)
     num_votes = PositiveIntegerField(default=0, db_index=True)
@@ -77,103 +90,93 @@ class Game(Model):
     bga_id = JSONField(default=list)
 
     class Meta:
-        ''' meta '''
-        ordering = (
-            '-rec_rating',
-            '-bayes_rating',
-            '-avg_rating',
-        )
-        indexes = (
-            Index(fields=('-rec_rating', '-bayes_rating', '-avg_rating')),
-        )
+        """ meta """
+
+        ordering = ("-rec_rating", "-bayes_rating", "-avg_rating")
+        indexes = (Index(fields=("-rec_rating", "-bayes_rating", "-avg_rating")),)
 
     def __str__(self):
         return self.name
 
 
 class Person(Model):
-    ''' person model '''
+    """ person model """
 
     bgg_id = PositiveIntegerField(primary_key=True)
     name = CharField(max_length=255, db_index=True)
 
     class Meta:
-        ''' meta '''
-        ordering = (
-            'name',
-        )
+        """ meta """
+
+        ordering = ("name",)
 
     def __str__(self):
         return self.name
 
 
 class GameType(Model):
-    ''' game type model '''
+    """ game type model """
 
     bgg_id = PositiveIntegerField(primary_key=True)
     name = CharField(max_length=255, db_index=True)
 
     class Meta:
-        ''' meta '''
-        ordering = (
-            'name',
-        )
+        """ meta """
+
+        ordering = ("name",)
 
     def __str__(self):
         return self.name
 
 
 class Category(Model):
-    ''' category model '''
+    """ category model """
 
     bgg_id = PositiveIntegerField(primary_key=True)
     name = CharField(max_length=255, db_index=True)
 
     class Meta:
-        ''' meta '''
-        ordering = (
-            'name',
-        )
+        """ meta """
+
+        ordering = ("name",)
 
     def __str__(self):
         return self.name
 
 
 class Mechanic(Model):
-    ''' mechanic model '''
+    """ mechanic model """
 
     bgg_id = PositiveIntegerField(primary_key=True)
     name = CharField(max_length=255, db_index=True)
 
     class Meta:
-        ''' meta '''
-        ordering = (
-            'name',
-        )
+        """ meta """
+
+        ordering = ("name",)
 
     def __str__(self):
         return self.name
 
 
 class User(Model):
-    ''' user model '''
+    """ user model """
 
     name = CharField(primary_key=True, max_length=255)
-    games = ManyToManyField(Game, through='Collection', blank=True)
+    games = ManyToManyField(Game, through="Collection", blank=True)
     updated_at = DateTimeField(blank=True, null=True, db_index=True)
 
     class Meta:
-        ''' meta '''
-        ordering = (
-            'name',
-        )
+        """ meta """
+
+        ordering = ("name",)
 
     def __str__(self):
         return self.name
 
 
 class Collection(Model):
-    ''' collection model '''
+    """ collection model """
 
     game = ForeignKey(Game, on_delete=CASCADE)
     user = ForeignKey(User, on_delete=CASCADE)
@@ -184,11 +187,10 @@ class Collection(Model):
     play_count = PositiveIntegerField(default=0, db_index=True)
 
     class Meta:
-        ''' meta '''
-        indexes = (
-            Index(fields=('user', 'owned')),
-        )
+        """ meta """
+
+        indexes = (Index(fields=("user", "owned")),)
 
     def __str__(self):
         # pylint: disable=no-member
-        return f'{self.game_id}: {self.user_id}'
+        return f"{self.game_id}: {self.user_id}"
