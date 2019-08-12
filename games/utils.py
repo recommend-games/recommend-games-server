@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-''' utils '''
+""" utils """
 
 import logging
 import os.path
@@ -19,30 +19,30 @@ LOGGER = logging.getLogger(__name__)
 
 
 def arg_to_iter(arg):
-    ''' wraps arg into tuple if not an iterable '''
+    """ wraps arg into tuple if not an iterable """
     if arg is None:
         return ()
-    if not isinstance(arg, ITERABLE_SINGLE_VALUES) and hasattr(arg, '__iter__'):
+    if not isinstance(arg, ITERABLE_SINGLE_VALUES) and hasattr(arg, "__iter__"):
         return arg
     return (arg,)
 
 
 def take_first(items):
-    ''' take first item '''
+    """ take first item """
     for item in arg_to_iter(items):
-        if item is not None and item != '':
+        if item is not None and item != "":
             return item
     return None
 
 
 def batchify(iterable, size):
-    ''' make batches of given size '''
+    """ make batches of given size """
     for _, group in groupby(enumerate(iterable), key=lambda x: x[0] // size):
         yield (x[1] for x in group)
 
 
 def format_from_path(path):
-    ''' get file extension '''
+    """ get file extension """
     try:
         _, ext = os.path.splitext(path)
         return ext.lower()[1:] if ext else None
@@ -52,7 +52,7 @@ def format_from_path(path):
 
 
 def parse_int(string, base=10):
-    ''' safely convert an object to int if possible, else return None '''
+    """ safely convert an object to int if possible, else return None """
     if isinstance(string, int):
         return string
     try:
@@ -67,7 +67,7 @@ def parse_int(string, base=10):
 
 
 def parse_float(number):
-    ''' safely convert an object to float if possible, else return None '''
+    """ safely convert an object to float if possible, else return None """
     try:
         return float(number)
     except Exception:
@@ -76,10 +76,10 @@ def parse_float(number):
 
 
 def parse_bool(item):
-    ''' parses an item and converts it to a boolean '''
+    """ parses an item and converts it to a boolean """
     if isinstance(item, int):
         return bool(item)
-    if item in ('True', 'true', 'Yes', 'yes'):
+    if item in ("True", "true", "Yes", "yes"):
         return True
     integer = parse_int(item)
     if integer is not None:
@@ -88,11 +88,13 @@ def parse_bool(item):
 
 
 def _add_tz(date, tzinfo=None):
-    return date if not tzinfo or not date or date.tzinfo else date.replace(tzinfo=tzinfo)
+    return (
+        date if not tzinfo or not date or date.tzinfo else date.replace(tzinfo=tzinfo)
+    )
 
 
 def parse_date(date, tzinfo=None, format_str=None):
-    '''try to turn input into a datetime object'''
+    """try to turn input into a datetime object"""
 
     if not date:
         return None
@@ -135,46 +137,49 @@ def parse_date(date, tzinfo=None, format_str=None):
 
 
 def serialize_date(date, tzinfo=None):
-    '''seralize a date into ISO format if possible'''
+    """seralize a date into ISO format if possible"""
     parsed = parse_date(date, tzinfo)
-    return parsed.strftime('%Y-%m-%dT%T%z') if parsed else str(date) if date else None
+    return parsed.strftime("%Y-%m-%dT%T%z") if parsed else str(date) if date else None
 
 
 @lru_cache(maxsize=8)
-def load_recommender(path, site='bgg'):
-    ''' load recommender from given path '''
+def load_recommender(path, site="bgg"):
+    """ load recommender from given path """
     if not path:
         return None
     try:
-        if site == 'bga':
+        if site == "bga":
             from ludoj_recommender import BGARecommender
+
             return BGARecommender.load(path=path)
         from ludoj_recommender import BGGRecommender
+
         return BGGRecommender.load(path=path)
     except Exception:
-        LOGGER.exception('unable to load recommender model from <%s>', path)
+        LOGGER.exception("unable to load recommender model from <%s>", path)
     return None
 
 
 @lru_cache(maxsize=8)
 def pubsub_client():
-    ''' Google Cloud PubSub client '''
+    """ Google Cloud PubSub client """
     try:
         from google.cloud import pubsub
+
         return pubsub.PublisherClient()
     except Exception:
-        LOGGER.exception('unable to initialise PubSub client')
+        LOGGER.exception("unable to initialise PubSub client")
     return None
 
 
 def pubsub_push(
-        message,
-        project=settings.PUBSUB_QUEUE_PROJECT,
-        topic=settings.PUBSUB_QUEUE_TOPIC,
-        encoding='utf-8',
-        **kwargs,
-    ):
-    ''' publish message '''
+    message,
+    project=settings.PUBSUB_QUEUE_PROJECT,
+    topic=settings.PUBSUB_QUEUE_TOPIC,
+    encoding="utf-8",
+    **kwargs,
+):
+    """ publish message """
 
     if not project or not topic:
         return None
@@ -191,22 +196,22 @@ def pubsub_push(
     # pylint: disable=no-member
     path = client.topic_path(project, topic)
 
-    LOGGER.debug('pushing message %r to <%s>', message, path)
+    LOGGER.debug("pushing message %r to <%s>", message, path)
 
     try:
         return client.publish(topic=path, data=message, **kwargs)
     except Exception:
-        LOGGER.exception('unable to send message %r', message)
+        LOGGER.exception("unable to send message %r", message)
     return None
 
 
 @lru_cache(maxsize=8)
 def model_updated_at(file_path=settings.MODEL_UPDATED_FILE):
-    ''' latest model update '''
+    """ latest model update """
     try:
         with open(file_path) as file_obj:
             updated_at = file_obj.read()
-        updated_at = ' '.join(updated_at.split())
+        updated_at = " ".join(updated_at.split())
         return parse_date(updated_at, tzinfo=timezone.utc)
     except Exception:
         pass
@@ -214,7 +219,7 @@ def model_updated_at(file_path=settings.MODEL_UPDATED_FILE):
 
 
 class Timer:
-    ''' log execution time: with Timer('message'): do_something() '''
+    """ log execution time: with Timer('message'): do_something() """
 
     def __init__(self, message, logger=None):
         self.message = f'"{message}" execution time: %.1f ms'
