@@ -31,6 +31,7 @@ ALLOWED_HOSTS = [
     ".recommend-games.appspot.com",
     ".recommend-ludoj.appspot.com",
     ".recommend.games",
+    ".recommended.games",
 ]
 
 # Application definition
