@@ -17,7 +17,7 @@ gunicorn = "*"
 ludoj-recommender = {editable = true, git = "https://github.com/MarkusShepherd/ludoj-recommender.git"}
 markdown = "*"
 python-dateutil = "*"
-turicreate = "*"
+turicreate = "<5.7"
 whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]

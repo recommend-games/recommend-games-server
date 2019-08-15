@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "ac78377c3a28fa45656cd450970b9eda002867a71435603a8ce847e0688a1443"
+            "sha256": "28766876e3a726e0792f3a1f4903595364b42a3ffb88ccb89248c5d2fc3867c7"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -269,7 +269,7 @@
         "ludoj-recommender": {
             "editable": true,
             "git": "https://github.com/MarkusShepherd/ludoj-recommender.git",
-            "ref": "96c5c5c837811ecba7844b1d3d892c92b3fc45ce"
+            "ref": "e23a406b52cbf9f99704c170b276d8171cf495c9"
         },
         "markdown": {
             "hashes": [
@@ -624,10 +624,10 @@
         },
         "awscli": {
             "hashes": [
-                "sha256:9eb546e8b2e894fbf54136568eaf8361dc9a2865481c988215953f2173aa9a4c",
-                "sha256:df108d123e4df4356022f20964582cc8a4aff7f854d82a744c56d1b1d3098f85"
+                "sha256:1f478930cfd0ae7fbbb3f9c5aab6ae402235901c574765df73bc4b837ca4acfd",
+                "sha256:89ba250fff1f0753c6de4ca31bd981832ca723252f96e560294d7dfcb995be58"
             ],
-            "version": "==1.16.217"
+            "version": "==1.16.218"
         },
         "boto": {
             "hashes": [
@@ -638,17 +638,17 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:2ff8f804f2bc092bee3186d7625e1816e4739e82084131e860ac4d4de9fefbab",
-                "sha256:7a0199369d5e1aca676d7b0e2bf71db67cd488ffbea1e9296ba2df058f6e6745"
+                "sha256:7b527dd1acc127822a4b5ff7565e031e095ce1a7e1560ca88d1e4548c4b78388",
+                "sha256:82e8c5ab549205843b0a25204aff11b01d80e814656938446ab651573dfd83e1"
             ],
-            "version": "==1.9.207"
+            "version": "==1.9.208"
         },
         "botocore": {
             "hashes": [
-                "sha256:4ef7ab3e5632d55ae91be8a0d404cf586f955c2dca972a6f761de793ddc14ea1",
-                "sha256:d90d0299dde2b7514586f01f11954c4c6acca58f1508827408690b201ccce8ac"
+                "sha256:1a9b246b40a7694c6c1707c386e6dc00cd473647efd92aa8b5b812c8a223ff4d",
+                "sha256:7fa1ea16e11d8537dab675577e609b95d3cea6f5db005f3adc934afdae6b72bc"
             ],
-            "version": "==1.12.207"
+            "version": "==1.12.208"
         },
         "btrees": {
             "hashes": [
@@ -1171,7 +1171,7 @@
         "ludoj-scraper": {
             "editable": true,
             "git": "https://github.com/MarkusShepherd/ludoj-scraper.git",
-            "ref": "2023b93452932f0a72c608d86af6c6c02ebcc483"
+            "ref": "35e2c7f80712c9643cf2f0a5e212760d826a2f7c"
         },
         "lxml": {
             "hashes": [
