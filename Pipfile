@@ -25,6 +25,7 @@ gcloud = "*"
 gsutil = "*"
 ludoj-scraper = {editable = true, git = "https://github.com/MarkusShepherd/ludoj-scraper.git"}
 lxml = "*"
+psutil = "*"
 pylint = "*"
 pynt = "*"
 pynt-contrib = "*"
