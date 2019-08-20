@@ -318,7 +318,6 @@ class GameViewSet(PermissionsModelViewSet):
         return recommendations
 
     def _recommend_similar(self, like, recommender):
-        like = list(_parse_ints(like))
         games = (
             frozenset(
                 self.filter_queryset(self.get_queryset())
