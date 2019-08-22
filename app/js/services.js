@@ -834,8 +834,7 @@ ludojApp.factory('filterService', function filterService(
         params = params || {};
 
         var usersFor = parseList(params.for, true),
-            usersUser = parseList(params.user, true),
-            user = !_.isEmpty(usersFor) ? usersFor : usersUser,
+            user = !_.isEmpty(usersFor) ? usersFor : parseList(params.user, true),
             playerCount = _.parseInt(params.playerCount) || null,
             playTime = _.parseInt(params.playTime) || null,
             playerAge = _.parseInt(params.playerAge) || null,
