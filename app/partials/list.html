@@ -765,22 +765,26 @@
 		</div>
 	</form>
 
-	<h2 ng-if="currUser">
-		Recommended games for <strong>
-			<a ng-href="https://boardgamegeek.com/user/{{ currUser }}"
-				target="_blank">{{ currUser }} <i class="fas fa-external-link-alt"></i></a>
-		</strong>
+	<h2 ng-if="!isEmpty(currUser)">
+		Recommended games for
+		<span ng-repeat="cUser in currUser track by $index">
+			<strong>
+				<a ng-href="https://boardgamegeek.com/user/{{ cUser }}"
+					target="_blank">{{ cUser }} <i class="fas fa-external-link-alt"></i></a>
+			</strong>
+			<span ng-if="!$last">, </span>
+		</span>
 	</h2>
 	<h2 ng-if="!isEmpty(likedGames)">
 		Recommended games based on your taste
 	</h2>
 
 	<p>
-		<span ng-if="currUser &amp;&amp; !userNotFound">
+		<span ng-if="!isEmpty(currUser) &amp;&amp; !userNotFound">
 			See recommendations <a href="" ng-click="clearUser()">for all users</a> instead.
 		</span>
-		<span ng-if="currUser &amp;&amp; userNotFound" class="text-danger">
-			We didn't find any ratings for "{{currUser}}".
+		<span ng-if="!isEmpty(currUser) &amp;&amp; userNotFound" class="text-danger">
+			We didn't find any ratings for <span ng-repeat="cUser in currUser track by $index">"{{ currUser }}"<span ng-if="!$last">, </span></span>.
 			Recommendations are based on BoardGameGeek user ratings, so we were unable to find personal recommendations.
 			Read <a href="/#/faq#why-does-it-say-user-cannot-be-found-when-i-type-in-my-board-game-geek-user-name" class="text-danger"><strong>more about this</strong></a>.
 			Below are general recommendations.
@@ -847,11 +851,11 @@
 		</div>
 	</div>
 
-	<section ng-if="statsActive &amp;&amp; !isEmpty(userStats)">
+	<section ng-if="statsActive &amp;&amp; !isEmpty(userStats) &amp;&amp; size(currUser) == 1">
 		<h2>
 			Statistics for <strong>
-				<a ng-href="https://boardgamegeek.com/user/{{ currUser }}"
-					target="_blank">{{ currUser }} <i class="fas fa-external-link-alt"></i></a>
+				<a ng-href="https://boardgamegeek.com/user/{{ currUser[0] }}"
+					target="_blank">{{ currUser[0] }} <i class="fas fa-external-link-alt"></i></a>
 			</strong>
 		</h2>
 		<p>More <a href="/#/stats">stats</a>...</p>
