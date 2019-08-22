@@ -977,12 +977,14 @@ ludojApp.factory('filterService', function filterService(
 
         if (!_.isEmpty(params.for)) {
             result.user = params.for;
-            result.exclude_known = booleanString(booleanDefault(params.excludeRated, true));
-            result.exclude_owned = booleanString(booleanDefault(params.excludeOwned, true));
-            result.exclude_wishlist = booleanDefault(params.excludeWishlist, false) ? 5 : null;
-            result.exclude_play_count = booleanDefault(params.excludePlayed, false) ? 1 : null;
-            result.exclude_clusters = booleanString(booleanDefault(params.excludeClusters, true));
             result.model = params.similarity ? 'similarity' : null;
+            if (_.size(params.for) === 1) {
+                result.exclude_known = booleanString(booleanDefault(params.excludeRated, true));
+                result.exclude_owned = booleanString(booleanDefault(params.excludeOwned, true));
+                result.exclude_wishlist = booleanDefault(params.excludeWishlist, false) ? 5 : null;
+                result.exclude_play_count = booleanDefault(params.excludePlayed, false) ? 1 : null;
+                result.exclude_clusters = booleanString(booleanDefault(params.excludeClusters, true));
+            }
         } else if (!_.isEmpty(params.like)) {
             result.like = params.like;
         } else {
