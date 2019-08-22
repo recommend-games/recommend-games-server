@@ -122,7 +122,11 @@ ludojApp.factory('gamesService', function gamesService(
 
         game.designer_display = join(game.designer_name, ', ', ' & ');
         game.artist_display = join(game.artist_name, ', ', ' & ');
-        game.description_array = _.filter(_.map(_.split(game.description, /\n(\s*\n\s*)+/), _.trim));
+        game.description_array = _(game.description)
+            .split(/\n(\s*\n\s*)+/)
+            .map(_.trim)
+            .filter()
+            .value();
         game.description_short = _.size(game.description) > 250 ? _.truncate(game.description, {'length': 250, 'separator': /,? +/}) : null;
 
         game.designer_data = _.isEmpty(game.designer) || _.isEmpty(game.designer_name) ?
@@ -758,7 +762,10 @@ ludojApp.factory('filterService', function filterService(
         };
 
     function parseList(input, sorted) {
-        var result = _(input).split(',').map(_.trim).filter();
+        var result = _(input)
+            .split(',')
+            .map(_.trim)
+            .filter();
         if (sorted) {
             result = result.sortBy(_.lowerCase);
         }
