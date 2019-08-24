@@ -527,10 +527,13 @@ ludojApp.factory('gamesService', function gamesService(
     function canonicalPath(path, params) {
         path = '#' + (path || '/');
         var qString = _(_.toPairs(params))
-                .filter(1)
+                .flatMap(function (v) {
+                    return _.isArray(v[1]) ? _.map(v[1], function (vv) { return [v[0], vv]; }) : [v];
+                })
+                .reject(function (v) { return _.isNil(v[1]) || v[1] === ''; })
                 .sortBy(0)
                 .map(function (v) {
-                    return v[0] + '=' + encodeURIComponent(v[1]);
+                    return v[1] === true ? v[0] : v[0] + '=' + encodeURIComponent(v[1]);
                 })
                 .join('&');
         return qString ? path + '?' + qString : path;
