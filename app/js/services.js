@@ -122,7 +122,11 @@ ludojApp.factory('gamesService', function gamesService(
 
         game.designer_display = join(game.designer_name, ', ', ' & ');
         game.artist_display = join(game.artist_name, ', ', ' & ');
-        game.description_array = _.filter(_.map(_.split(game.description, /\n(\s*\n\s*)+/), _.trim));
+        game.description_array = _(game.description)
+            .split(/\n(\s*\n\s*)+/)
+            .map(_.trim)
+            .filter()
+            .value();
         game.description_short = _.size(game.description) > 250 ? _.truncate(game.description, {'length': 250, 'separator': /,? +/}) : null;
 
         game.designer_data = _.isEmpty(game.designer) || _.isEmpty(game.designer_name) ?
@@ -210,7 +214,7 @@ ludojApp.factory('gamesService', function gamesService(
             params.page = page;
         }
 
-        if (params.user || !_.isEmpty(params.like)) {
+        if (!_.isEmpty(params.user) || !_.isEmpty(params.like)) {
             url += 'recommend/';
         }
 
@@ -228,7 +232,7 @@ ludojApp.factory('gamesService', function gamesService(
                 response.data.results = games;
                 response.data.page = page;
 
-                if (!params.user && _.isEmpty(params.like)) {
+                if (_.isEmpty(params.user) && _.isEmpty(params.like)) {
                     _.forEach(games, function (game) {
                         putCache(game);
                     });
@@ -334,11 +338,9 @@ ludojApp.factory('gamesService', function gamesService(
                 response.data.results = games;
                 response.data.page = page;
 
-                if (!params.user) {
-                    _.forEach(games, function (game) {
-                        putCache(game);
-                    });
-                }
+                _.forEach(games, function (game) {
+                    putCache(game);
+                });
 
                 return response.data;
             })
@@ -525,10 +527,13 @@ ludojApp.factory('gamesService', function gamesService(
     function canonicalPath(path, params) {
         path = '#' + (path || '/');
         var qString = _(_.toPairs(params))
-                .filter(1)
+                .flatMap(function (v) {
+                    return _.isArray(v[1]) ? _.map(v[1], function (vv) { return [v[0], vv]; }) : [v];
+                })
+                .reject(function (v) { return _.isNil(v[1]) || v[1] === ''; })
                 .sortBy(0)
                 .map(function (v) {
-                    return v[0] + '=' + encodeURIComponent(v[1]);
+                    return v[1] === true ? v[0] : v[0] + '=' + encodeURIComponent(v[1]);
                 })
                 .join('&');
         return qString ? path + '?' + qString : path;
@@ -759,6 +764,17 @@ ludojApp.factory('filterService', function filterService(
             '-age': '-min_age,-rec_rating,-bayes_rating,-avg_rating'
         };
 
+    function parseList(input, sorted) {
+        var result = _(input)
+            .split(',')
+            .map(_.trim)
+            .filter();
+        if (sorted) {
+            result = result.sortBy(_.lowerCase);
+        }
+        return result.value();
+    }
+
     function validateCountType(playerCountType) {
         var playerCountTypes = {'box': true, 'recommended': true, 'best': true};
         return playerCountTypes[playerCountType] ? playerCountType : 'recommended';
@@ -827,16 +843,17 @@ ludojApp.factory('filterService', function filterService(
     function parseParams(params) {
         params = params || {};
 
-        var user = _.trim(params.for) || _.trim(params.user) || null,
+        var usersFor = parseList(params.for, true),
+            user = !_.isEmpty(usersFor) ? usersFor : parseList(params.user, true),
             playerCount = _.parseInt(params.playerCount) || null,
             playTime = _.parseInt(params.playTime) || null,
             playerAge = _.parseInt(params.playerAge) || null,
-            excludeRated = booleanDefault(params.excludeRated, true, !user),
-            excludeOwned = booleanDefault(params.excludeOwned, true, !user),
-            excludeWishlist = booleanDefault(params.excludeWishlist, false, !user),
-            excludePlayed = booleanDefault(params.excludePlayed, false, !user),
-            excludeClusters = booleanDefault(params.excludeClusters, true, !user),
-            similarity = booleanDefault(params.similarity, false, !user),
+            excludeRated = booleanDefault(params.excludeRated, true, _.size(user) !== 1),
+            excludeOwned = booleanDefault(params.excludeOwned, true, _.size(user) !== 1),
+            excludeWishlist = booleanDefault(params.excludeWishlist, false, _.size(user) !== 1),
+            excludePlayed = booleanDefault(params.excludePlayed, false, _.size(user) !== 1),
+            excludeClusters = booleanDefault(params.excludeClusters, true, _.size(user) !== 1),
+            similarity = booleanDefault(params.similarity, false, _.isEmpty(user)),
             yearMin = _.parseInt(params.yearMin),
             yearMax = _.parseInt(params.yearMax),
             ordering = validateOrdering(params.ordering),
@@ -849,14 +866,14 @@ ludojApp.factory('filterService', function filterService(
                 .value();
 
         return {
-            'for': user,
+            'for': _.isEmpty(user) ? null : user,
             'excludeRated': excludeRated === false ? false : null,
             'excludeOwned': excludeOwned === false ? false : null,
             'excludeWishlist': excludeWishlist === true ? true : null,
             'excludePlayed': excludePlayed === true ? true : null,
             'excludeClusters': excludeClusters === false ? false : null,
             'similarity': similarity === true ? true : null,
-            'like': !_.isEmpty(like) && !user ? like : null,
+            'like': !_.isEmpty(like) && _.isEmpty(user) ? like : null,
             'search': _.trim(params.search) || null,
             'playerCount': playerCount,
             'playerCountType': playerCount && validateCountType(params.playerCountType),
@@ -872,22 +889,23 @@ ludojApp.factory('filterService', function filterService(
             'gameType': _.parseInt(params.gameType) || null,
             'category': _.parseInt(params.category) || null,
             'mechanic': _.parseInt(params.mechanic) || null,
-            'ordering': user || !_.isEmpty(like) || ordering === 'rg' ? null : ordering
+            'ordering': !_.isEmpty(user) || !_.isEmpty(like) || ordering === 'rg' ? null : ordering
         };
     }
 
     service.paramsFromScope = function paramsFromScope(scope) {
         scope = scope || {};
 
-        var result = {
-            'for': scope.user,
-            'search': scope.search,
-            'cooperative': scope.cooperative,
-            'gameType': scope.gameType,
-            'category': scope.category,
-            'mechanic': scope.mechanic,
-            'ordering': scope.ordering
-        };
+        var userList = parseList(scope.user, true),
+            result = {
+                'for': _.isEmpty(userList) ? null : userList,
+                'search': scope.search,
+                'cooperative': scope.cooperative,
+                'gameType': scope.gameType,
+                'category': scope.category,
+                'mechanic': scope.mechanic,
+                'ordering': scope.ordering
+            };
 
         if (scope.count.enabled && scope.count.value) {
             result.playerCount = scope.count.value;
@@ -929,23 +947,23 @@ ludojApp.factory('filterService', function filterService(
             result.yearMax = null;
         }
 
-        if (scope.user) {
-            result.excludeRated = parseBoolean(_.get(scope, 'exclude.rated'));
-            result.excludeOwned = parseBoolean(_.get(scope, 'exclude.owned'));
-            result.excludeWishlist = parseBoolean(_.get(scope, 'exclude.wishlist'));
-            result.excludePlayed = parseBoolean(_.get(scope, 'exclude.played'));
-            result.excludeClusters = parseBoolean(_.get(scope, 'exclude.clusters'));
-            result.similarity = parseBoolean(scope.similarity);
-        } else {
+        if (_.isEmpty(userList)) {
             result.excludeRated = null;
             result.excludeOwned = null;
             result.excludeWishlist = null;
             result.excludePlayed = null;
             result.excludeClusters = null;
             result.similarity = null;
+        } else {
+            result.excludeRated = parseBoolean(_.get(scope, 'exclude.rated'));
+            result.excludeOwned = parseBoolean(_.get(scope, 'exclude.owned'));
+            result.excludeWishlist = parseBoolean(_.get(scope, 'exclude.wishlist'));
+            result.excludePlayed = parseBoolean(_.get(scope, 'exclude.played'));
+            result.excludeClusters = parseBoolean(_.get(scope, 'exclude.clusters'));
+            result.similarity = parseBoolean(scope.similarity);
         }
 
-        result.like = !_.isEmpty(scope.likedGames) && !scope.user ? _.map(scope.likedGames, 'bgg_id') : null;
+        result.like = !_.isEmpty(scope.likedGames) && _.isEmpty(userList) ? _.map(scope.likedGames, 'bgg_id') : null;
 
         return parseParams(result);
     };
@@ -966,14 +984,16 @@ ludojApp.factory('filterService', function filterService(
 
         params = params || {};
 
-        if (params.for) {
+        if (!_.isEmpty(params.for)) {
             result.user = params.for;
-            result.exclude_known = booleanString(booleanDefault(params.excludeRated, true));
-            result.exclude_owned = booleanString(booleanDefault(params.excludeOwned, true));
-            result.exclude_wishlist = booleanDefault(params.excludeWishlist, false) ? 5 : null;
-            result.exclude_play_count = booleanDefault(params.excludePlayed, false) ? 1 : null;
-            result.exclude_clusters = booleanString(booleanDefault(params.excludeClusters, true));
             result.model = params.similarity ? 'similarity' : null;
+            if (_.size(params.for) === 1) {
+                result.exclude_known = booleanString(booleanDefault(params.excludeRated, true));
+                result.exclude_owned = booleanString(booleanDefault(params.excludeOwned, true));
+                result.exclude_wishlist = booleanDefault(params.excludeWishlist, false) ? 5 : null;
+                result.exclude_play_count = booleanDefault(params.excludePlayed, false) ? 1 : null;
+                result.exclude_clusters = booleanString(booleanDefault(params.excludeClusters, true));
+            }
         } else if (!_.isEmpty(params.like)) {
             result.like = params.like;
         } else {

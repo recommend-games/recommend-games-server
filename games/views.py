@@ -121,19 +121,14 @@ def _parse_parts(args):
                     yield parsed
         elif isinstance(arg, (list, tuple)):
             yield from _parse_parts(arg)
+        else:
+            yield arg
 
 
 def _parse_ints(args):
-    # TODO use _parse_parts()
-    for arg in arg_to_iter(args):
-        if isinstance(arg, int):
-            yield arg
-        elif isinstance(arg, str):
-            for parsed in map(parse_int, arg.split(",")):
-                if parsed is not None:
-                    yield parsed
-        elif isinstance(arg, (list, tuple)):
-            yield from _parse_ints(arg)
+    for parsed in map(parse_int, _parse_parts(args)):
+        if parsed is not None:
+            yield parsed
 
 
 class GameFilter(FilterSet):
@@ -296,8 +291,33 @@ class GameViewSet(PermissionsModelViewSet):
             star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
         )
 
+    # pylint: disable=no-self-use
+    def _recommend_group_rating(self, users, recommender, params):
+        import turicreate as tc
+
+        users = (user.lower() for user in users if user)
+        users = [user for user in users if user in recommender.known_users]
+        if not users:
+            raise NotFound("none of the users could be found")
+
+        similarity_model = take_first(params.get("model")) == "similarity"
+
+        recommendations = (
+            recommender.recommend(
+                users=users, similarity_model=similarity_model, exclude_known=False
+            )
+            .groupby(
+                key_column_names="bgg_id",
+                operations={"score": tc.aggregate.MEAN("score")},
+            )
+            .sort("score", ascending=False)
+        )
+
+        recommendations["rank"] = range(1, len(recommendations) + 1)
+
+        return recommendations
+
     def _recommend_similar(self, like, recommender):
-        like = list(_parse_ints(like))
         games = (
             frozenset(
                 self.filter_queryset(self.get_queryset())
@@ -311,6 +331,74 @@ class GameViewSet(PermissionsModelViewSet):
             return ()
 
         return recommender.recommend_similar(games=like, items=games)
+
+    @action(detail=False)
+    def recommend(self, request):
+        """ recommend games """
+
+        site = request.query_params.get("site")
+
+        if site == "bga":
+            return self.recommend_bga(request)
+
+        users = list(_parse_parts(request.query_params.getlist("user")))
+        like = list(_parse_ints(request.query_params.getlist("like")))
+
+        if not users and not like:
+            return self.list(request)
+
+        if settings.PUBSUB_PUSH_ENABLED and users:
+            for user in users:
+                pubsub_push(user)
+
+        path = getattr(settings, "RECOMMENDER_PATH", None)
+        recommender = load_recommender(path, "bgg")
+
+        if recommender is None:
+            return self.list(request)
+
+        recommendation = (
+            self._recommend_rating(users[0], recommender, dict(request.query_params))
+            if len(users) == 1
+            else self._recommend_group_rating(
+                users, recommender, dict(request.query_params)
+            )
+            if users
+            else self._recommend_similar(like, recommender)
+        )
+
+        del like, path, recommender
+
+        page = self.paginate_queryset(recommendation)
+        if page is None:
+            recommendation = recommendation[:10]
+            paginate = False
+        else:
+            recommendation = page
+            paginate = True
+        del page
+
+        recommendation = {game["bgg_id"]: game for game in recommendation}
+        games = self.filter_queryset(self.get_queryset()).filter(
+            bgg_id__in=recommendation
+        )
+        for game in games:
+            rec = recommendation[game.bgg_id]
+            game.rec_rank = rec["rank"]
+            game.rec_rating = rec["score"] if users else None
+            game.rec_stars = rec.get("stars") if users else None
+        del recommendation
+
+        serializer = self.get_serializer(
+            instance=sorted(games, key=lambda game: game.rec_rank), many=True
+        )
+        del games
+
+        return (
+            self.get_paginated_response(serializer.data)
+            if paginate
+            else Response(serializer.data)
+        )
 
     @action(detail=False)
     def recommend_bga(self, request):
@@ -344,91 +432,6 @@ class GameViewSet(PermissionsModelViewSet):
             self.get_paginated_response(page)
             if page is not None
             else Response(list(recommendation[:10]))
-        )
-
-    @action(detail=False)
-    def recommend(self, request):
-        """ recommend games """
-
-        site = request.query_params.get("site")
-
-        if site == "bga":
-            return self.recommend_bga(request)
-
-        user = request.query_params.get("user")
-        like = request.query_params.getlist("like")
-
-        if not user and not like:
-            return self.list(request)
-
-        if settings.PUBSUB_PUSH_ENABLED and user:
-            pubsub_push(user)
-
-        path = getattr(settings, "RECOMMENDER_PATH", None)
-        recommender = load_recommender(path, "bgg")
-
-        if recommender is None:
-            return self.list(request)
-
-        recommendation = (
-            self._recommend_rating(user, recommender, dict(request.query_params))
-            if user
-            else self._recommend_similar(like, recommender)
-        )
-
-        del like, path, recommender
-
-        page = self.paginate_queryset(recommendation)
-        if page is None:
-            recommendation = recommendation[:10]
-            paginate = False
-        else:
-            recommendation = page
-            paginate = True
-        del page
-
-        recommendation = {game["bgg_id"]: game for game in recommendation}
-        games = self.filter_queryset(self.get_queryset()).filter(
-            bgg_id__in=recommendation
-        )
-        for game in games:
-            rec = recommendation[game.bgg_id]
-            game.rec_rank = rec["rank"]
-            game.rec_rating = rec["score"] if user else None
-            game.rec_stars = rec.get("stars") if user else None
-        del recommendation
-
-        serializer = self.get_serializer(
-            instance=sorted(games, key=lambda game: game.rec_rank), many=True
-        )
-        del games
-
-        return (
-            self.get_paginated_response(serializer.data)
-            if paginate
-            else Response(serializer.data)
-        )
-
-    # pylint: disable=unused-argument,invalid-name
-    @action(detail=True)
-    def similar_bga(self, request, pk=None):
-        """ find games similar to this game with BGA data """
-
-        path = getattr(settings, "BGA_RECOMMENDER_PATH", None)
-        recommender = load_recommender(path, "bga")
-
-        if recommender is None:
-            raise NotFound(f"cannot find similar games to <{pk}>")
-
-        games = recommender.similar_games(pk, num_games=0)
-
-        del path, recommender
-
-        page = self.paginate_queryset(games)
-        return (
-            self.get_paginated_response(page)
-            if page is not None
-            else Response(list(games[:10]))
         )
 
     # pylint: disable=invalid-name
@@ -476,7 +479,28 @@ class GameViewSet(PermissionsModelViewSet):
             else Response(serializer.data)
         )
 
-    # pylint: disable=no-self-use
+    # pylint: disable=unused-argument,invalid-name
+    @action(detail=True)
+    def similar_bga(self, request, pk=None):
+        """ find games similar to this game with BGA data """
+
+        path = getattr(settings, "BGA_RECOMMENDER_PATH", None)
+        recommender = load_recommender(path, "bga")
+
+        if recommender is None:
+            raise NotFound(f"cannot find similar games to <{pk}>")
+
+        games = recommender.similar_games(pk, num_games=0)
+
+        del path, recommender
+
+        page = self.paginate_queryset(games)
+        return (
+            self.get_paginated_response(page)
+            if page is not None
+            else Response(list(games[:10]))
+        )
+
     @action(detail=False)
     def updated_at(self, request):
         """ recommend games """

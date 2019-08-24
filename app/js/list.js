@@ -104,11 +104,11 @@ ludojApp.controller('ListController', function ListController(
             .catch(function (response) {
                 $log.error(response);
 
-                if (response.status !== 404 || !filters.user) {
+                if (response.status !== 404 || _.isEmpty(filters.user)) {
                     return $q.reject(response);
                 }
 
-                toastr.error('Unable to create recommendations for "' + filters.user + '"');
+                toastr.error('Unable to create recommendations for "' + _.join(filters.user, ', ') + '"');
 
                 $scope.userNotFound = true;
 
@@ -182,7 +182,7 @@ ludojApp.controller('ListController', function ListController(
         });
     }
 
-    $scope.user = params.for;
+    $scope.user = _.join(params.for, ', ');
 
     $scope.exclude = {
         'rated': filterService.booleanDefault(params.excludeRated, true),
@@ -286,6 +286,7 @@ ludojApp.controller('ListController', function ListController(
     $scope.fetchGames = fetchGames;
     $scope.pad = _.padStart;
     $scope.isEmpty = _.isEmpty;
+    $scope.size = _.size;
     $scope.empty = false;
     $scope.total = null;
     $scope.renderSlider = renderSlider;
@@ -293,7 +294,7 @@ ludojApp.controller('ListController', function ListController(
     $scope.updateParams = updateParams;
     $scope.selectionActive = false;
     $scope.userNotFound = false;
-    $scope.hideScore = params.for && params.similarity;
+    $scope.hideScore = !_.isEmpty(params.for) && params.similarity;
     $scope.statsActive = false;
     $scope.userStats = {};
 
@@ -510,7 +511,7 @@ ludojApp.controller('ListController', function ListController(
                 .sortBy('num_votes')
                 .reverse()
                 .value();
-            if (!params.for && !_.isEmpty(params.like)) {
+            if (_.isEmpty(params.for) && !_.isEmpty(params.like)) {
                 showPane('select');
             }
         })
@@ -537,8 +538,8 @@ ludojApp.controller('ListController', function ListController(
         })
         .catch($log.error);
 
-    if (params.for) {
-        usersService.getUserStats(params.for, true)
+    if (_.size(params.for) === 1) {
+        usersService.getUserStats(params.for[0], true)
             .then(function (stats) {
                 $scope.userUpdatedAt = stats.updated_at_str;
                 userStats.rg = stats.rg_top;
@@ -554,7 +555,7 @@ ludojApp.controller('ListController', function ListController(
         })
         .catch($log.error);
 
-    gamesService.setTitle(params.for ? 'Recommendations for ' + params.for : null);
+    gamesService.setTitle(!_.isEmpty(params.for) ? 'Recommendations for ' + _.join(params.for, ', ') : null);
     gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
     gamesService.setImage();
     gamesService.setDescription();
