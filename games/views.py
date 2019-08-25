@@ -313,7 +313,9 @@ class GameViewSet(PermissionsModelViewSet):
             .sort("score", ascending=False)
         )
 
+        recommendations.materialize()
         recommendations["rank"] = range(1, len(recommendations) + 1)
+        recommendations.materialize()
 
         return recommendations
 
