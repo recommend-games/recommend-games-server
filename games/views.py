@@ -304,7 +304,10 @@ class GameViewSet(PermissionsModelViewSet):
 
         recommendations = (
             recommender.recommend(
-                users=users, similarity_model=similarity_model, exclude_known=False
+                users=users,
+                games=recommender.rated_games,
+                similarity_model=similarity_model,
+                exclude_known=False,
             )
             .groupby(
                 key_column_names="bgg_id",
