@@ -177,11 +177,10 @@
 					</div>
 				</div>
 				<div id="form-exclude-filters" class="collapse">
-					<!-- TODO: disable filters when group recommendation -->
-					<div class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
+					<div class="{{ user &amp;&amp; !groupRecommendation ? 'text-success' : 'text-muted' }} mb-0">
 						Exclude games from recommendations:
 					</div>
-					<div class="{{ user ? 'form-exclude-enabled' : 'form-exclude-disabled' }} mb-1">
+					<div class="{{ user &amp;&amp; !groupRecommendation ? 'form-exclude-enabled' : 'form-exclude-disabled' }} mb-1">
 						<div class="form-check form-check-inline"
 								data-toggle="tooltip"
 								data-placement="bottom"
@@ -191,10 +190,10 @@
 									id="filter-exclude-rated"
 									name="filter-exclude-rated"
 									ng-model="exclude.rated"
-									ng-disabled="!user" />
-								<span class="slider {{ user &amp;&amp; exclude.rated ? 'bg-success' : 'bg-secondary' }}"></span>
+									ng-disabled="!user || groupRecommendation" />
+								<span class="slider {{ user &amp;&amp; !groupRecommendation &amp;&amp; exclude.rated ? 'bg-success' : 'bg-secondary' }}"></span>
 							</label>
-							<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.rated ? 'text-success' : 'text-muted' }} ml-1"
+							<label class="form-check-label form-label-exclude {{ user &amp;&amp; !groupRecommendation &amp;&amp; exclude.rated ? 'text-success' : 'text-muted' }} ml-1"
 									for="filter-exclude-rated">
 								rated
 							</label>
@@ -208,10 +207,10 @@
 									id="filter-exclude-owned"
 									name="filter-exclude-owned"
 									ng-model="exclude.owned"
-									ng-disabled="!user" />
-								<span class="slider {{ user &amp;&amp; exclude.owned ? 'bg-success' : 'bg-secondary' }}"></span>
+									ng-disabled="!user || groupRecommendation" />
+								<span class="slider {{ user &amp;&amp; !groupRecommendation &amp;&amp; exclude.owned ? 'bg-success' : 'bg-secondary' }}"></span>
 							</label>
-							<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.owned ? 'text-success' : 'text-muted' }} ml-1"
+							<label class="form-check-label form-label-exclude {{ user &amp;&amp; !groupRecommendation &amp;&amp; exclude.owned ? 'text-success' : 'text-muted' }} ml-1"
 									for="filter-exclude-owned">
 								owned
 							</label>
@@ -225,10 +224,10 @@
 									id="filter-exclude-wishlist"
 									name="filter-exclude-wishlist"
 									ng-model="exclude.wishlist"
-									ng-disabled="!user" />
-								<span class="slider {{ user &amp;&amp; exclude.wishlist ? 'bg-success' : 'bg-secondary' }}"></span>
+									ng-disabled="!user || groupRecommendation" />
+								<span class="slider {{ user &amp;&amp; !groupRecommendation &amp;&amp; exclude.wishlist ? 'bg-success' : 'bg-secondary' }}"></span>
 							</label>
-							<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.wishlist ? 'text-success' : 'text-muted' }} ml-1"
+							<label class="form-check-label form-label-exclude {{ user &amp;&amp; !groupRecommendation &amp;&amp; exclude.wishlist ? 'text-success' : 'text-muted' }} ml-1"
 									for="filter-exclude-wishlist">
 								wishlist
 							</label>
@@ -242,10 +241,10 @@
 									id="filter-exclude-played"
 									name="filter-exclude-played"
 									ng-model="exclude.played"
-									ng-disabled="!user" />
-								<span class="slider {{ user &amp;&amp; exclude.played ? 'bg-success' : 'bg-secondary' }}"></span>
+									ng-disabled="!user || groupRecommendation" />
+								<span class="slider {{ user &amp;&amp; !groupRecommendation &amp;&amp; exclude.played ? 'bg-success' : 'bg-secondary' }}"></span>
 							</label>
-							<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.played ? 'text-success' : 'text-muted' }} ml-1"
+							<label class="form-check-label form-label-exclude {{ user &amp;&amp; !groupRecommendation &amp;&amp; exclude.played ? 'text-success' : 'text-muted' }} ml-1"
 									for="filter-exclude-played">
 								played
 							</label>
@@ -259,10 +258,10 @@
 									id="filter-exclude-clusters"
 									name="filter-exclude-clusters"
 									ng-model="exclude.clusters"
-									ng-disabled="!user" />
-								<span class="slider {{ user &amp;&amp; exclude.clusters ? 'bg-success' : 'bg-secondary' }}"></span>
+									ng-disabled="!user || groupRecommendation" />
+								<span class="slider {{ user &amp;&amp; !groupRecommendation &amp;&amp; exclude.clusters ? 'bg-success' : 'bg-secondary' }}"></span>
 							</label>
-							<label class="form-check-label form-label-exclude {{ user &amp;&amp; exclude.clusters ? 'text-success' : 'text-muted' }} ml-1"
+							<label class="form-check-label form-label-exclude {{ user &amp;&amp; !groupRecommendation &amp;&amp; exclude.clusters ? 'text-success' : 'text-muted' }} ml-1"
 									for="filter-exclude-clusters">
 								implementations
 							</label>

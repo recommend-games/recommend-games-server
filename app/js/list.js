@@ -293,6 +293,7 @@ ludojApp.controller('ListController', function ListController(
     $scope.filtersActive = filtersActive;
     $scope.updateParams = updateParams;
     $scope.selectionActive = false;
+    $scope.groupRecommendation = _.size(params.for) > 1;
     $scope.userNotFound = false;
     $scope.hideScore = !_.isEmpty(params.for) && params.similarity;
     $scope.statsActive = false;
@@ -473,6 +474,7 @@ ludojApp.controller('ListController', function ListController(
     $scope.$watch('age.enabled', renderSlider);
     $scope.$watch('complexity.enabled', renderSlider);
     $scope.$watch('year.enabled', renderSlider);
+    $scope.$watch('user', function () { $scope.groupRecommendation = _.includes($scope.user, ','); });
 
     fetchGames(1)
         .then(function () {
