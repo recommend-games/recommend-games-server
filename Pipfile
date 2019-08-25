@@ -21,7 +21,6 @@ turicreate = "<5.7"
 whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
-gcloud = "*"
 gsutil = "*"
 ludoj-scraper = {editable = true, git = "https://github.com/MarkusShepherd/ludoj-scraper.git"}
 lxml = "*"
