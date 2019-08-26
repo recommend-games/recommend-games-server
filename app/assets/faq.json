@@ -9,7 +9,7 @@
 	"answer": "Ratings are scraped in the background, and as such any changes need time before they go through our system. You will need to be patient (possibly a week or so) before you can see your changes affecting your recommendations. Also see the previous two questions."
 }, {
 	"question": "I get recommendations for games I've already played. How can I filter these games out?",
-	"answer": "There is a triangle next to the \"GO!\" button. Click on it to see more collection filters, including for games you've played."
+	"answer": "When you start typing your BGG user name, collection filters will appear, including for games you've played."
 }, {
 	"question": "I don't like cooperative games. How can I filter those out?",
 	"answer": "There is a button labelled \"Advanced\" near the search box. When you click on it, you see a bunch of possible filters, including for cooperative games."
