@@ -291,7 +291,6 @@ class GameViewSet(PermissionsModelViewSet):
             star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
         )
 
-    # pylint: disable=no-self-use
     def _recommend_group_rating(self, users, recommender, params):
         import turicreate as tc
 
@@ -300,13 +299,27 @@ class GameViewSet(PermissionsModelViewSet):
         if not users:
             raise NotFound("none of the users could be found")
 
+        games = (
+            frozenset(
+                self.filter_queryset(self.get_queryset())
+                .order_by()
+                .values_list("bgg_id", flat=True)
+            )
+            & recommender.rated_games
+        )
+
+        if not games:
+            return ()
+
         similarity_model = take_first(params.get("model")) == "similarity"
 
         recommendations = (
             recommender.recommend(
                 users=users,
-                games=recommender.rated_games,
+                games=games,
                 similarity_model=similarity_model,
+                # TODO we want to exclude games based on the group's collections, see #228
+                # exclude=(),
                 exclude_known=False,
             )
             .groupby(
@@ -506,6 +519,7 @@ class GameViewSet(PermissionsModelViewSet):
             else Response(list(games[:10]))
         )
 
+    # pylint: disable=no-self-use
     @action(detail=False)
     def updated_at(self, request):
         """ recommend games """
