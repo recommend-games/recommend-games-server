@@ -408,6 +408,10 @@ input:checked + .slider:before {
     }
 }
 
+.faq-anchor {
+    font-size: 80%;
+}
+
 .faq-headline .faq-anchor {
     visibility: hidden;
 }
