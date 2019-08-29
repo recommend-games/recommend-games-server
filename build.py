@@ -502,6 +502,83 @@ def train():
     """ train BoardGameGeek and Board Game Atlas recommender models """
 
 
+def _save_ranking(
+    recommender, dst_dir, file_name="%Y%m%d-%H%M%S.csv", similarity_model=False
+):
+    file_name = django.utils.timezone.now().strftime(file_name)
+    dst_path = os.path.join(dst_dir, file_name)
+
+    LOGGER.info(
+        "Saving <%s> ranking to <%s>...",
+        recommender.similarity_model if similarity_model else recommender.model,
+        dst_path,
+    )
+
+    _remove(file_name)
+    os.makedirs(dst_dir, exist_ok=True)
+
+    recommendations = recommender.recommend(similarity_model=similarity_model)
+    if "name" in recommendations.column_names():
+        recommendations.remove_column("name", inplace=True)
+
+    recommendations.export_csv(dst_path)
+
+
+@task()
+def savebggrankings(
+    recommender_path=os.path.join(RECOMMENDER_DIR, ".bgg"),
+    dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg"),
+    file_name="%Y%m%d-%H%M%S.csv",
+):
+    """Take a snapshot of the BoardGameGeek rankings."""
+    from games.utils import load_recommender
+
+    LOGGER.info("Loading BoardGameGeek recommender from <%s>...", recommender_path)
+    recommender = load_recommender(recommender_path, site="bgg")
+    _save_ranking(
+        recommender=recommender,
+        dst_dir=os.path.join(dst_dir, "factor"),
+        file_name=file_name,
+        similarity_model=False,
+    )
+    _save_ranking(
+        recommender=recommender,
+        dst_dir=os.path.join(dst_dir, "similarity"),
+        file_name=file_name,
+        similarity_model=True,
+    )
+
+
+@task()
+def savebgarankings(
+    recommender_path=os.path.join(RECOMMENDER_DIR, ".bga"),
+    dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bga"),
+    file_name="%Y%m%d-%H%M%S.csv",
+):
+    """Take a snapshot of the Board Game Atlas rankings."""
+    from games.utils import load_recommender
+
+    LOGGER.info("Loading Board Game Atlas recommender from <%s>...", recommender_path)
+    recommender = load_recommender(recommender_path, site="bga")
+    _save_ranking(
+        recommender=recommender,
+        dst_dir=os.path.join(dst_dir, "factor"),
+        file_name=file_name,
+        similarity_model=False,
+    )
+    _save_ranking(
+        recommender=recommender,
+        dst_dir=os.path.join(dst_dir, "similarity"),
+        file_name=file_name,
+        similarity_model=True,
+    )
+
+
+@task(savebggrankings, savebgarankings)
+def saverankings():
+    """Take a snapshot of both BoardGameGeek and Board Game Atlas rankings."""
+
+
 @task()
 def cleandata(src_dir=DATA_DIR, bk_dir=f"{DATA_DIR}.bk"):
     """ clean data file """
@@ -594,7 +671,7 @@ def builddb():
     """ build a new database """
 
 
-@task(mergeall, link, train, builddb, split)
+@task(mergeall, link, train, saverankings, builddb, split)
 def builddbfull():
     """ merge, link, train, build, and split all relevant files """
 
