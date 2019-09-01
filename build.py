@@ -678,7 +678,22 @@ def bggranking(
     django.core.management.call_command("bggranking", output=dst)
 
 
-@task(cleandata, filldb, compressdb, cpdirs, cpdirsbga, dateflag, bggranking)
+@task()
+def fillrankingdb(path=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg")):
+    """Parses the ranking CSVs and writes them to the database."""
+    django.core.management.call_command("fillrankingdb", path)
+
+
+@task(
+    cleandata,
+    filldb,
+    dateflag,
+    bggranking,
+    fillrankingdb,
+    compressdb,
+    cpdirs,
+    cpdirsbga,
+)
 def builddb():
     """ build a new database """
 
