@@ -655,7 +655,7 @@ def cpdirsbga(
 
 
 @task()
-def dateflag(dst=os.path.join(DATA_DIR, "updated_at"), date=None):
+def dateflag(dst=SETTINGS.MODEL_UPDATED_FILE, date=None):
     """ write date to file """
     from games.utils import parse_date, serialize_date
 
@@ -666,7 +666,19 @@ def dateflag(dst=os.path.join(DATA_DIR, "updated_at"), date=None):
         file.write(date_str)
 
 
-@task(cleandata, filldb, compressdb, cpdirs, cpdirsbga, dateflag)
+@task()
+def bggranking(
+    dst=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg", "%Y%m%d-%H%M%S.csv")
+):
+    """Saves a snapshot of the BGG rankings."""
+    from games.utils import model_updated_at
+
+    updated_at = model_updated_at() or django.utils.timezone.now()
+    dst = updated_at.strftime(dst)
+    django.core.management.call_command("bggranking", output=dst)
+
+
+@task(cleandata, filldb, compressdb, cpdirs, cpdirsbga, dateflag, bggranking)
 def builddb():
     """ build a new database """
 

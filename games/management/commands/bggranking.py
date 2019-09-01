@@ -42,7 +42,11 @@ class Command(BaseCommand):
         ).order_by("bgg_rank", "-bayes_rating", "-avg_rating")
 
         if kwargs["output"] and kwargs["output"] != "-":
+            LOGGER.info(
+                "Writing BoardGameGeek ranking snapshot to <%s>...", kwargs["output"]
+            )
             with open(kwargs["output"], "w") as file:
                 _write_games(games, file)
         else:
+            LOGGER.info("Writing BoardGameGeek ranking snapshot to standard output...")
             _write_games(games, sys.stdout)
