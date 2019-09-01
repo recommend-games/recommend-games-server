@@ -1,0 +1,118 @@
+# -*- coding: utf-8 -*-
+
+"""Parses the ranking CSVs and writes them to the database."""
+
+import csv
+import logging
+import os
+import sys
+
+from datetime import timezone
+
+import pandas as pd
+
+from django.core.management.base import BaseCommand
+
+from ...models import Game, Ranking
+from ...utils import batchify, format_from_path, parse_date
+
+csv.field_size_limit(sys.maxsize)
+
+LOGGER = logging.getLogger(__name__)
+
+
+def parse_ranking_csv(path_file):
+    """Parses a ranking CSV file."""
+
+    LOGGER.info("Reading ranking from <%s>...", path_file)
+
+    file_name = os.path.basename(path_file)
+    date_str, _ = os.path.splitext(file_name)
+    date = parse_date(date_str, tzinfo=timezone.utc)
+
+    ranking = pd.read_csv(path_file)
+    ranking["date"] = date
+
+    return ranking
+
+
+def parse_ranking_csvs(path_dir):
+    """Parses all ranking CSV files in a directory."""
+
+    LOGGER.info("Iterating through all CSV files in <%s>...", path_dir)
+
+    for file_name in os.listdir(path_dir):
+        if format_from_path(file_name) == "csv":
+            yield parse_ranking_csv(os.path.join(path_dir, file_name))
+
+
+def _create_instances(path_dir, ranking_type=Ranking.BGG, filter_ids=None):
+    LOGGER.info("Finding all rankings of type <%s> in <%s>...", ranking_type, path_dir)
+    for ranking in parse_ranking_csvs(path_dir):
+        for item in ranking.itertuples(index=False):
+            if filter_ids is None or item.bgg_id in filter_ids:
+                yield Ranking(
+                    game_id=item.bgg_id,
+                    ranking_type=ranking_type,
+                    rank=item.rank,
+                    date=item.date,
+                )
+
+
+class Command(BaseCommand):
+    """Parses the ranking CSVs and writes them to the database."""
+
+    help = "Parses the ranking CSVs and writes them to the database."
+
+    ranking_types = {
+        Ranking.BGG: "bgg",
+        Ranking.FACTOR: "factor",
+        Ranking.SIMILARITY: "similarity",
+    }
+
+    def add_arguments(self, parser):
+        parser.add_argument("path", help="input directory")
+        parser.add_argument(
+            "--batch",
+            "-b",
+            type=int,
+            default=100_000,
+            help="batch size for DB transactions",
+        )
+        parser.add_argument(
+            "--dry-run", "-n", action="store_true", help="don't write to the database"
+        )
+
+    def _create_all_instances(self, path, filter_ids=None):
+        for ranking_type, sub_dir in self.ranking_types.items():
+            yield from _create_instances(
+                path_dir=os.path.join(path, sub_dir),
+                ranking_type=ranking_type,
+                filter_ids=filter_ids,
+            )
+
+    def handle(self, *args, **kwargs):
+        logging.basicConfig(
+            stream=sys.stderr,
+            level=logging.DEBUG if kwargs["verbosity"] > 1 else logging.INFO,
+            format="%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s",
+        )
+
+        LOGGER.info(kwargs)
+
+        # pylint: disable=no-member
+        game_ids = frozenset(Game.objects.order_by().values_list("bgg_id", flat=True))
+        instances = self._create_all_instances(kwargs["path"], filter_ids=game_ids)
+        batches = (
+            batchify(instances, kwargs["batch"]) if kwargs["batch"] else (instances,)
+        )
+
+        for count, batch in enumerate(batches):
+            LOGGER.info("Processing batch #%d...", count + 1)
+            if kwargs["dry_run"]:
+                for item in batch:
+                    print(item)
+            else:
+                Ranking.objects.bulk_create(batch)
+
+        LOGGER.info("Done filling the database.")

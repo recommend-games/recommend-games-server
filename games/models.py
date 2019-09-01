@@ -159,6 +159,28 @@ class Mechanic(Model):
         return self.name
 
 
+class Ranking(Model):
+    """Ranking model."""
+
+    BGG = "bgg"
+    FACTOR = "fac"
+    SIMILARITY = "sim"
+    TYPES = ((BGG, "BoardGameGeek"), (FACTOR, "Factor"), (SIMILARITY, "Similarity"))
+
+    game = ForeignKey(Game, on_delete=CASCADE)
+    ranking_type = CharField(max_length=3, choices=TYPES, default=BGG, db_index=True)
+    rank = PositiveIntegerField(db_index=True)
+    date = DateTimeField(db_index=True)
+
+    class Meta:
+        """Meta."""
+
+        ordering = ("ranking_type", "date", "rank")
+
+    def __str__(self):
+        return f"#{self.rank}: {self.game} ({self.ranking_type}, {self.date})"
+
+
 class User(Model):
     """ user model """
 

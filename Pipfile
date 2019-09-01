@@ -24,6 +24,7 @@ whitenoise = {extras = ["brotli"], version = "*"}
 gsutil = "*"
 ludoj-scraper = {editable = true, git = "https://github.com/MarkusShepherd/ludoj-scraper.git"}
 lxml = "*"
+pandas = "*"
 psutil = "*"
 pylint = "*"
 pynt = "*"
