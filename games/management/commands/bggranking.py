@@ -10,6 +10,8 @@ from django.core.management.base import BaseCommand
 
 from ...models import Game
 
+csv.field_size_limit(sys.maxsize)
+
 LOGGER = logging.getLogger(__name__)
 
 
