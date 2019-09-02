@@ -1,12 +1,14 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global ludojApp, _, $ */
+/*global angular, ludojApp, _, $, moment, Chart */
 
 'use strict';
 
 ludojApp.controller('DetailController', function DetailController(
     $filter,
+    $http,
     $location,
+    $log,
     $q,
     $routeParams,
     $scope,
@@ -114,6 +116,75 @@ ludojApp.controller('DetailController', function DetailController(
             });
         });
         // TODO catch errors
+
+    function makeDataPoints(data, rankingType) {
+        return _(data)
+            .filter(['ranking_type', rankingType])
+            .map(function (item) {
+                return {x: moment(item.date), y: item.rank};
+            })
+            .sortBy('x')
+            .value();
+    }
+
+    function makeDataSet(data, rankingType, label, color) {
+        var dataPoints = makeDataPoints(data, rankingType);
+        return {
+            label: label,
+            borderColor: color,
+            backgroundColor: 'rgba(0, 0, 0, 0)',
+            data: dataPoints,
+            pointRadius: 0,
+            fill: false
+        };
+    }
+
+    $http.get('/api/games/' + $routeParams.id + '/rankings/', {'params': {'date__gte': moment().subtract(30, 'days').format()}, 'noblock': true})
+        .then(function (response) {
+            var data = response.data;
+            return angular.element(function () {
+                var ctx = $('#ranking-history'),
+                    chart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            datasets: [
+                                makeDataSet(data, 'bgg', 'BGG', 'blue'),
+                                makeDataSet(data, 'fac', 'R.G', 'red')
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            title: {
+                                display: true,
+                                text: 'Rankings over time'
+                            },
+                            tooltips: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                            hover: {
+                                mode: 'nearest',
+                                intersect: true
+                            },
+                            scales: {
+                                xAxes: [{
+                                    type: 'time',
+                                    distribution: 'linear'
+                                }],
+                                yAxes: [{
+                                    ticks: {
+                                        reverse: true,
+                                        min: 1,
+                                        suggestedMax: 100
+                                    }
+                                }]
+                            }
+                        }
+                    });
+                return chart;
+            });
+        })
+        .catch($log.error);
 
     gamesService.setCanonicalUrl($location.path());
 });
