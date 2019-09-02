@@ -4,6 +4,7 @@
 
 import logging
 
+from datetime import timezone
 from functools import reduce
 from operator import or_
 
@@ -23,7 +24,16 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from .models import Category, Collection, Game, GameType, Mechanic, Person, User
+from .models import (
+    Category,
+    Collection,
+    Game,
+    GameType,
+    Mechanic,
+    Person,
+    Ranking,
+    User,
+)
 from .permissions import ReadOnly
 from .serializers import (
     CategorySerializer,
@@ -32,6 +42,7 @@ from .serializers import (
     GameTypeSerializer,
     MechanicSerializer,
     PersonSerializer,
+    RankingSerializer,
     UserSerializer,
 )
 from .utils import (
@@ -39,6 +50,7 @@ from .utils import (
     load_recommender,
     model_updated_at,
     parse_bool,
+    parse_date,
     parse_int,
     pubsub_push,
     take_first,
@@ -516,6 +528,35 @@ class GameViewSet(PermissionsModelViewSet):
             if page is not None
             else Response(list(games[:10]))
         )
+
+    @action(detail=True)
+    def rankings(self, request, pk=None):
+        """Find historical rankings of a game."""
+
+        filters = {
+            "game": pk,
+            "ranking_type": request.query_params.get("ranking_type"),
+            "date__gte": parse_date(
+                request.query_params.get("date__gte"), tzinfo=timezone.utc
+            ),
+            "date__lte": parse_date(
+                request.query_params.get("date__lte"), tzinfo=timezone.utc
+            ),
+        }
+        filters = {k: v for k, v in filters.items() if v}
+        queryset = Ranking.objects.filter(**filters)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = RankingSerializer(
+                page, many=True, context=self.get_serializer_context()
+            )
+            return self.get_paginated_response(serializer.data)
+
+        serializer = RankingSerializer(
+            queryset, many=True, context=self.get_serializer_context()
+        )
+        return Response(serializer.data)
 
     # pylint: disable=no-self-use
     @action(detail=False)

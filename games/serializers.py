@@ -12,7 +12,16 @@ from rest_framework.serializers import (
     URLField,
 )
 
-from .models import Category, Collection, Game, GameType, Mechanic, Person, User
+from .models import (
+    Category,
+    Collection,
+    Game,
+    GameType,
+    Mechanic,
+    Person,
+    Ranking,
+    User,
+)
 
 
 class GameSerializer(ModelSerializer):
@@ -90,6 +99,16 @@ class MechanicSerializer(ModelSerializer):
 
         model = Mechanic
         fields = "__all__"
+
+
+class RankingSerializer(ModelSerializer):
+    """Ranking serializer."""
+
+    class Meta:
+        """Meta."""
+
+        model = Ranking
+        exclude = ("id",)
 
 
 class CollectionSerializer(ModelSerializer):
