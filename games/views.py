@@ -544,14 +544,8 @@ class GameViewSet(PermissionsModelViewSet):
             ),
         }
         filters = {k: v for k, v in filters.items() if v}
-        queryset = Ranking.objects.filter(**filters)
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = RankingSerializer(
-                page, many=True, context=self.get_serializer_context()
-            )
-            return self.get_paginated_response(serializer.data)
+        queryset = Ranking.objects.filter(**filters)
 
         serializer = RankingSerializer(
             queryset, many=True, context=self.get_serializer_context()
