@@ -14,7 +14,7 @@ django-rest-framework-proxy = "*"
 djangorestframework = "*"
 google-cloud-pubsub = "*"
 gunicorn = "*"
-ludoj-recommender = {editable = true, git = "https://github.com/MarkusShepherd/ludoj-recommender.git"}
+ludoj-recommender = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-recommender.git"}
 markdown = "*"
 python-dateutil = "*"
 turicreate = "<5.7"
@@ -22,7 +22,7 @@ whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
 gsutil = "*"
-ludoj-scraper = {editable = true, git = "https://github.com/MarkusShepherd/ludoj-scraper.git"}
+ludoj-scraper = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-scraper.git"}
 lxml = "*"
 pandas = "*"
 psutil = "*"
