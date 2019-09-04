@@ -684,6 +684,18 @@ def fillrankingdb(path=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg")):
     django.core.management.call_command("fillrankingdb", path)
 
 
+@task()
+def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_000):
+    """Generate sitemap.xml."""
+    from games.utils import parse_int
+
+    limit = parse_int(limit) or 50_000
+    LOGGER.info(
+        "Generating sitemap with URL <%s> to <%s>, limit to %d...", url, dst, limit
+    )
+    django.core.management.call_command("sitemap", url=url, limit=limit, output=dst)
+
+
 @task(
     cleandata,
     filldb,
@@ -693,6 +705,7 @@ def fillrankingdb(path=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg")):
     compressdb,
     cpdirs,
     cpdirsbga,
+    sitemap,
 )
 def builddb():
     """ build a new database """
@@ -750,23 +763,9 @@ def minify(src=os.path.join(BASE_DIR, "app"), dst=os.path.join(BASE_DIR, ".temp"
     )
 
 
-@task()
-def sitemap(
-    url=URL_LIVE, dst=os.path.join(BASE_DIR, ".temp", "sitemap.xml"), limit=50_000
-):
-    """ generate sitemap.xml """
-    from games.utils import parse_int
-
-    limit = parse_int(limit) or 50_000
-    LOGGER.info(
-        "Generating sitemap with URL <%s> to <%s>, limit to %d...", url, dst, limit
-    )
-    django.core.management.call_command("sitemap", url=url, limit=limit, output=dst)
-
-
-@task(cleanstatic, minify, sitemap)
+@task(cleanstatic, minify)
 def collectstatic(delete=True):
-    """ generate sitemap.xml """
+    """Collect static files."""
 
     from games.utils import parse_bool
 
