@@ -860,7 +860,19 @@ def releasefull():
 @task()
 def lintshell(base_dir=BASE_DIR):
     """ lint Shell scripts """
-    execute("find", base_dir, "-name", "*.sh", "-ls", "-exec", "shellcheck", "{}", ";")
+    execute(
+        "find",
+        base_dir,
+        "-name",
+        "*.sh",
+        "-ls",
+        "-exec",
+        "shellcheck",
+        "{}",
+        "-x",
+        ".env",
+        ";",
+    )
 
 
 @task()
