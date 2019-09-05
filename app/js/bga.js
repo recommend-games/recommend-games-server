@@ -18,8 +18,46 @@ ludojApp.controller('BgaController', function BgaController(
     gamesService,
     toastr
 ) {
+    function parseList(input, sorted) {
+        var result = _(input)
+            .split(',')
+            .map(_.trim)
+            .filter();
+        if (sorted) {
+            result = result.sortBy(_.lowerCase);
+        }
+        return result.value();
+    }
+
     var users = {},
+        userNames = parseList($routeParams.for, true),
         routeParams = filterService.getParams($routeParams);
+
+    function fetchUser(userName) {
+        if (users[userName]) {
+            return $q.resolve(users[userName]);
+        }
+
+        var params = {
+            'client_id': BGA_CLIENT_ID,
+            'username': userName,
+            'limit': 1
+        };
+
+        return $http.get('https://www.boardgameatlas.com/api/reviews', {'params': params})
+            .then(function (response) {
+                var user = _.get(response, 'data.reviews[0].user.id') || null;
+                if (user) {
+                    users[userName] = user;
+                    return user;
+                }
+                return null;
+            })
+            .catch(function (response) {
+                $log.error(response);
+                return null;
+            });
+    }
 
     function fetchGames(page) {
         toastr.clear();
@@ -28,7 +66,6 @@ ludojApp.controller('BgaController', function BgaController(
 
         var append = page > 1,
             url = API_URL + 'games/recommend_bga/',
-            userName = routeParams.for || null,
             params = {'page': page},
             promise,
             bgaParams,
@@ -38,24 +75,12 @@ ludojApp.controller('BgaController', function BgaController(
             params.model = 'similarity';
         }
 
-        if (!userName) {
-            promise = $q.resolve(params);
-        } else if (users[userName]) {
-            params.user = users[userName];
+        if (_.isEmpty(userNames)) {
             promise = $q.resolve(params);
         } else {
-            bgaParams = {
-                'client_id': BGA_CLIENT_ID,
-                'username': userName,
-                'limit': 1
-            };
-            promise = $http.get('https://www.boardgameatlas.com/api/reviews', {'params': bgaParams})
-                .then(function (response) {
-                    var user = _.get(response, 'data.reviews[0].user.id') || null;
-                    if (user) {
-                        users[userName] = user;
-                        params.user = user;
-                    }
+            promise = $q.all(_.map(userNames, fetchUser))
+                .then(function (results) {
+                    params.user = _.filter(results);
                     return params;
                 });
         }
@@ -72,7 +97,7 @@ ludojApp.controller('BgaController', function BgaController(
                 $scope.prevPage = response.previous ? page - 1 : null;
                 $scope.nextPage = response.next ? page + 1 : null;
                 $scope.total = response.count;
-                $scope.currUser = userName;
+                $scope.currUser = !_.isEmpty(userNames) ? userNames : null;
 
                 games = response.results;
                 var ids = _.map(games, 'bga_id');
@@ -135,7 +160,7 @@ ludojApp.controller('BgaController', function BgaController(
             });
     }
 
-    $scope.user = routeParams.for;
+    $scope.user = _.join(userNames, ', ');
     $scope.similarity = routeParams.similarity;
 
     $scope.fetchGames = fetchGames;
@@ -145,7 +170,7 @@ ludojApp.controller('BgaController', function BgaController(
 
     $scope.updateParams = function updateParams() {
         $route.updateParams({
-            'for': $scope.user || null,
+            'for': parseList($scope.user, true),
             'similarity': $scope.similarity || null
         });
     };
