@@ -24,6 +24,7 @@ ludojApp.controller('DetailController', function DetailController(
     $scope.implementations = false;
     $scope.expandable = false;
     $scope.expandDescription = false;
+    $scope.chartVisible = false;
 
     $scope.toggleDescription = function toggleDescription() {
         $scope.expandDescription = !$scope.expandDescription;
@@ -142,46 +143,60 @@ ludojApp.controller('DetailController', function DetailController(
     $http.get('/api/games/' + $routeParams.id + '/rankings/', {'params': {'date__gte': moment().subtract(30, 'days').format()}, 'noblock': true})
         .then(function (response) {
             var data = response.data;
+
+            if (_.isEmpty(data)) {
+                $scope.chartVisible = false;
+                return;
+            }
+
+            $scope.chartVisible = true;
+
             return angular.element(function () {
-                var ctx = $('#ranking-history'),
-                    chart = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            datasets: [
-                                makeDataSet(data, 'bgg', 'BGG', 'blue'),
-                                makeDataSet(data, 'fac', 'R.G', 'red')
-                            ]
+                var ctx = angular.element('#ranking-history');
+
+                if (_.isNil(ctx) || _.isEmpty(ctx)) {
+                    $scope.chartVisible = false;
+                    $log.error('unable to find canvas element');
+                    return null;
+                }
+
+                return new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [
+                            makeDataSet(data, 'bgg', 'BGG', 'blue'),
+                            makeDataSet(data, 'fac', 'R.G', 'red')
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        title: {
+                            display: true,
+                            text: 'Rankings over time'
                         },
-                        options: {
-                            responsive: true,
-                            title: {
-                                display: true,
-                                text: 'Rankings over time'
-                            },
-                            tooltips: {
-                                mode: 'index',
-                                intersect: false,
-                            },
-                            hover: {
-                                mode: 'nearest',
-                                intersect: true
-                            },
-                            scales: {
-                                xAxes: [{
-                                    type: 'time',
-                                    distribution: 'linear'
-                                }],
-                                yAxes: [{
-                                    ticks: {
-                                        reverse: true,
-                                        min: 1,
-                                        suggestedMax: 100
-                                    }
-                                }]
-                            }
+                        tooltips: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        hover: {
+                            mode: 'nearest',
+                            intersect: true
+                        },
+                        scales: {
+                            xAxes: [{
+                                type: 'time',
+                                distribution: 'linear'
+                            }],
+                            yAxes: [{
+                                ticks: {
+                                    reverse: true,
+                                    min: 1,
+                                    suggestedMax: 10
+                                }
+                            }]
                         }
-                    });
-                return chart;
+                    }
+                });
             });
         })
         .catch($log.error);
