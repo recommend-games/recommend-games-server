@@ -428,6 +428,34 @@ class GameViewSet(PermissionsModelViewSet):
             else Response(serializer.data)
         )
 
+    # pylint: disable=no-self-use
+    def _recommend_group_rating_bga(self, users, recommender, params):
+        import turicreate as tc
+
+        users = [user for user in users if user in recommender.known_users]
+        if not users:
+            raise NotFound("none of the users could be found")
+
+        similarity_model = take_first(params.get("model")) == "similarity"
+
+        recommendations = (
+            recommender.recommend(
+                users=users,
+                games=recommender.rated_games,
+                similarity_model=similarity_model,
+                exclude_known=False,
+            )
+            .groupby(
+                key_column_names="bga_id",
+                operations={"score": tc.aggregate.MEAN("score")},
+            )
+            .sort("score", ascending=False)
+        )
+
+        recommendations["rank"] = range(1, len(recommendations) + 1)
+
+        return recommendations
+
     @action(detail=False)
     def recommend_bga(self, request):
         """ recommend games with Board Game Atlas data """
@@ -438,22 +466,26 @@ class GameViewSet(PermissionsModelViewSet):
         if recommender is None:
             return self.list(request)
 
-        user = request.query_params.get("user")
+        users = list(_parse_parts(request.query_params.getlist("user")))
         like = list(_parse_parts(request.query_params.getlist("like")))
 
+        print(users)
+
         recommendation = (
-            recommender.recommend(
-                users=(user,),
+            recommender.recommend_similar(games=like)
+            if like and not users
+            else self._recommend_group_rating_bga(
+                users, recommender, dict(request.query_params)
+            )
+            if len(users) > 1
+            else recommender.recommend(
+                users=(take_first(users),),
                 similarity_model=request.query_params.get("model") == "similarity",
-                # exclude_known=parse_bool(take_first(params.get('exclude_known'))),
-                # exclude_clusters=parse_bool(take_first(params.get('exclude_clusters'))),
                 star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
             )
-            if user or not like
-            else recommender.recommend_similar(games=like)
         )
 
-        del path, recommender, user, like
+        del path, recommender, users, like
 
         page = self.paginate_queryset(recommendation)
         return (
@@ -553,6 +585,7 @@ class GameViewSet(PermissionsModelViewSet):
         return Response(serializer.data)
 
     # pylint: disable=no-self-use
+
     @action(detail=False)
     def updated_at(self, request):
         """ recommend games """

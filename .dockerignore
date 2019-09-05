@@ -107,7 +107,7 @@
 
 # other
 **/*.bk
-**/data/
+**/data*/
 **/logs/
 **/tests/
 **/*.sqlite*
