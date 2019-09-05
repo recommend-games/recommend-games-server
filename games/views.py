@@ -469,8 +469,6 @@ class GameViewSet(PermissionsModelViewSet):
         users = list(_parse_parts(request.query_params.getlist("user")))
         like = list(_parse_parts(request.query_params.getlist("like")))
 
-        print(users)
-
         recommendation = (
             recommender.recommend_similar(games=like)
             if like and not users
