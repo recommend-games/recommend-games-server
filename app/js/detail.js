@@ -1,6 +1,6 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global angular, ludojApp, _, $, moment, Chart */
+/*global ludojApp, _, $, moment, Chart */
 
 'use strict';
 
@@ -12,6 +12,7 @@ ludojApp.controller('DetailController', function DetailController(
     $q,
     $routeParams,
     $scope,
+    $timeout,
     gamesService
 ) {
     var compilationOf = [],
@@ -19,7 +20,8 @@ ludojApp.controller('DetailController', function DetailController(
         implementationOf = [],
         implementedBy = [],
         integratesWith = [],
-        similarPromise = gamesService.getSimilarGames($routeParams.id, 1, true);
+        similarPromise = gamesService.getSimilarGames($routeParams.id, 1, true),
+        rankingData;
 
     $scope.implementations = false;
     $scope.expandable = false;
@@ -140,63 +142,72 @@ ludojApp.controller('DetailController', function DetailController(
         };
     }
 
+    function findElement(selector, wait) {
+        // TODO max retries
+        var element = $(selector);
+
+        if (_.isNil(element) || _.isEmpty(element)) {
+            return $timeout(function () { return findElement(selector); }, _.parseInt(wait) || 100);
+        }
+
+        return $q.resolve(element);
+    }
+
     $http.get('/api/games/' + $routeParams.id + '/rankings/', {'params': {'date__gte': moment().subtract(30, 'days').format()}, 'noblock': true})
         .then(function (response) {
-            var data = response.data;
+            rankingData = response.data;
 
-            if (_.isEmpty(data)) {
+            if (_.isEmpty(rankingData)) {
                 $scope.chartVisible = false;
                 return;
             }
 
             $scope.chartVisible = true;
+            return findElement('#ranking-history');
+        })
+        .then(function (element) {
+            if (_.isNil(element) || _.isEmpty(element)) {
+                $scope.chartVisible = false;
+                $log.error('unable to find canvas element');
+                return null;
+            }
 
-            return angular.element(function () {
-                var ctx = angular.element('#ranking-history');
-
-                if (_.isNil(ctx) || _.isEmpty(ctx)) {
-                    $scope.chartVisible = false;
-                    $log.error('unable to find canvas element');
-                    return null;
-                }
-
-                return new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        datasets: [
-                            makeDataSet(data, 'bgg', 'BGG', 'blue'),
-                            makeDataSet(data, 'fac', 'R.G', 'red')
-                        ]
+            return new Chart(element, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        makeDataSet(rankingData, 'bgg', 'BGG', 'blue'),
+                        makeDataSet(rankingData, 'fac', 'R.G', 'red')
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    title: {
+                        display: true,
+                        text: 'Rankings over time'
                     },
-                    options: {
-                        responsive: true,
-                        title: {
-                            display: true,
-                            text: 'Rankings over time'
-                        },
-                        tooltips: {
-                            mode: 'index',
-                            intersect: false,
-                        },
-                        hover: {
-                            mode: 'nearest',
-                            intersect: true
-                        },
-                        scales: {
-                            xAxes: [{
-                                type: 'time',
-                                distribution: 'linear'
-                            }],
-                            yAxes: [{
-                                ticks: {
-                                    reverse: true,
-                                    min: 1,
-                                    suggestedMax: 10
-                                }
-                            }]
-                        }
+                    tooltips: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    scales: {
+                        xAxes: [{
+                            type: 'time',
+                            distribution: 'linear'
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                reverse: true,
+                                min: 1,
+                                suggestedMax: 10
+                            }
+                        }]
                     }
-                });
+                }
             });
         })
         .catch($log.error);
