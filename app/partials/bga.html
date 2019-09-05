@@ -72,10 +72,14 @@
 	</form>
 
 	<h2 ng-if="currUser">
-		Recommended games for <strong>
-			<a ng-href="https://www.boardgameatlas.com/u/{{ currUser }}"
-				target="_blank">{{ currUser }} <i class="fas fa-external-link-alt"></i></a>
-		</strong>
+		Recommended games for
+		<span ng-repeat="cUser in currUser track by $index">
+			<strong>
+				<a ng-href="https://www.boardgameatlas.com/u/{{ cUser }}"
+					target="_blank">{{ cUser }} <i class="fas fa-external-link-alt"></i></a>
+			</strong>
+			<span ng-if="!$last">, </span>
+		</span>
 	</h2>
 
 	<div ng-if="empty"
