@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<section xmlns="http://www.w3.org/1999/xhtml"
+		id="designer-games-list">
+	<h1>{{ designer.name }}</h1>
+	<div class="row">
+		<a ng-repeat="game in games"
+			game-square=""
+			game="game"
+			show-ranking="true"
+			ng-href="/#/game/{{ game.bgg_id }}"
+			class="col-lg-3 col-md-4 col-sm-6"></a>
+		<div ng-if="nextPage"
+				ng-click="fetchGames(nextPage)"
+				class="col-lg-3 col-md-4 col-sm-6">
+			<div class="game game-more">
+				<div>
+					<h2 class="game-title">
+						More...
+						<small ng-if="total"
+								class="text-secondary">
+							({{ total }} games in total)
+						</small>
+					</h2>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
