@@ -92,25 +92,30 @@ def gitprepare(repo=SCRAPED_DATA_DIR):
     LOGGER.info("Preparing Git repo <%s>...", repo)
     with safe_cd(repo):
         execute("git", "checkout", "master")
-        # execute('git', 'pull', '--ff-only')
+        execute("git", "pull", "--ff-only")
         execute("git", "diff", "HEAD", "--exit-code")
 
 
 @task()
 def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
     """ commit and push Git repo """
-    paths = paths or ("scraped", "links.json", "prefixes.txt")
+    paths = paths or ("rankings", "scraped", "links.json", "prefixes.txt")
     LOGGER.info("Updating paths %r in Git repo <%s>...", paths, repo)
     with safe_cd(repo):
         execute("git", "gc", "--prune=now")
         execute("git", "add", "--", *paths)
+
         try:
             execute("git", "commit", "--message", f"automatic commit by <{name}>")
         except SystemExit:
             LOGGER.info("Nothing to commit...")
         else:
             execute("git", "gc", "--prune=now")
-            # execute('git', 'push')
+
+        try:
+            execute("git", "push")
+        except SystemExit:
+            LOGGER.exception("Unable to push...")
 
 
 @task()
@@ -711,7 +716,7 @@ def builddb():
     """ build a new database """
 
 
-@task(mergeall, link, train, saverankings, builddb)
+@task(gitprepare, mergeall, link, train, saverankings, builddb, gitupdate)
 def builddbfull():
     """ merge, link, train, and build, all relevant files """
 
