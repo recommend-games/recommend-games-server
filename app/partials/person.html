@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <section xmlns="http://www.w3.org/1999/xhtml"
-		id="designer-games-list">
-	<h1>{{ designer.name }}</h1>
+		id="person-games-list">
+	<h1>{{ person.name }} <small class="text-secondary">({{ role }})</small></h1>
 	<div class="row">
 		<a ng-repeat="game in games"
 			game-square=""
