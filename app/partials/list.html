@@ -87,7 +87,7 @@
 					<div class="btn-group-vertical float-right ml-1 mb-1">
 						<button type="button"
 								ng-disabled="isEmpty(likedGames)"
-								ng-click="clearUser()"
+								ng-click="resetField('user')"
 								class="btn btn-primary">
 							<i class="fas fa-dice"></i>
 							Recommend!
@@ -320,7 +320,7 @@
 			</button>
 			<button type="button"
 				ng-disabled="isEmpty(likedGames)"
-				ng-click="clearUser()"
+				ng-click="resetField('user')"
 				class="btn btn-primary">
 				<i class="fas fa-dice"></i>
 				Recommend!
@@ -780,8 +780,28 @@
 	</h2>
 
 	<p>
+		<span ng-if="designerData">
+			Games designed by
+			<strong>
+				<a ng-href="https://boardgamegeek.com/boardgamedesigner/{{ designerData.bgg_id }}"
+					target="_blank">{{ designerData.name }} <i class="fas fa-external-link-alt"></i></a>
+			</strong>
+			<a href=""
+				ng-click="resetField('designer')"
+				class="text-danger"><i class="fas fa-times"></i></a>.
+		</span>
+		<span ng-if="artistData">
+			Games with art by
+			<strong>
+				<a ng-href="https://boardgamegeek.com/boardgameartist/{{ artistData.bgg_id }}"
+					target="_blank">{{ artistData.name }} <i class="fas fa-external-link-alt"></i></a>
+			</strong>
+			<a href=""
+				ng-click="resetField('artist')"
+				class="text-danger"><i class="fas fa-times"></i></a>.
+		</span>
 		<span ng-if="!isEmpty(currUser) &amp;&amp; !userNotFound">
-			See recommendations <a href="" ng-click="clearUser()">for all users</a> instead.
+			See recommendations <a href="" ng-click="resetField('user')">for all users</a> instead.
 		</span>
 		<span ng-if="!isEmpty(currUser) &amp;&amp; userNotFound" class="text-danger">
 			We didn't find any ratings for <span ng-repeat="cUser in currUser track by $index">"{{ cUser }}"<span ng-if="!$last">, </span></span>.
