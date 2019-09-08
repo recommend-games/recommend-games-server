@@ -45,12 +45,6 @@ ludojApp.config(function (
     }).when('/stats', {
         templateUrl: '/partials/stats.html',
         controller: 'StatsController'
-    }).when('/person/:id/:role', {
-        templateUrl: '/partials/person.html',
-        controller: 'PersonController'
-    }).when('/person/:id', {
-        templateUrl: '/partials/person.html',
-        controller: 'PersonController'
     }).when('/about', {
         templateUrl: '/partials/about.html',
         controller: 'AboutController'
