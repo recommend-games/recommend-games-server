@@ -716,7 +716,7 @@ def builddb():
     """ build a new database """
 
 
-@task(gitprepare, mergeall, link, train, saverankings, builddb, gitupdate)
+@task(mergeall, link, train, saverankings, builddb)
 def builddbfull():
     """ merge, link, train, and build, all relevant files """
 
