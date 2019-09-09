@@ -16,6 +16,7 @@ google-cloud-pubsub = "*"
 gunicorn = "*"
 ludoj-recommender = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-recommender.git"}
 markdown = "*"
+pandas = "*"
 python-dateutil = "*"
 turicreate = "<5.7"
 whitenoise = {extras = ["brotli"], version = "*"}
@@ -24,7 +25,6 @@ whitenoise = {extras = ["brotli"], version = "*"}
 gsutil = "*"
 ludoj-scraper = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-scraper.git"}
 lxml = "*"
-pandas = "*"
 psutil = "*"
 pylint = "*"
 pynt = "*"
