@@ -4,6 +4,7 @@
 
 from rest_framework.serializers import (
     CharField,
+    FloatField,
     IntegerField,
     ListField,
     ModelSerializer,
@@ -104,11 +105,13 @@ class MechanicSerializer(ModelSerializer):
 class RankingSerializer(ModelSerializer):
     """Ranking serializer."""
 
+    avg = FloatField(read_only=True)
+
     class Meta:
         """Meta."""
 
         model = Ranking
-        exclude = ("id",)
+        exclude = ("id", "game")
 
 
 class CollectionSerializer(ModelSerializer):
