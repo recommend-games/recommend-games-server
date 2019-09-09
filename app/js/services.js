@@ -432,10 +432,11 @@ ludojApp.factory('gamesService', function gamesService(
             });
     };
 
-    function addRanks(items, field) {
-        field = field || 'count';
+    function addRanks(items, fields) {
+        fields = _.isEmpty(fields) ? ['count', 'best'] : fields;
         _.forEach(items, function (item, i) {
-            item.rank = i === 0 || item[field] !== items[i - 1][field] ? i + 1 : items[i - 1].rank;
+            var same = i > 0 && _.every(fields, function (field) { return item[field] === items[i - 1][field]; });
+            item.rank =  !same ? i + 1 : items[i - 1].rank;
         });
         return items;
     }

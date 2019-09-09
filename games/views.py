@@ -8,7 +8,7 @@ from functools import reduce
 from operator import or_
 
 from django.conf import settings
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Min
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
@@ -581,9 +581,12 @@ class GameViewSet(PermissionsModelViewSet):
             for key, (queryset, field, serializer_class) in self.stats_models.items():
                 filters = {f"{field}__in": games}
                 objs = (
-                    queryset.annotate(top=Count(field, filter=Q(**filters)))
+                    queryset.annotate(
+                        top=Count(field, filter=Q(**filters)),
+                        best=Min(f"{field}__{site_rank}"),
+                    )
                     .filter(top__gt=0)
-                    .order_by("-top")[:top_items]
+                    .order_by("-top", "best")[:top_items]
                 )
                 serializer = serializer_class(
                     objs, many=True, context=self.get_serializer_context()
@@ -591,6 +594,7 @@ class GameViewSet(PermissionsModelViewSet):
                 for d, obj in zip(serializer.data, objs):
                     d["count"] = obj.top
                     d["pct"] = 100 * obj.top / total if total else 0
+                    d["best"] = obj.best
                 site_result[key] = serializer.data
 
         return Response(result)
