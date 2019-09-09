@@ -218,6 +218,7 @@ ludojApp.controller('DetailController', function DetailController(
                     tooltips: {
                         mode: 'index',
                         intersect: false,
+                        filter: function (item) { return item.datasetIndex <= 1; }
                     },
                     hover: {
                         mode: 'nearest',
@@ -235,6 +236,12 @@ ludojApp.controller('DetailController', function DetailController(
                                 suggestedMax: 10
                             }
                         }]
+                    },
+                    legend: {
+                        display: true,
+                        labels: {
+                            filter: function (item) { return _.endsWith(item.text, 'trend'); }
+                        }
                     }
                 }
             });
