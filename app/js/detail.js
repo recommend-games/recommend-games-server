@@ -159,19 +159,26 @@ ludojApp.controller('DetailController', function DetailController(
         return options;
     }
 
-    function findElement(selector, wait) {
-        // TODO max retries
+    function findElement(selector, wait, retries) {
         var element = $(selector);
 
-        if (_.isNil(element) || _.isEmpty(element)) {
-            // make sure wait is between 10ms and 10s
-            wait = _.min([_.max([_.parseInt(wait) || 100, 10]), 10000]);
-            return $timeout(function () {
-                return findElement(selector, wait * 2);
-            }, wait);
+        if (!_.isNil(element) && !_.isEmpty(element)) {
+            return $q.resolve(element);
         }
 
-        return $q.resolve(element);
+        retries = _.parseInt(retries);
+
+        if (_.isInteger(retries) && retries <= 0) {
+            return $q.reject('unable to find canvas element');
+        }
+
+        // make sure wait is between 10ms and 10s
+        wait = _.min([_.max([parseFloat(wait) || 100, 10]), 10000]);
+        retries = _.isInteger(retries) ? retries - 1 : null;
+
+        return $timeout(function () {
+            return findElement(selector, wait * 2, retries);
+        }, wait);
     }
 
     $http.get('/api/games/' + $routeParams.id + '/rankings/', {'params': rankingParams, 'noblock': true})
@@ -189,8 +196,7 @@ ludojApp.controller('DetailController', function DetailController(
         .then(function (element) {
             if (_.isNil(element) || _.isEmpty(element)) {
                 $scope.chartVisible = false;
-                $log.error('unable to find canvas element');
-                return null;
+                return $q.reject('unable to find canvas element');
             }
 
             return new Chart(element, {
