@@ -21,13 +21,16 @@ ludojApp.controller('DetailController', function DetailController(
         implementedBy = [],
         integratesWith = [],
         similarPromise = gamesService.getSimilarGames($routeParams.id, 1, true),
-        rankingData,
+        chart = null,
+        rankingData = null,
         rankingParams = {'date__gte': moment().subtract(30, 'days').format(), 'window': '7d'};
 
     $scope.implementations = false;
     $scope.expandable = false;
     $scope.expandDescription = false;
     $scope.chartVisible = false;
+    $scope.displayRGData = true;
+    $scope.displayBGGData = true;
 
     $scope.toggleDescription = function toggleDescription() {
         $scope.expandDescription = !$scope.expandDescription;
@@ -159,6 +162,17 @@ ludojApp.controller('DetailController', function DetailController(
         return options;
     }
 
+    function makeDataSets(data) {
+        var datasets = [
+            $scope.displayRGData ? makeDataSet(data, 'fac', 'rank', 'R.G', 'rgba(0, 0, 0, 0.5)', 2) : null,
+            $scope.displayBGGData ? makeDataSet(data, 'bgg', 'rank', 'BGG', 'rgba(255, 81, 0, 0.5)', 2) : null,
+            $scope.displayRGData ? makeDataSet(data, 'fac', 'avg', 'R.G trend', 'rgba(0, 0, 0, 1)') : null,
+            $scope.displayBGGData ? makeDataSet(data, 'bgg', 'avg', 'BGG trend', 'rgba(255, 81, 0, 1)') : null
+        ];
+
+        return _.filter(datasets);
+    }
+
     function findElement(selector, wait, retries) {
         var element = $(selector);
 
@@ -199,20 +213,15 @@ ludojApp.controller('DetailController', function DetailController(
                 return $q.reject('unable to find canvas element');
             }
 
-            return new Chart(element, {
+            chart = new Chart(element, {
                 type: 'line',
                 data: {
-                    datasets: [
-                        makeDataSet(rankingData, 'fac', 'rank', 'R.G', 'rgba(0, 0, 0, 0.5)', 2),
-                        makeDataSet(rankingData, 'bgg', 'rank', 'BGG', 'rgba(255, 81, 0, 0.5)', 2),
-                        makeDataSet(rankingData, 'fac', 'avg', 'R.G trend', 'rgba(0, 0, 0, 1)'),
-                        makeDataSet(rankingData, 'bgg', 'avg', 'BGG trend', 'rgba(255, 81, 0, 1)')
-                    ]
+                    datasets: makeDataSets(rankingData)
                 },
                 options: {
                     responsive: true,
                     title: {
-                        display: true,
+                        display: false,
                         text: 'Rankings over time'
                     },
                     tooltips: {
@@ -238,7 +247,7 @@ ludojApp.controller('DetailController', function DetailController(
                         }]
                     },
                     legend: {
-                        display: true,
+                        display: false,
                         labels: {
                             filter: function (item) { return _.endsWith(item.text, 'trend'); }
                         }
@@ -247,6 +256,15 @@ ludojApp.controller('DetailController', function DetailController(
             });
         })
         .catch($log.error);
+
+    $scope.$watchGroup(['displayRGData', 'displayBGGData'], function () {
+        if (_.isNil(chart) || _.isEmpty(rankingData)) {
+            return;
+        }
+
+        chart.data.datasets = makeDataSets(rankingData);
+        chart.update();
+    });
 
     gamesService.setCanonicalUrl($location.path());
 });

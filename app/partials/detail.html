@@ -279,6 +279,33 @@
 				</small>
 			</dd>
 		</dl>
-		<canvas id="ranking-history" ng-if="chartVisible"></canvas>
+		<section ng-if="chartVisible">
+			<h3>Rankings over time</h3>
+			<p>
+				<label class="switch">
+					<input type="checkbox"
+						id="display-rg-data"
+						name="display-rg-data"
+						ng-model="displayRGData" />
+					<span class="slider {{ displayRGData ? 'bg-success' : 'bg-secondary' }}"></span>
+				</label>
+				<label class="recommend-games {{ displayRGData ? 'rg-color' : 'text-muted' }}"
+						for="display-rg-data">
+					<strong>Recommend.Games</strong>
+				</label>
+				<label class="switch">
+					<input type="checkbox"
+						id="display-bgg-data"
+						name="display-bgg-data"
+						ng-model="displayBGGData" />
+					<span class="slider {{ displayBGGData ? 'bg-success' : 'bg-secondary' }}"></span>
+				</label>
+				<label class="{{ displayBGGData ? 'bgg-color' : 'text-muted' }}"
+						for="display-bgg-data">
+					<strong>BoardGameGeek</strong>
+				</label>
+			</p>
+			<canvas id="ranking-history"></canvas>
+		</section>
 	</section>
 </section>

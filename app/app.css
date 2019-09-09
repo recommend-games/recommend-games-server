@@ -421,3 +421,11 @@ input:checked + .slider:before {
 .faq-headline:active .faq-anchor {
     visibility: visible;
 }
+
+.rg-color {
+    color: black;
+}
+
+.bgg-color {
+    color: #FF5100;
+}
