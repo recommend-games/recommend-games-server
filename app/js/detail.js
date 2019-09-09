@@ -21,7 +21,8 @@ ludojApp.controller('DetailController', function DetailController(
         implementedBy = [],
         integratesWith = [],
         similarPromise = gamesService.getSimilarGames($routeParams.id, 1, true),
-        rankingData;
+        rankingData,
+        rankingParams = {'date__gte': moment().subtract(30, 'days').format(), 'window': '7d'};
 
     $scope.implementations = false;
     $scope.expandable = false;
@@ -120,26 +121,42 @@ ludojApp.controller('DetailController', function DetailController(
         });
         // TODO catch errors
 
-    function makeDataPoints(data, rankingType) {
+    function makeDataPoints(data, rankingType, field) {
+        field = field || 'rank';
         return _(data)
             .filter(['ranking_type', rankingType])
             .map(function (item) {
-                return {x: moment(item.date), y: item.rank};
+                return {x: moment(item.date), y: item[field]};
             })
             .sortBy('x')
             .value();
     }
 
-    function makeDataSet(data, rankingType, label, color) {
-        var dataPoints = makeDataPoints(data, rankingType);
-        return {
-            label: label,
-            borderColor: color,
-            backgroundColor: 'rgba(0, 0, 0, 0)',
-            data: dataPoints,
-            pointRadius: 0,
-            fill: false
-        };
+    function makeDataSet(data, rankingType, field, label, color, pointRadius) {
+        pointRadius = _.parseInt(pointRadius) || 0;
+
+        var dataPoints = makeDataPoints(data, rankingType, field),
+            type = pointRadius ? 'scatter' : 'line',
+            options = {
+                type: type,
+                label: label,
+                data: dataPoints,
+                pointRadius: pointRadius,
+                fill: false
+            };
+
+        if (type === 'scatter') {
+            options.borderColor = 'rgba(0, 0, 0, 0)';
+            options.backgroundColor = 'rgba(0, 0, 0, 0)';
+            options.pointBorderColor = color;
+            options.pointBackgroundColor = 'rgba(0, 0, 0, 0)';
+            options.pointBorderWidth = 1;
+        } else {
+            options.borderColor = color;
+            options.backgroundColor = 'rgba(0, 0, 0, 0)';
+        }
+
+        return options;
     }
 
     function findElement(selector, wait) {
@@ -153,7 +170,7 @@ ludojApp.controller('DetailController', function DetailController(
         return $q.resolve(element);
     }
 
-    $http.get('/api/games/' + $routeParams.id + '/rankings/', {'params': {'date__gte': moment().subtract(30, 'days').format()}, 'noblock': true})
+    $http.get('/api/games/' + $routeParams.id + '/rankings/', {'params': rankingParams, 'noblock': true})
         .then(function (response) {
             rankingData = response.data;
 
@@ -176,8 +193,10 @@ ludojApp.controller('DetailController', function DetailController(
                 type: 'line',
                 data: {
                     datasets: [
-                        makeDataSet(rankingData, 'bgg', 'BGG', 'blue'),
-                        makeDataSet(rankingData, 'fac', 'R.G', 'red')
+                        makeDataSet(rankingData, 'fac', 'rank', 'R.G', 'rgba(0, 0, 0, 0.5)', 2),
+                        makeDataSet(rankingData, 'bgg', 'rank', 'BGG', 'rgba(255, 81, 0, 0.5)', 2),
+                        makeDataSet(rankingData, 'fac', 'avg', 'R.G trend', 'rgba(0, 0, 0, 1)'),
+                        makeDataSet(rankingData, 'bgg', 'avg', 'BGG trend', 'rgba(255, 81, 0, 1)')
                     ]
                 },
                 options: {

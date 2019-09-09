@@ -588,6 +588,10 @@ class GameViewSet(PermissionsModelViewSet):
         import pandas as pd
 
         df = pd.DataFrame.from_records(queryset.values("ranking_type", "rank", "date"))
+
+        if df.empty:
+            return Response(())
+
         groups = df.groupby("ranking_type")
         rolling = groups.apply(
             lambda group: group.sort_values("date").rolling(window, on="date").mean()
