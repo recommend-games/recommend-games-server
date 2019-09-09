@@ -269,7 +269,7 @@
         "ludoj-recommender": {
             "editable": true,
             "git": "https://gitlab.com/mshepherd/ludoj-recommender.git",
-            "ref": "24020ac6a5621ce28b49238d49407bbc605b691a"
+            "ref": "4c7ada0ad40a3f5b2affa0ea476a612c94f8d447"
         },
         "markdown": {
             "hashes": [
@@ -625,10 +625,10 @@
         },
         "awscli": {
             "hashes": [
-                "sha256:1878215aff2a8621198303bd88687b331086dd8a372c4daba76ebb3ff35d5d3b",
-                "sha256:1a70436d85eac30be4c5a3489d2616004967dc88e399692ae7d75bd2298d4743"
+                "sha256:b937b05a75df2cfb0fc46f7299c32b382ec7231dc115b3583e440aae95a2a094",
+                "sha256:d222019714f28406de6f8c3cd73d7fef3fa965926023165151e09b3408f20a45"
             ],
-            "version": "==1.16.232"
+            "version": "==1.16.234"
         },
         "boto": {
             "hashes": [
@@ -639,17 +639,17 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:48624b5ae02c8bca674627099b98e578a8ab8836e04c7f8f555c8566836681cd",
-                "sha256:cb579c00b2044958e0868969d36eb0083fb2cf3c9d1d856e96df5e7e50050cac"
+                "sha256:9d588e23a8f6bbb1c71790d70190f67bd644aaf6a6010ffed40d63c1f38d6b9d",
+                "sha256:d695bb99dec048800fcba9657182d2db3a4cae5e6c3625a5b3a5cd785fb2d6d6"
             ],
-            "version": "==1.9.222"
+            "version": "==1.9.224"
         },
         "botocore": {
             "hashes": [
-                "sha256:04f75b00f731b3c48ab59eaa6fe12eda6ce95add8caa173529e949087fbb73b0",
-                "sha256:f0e436c9402ca2c0ec10cb6f82b385e5d7e05b159cd3dac330e21a822d2af8b0"
+                "sha256:197f118419b81c8e15db03b92220f9fa864de2f062d962dbbe1a30d42d080d50",
+                "sha256:e2009cc78a99d284aa40d8bdc6954a47f2afeeecd33492ba8ef9337b97d0044c"
             ],
-            "version": "==1.12.222"
+            "version": "==1.12.224"
         },
         "btrees": {
             "hashes": [
@@ -1165,7 +1165,7 @@
         "ludoj-scraper": {
             "editable": true,
             "git": "https://gitlab.com/mshepherd/ludoj-scraper.git",
-            "ref": "4f677243fceb2c827bb1aa0db63772a55c45f300"
+            "ref": "00fd336610bd2fd603884c530576f3c30f835560"
         },
         "lxml": {
             "hashes": [
