@@ -671,6 +671,51 @@ ludojApp.factory('usersService', function usersService(
     return service;
 });
 
+ludojApp.factory('personsService', function personsService(
+    $http,
+    $localStorage,
+    $log,
+    $q,
+    API_URL
+) {
+    var service = {};
+
+    if (_.isEmpty($localStorage.persons)) {
+        $localStorage.persons = {};
+    }
+
+    service.getPerson = function getPerson(id, forceRefresh, noblock) {
+        id = _.parseInt(id);
+        var cached = forceRefresh ? null : $localStorage.persons[id];
+
+        if (!_.isEmpty(cached)) {
+            return $q.resolve(cached);
+        }
+
+        return $http.get(API_URL + 'persons/' + id + '/', {'noblock': !!noblock})
+            .then(function (response) {
+                var responseId = _.get(response, 'data.bgg_id'),
+                    person;
+
+                if (id !== responseId) {
+                    return $q.reject('Unable to load person.');
+                }
+
+                person = response.data;
+                $localStorage.persons[id] = person;
+                return person;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to load person.';
+                return $q.reject(response);
+            });
+    };
+
+    return service;
+});
+
 ludojApp.factory('newsService', function newsService(
     $http,
     $localStorage,
@@ -890,6 +935,8 @@ ludojApp.factory('filterService', function filterService(
             'gameType': _.parseInt(params.gameType) || null,
             'category': _.parseInt(params.category) || null,
             'mechanic': _.parseInt(params.mechanic) || null,
+            'designer': _.parseInt(params.designer) || null,
+            'artist': _.parseInt(params.artist) || null,
             'ordering': !_.isEmpty(user) || !_.isEmpty(like) || ordering === 'rg' ? null : ordering
         };
     }
@@ -905,6 +952,8 @@ ludojApp.factory('filterService', function filterService(
                 'gameType': scope.gameType,
                 'category': scope.category,
                 'mechanic': scope.mechanic,
+                'designer': scope.designer,
+                'artist': scope.artist,
                 'ordering': scope.ordering
             };
 
@@ -1056,6 +1105,14 @@ ludojApp.factory('filterService', function filterService(
 
         if (params.mechanic) {
             result.mechanic = params.mechanic;
+        }
+
+        if (params.designer) {
+            result.designer = params.designer;
+        }
+
+        if (params.artist) {
+            result.artist = params.artist;
         }
 
         return result;

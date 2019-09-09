@@ -615,7 +615,9 @@ class PersonViewSet(PermissionsModelViewSet):
         person = self.get_object()
         role = request.query_params.get("role")
         queryset = person.artist_of if role == "artist" else person.designer_of
-        queryset = self.filter_queryset(queryset.all())
+
+        ordering = _parse_parts(request.query_params.getlist("ordering"))
+        queryset = queryset.order_by(*ordering)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
