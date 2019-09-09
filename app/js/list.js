@@ -15,6 +15,7 @@ ludojApp.controller('ListController', function ListController(
     $timeout,
     filterService,
     gamesService,
+    personsService,
     toastr,
     usersService
 ) {
@@ -33,7 +34,9 @@ ludojApp.controller('ListController', function ListController(
             !!$scope.cooperative,
             !!$scope.gameType,
             !!$scope.category,
-            !!$scope.mechanic
+            !!$scope.mechanic,
+            !!$scope.designer,
+            !!$scope.artist
         ]);
     }
 
@@ -281,6 +284,10 @@ ludojApp.controller('ListController', function ListController(
     $scope.gameType = params.gameType;
     $scope.category = params.category;
     $scope.mechanic = params.mechanic;
+    $scope.designer = params.designer;
+    $scope.designerData = null;
+    $scope.artist = params.artist;
+    $scope.artistData = null;
     $scope.ordering = params.ordering || 'rg';
 
     $scope.fetchGames = fetchGames;
@@ -312,12 +319,17 @@ ludojApp.controller('ListController', function ListController(
         $scope.gameType = null;
         $scope.category = null;
         $scope.mechanic = null;
+        $scope.designer = null;
+        $scope.artist = null;
         $scope.ordering = 'rg';
         updateParams();
     };
 
-    $scope.clearUser = function clearUser() {
-        $scope.user = null;
+    $scope.resetField = function resetField(field) {
+        if (_.isEmpty(field)) {
+            return;
+        }
+        $scope[field] = null;
         updateParams();
     };
 
@@ -497,6 +509,22 @@ ludojApp.controller('ListController', function ListController(
 
             renderSlider();
         });
+
+    if (params.designer) {
+        personsService.getPerson(params.designer)
+            .then(function (person) {
+                $scope.designerData = person;
+            })
+            .catch($log.error);
+    }
+
+    if (params.artist) {
+        personsService.getPerson(params.artist)
+            .then(function (person) {
+                $scope.artistData = person;
+            })
+            .catch($log.error);
+    }
 
     fetchPopularGames(1)
         .then(function () {
