@@ -164,7 +164,11 @@ ludojApp.controller('DetailController', function DetailController(
         var element = $(selector);
 
         if (_.isNil(element) || _.isEmpty(element)) {
-            return $timeout(function () { return findElement(selector); }, _.parseInt(wait) || 100);
+            // make sure wait is between 10ms and 10s
+            wait = _.min([_.max([_.parseInt(wait) || 100, 10]), 10000]);
+            return $timeout(function () {
+                return findElement(selector, wait * 2);
+            }, wait);
         }
 
         return $q.resolve(element);
