@@ -85,6 +85,7 @@ def _process_df(data_frame):
         data_frame[columns][~data_frame["rank"].isna()]
         .sort_values("rank")
         .rename(columns={"bayes_rating": "score"})
+        .astype({"rank": int, "bgg_id": int})
     )
 
 
