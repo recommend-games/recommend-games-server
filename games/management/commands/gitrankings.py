@@ -44,7 +44,7 @@ def _dfs_from_repo(repo, directories, files):
                 'Found <%s> from commit <%s>: "%s" (%s)',
                 blob,
                 commit,
-                commit.message,
+                commit.message.strip(),
                 commit.authored_datetime,
             )
 
