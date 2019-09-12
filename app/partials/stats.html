@@ -40,14 +40,12 @@
 				<ol class="mb-0">
 					<li ng-repeat="designer in data.rg_top.designer"
 							value="{{ designer.rank }}">
-						<a ng-href="https://boardgamegeek.com/boardgamedesigner/{{ designer.bgg_id }}"
-								target="_blank">
+						<a ng-href="/#/?designer={{ designer.bgg_id }}">
 							<strong>
 								{{ designer.name }}
-								<i class="fas fa-external-link-alt"></i>
 							</strong>
 						</a>
-						({{ designer.count }} game{{ designer.count === 1 ? '' : 's' }})
+						({{ designer.count }} game{{ designer.count === 1 ? '' : 's' }}, best #{{ designer.best }})
 					</li>
 				</ol>
 			</div>
@@ -58,14 +56,12 @@
 				<ol class="mb-0">
 					<li ng-repeat="designer in data.bgg_top.designer"
 							value="{{ designer.rank }}">
-						<a ng-href="https://boardgamegeek.com/boardgamedesigner/{{ designer.bgg_id }}"
-								target="_blank">
+						<a ng-href="/#/?designer={{ designer.bgg_id }}&amp;ordering=bgg">
 							<strong>
 								{{ designer.name }}
-								<i class="fas fa-external-link-alt"></i>
 							</strong>
 						</a>
-						({{ designer.count }} game{{ designer.count === 1 ? '' : 's' }})
+						({{ designer.count }} game{{ designer.count === 1 ? '' : 's' }}, best #{{ designer.best }})
 					</li>
 				</ol>
 			</div>
@@ -106,14 +102,12 @@
 				<ol class="mb-0">
 					<li ng-repeat="artist in data.rg_top.artist"
 							value="{{ artist.rank }}">
-						<a ng-href="https://boardgamegeek.com/boardgameartist/{{ artist.bgg_id }}"
-								target="_blank">
+						<a ng-href="/#/?artist={{ artist.bgg_id }}">
 							<strong>
 								{{ artist.name }}
-								<i class="fas fa-external-link-alt"></i>
 							</strong>
 						</a>
-						({{ artist.count }} game{{ artist.count === 1 ? '' : 's' }})
+						({{ artist.count }} game{{ artist.count === 1 ? '' : 's' }}, best #{{ artist.best }})
 					</li>
 				</ol>
 			</div>
@@ -124,14 +118,12 @@
 				<ol class="mb-0">
 					<li ng-repeat="artist in data.bgg_top.artist"
 							value="{{ artist.rank }}">
-						<a ng-href="https://boardgamegeek.com/boardgameartist/{{ artist.bgg_id }}"
-								target="_blank">
+						<a ng-href="/#/?artist={{ artist.bgg_id }}&amp;ordering=bgg">
 							<strong>
 								{{ artist.name }}
-								<i class="fas fa-external-link-alt"></i>
 							</strong>
 						</a>
-						({{ artist.count }} game{{ artist.count === 1 ? '' : 's' }})
+						({{ artist.count }} game{{ artist.count === 1 ? '' : 's' }}, best #{{ artist.best }})
 					</li>
 				</ol>
 			</div>
@@ -177,7 +169,7 @@
 								{{ type.name }}
 							</strong>
 						</a>
-						({{ type.count }} game{{ type.count === 1 ? '' : 's' }})
+						({{ type.count }} game{{ type.count === 1 ? '' : 's' }}, best #{{ type.best }})
 					</li>
 				</ol>
 			</div>
@@ -188,12 +180,12 @@
 				<ol class="mb-0">
 					<li ng-repeat="type in data.bgg_top.game_type"
 							value="{{ type.rank }}">
-						<a ng-href="/#/?gameType={{ type.bgg_id }}">
+						<a ng-href="/#/?gameType={{ type.bgg_id }}&amp;ordering=bgg">
 							<strong>
 								{{ type.name }}
 							</strong>
 						</a>
-						({{ type.count }} game{{ type.count === 1 ? '' : 's' }})
+						({{ type.count }} game{{ type.count === 1 ? '' : 's' }}, best #{{ type.best }})
 					</li>
 				</ol>
 			</div>
@@ -239,7 +231,7 @@
 								{{ category.name }}
 							</strong>
 						</a>
-						({{ category.count }} game{{ category.count === 1 ? '' : 's' }})
+						({{ category.count }} game{{ category.count === 1 ? '' : 's' }}, best #{{ category.best }})
 					</li>
 				</ol>
 			</div>
@@ -250,12 +242,12 @@
 				<ol class="mb-0">
 					<li ng-repeat="category in data.bgg_top.category"
 							value="{{ category.rank }}">
-						<a ng-href="/#/?category={{ category.bgg_id }}">
+						<a ng-href="/#/?category={{ category.bgg_id }}&amp;ordering=bgg">
 							<strong>
 								{{ category.name }}
 							</strong>
 						</a>
-						({{ category.count }} game{{ category.count === 1 ? '' : 's' }})
+						({{ category.count }} game{{ category.count === 1 ? '' : 's' }}, best #{{ category.best }})
 					</li>
 				</ol>
 			</div>
@@ -301,7 +293,7 @@
 								{{ mechanic.name }}
 							</strong>
 						</a>
-						({{ mechanic.count }} game{{ mechanic.count === 1 ? '' : 's' }})
+						({{ mechanic.count }} game{{ mechanic.count === 1 ? '' : 's' }}, best #{{ mechanic.best }})
 					</li>
 				</ol>
 			</div>
@@ -312,12 +304,12 @@
 				<ol class="mb-0">
 					<li ng-repeat="mechanic in data.bgg_top.mechanic"
 							value="{{ mechanic.rank }}">
-						<a ng-href="/#/?mechanic={{ mechanic.bgg_id }}">
+						<a ng-href="/#/?mechanic={{ mechanic.bgg_id }}&amp;ordering=bgg">
 							<strong>
 								{{ mechanic.name }}
 							</strong>
 						</a>
-						({{ mechanic.count }} game{{ mechanic.count === 1 ? '' : 's' }})
+						({{ mechanic.count }} game{{ mechanic.count === 1 ? '' : 's' }}, best #{{ mechanic.best }})
 					</li>
 				</ol>
 			</div>
