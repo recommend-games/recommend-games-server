@@ -23,7 +23,7 @@ ludojApp.controller('DetailController', function DetailController(
         similarPromise = gamesService.getSimilarGames($routeParams.id, 1, true),
         chart = null,
         rankingData = null,
-        rankingParams = {'date__gte': moment().subtract(1, 'year').format(), 'window': '7d'};
+        rankingParams = {'window': '7d'};
 
     $scope.implementations = false;
     $scope.expandable = false;
