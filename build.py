@@ -91,9 +91,12 @@ def gitprepare(repo=SCRAPED_DATA_DIR):
     """ check Git repo is clean and up-to-date """
     LOGGER.info("Preparing Git repo <%s>...", repo)
     with safe_cd(repo):
-        execute("git", "checkout", "master")
-        execute("git", "pull", "--ff-only")
-        execute("git", "diff", "HEAD", "--exit-code")
+        try:
+            execute("git", "checkout", "master")
+            execute("git", "pull", "--ff-only")
+            execute("git", "diff", "HEAD", "--exit-code")
+        except SystemExit:
+            LOGGER.exception("There was a problem preparing <%s>...", repo)
 
 
 @task()
@@ -102,15 +105,17 @@ def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
     paths = paths or ("rankings", "scraped", "links.json", "prefixes.txt")
     LOGGER.info("Updating paths %r in Git repo <%s>...", paths, repo)
     with safe_cd(repo):
-        execute("git", "gc", "--prune=now")
-        execute("git", "add", "--", *paths)
+        try:
+            execute("git", "gc", "--prune=now")
+            execute("git", "add", "--", *paths)
+        except SystemExit:
+            LOGGER.exception("There was a problem in repo <%s>...", repo)
 
         try:
             execute("git", "commit", "--message", f"automatic commit by <{name}>")
+            execute("git", "gc", "--prune=now")
         except SystemExit:
             LOGGER.info("Nothing to commit...")
-        else:
-            execute("git", "gc", "--prune=now")
 
         try:
             execute("git", "push")
@@ -716,7 +721,7 @@ def builddb():
     """ build a new database """
 
 
-@task(mergeall, link, train, saverankings, builddb)
+@task(gitprepare, mergeall, link, train, saverankings, builddb, gitupdate)
 def builddbfull():
     """ merge, link, train, and build, all relevant files """
 
