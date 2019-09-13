@@ -236,12 +236,14 @@ ludojApp.controller('DetailController', function DetailController(
                         text: 'Rankings over time'
                     },
                     tooltips: {
-                        mode: 'index',
+                        mode: 'nearest',
+                        axis: 'x',
                         intersect: false,
                         filter: function (item) { return item.datasetIndex < tooltipThreshold; }
                     },
                     hover: {
                         mode: 'nearest',
+                        axis: 'x',
                         intersect: true
                     },
                     scales: {
