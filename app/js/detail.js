@@ -23,14 +23,19 @@ ludojApp.controller('DetailController', function DetailController(
         similarPromise = gamesService.getSimilarGames($routeParams.id, 1, true),
         chart = null,
         rankingData = null,
-        rankingParams = {'window': '7d'};
+        rankingParams = {'window': '7d'},
+        tooltipThreshold = 2;
 
     $scope.implementations = false;
     $scope.expandable = false;
     $scope.expandDescription = false;
     $scope.chartVisible = false;
-    $scope.displayRGData = true;
-    $scope.displayBGGData = true;
+    $scope.display = {
+        rgFactor: true,
+        rgSimilarity: false,
+        bgg: true,
+        window: 365
+    };
 
     $scope.toggleDescription = function toggleDescription() {
         $scope.expandDescription = !$scope.expandDescription;
@@ -124,21 +129,22 @@ ludojApp.controller('DetailController', function DetailController(
         });
         // TODO catch errors
 
-    function makeDataPoints(data, rankingType, field) {
+    function makeDataPoints(data, rankingType, field, since) {
         field = field || 'rank';
-        return _(data)
+        data = _(data)
             .filter(['ranking_type', rankingType])
             .map(function (item) {
                 return {x: moment(item.date), y: item[field]};
             })
-            .sortBy('x')
-            .value();
+            .sortBy('x');
+        data = _.isNil(since) ? data : data.filter(function (item) { return item.x >= since; });
+        return data.value();
     }
 
-    function makeDataSet(data, rankingType, field, label, color, pointRadius) {
+    function makeDataSet(data, rankingType, field, since, label, color, pointRadius) {
         pointRadius = _.parseInt(pointRadius) || 0;
 
-        var dataPoints = makeDataPoints(data, rankingType, field),
+        var dataPoints = makeDataPoints(data, rankingType, field, since),
             type = pointRadius ? 'scatter' : 'line',
             options = {
                 type: type,
@@ -163,14 +169,18 @@ ludojApp.controller('DetailController', function DetailController(
     }
 
     function makeDataSets(data) {
-        var datasets = [
-            $scope.displayRGData ? makeDataSet(data, 'fac', 'rank', 'R.G', 'rgba(0, 0, 0, 0.5)', 2) : null,
-            $scope.displayBGGData ? makeDataSet(data, 'bgg', 'rank', 'BGG', 'rgba(255, 81, 0, 0.5)', 2) : null,
-            $scope.displayRGData ? makeDataSet(data, 'fac', 'avg', 'R.G trend', 'rgba(0, 0, 0, 1)') : null,
-            $scope.displayBGGData ? makeDataSet(data, 'bgg', 'avg', 'BGG trend', 'rgba(255, 81, 0, 1)') : null
-        ];
-
-        return _.filter(datasets);
+        var since = _.isInteger($scope.display.window) ? moment().subtract($scope.display.window, 'days') : null,
+            datasets = [
+                $scope.display.rgFactor ? makeDataSet(data, 'fac', 'rank', since, 'R.G', 'rgba(0, 0, 0, 0.5)', 2) : null,
+                $scope.display.rgSimilarity ? makeDataSet(data, 'sim', 'rank', since, 'R.G sim', 'rgba(100, 100, 100, 0.5)', 2) : null,
+                $scope.display.bgg ? makeDataSet(data, 'bgg', 'rank', since, 'BGG', 'rgba(255, 81, 0, 0.5)', 2) : null,
+                $scope.display.rgFactor ? makeDataSet(data, 'fac', 'avg', since, 'R.G trend', 'rgba(0, 0, 0, 1)') : null,
+                $scope.display.rgSimilarity ? makeDataSet(data, 'sim', 'avg', since, 'R.G sim trend', 'rgba(100, 100, 100, 1)') : null,
+                $scope.display.bgg ? makeDataSet(data, 'bgg', 'avg', since, 'BGG trend', 'rgba(255, 81, 0, 1)') : null
+            ],
+            datasetsFiltered = _.filter(datasets);
+        tooltipThreshold = _.size(datasetsFiltered) / 2;
+        return datasetsFiltered;
     }
 
     function findElement(selector, wait, retries) {
@@ -227,7 +237,7 @@ ludojApp.controller('DetailController', function DetailController(
                     tooltips: {
                         mode: 'index',
                         intersect: false,
-                        filter: function (item) { return item.datasetIndex <= 1; }
+                        filter: function (item) { return item.datasetIndex < tooltipThreshold; }
                     },
                     hover: {
                         mode: 'nearest',
@@ -257,14 +267,19 @@ ludojApp.controller('DetailController', function DetailController(
         })
         .catch($log.error);
 
-    $scope.$watchGroup(['displayRGData', 'displayBGGData'], function () {
+    function updateChart() {
         if (_.isNil(chart) || _.isEmpty(rankingData)) {
             return;
         }
 
         chart.data.datasets = makeDataSets(rankingData);
         chart.update();
-    });
+    }
+
+    $scope.$watchGroup(
+        ['display.rgFactor', 'display.rgSimilarity', 'display.bgg', 'display.window'],
+        updateChart
+    );
 
     gamesService.setCanonicalUrl($location.path());
 });

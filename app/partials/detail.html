@@ -279,30 +279,53 @@
 		</dl>
 		<section ng-if="chartVisible">
 			<h3>Rankings over time</h3>
-			<p>
-				<label class="switch">
+			<form class="form-inline mb-1">
+				<label class="switch mr-1">
 					<input type="checkbox"
-						id="display-rg-data"
-						name="display-rg-data"
-						ng-model="displayRGData" />
-					<span class="slider {{ displayRGData ? 'bg-success' : 'bg-secondary' }}"></span>
+						id="display-rg-factor"
+						name="display-rg-factor"
+						ng-model="display.rgFactor" />
+					<span class="slider {{ display.rgFactor ? 'bg-success' : 'bg-secondary' }}"></span>
 				</label>
-				<label class="recommend-games {{ displayRGData ? 'rg-color' : 'text-muted' }}"
-						for="display-rg-data">
-					<strong>Recommend.Games</strong>
+				<label class="{{ display.rgFactor ? 'rg-color' : 'text-muted' }} mr-2"
+						for="display-rg-factor">
+					<strong class="recommend-games">Recommend.Games</strong>
 				</label>
-				<label class="switch">
+				<label class="switch mr-1">
+					<input type="checkbox"
+						id="display-rg-similarity"
+						name="display-rg-similarity"
+						ng-model="display.rgSimilarity" />
+					<span class="slider {{ display.rgSimilarity ? 'bg-success' : 'bg-secondary' }}"></span>
+				</label>
+				<label class="{{ display.rgSimilarity ? 'rg-color-light' : 'text-muted' }} mr-2"
+						for="display-rg-similarity">
+					<strong class="recommend-games">Recommend.Games</strong> similarity
+				</label>
+				<label class="switch mr-1">
 					<input type="checkbox"
 						id="display-bgg-data"
 						name="display-bgg-data"
-						ng-model="displayBGGData" />
-					<span class="slider {{ displayBGGData ? 'bg-success' : 'bg-secondary' }}"></span>
+						ng-model="display.bgg" />
+					<span class="slider {{ display.bgg ? 'bg-success' : 'bg-secondary' }}"></span>
 				</label>
-				<label class="{{ displayBGGData ? 'bgg-color' : 'text-muted' }}"
+				<label class="{{ display.bgg ? 'bgg-color' : 'text-muted' }} mr-2"
 						for="display-bgg-data">
 					<strong>BoardGameGeek</strong>
 				</label>
-			</p>
+				<label for="chart-time-window" class="mr-1">Window:</label>
+				<select name="chart-time-window"
+						ng-model="display.window"
+						class="custom-select"
+						id="chart-time-window">
+					<option ng-value="30">30 days</option>
+					<option ng-value="183">6 months</option>
+					<option ng-value="365" selected="selected">1 year</option>
+					<option ng-value="1095">3 years</option>
+					<option ng-value="1826">5 years</option>
+					<option ng-value="null">all times</option>
+				</select>
+			</form>
 			<canvas id="ranking-history"></canvas>
 		</section>
 	</section>

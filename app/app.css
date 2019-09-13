@@ -426,6 +426,10 @@ input:checked + .slider:before {
     color: black;
 }
 
+.rg-color-light {
+    color: rgb(100, 100, 100);
+}
+
 .bgg-color {
     color: #FF5100;
 }
