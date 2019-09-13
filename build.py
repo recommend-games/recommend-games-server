@@ -94,7 +94,7 @@ def gitprepare(repo=SCRAPED_DATA_DIR):
         try:
             execute("git", "checkout", "master")
             execute("git", "pull", "--ff-only")
-            execute("git", "diff", "HEAD", "--exit-code")
+            execute("git", "diff", "HEAD", "--name-only")
         except SystemExit:
             LOGGER.exception("There was a problem preparing <%s>...", repo)
 
