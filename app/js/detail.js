@@ -230,6 +230,7 @@ ludojApp.controller('DetailController', function DetailController(
                 },
                 options: {
                     responsive: true,
+                    animation: false,
                     title: {
                         display: false,
                         text: 'Rankings over time'
