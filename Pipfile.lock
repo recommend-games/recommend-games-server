@@ -58,10 +58,10 @@
         },
         "certifi": {
             "hashes": [
-                "sha256:046832c04d4e752f37383b628bc601a7ea7211496b4638f6514d0e5b9acc4939",
-                "sha256:945e3ba63a0b9f577b1395204e13c3a231f9bc0223888be653286534e5873695"
+                "sha256:e4f3620cfea4f83eedc95b24abd9cd56f3c4b146dd0177e83a21b4eb49e21e50",
+                "sha256:fd7c7c74727ddcf00e9acd26bba8da604ffec95bf1c2144e67aff7a8b50e6cef"
             ],
-            "version": "==2019.6.16"
+            "version": "==2019.9.11"
         },
         "chardet": {
             "hashes": [
@@ -625,10 +625,10 @@
         },
         "awscli": {
             "hashes": [
-                "sha256:1b7b63255870c6e01469fbe01e8f4a92981d0c1b4e66be35b0d2fd74c6f2ebd8",
-                "sha256:e8c587e2e7d00b36416c2b02e05e6278174556d88e59fd93a7f2f90e87434736"
+                "sha256:7ef77d8897b95c0c0f11ee5a8bc59a1d5f430a9f7971ccc5b5d2fe6dda9b2b46",
+                "sha256:c96e1365c89236bb219cfe356cd0ade12e2788cebe2ac49309db153365472a27"
             ],
-            "version": "==1.16.235"
+            "version": "==1.16.243"
         },
         "boto": {
             "hashes": [
@@ -639,17 +639,17 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:0c4b88af2bf774992cba6361f0af30ca7c7e9fa0dc0f849f241e73edfdeab2b9",
-                "sha256:97114b6d43c691c7314f461b74da20aaffcc6dc6afaa47ad22b0bc383b112d8a"
+                "sha256:012dee0d170d9ee637831a2766c3d5a9cddbe3b18bf688b4c348ec591411bd21",
+                "sha256:2fd733957e83546547cede51ebf7356a14eeb369293e1e918e7eabcc7cf30e2c"
             ],
-            "version": "==1.9.225"
+            "version": "==1.9.233"
         },
         "botocore": {
             "hashes": [
-                "sha256:e6d17290add0a5e8510af92b26ede437bd618f211bc40ad3e4cdf1e7e478b44c",
-                "sha256:fe4c216f1d35d0b368d1916d9e8e7f1933deb80d52d8f84a5d2797a810deef5c"
+                "sha256:9b0bf5614a0e6a29838dc1bc3d38405c57ec6dc3e25709776f9d2d7f7e84b0e0",
+                "sha256:9b93ca5743e9209daaece3e682626d8370f04c9693760c7c1e7fd95b746e45ff"
             ],
-            "version": "==1.12.225"
+            "version": "==1.12.233"
         },
         "btrees": {
             "hashes": [
@@ -696,10 +696,10 @@
         },
         "certifi": {
             "hashes": [
-                "sha256:046832c04d4e752f37383b628bc601a7ea7211496b4638f6514d0e5b9acc4939",
-                "sha256:945e3ba63a0b9f577b1395204e13c3a231f9bc0223888be653286534e5873695"
+                "sha256:e4f3620cfea4f83eedc95b24abd9cd56f3c4b146dd0177e83a21b4eb49e21e50",
+                "sha256:fd7c7c74727ddcf00e9acd26bba8da604ffec95bf1c2144e67aff7a8b50e6cef"
             ],
-            "version": "==2019.6.16"
+            "version": "==2019.9.11"
         },
         "cffi": {
             "hashes": [
@@ -1061,10 +1061,10 @@
         },
         "gsutil": {
             "hashes": [
-                "sha256:9d7faf682fa060dec14c9e075a4f3558ed3ce818d54009c2ea35768692b39dfe"
+                "sha256:09d703315359c7777076bb0423b7e25c5bea6569f6d6276a1d8b12af4eb5a5b1"
             ],
             "index": "pypi",
-            "version": "==4.42"
+            "version": "==4.43"
         },
         "haversine": {
             "hashes": [
