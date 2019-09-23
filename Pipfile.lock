@@ -626,10 +626,10 @@
         },
         "awscli": {
             "hashes": [
-                "sha256:b85da8f14e580d0e487506b9d1a2d0c3b31e33f6fb8732172ada76904430df3f",
-                "sha256:cda5c2dfe64a02db0fe954746c0d1aed3fe7c6b0a5dddbfc31ab83ea69a3ca9b"
+                "sha256:7ef77d8897b95c0c0f11ee5a8bc59a1d5f430a9f7971ccc5b5d2fe6dda9b2b46",
+                "sha256:c96e1365c89236bb219cfe356cd0ade12e2788cebe2ac49309db153365472a27"
             ],
-            "version": "==1.16.237"
+            "version": "==1.16.243"
         },
         "boto": {
             "hashes": [
@@ -640,17 +640,17 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:ca110faa605cd686b9ca5dd71da92a30a1c7f99c7021c660c51707585393e0db",
-                "sha256:f83f7f67ab4ecbe08d4a661ddd1b459000a10bbf97eb1164b96e579c423816f8"
+                "sha256:012dee0d170d9ee637831a2766c3d5a9cddbe3b18bf688b4c348ec591411bd21",
+                "sha256:2fd733957e83546547cede51ebf7356a14eeb369293e1e918e7eabcc7cf30e2c"
             ],
-            "version": "==1.9.227"
+            "version": "==1.9.233"
         },
         "botocore": {
             "hashes": [
-                "sha256:0a70ebf0b64d0667a22bc1cf461ff61789bac2dda107a47edaa9f6371b68eb1c",
-                "sha256:4e97755376dbdc3de8c99685ef34b19303751a0c0b5984803f870c0a5798c973"
+                "sha256:9b0bf5614a0e6a29838dc1bc3d38405c57ec6dc3e25709776f9d2d7f7e84b0e0",
+                "sha256:9b93ca5743e9209daaece3e682626d8370f04c9693760c7c1e7fd95b746e45ff"
             ],
-            "version": "==1.12.227"
+            "version": "==1.12.233"
         },
         "btrees": {
             "hashes": [
@@ -1062,10 +1062,10 @@
         },
         "gsutil": {
             "hashes": [
-                "sha256:9d7faf682fa060dec14c9e075a4f3558ed3ce818d54009c2ea35768692b39dfe"
+                "sha256:09d703315359c7777076bb0423b7e25c5bea6569f6d6276a1d8b12af4eb5a5b1"
             ],
             "index": "pypi",
-            "version": "==4.42"
+            "version": "==4.43"
         },
         "haversine": {
             "hashes": [
