@@ -283,15 +283,20 @@ ludojApp.controller('DetailController', function DetailController(
             return findElement('#date-range');
         })
         .then(function (element) {
+            var minDate = moment(_.minBy(rankingData, 'date').date);
             element.daterangepicker({
                 startDate: startDate,
                 endDate: endDate,
+                minDate: minDate,
+                maxDate: endDate,
+                showDropdowns: true,
                 ranges: {
                     '30 Days': [moment().subtract(30, 'days'), endDate],
+                    '90 Days': [moment().subtract(90, 'days'), endDate],
                     '6 months': [moment().subtract(6, 'months'), endDate],
                     '1 year': [startDate, endDate],
-                    '3 years': [moment().subtract(3, 'years'), endDate],
-                    '5 years': [moment().subtract(5, 'years'), endDate]
+                    // '3 years': [moment().subtract(3, 'years'), endDate],
+                    'Max': [minDate, endDate]
                 }
             }, function (start, end) {
                 $scope.display.startDate = start;
