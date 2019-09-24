@@ -24,7 +24,9 @@ ludojApp.controller('DetailController', function DetailController(
         chart = null,
         rankingData = null,
         rankingParams = {'window': '7d'},
-        tooltipThreshold = 2;
+        tooltipThreshold = 2,
+        startDate = moment().subtract(1, 'year'),
+        endDate = moment();
 
     $scope.implementations = false;
     $scope.expandable = false;
@@ -34,7 +36,8 @@ ludojApp.controller('DetailController', function DetailController(
         rgFactor: true,
         rgSimilarity: false,
         bgg: true,
-        window: 365
+        startDate: startDate,
+        endDate: endDate
     };
 
     $scope.toggleDescription = function toggleDescription() {
@@ -129,7 +132,7 @@ ludojApp.controller('DetailController', function DetailController(
         });
         // TODO catch errors
 
-    function makeDataPoints(data, rankingType, field, since) {
+    function makeDataPoints(data, rankingType, field, startDate, endDate) {
         field = field || 'rank';
         data = _(data)
             .filter(['ranking_type', rankingType])
@@ -137,14 +140,15 @@ ludojApp.controller('DetailController', function DetailController(
                 return {x: moment(item.date), y: item[field]};
             })
             .sortBy('x');
-        data = _.isNil(since) ? data : data.filter(function (item) { return item.x >= since; });
+        data = _.isNil(startDate) ? data : data.filter(function (item) { return item.x >= startDate; });
+        data = _.isNil(endDate) ? data : data.filter(function (item) { return item.x <= endDate; });
         return data.value();
     }
 
-    function makeDataSet(data, rankingType, field, since, label, color, pointRadius) {
+    function makeDataSet(data, rankingType, field, startDate, endDate, label, color, pointRadius) {
         pointRadius = _.parseInt(pointRadius) || 0;
 
-        var dataPoints = makeDataPoints(data, rankingType, field, since),
+        var dataPoints = makeDataPoints(data, rankingType, field, startDate, endDate),
             type = pointRadius ? 'scatter' : 'line',
             options = {
                 type: type,
@@ -168,15 +172,14 @@ ludojApp.controller('DetailController', function DetailController(
         return options;
     }
 
-    function makeDataSets(data) {
-        var since = _.isInteger($scope.display.window) ? moment().subtract($scope.display.window, 'days') : null,
-            datasets = [
-                $scope.display.rgFactor ? makeDataSet(data, 'fac', 'rank', since, 'R.G', 'rgba(0, 0, 0, 0.5)', 2) : null,
-                $scope.display.rgSimilarity ? makeDataSet(data, 'sim', 'rank', since, 'R.G sim', 'rgba(100, 100, 100, 0.5)', 2) : null,
-                $scope.display.bgg ? makeDataSet(data, 'bgg', 'rank', since, 'BGG', 'rgba(255, 81, 0, 0.5)', 2) : null,
-                $scope.display.rgFactor ? makeDataSet(data, 'fac', 'avg', since, 'R.G trend', 'rgba(0, 0, 0, 1)') : null,
-                $scope.display.rgSimilarity ? makeDataSet(data, 'sim', 'avg', since, 'R.G sim trend', 'rgba(100, 100, 100, 1)') : null,
-                $scope.display.bgg ? makeDataSet(data, 'bgg', 'avg', since, 'BGG trend', 'rgba(255, 81, 0, 1)') : null
+    function makeDataSets(data, startDate, endDate) {
+        var datasets = [
+                $scope.display.rgFactor ? makeDataSet(data, 'fac', 'rank', startDate, endDate, 'R.G', 'rgba(0, 0, 0, 0.5)', 2) : null,
+                $scope.display.rgSimilarity ? makeDataSet(data, 'sim', 'rank', startDate, endDate, 'R.G sim', 'rgba(100, 100, 100, 0.5)', 2) : null,
+                $scope.display.bgg ? makeDataSet(data, 'bgg', 'rank', startDate, endDate, 'BGG', 'rgba(255, 81, 0, 0.5)', 2) : null,
+                $scope.display.rgFactor ? makeDataSet(data, 'fac', 'avg', startDate, endDate, 'R.G trend', 'rgba(0, 0, 0, 1)') : null,
+                $scope.display.rgSimilarity ? makeDataSet(data, 'sim', 'avg', startDate, endDate, 'R.G sim trend', 'rgba(100, 100, 100, 1)') : null,
+                $scope.display.bgg ? makeDataSet(data, 'bgg', 'avg', startDate, endDate, 'BGG trend', 'rgba(255, 81, 0, 1)') : null
             ],
             datasetsFiltered = _.filter(datasets);
         tooltipThreshold = _.size(datasetsFiltered) / 2;
@@ -205,6 +208,15 @@ ludojApp.controller('DetailController', function DetailController(
         }, wait);
     }
 
+    function updateChart() {
+        if (_.isNil(chart) || _.isEmpty(rankingData)) {
+            return;
+        }
+
+        chart.data.datasets = makeDataSets(rankingData, $scope.display.startDate, $scope.display.endDate);
+        chart.update();
+    }
+
     $http.get('/api/games/' + $routeParams.id + '/rankings/', {'params': rankingParams, 'noblock': true})
         .then(function (response) {
             rankingData = response.data;
@@ -226,7 +238,7 @@ ludojApp.controller('DetailController', function DetailController(
             chart = new Chart(element, {
                 type: 'line',
                 data: {
-                    datasets: makeDataSets(rankingData)
+                    datasets: makeDataSets(rankingData, startDate, endDate)
                 },
                 options: {
                     responsive: true,
@@ -267,20 +279,30 @@ ludojApp.controller('DetailController', function DetailController(
                     }
                 }
             });
+
+            return findElement('#date-range');
+        })
+        .then(function (element) {
+            element.daterangepicker({
+                startDate: startDate,
+                endDate: endDate,
+                ranges: {
+                    '30 Days': [moment().subtract(30, 'days'), endDate],
+                    '6 months': [moment().subtract(6, 'months'), endDate],
+                    '1 year': [startDate, endDate],
+                    '3 years': [moment().subtract(3, 'years'), endDate],
+                    '5 years': [moment().subtract(5, 'years'), endDate]
+                }
+            }, function (start, end) {
+                $scope.display.startDate = start;
+                $scope.display.endDate = end;
+                updateChart();
+            });
         })
         .catch($log.error);
 
-    function updateChart() {
-        if (_.isNil(chart) || _.isEmpty(rankingData)) {
-            return;
-        }
-
-        chart.data.datasets = makeDataSets(rankingData);
-        chart.update();
-    }
-
     $scope.$watchGroup(
-        ['display.rgFactor', 'display.rgSimilarity', 'display.bgg', 'display.window'],
+        ['display.rgFactor', 'display.rgSimilarity', 'display.bgg'],
         updateChart
     );
 

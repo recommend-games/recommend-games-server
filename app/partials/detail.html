@@ -313,18 +313,10 @@
 						for="display-bgg-data">
 					<strong>BoardGameGeek</strong>
 				</label>
-				<label for="chart-time-window" class="mr-1">Window:</label>
-				<select name="chart-time-window"
-						ng-model="display.window"
-						class="custom-select"
-						id="chart-time-window">
-					<option ng-value="30">30 days</option>
-					<option ng-value="183">6 months</option>
-					<option ng-value="365" selected="selected">1 year</option>
-					<option ng-value="1095">3 years</option>
-					<option ng-value="1826">5 years</option>
-					<option ng-value="null">all times</option>
-				</select>
+				<input type="text"
+					id="date-range"
+					name="date-range"
+					class="form-control" />
 			</form>
 			<canvas id="ranking-history"></canvas>
 		</section>
