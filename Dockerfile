@@ -18,10 +18,10 @@ RUN apt-get -y update && \
     pip3 install --upgrade \
         gsutil==4.43 \
         pipenv==2018.11.26
-COPY Pipfile* .
-RUN pipenv install --deploy
+COPY Pipfile* ./
+RUN pipenv install --deploy --verbose
 
-COPY .boto gs.json startup.sh .
+COPY .boto gs.json startup.sh ./
 COPY ludoj ludoj
 COPY games games
 COPY static static
