@@ -1,4 +1,4 @@
-FROM gcr.io/google-appengine/python:2019-09-16-112608
+FROM gcr.io/google-appengine/python:2019-09-23-101712
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
@@ -19,7 +19,7 @@ RUN apt-get -y update && \
         gsutil==4.43 \
         pipenv==2018.11.26
 COPY Pipfile* ./
-RUN pipenv install --deploy
+RUN pipenv install --deploy --verbose
 
 COPY .boto gs.json startup.sh ./
 COPY ludoj ludoj

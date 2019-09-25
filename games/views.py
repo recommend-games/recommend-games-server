@@ -4,6 +4,7 @@
 
 import logging
 
+from datetime import timezone
 from functools import reduce
 from operator import or_
 
@@ -23,7 +24,16 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from .models import Category, Collection, Game, GameType, Mechanic, Person, User
+from .models import (
+    Category,
+    Collection,
+    Game,
+    GameType,
+    Mechanic,
+    Person,
+    Ranking,
+    User,
+)
 from .permissions import ReadOnly
 from .serializers import (
     CategorySerializer,
@@ -32,6 +42,7 @@ from .serializers import (
     GameTypeSerializer,
     MechanicSerializer,
     PersonSerializer,
+    RankingSerializer,
     UserSerializer,
 )
 from .utils import (
@@ -39,6 +50,7 @@ from .utils import (
     load_recommender,
     model_updated_at,
     parse_bool,
+    parse_date,
     parse_int,
     pubsub_push,
     take_first,
@@ -457,8 +469,6 @@ class GameViewSet(PermissionsModelViewSet):
         users = list(_parse_parts(request.query_params.getlist("user")))
         like = list(_parse_parts(request.query_params.getlist("like")))
 
-        print(users)
-
         recommendation = (
             recommender.recommend_similar(games=like)
             if like and not users
@@ -549,6 +559,52 @@ class GameViewSet(PermissionsModelViewSet):
             else Response(list(games[:10]))
         )
 
+    @action(detail=True)
+    def rankings(self, request, pk=None):
+        """Find historical rankings of a game."""
+
+        window = request.query_params.get("window")
+
+        filters = {
+            "game": pk,
+            "ranking_type": request.query_params.get("ranking_type"),
+            "date__gte": parse_date(
+                request.query_params.get("date__gte"), tzinfo=timezone.utc
+            ),
+            "date__lte": parse_date(
+                request.query_params.get("date__lte"), tzinfo=timezone.utc
+            ),
+        }
+        filters = {k: v for k, v in filters.items() if v}
+
+        queryset = Ranking.objects.filter(**filters)
+
+        if not window:
+            serializer = RankingSerializer(
+                queryset, many=True, context=self.get_serializer_context()
+            )
+            return Response(serializer.data)
+
+        import pandas as pd
+
+        df = pd.DataFrame.from_records(queryset.values("ranking_type", "rank", "date"))
+
+        if df.empty:
+            return Response(())
+
+        groups = df.groupby("ranking_type")
+        rolling = groups.apply(
+            lambda group: group.sort_values("date").rolling(window, on="date").mean()
+        )
+        df["avg"] = rolling["rank"]
+
+        data = (dict(row) for _, row in df.iterrows())
+        serializer = RankingSerializer(
+            data, many=True, context=self.get_serializer_context()
+        )
+        return Response(serializer.data)
+
+    # pylint: disable=no-self-use
     @action(detail=False)
     def updated_at(self, request):
         """ recommend games """

@@ -1,15 +1,18 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global ludojApp, _, $ */
+/*global ludojApp, _, $, moment, Chart */
 
 'use strict';
 
 ludojApp.controller('DetailController', function DetailController(
     $filter,
+    $http,
     $location,
+    $log,
     $q,
     $routeParams,
     $scope,
+    $timeout,
     gamesService
 ) {
     var compilationOf = [],
@@ -17,11 +20,35 @@ ludojApp.controller('DetailController', function DetailController(
         implementationOf = [],
         implementedBy = [],
         integratesWith = [],
-        similarPromise = gamesService.getSimilarGames($routeParams.id, 1, true);
+        similarPromise = gamesService.getSimilarGames($routeParams.id, 1, true),
+        chart = null,
+        rankingData = null,
+        rankingParams = {'window': '7d'},
+        tooltipThreshold = 2,
+        startDate = moment().subtract(1, 'year'),
+        endDate = moment(),
+        allRanges = [
+            ['30 Days', moment().subtract(30, 'days')],
+            ['90 Days', moment().subtract(90, 'days')],
+            ['6 months', moment().subtract(6, 'months')],
+            ['1 year', startDate],
+            ['2 years', moment().subtract(2, 'years')],
+            ['3 years', moment().subtract(3, 'years')],
+            ['5 years', moment().subtract(5, 'years')],
+            ['10 years', moment().subtract(10, 'years')]
+        ];
 
     $scope.implementations = false;
     $scope.expandable = false;
     $scope.expandDescription = false;
+    $scope.chartVisible = false;
+    $scope.display = {
+        rgFactor: true,
+        rgSimilarity: false,
+        bgg: true,
+        startDate: startDate,
+        endDate: endDate
+    };
 
     $scope.toggleDescription = function toggleDescription() {
         $scope.expandDescription = !$scope.expandDescription;
@@ -114,6 +141,185 @@ ludojApp.controller('DetailController', function DetailController(
             });
         });
         // TODO catch errors
+
+    function makeDataPoints(data, rankingType, field, startDate, endDate) {
+        field = field || 'rank';
+        data = _(data)
+            .filter(['ranking_type', rankingType])
+            .map(function (item) {
+                return {x: moment(item.date), y: item[field]};
+            })
+            .sortBy('x');
+        data = _.isNil(startDate) ? data : data.filter(function (item) { return item.x >= startDate; });
+        data = _.isNil(endDate) ? data : data.filter(function (item) { return item.x <= endDate; });
+        return data.value();
+    }
+
+    function makeDataSet(data, rankingType, field, startDate, endDate, label, color, pointRadius) {
+        pointRadius = _.parseInt(pointRadius) || 0;
+
+        var dataPoints = makeDataPoints(data, rankingType, field, startDate, endDate),
+            type = pointRadius ? 'scatter' : 'line',
+            options = {
+                type: type,
+                label: label,
+                data: dataPoints,
+                pointRadius: pointRadius,
+                fill: false
+            };
+
+        if (type === 'scatter') {
+            options.borderColor = 'rgba(0, 0, 0, 0)';
+            options.backgroundColor = 'rgba(0, 0, 0, 0)';
+            options.pointBorderColor = color;
+            options.pointBackgroundColor = 'rgba(0, 0, 0, 0)';
+            options.pointBorderWidth = 1;
+        } else {
+            options.borderColor = color;
+            options.backgroundColor = 'rgba(0, 0, 0, 0)';
+        }
+
+        return options;
+    }
+
+    function makeDataSets(data, startDate, endDate) {
+        var datasets = [
+                $scope.display.rgFactor ? makeDataSet(data, 'fac', 'rank', startDate, endDate, 'R.G', 'rgba(0, 0, 0, 0.5)', 2) : null,
+                $scope.display.rgSimilarity ? makeDataSet(data, 'sim', 'rank', startDate, endDate, 'R.G sim', 'rgba(100, 100, 100, 0.5)', 2) : null,
+                $scope.display.bgg ? makeDataSet(data, 'bgg', 'rank', startDate, endDate, 'BGG', 'rgba(255, 81, 0, 0.5)', 2) : null,
+                $scope.display.rgFactor ? makeDataSet(data, 'fac', 'avg', startDate, endDate, 'R.G trend', 'rgba(0, 0, 0, 1)') : null,
+                $scope.display.rgSimilarity ? makeDataSet(data, 'sim', 'avg', startDate, endDate, 'R.G sim trend', 'rgba(100, 100, 100, 1)') : null,
+                $scope.display.bgg ? makeDataSet(data, 'bgg', 'avg', startDate, endDate, 'BGG trend', 'rgba(255, 81, 0, 1)') : null
+            ],
+            datasetsFiltered = _.filter(datasets);
+        tooltipThreshold = _.size(datasetsFiltered) / 2;
+        return datasetsFiltered;
+    }
+
+    function findElement(selector, wait, retries) {
+        var element = $(selector);
+
+        if (!_.isNil(element) && !_.isEmpty(element)) {
+            return $q.resolve(element);
+        }
+
+        retries = _.parseInt(retries);
+
+        if (_.isInteger(retries) && retries <= 0) {
+            return $q.reject('unable to find canvas element');
+        }
+
+        // make sure wait is between 10ms and 10s
+        wait = _.min([_.max([parseFloat(wait) || 100, 10]), 10000]);
+        retries = _.isInteger(retries) ? retries - 1 : null;
+
+        return $timeout(function () {
+            return findElement(selector, wait * 2, retries);
+        }, wait);
+    }
+
+    function updateChart() {
+        if (_.isNil(chart) || _.isEmpty(rankingData)) {
+            return;
+        }
+
+        chart.data.datasets = makeDataSets(rankingData, $scope.display.startDate, $scope.display.endDate);
+        chart.update();
+    }
+
+    $http.get('/api/games/' + $routeParams.id + '/rankings/', {'params': rankingParams, 'noblock': true})
+        .then(function (response) {
+            rankingData = response.data;
+
+            if (_.isEmpty(rankingData)) {
+                $scope.chartVisible = false;
+                return;
+            }
+
+            $scope.chartVisible = true;
+            return findElement('#ranking-history');
+        })
+        .then(function (element) {
+            if (_.isNil(element) || _.isEmpty(element)) {
+                $scope.chartVisible = false;
+                return $q.reject('unable to find canvas element');
+            }
+
+            chart = new Chart(element, {
+                type: 'line',
+                data: {
+                    datasets: makeDataSets(rankingData, startDate, endDate)
+                },
+                options: {
+                    responsive: true,
+                    animation: false,
+                    title: {
+                        display: false,
+                        text: 'Rankings over time'
+                    },
+                    tooltips: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false,
+                        filter: function (item) { return item.datasetIndex < tooltipThreshold; }
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: true
+                    },
+                    scales: {
+                        xAxes: [{
+                            type: 'time',
+                            distribution: 'linear'
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                reverse: true,
+                                min: 1,
+                                suggestedMax: 10
+                            }
+                        }]
+                    },
+                    legend: {
+                        display: false,
+                        labels: {
+                            filter: function (item) { return _.endsWith(item.text, 'trend'); }
+                        }
+                    }
+                }
+            });
+
+            return findElement('#date-range');
+        })
+        .then(function (element) {
+            var minDate = moment(_.minBy(rankingData, 'date').date),
+                ranges = _(allRanges)
+                    .filter(function (item) { return item[1] >= minDate; })
+                    .map(function (item) { return [item[0], [item[1], endDate]]; })
+                    .fromPairs()
+                    .value();
+            ranges.Max = [minDate, endDate];
+
+            element.daterangepicker({
+                startDate: startDate,
+                endDate: endDate,
+                minDate: minDate,
+                maxDate: endDate,
+                showDropdowns: true,
+                ranges: ranges
+            }, function (start, end) {
+                $scope.display.startDate = start;
+                $scope.display.endDate = end;
+                updateChart();
+            });
+        })
+        .catch($log.error);
+
+    $scope.$watchGroup(
+        ['display.rgFactor', 'display.rgSimilarity', 'display.bgg'],
+        updateChart
+    );
 
     gamesService.setCanonicalUrl($location.path());
 });

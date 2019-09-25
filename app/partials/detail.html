@@ -277,5 +277,48 @@
 				</small>
 			</dd>
 		</dl>
+		<section ng-if="chartVisible">
+			<h3>Rankings over time</h3>
+			<form class="form-inline mb-1">
+				<label class="switch mr-1">
+					<input type="checkbox"
+						id="display-rg-factor"
+						name="display-rg-factor"
+						ng-model="display.rgFactor" />
+					<span class="slider {{ display.rgFactor ? 'bg-success' : 'bg-secondary' }}"></span>
+				</label>
+				<label class="{{ display.rgFactor ? 'rg-color' : 'text-muted' }} mr-2"
+						for="display-rg-factor">
+					<strong class="recommend-games">Recommend.Games</strong>
+				</label>
+				<label class="switch mr-1">
+					<input type="checkbox"
+						id="display-rg-similarity"
+						name="display-rg-similarity"
+						ng-model="display.rgSimilarity" />
+					<span class="slider {{ display.rgSimilarity ? 'bg-success' : 'bg-secondary' }}"></span>
+				</label>
+				<label class="{{ display.rgSimilarity ? 'rg-color-light' : 'text-muted' }} mr-2"
+						for="display-rg-similarity">
+					<strong class="recommend-games">Recommend.Games</strong> similarity
+				</label>
+				<label class="switch mr-1">
+					<input type="checkbox"
+						id="display-bgg-data"
+						name="display-bgg-data"
+						ng-model="display.bgg" />
+					<span class="slider {{ display.bgg ? 'bg-success' : 'bg-secondary' }}"></span>
+				</label>
+				<label class="{{ display.bgg ? 'bgg-color' : 'text-muted' }} mr-2"
+						for="display-bgg-data">
+					<strong>BoardGameGeek</strong>
+				</label>
+				<input type="text"
+					id="date-range"
+					name="date-range"
+					class="form-control" />
+			</form>
+			<canvas id="ranking-history"></canvas>
+		</section>
 	</section>
 </section>
