@@ -26,7 +26,17 @@ ludojApp.controller('DetailController', function DetailController(
         rankingParams = {'window': '7d'},
         tooltipThreshold = 2,
         startDate = moment().subtract(1, 'year'),
-        endDate = moment();
+        endDate = moment(),
+        allRanges = [
+            ['30 Days', moment().subtract(30, 'days')],
+            ['90 Days', moment().subtract(90, 'days')],
+            ['6 months', moment().subtract(6, 'months')],
+            ['1 year', startDate],
+            ['2 years', moment().subtract(2, 'years')],
+            ['3 years', moment().subtract(3, 'years')],
+            ['5 years', moment().subtract(5, 'years')],
+            ['10 years', moment().subtract(10, 'years')]
+        ];
 
     $scope.implementations = false;
     $scope.expandable = false;
@@ -283,21 +293,21 @@ ludojApp.controller('DetailController', function DetailController(
             return findElement('#date-range');
         })
         .then(function (element) {
-            var minDate = moment(_.minBy(rankingData, 'date').date);
+            var minDate = moment(_.minBy(rankingData, 'date').date),
+                ranges = _(allRanges)
+                    .filter(function (item) { return item[1] >= minDate; })
+                    .map(function (item) { return [item[0], [item[1], endDate]]; })
+                    .fromPairs()
+                    .value();
+            ranges.Max = [minDate, endDate];
+
             element.daterangepicker({
                 startDate: startDate,
                 endDate: endDate,
                 minDate: minDate,
                 maxDate: endDate,
                 showDropdowns: true,
-                ranges: {
-                    '30 Days': [moment().subtract(30, 'days'), endDate],
-                    '90 Days': [moment().subtract(90, 'days'), endDate],
-                    '6 months': [moment().subtract(6, 'months'), endDate],
-                    '1 year': [startDate, endDate],
-                    // '3 years': [moment().subtract(3, 'years'), endDate],
-                    'Max': [minDate, endDate]
-                }
+                ranges: ranges
             }, function (start, end) {
                 $scope.display.startDate = start;
                 $scope.display.endDate = end;
