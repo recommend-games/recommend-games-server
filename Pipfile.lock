@@ -152,11 +152,11 @@
         },
         "google-cloud-pubsub": {
             "hashes": [
-                "sha256:a052a67c3f0ae86716626ab0a3b83fdb0613df86d69aece43f905bf04672caf2",
-                "sha256:a922cd96474b0acbb1d03aa50e1db782800c5bb3e2731bc0feb93816d547ab17"
+                "sha256:53cdf87ec37bda06dd46b6a61b933289958b411bbcf75acc9488f1f5953f8772",
+                "sha256:d63dd922acc189b72ad253f4d0ae5a34196520c6a4ef02d436561104a675d070"
             ],
             "index": "pypi",
-            "version": "==1.0.0"
+            "version": "==1.0.1"
         },
         "googleapis-common-protos": {
             "extras": [
@@ -1047,11 +1047,11 @@
         },
         "google-cloud-pubsub": {
             "hashes": [
-                "sha256:a052a67c3f0ae86716626ab0a3b83fdb0613df86d69aece43f905bf04672caf2",
-                "sha256:a922cd96474b0acbb1d03aa50e1db782800c5bb3e2731bc0feb93816d547ab17"
+                "sha256:53cdf87ec37bda06dd46b6a61b933289958b411bbcf75acc9488f1f5953f8772",
+                "sha256:d63dd922acc189b72ad253f4d0ae5a34196520c6a4ef02d436561104a675d070"
             ],
             "index": "pypi",
-            "version": "==1.0.0"
+            "version": "==1.0.1"
         },
         "google-reauth": {
             "hashes": [
