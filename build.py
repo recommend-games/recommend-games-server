@@ -8,7 +8,7 @@ import os
 import shutil
 import sys
 
-from datetime import timedelta
+from datetime import timedelta, timezone
 from functools import lru_cache
 
 import django
@@ -587,6 +587,53 @@ def savebgarankings(
 @task(savebggrankings, savebgarankings)
 def saverankings():
     """Take a snapshot of both BoardGameGeek and Board Game Atlas rankings."""
+
+
+@task()
+def historicalbggrankings(
+    repo=os.path.abspath(os.path.join(BASE_DIR, "..", "bgg-ranking-historicals")),
+    dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg"),
+    file_name="%Y%m%d-%H%M%S.csv",
+    overwrite=False,
+):
+    """Save historical BGG rankings."""
+
+    from games.utils import format_from_path, parse_bool, parse_date
+
+    LOGGER.info("Loading historical BGG rankings from <%s>...", repo)
+
+    overwrite = parse_bool(overwrite)
+
+    with safe_cd(repo):
+        execute("git", "checkout", "master")
+        execute("git", "pull", "--ff-only")
+
+        for root, _, files in os.walk("."):
+            for file in files:
+                if format_from_path(file) != "csv":
+                    continue
+
+                date_str, _ = os.path.splitext(file)
+                date = parse_date(date_str, tzinfo=timezone.utc)
+                if date is None:
+                    continue
+
+                in_path = os.path.abspath(os.path.join(root, file))
+                dst_file = date.strftime(file_name)
+                dst_path = os.path.join(dst_dir, dst_file)
+
+                if not overwrite and os.path.exists(dst_path):
+                    LOGGER.info(
+                        "Output file <%s> already exists, skipping <%s>...",
+                        dst_path,
+                        in_path,
+                    )
+                    continue
+
+                LOGGER.info(
+                    "Reading from file <%s> and writing to <%s>...", in_path, dst_path
+                )
+                # TODO
 
 
 @task()
