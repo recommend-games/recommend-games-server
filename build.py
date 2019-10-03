@@ -692,6 +692,7 @@ def bggranking(
 def historicalbggrankings(
     repo=os.path.abspath(os.path.join(BASE_DIR, "..", "bgg-ranking-historicals")),
     dst=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg", "%Y%m%d-%H%M%S.csv"),
+    script=os.path.join(BASE_DIR, "scripts", "ranking.sh"),
     overwrite=False,
 ):
     """Save historical BGG rankings."""
@@ -720,7 +721,7 @@ def historicalbggrankings(
                 dst_path = date.strftime(dst)
 
                 if not overwrite and os.path.exists(dst_path):
-                    LOGGER.info(
+                    LOGGER.debug(
                         "Output file <%s> already exists, skipping <%s>...",
                         dst_path,
                         in_path,
@@ -730,7 +731,7 @@ def historicalbggrankings(
                 LOGGER.info(
                     "Reading from file <%s> and writing to <%s>...", in_path, dst_path
                 )
-                # TODO
+                execute("bash", script, in_path, dst_path)
 
 
 @task()
