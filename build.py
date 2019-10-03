@@ -8,7 +8,7 @@ import os
 import shutil
 import sys
 
-from datetime import timedelta
+from datetime import timedelta, timezone
 from functools import lru_cache
 
 import django
@@ -689,6 +689,52 @@ def bggranking(
 
 
 @task()
+def historicalbggrankings(
+    repo=os.path.abspath(os.path.join(BASE_DIR, "..", "bgg-ranking-historicals")),
+    dst=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg", "%Y%m%d-%H%M%S.csv"),
+    script=os.path.join(BASE_DIR, "scripts", "ranking.sh"),
+    overwrite=False,
+):
+    """Save historical BGG rankings."""
+
+    from games.utils import format_from_path, parse_bool, parse_date
+
+    LOGGER.info("Loading historical BGG rankings from <%s>...", repo)
+
+    overwrite = parse_bool(overwrite)
+
+    with safe_cd(repo):
+        execute("git", "checkout", "master")
+        execute("git", "pull", "--ff-only")
+
+        for root, _, files in os.walk("."):
+            for file in files:
+                if format_from_path(file) != "csv":
+                    continue
+
+                date_str, _ = os.path.splitext(file)
+                date = parse_date(date_str, tzinfo=timezone.utc)
+                if date is None:
+                    continue
+
+                in_path = os.path.abspath(os.path.join(root, file))
+                dst_path = date.strftime(dst)
+
+                if not overwrite and os.path.exists(dst_path):
+                    LOGGER.debug(
+                        "Output file <%s> already exists, skipping <%s>...",
+                        dst_path,
+                        in_path,
+                    )
+                    continue
+
+                LOGGER.info(
+                    "Reading from file <%s> and writing to <%s>...", in_path, dst_path
+                )
+                execute("bash", script, in_path, dst_path)
+
+
+@task()
 def fillrankingdb(path=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg")):
     """Parses the ranking CSVs and writes them to the database."""
     django.core.management.call_command("fillrankingdb", path)
@@ -711,6 +757,7 @@ def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_00
     filldb,
     dateflag,
     bggranking,
+    historicalbggrankings,
     fillrankingdb,
     compressdb,
     cpdirs,
