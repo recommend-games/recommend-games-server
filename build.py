@@ -930,8 +930,9 @@ def lintdocker(base_dir=BASE_DIR):
 @task()
 def lintpy(*modules):
     """ lint Python files """
-    modules = modules or ("ludoj", "games", "build", "manage")
+    modules = modules or ("ludoj", "games", "build.py", "manage.py")
     with safe_cd(BASE_DIR):
+        execute("black", "--diff", "--exclude", "/migrations/", *modules)
         execute("pylint", "--exit-zero", *modules)
 
 

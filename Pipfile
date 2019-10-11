@@ -22,6 +22,7 @@ turicreate = "<5.7"
 whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
+black = "==19.3b0" # no released version, so need to pin exact pre-release version
 csvkit = "*"
 gitpython = "*"
 gsutil = "*"
