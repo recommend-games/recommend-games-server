@@ -1,4 +1,4 @@
-FROM gcr.io/google-appengine/python:2019-09-23-101712
+FROM gcr.io/google-appengine/python:2019-10-10-155226
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
@@ -16,7 +16,7 @@ RUN apt-get -y update && \
     apt-get -y clean && \
     rm -rf /var/lib/apt/lists/* && \
     pip3 install --upgrade \
-        gsutil==4.43 \
+        gsutil==4.44 \
         pipenv==2018.11.26
 COPY Pipfile* ./
 RUN pipenv install --deploy --verbose
