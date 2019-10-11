@@ -1,4 +1,4 @@
-FROM gcr.io/google-appengine/python:2019-09-23-101712
+FROM gcr.io/google-appengine/python:2019-10-10-155226
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
