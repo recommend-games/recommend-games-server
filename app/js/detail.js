@@ -6,14 +6,14 @@
 
 ludojApp.controller('DetailController', function DetailController(
     $filter,
-    $http,
     $location,
     $log,
     $q,
     $routeParams,
     $scope,
     $timeout,
-    gamesService
+    gamesService,
+    rankingsService
 ) {
     var compilationOf = [],
         containedIn = [],
@@ -22,13 +22,9 @@ ludojApp.controller('DetailController', function DetailController(
         integratesWith = [],
         similarPromise = gamesService.getSimilarGames($routeParams.id, 1, true),
         chart = null,
-        rankingData = null,
-        rankingParams = {'window': '7d'},
-        tooltipThreshold = 2,
         startDate = moment().subtract(1, 'year'),
         endDate = moment(),
         allRanges = [
-            ['30 Days', moment().subtract(30, 'days')],
             ['90 Days', moment().subtract(90, 'days')],
             ['6 months', moment().subtract(6, 'months')],
             ['1 year', startDate],
@@ -142,12 +138,11 @@ ludojApp.controller('DetailController', function DetailController(
         });
         // TODO catch errors
 
-    function makeDataPoints(data, rankingType, field, startDate, endDate) {
-        field = field || 'rank';
+    function makeDataPoints(data, rankingType, startDate, endDate) {
         data = _(data)
             .filter(['ranking_type', rankingType])
             .map(function (item) {
-                return {x: moment(item.date), y: item[field]};
+                return {x: moment(item.date), y: item.rank};
             })
             .sortBy('x');
         data = _.isNil(startDate) ? data : data.filter(function (item) { return item.x >= startDate; });
@@ -155,45 +150,27 @@ ludojApp.controller('DetailController', function DetailController(
         return data.value();
     }
 
-    function makeDataSet(data, rankingType, field, startDate, endDate, label, color, pointRadius) {
-        pointRadius = _.parseInt(pointRadius) || 0;
-
-        var dataPoints = makeDataPoints(data, rankingType, field, startDate, endDate),
-            type = pointRadius ? 'scatter' : 'line',
-            options = {
-                type: type,
-                label: label,
-                data: dataPoints,
-                pointRadius: pointRadius,
-                fill: false
-            };
-
-        if (type === 'scatter') {
-            options.borderColor = 'rgba(0, 0, 0, 0)';
-            options.backgroundColor = 'rgba(0, 0, 0, 0)';
-            options.pointBorderColor = color;
-            options.pointBackgroundColor = 'rgba(0, 0, 0, 0)';
-            options.pointBorderWidth = 1;
-        } else {
-            options.borderColor = color;
-            options.backgroundColor = 'rgba(0, 0, 0, 0)';
-        }
-
-        return options;
+    function makeDataSet(data, rankingType, startDate, endDate, label, color) {
+        var dataPoints = makeDataPoints(data, rankingType, startDate, endDate);
+        return {
+            type: 'line',
+            label: label,
+            data: dataPoints,
+            pointRadius: 0,
+            fill: false,
+            borderColor: color,
+            backgroundColor: color,
+            cubicInterpolationMode: 'monotone'
+        };
     }
 
     function makeDataSets(data, startDate, endDate) {
         var datasets = [
-                $scope.display.rgFactor ? makeDataSet(data, 'fac', 'rank', startDate, endDate, 'R.G', 'rgba(0, 0, 0, 0.5)', 2) : null,
-                $scope.display.rgSimilarity ? makeDataSet(data, 'sim', 'rank', startDate, endDate, 'R.G sim', 'rgba(100, 100, 100, 0.5)', 2) : null,
-                $scope.display.bgg ? makeDataSet(data, 'bgg', 'rank', startDate, endDate, 'BGG', 'rgba(255, 81, 0, 0.5)', 2) : null,
-                $scope.display.rgFactor ? makeDataSet(data, 'fac', 'avg', startDate, endDate, 'R.G trend', 'rgba(0, 0, 0, 1)') : null,
-                $scope.display.rgSimilarity ? makeDataSet(data, 'sim', 'avg', startDate, endDate, 'R.G sim trend', 'rgba(100, 100, 100, 1)') : null,
-                $scope.display.bgg ? makeDataSet(data, 'bgg', 'avg', startDate, endDate, 'BGG trend', 'rgba(255, 81, 0, 1)') : null
-            ],
-            datasetsFiltered = _.filter(datasets);
-        tooltipThreshold = _.size(datasetsFiltered) / 2;
-        return datasetsFiltered;
+                $scope.display.rgFactor ? makeDataSet(data, 'fac', startDate, endDate, 'R.G', 'rgba(0, 0, 0, 1)') : null,
+                $scope.display.rgSimilarity ? makeDataSet(data, 'sim', startDate, endDate, 'R.G sim', 'rgba(100, 100, 100, 1)') : null,
+                $scope.display.bgg ? makeDataSet(data, 'bgg', startDate, endDate, 'BGG', 'rgba(255, 81, 0, 1)') : null
+            ];
+        return _.filter(datasets);
     }
 
     function findElement(selector, wait, retries) {
@@ -219,24 +196,24 @@ ludojApp.controller('DetailController', function DetailController(
     }
 
     function updateChart() {
-        if (_.isNil(chart) || _.isEmpty(rankingData)) {
+        if (_.isNil(chart) || _.isEmpty($scope.rankings)) {
             return;
         }
 
-        chart.data.datasets = makeDataSets(rankingData, $scope.display.startDate, $scope.display.endDate);
+        chart.data.datasets = makeDataSets($scope.rankings, $scope.display.startDate, $scope.display.endDate);
         chart.update();
     }
 
-    $http.get('/api/games/' + $routeParams.id + '/rankings/', {'params': rankingParams, 'noblock': true})
-        .then(function (response) {
-            rankingData = response.data;
-
-            if (_.isEmpty(rankingData)) {
+    rankingsService.getRankings($routeParams.id, true)
+        .then(function (rankings) {
+            if (_.isEmpty(rankings)) {
                 $scope.chartVisible = false;
-                return;
+                $scope.rankings = null;
+                return $q.reject('unable to load rankings');
             }
 
             $scope.chartVisible = true;
+            $scope.rankings = rankings;
             return findElement('#ranking-history');
         })
         .then(function (element) {
@@ -248,7 +225,7 @@ ludojApp.controller('DetailController', function DetailController(
             chart = new Chart(element, {
                 type: 'line',
                 data: {
-                    datasets: makeDataSets(rankingData, startDate, endDate)
+                    datasets: makeDataSets($scope.rankings, startDate, endDate)
                 },
                 options: {
                     responsive: true,
@@ -260,8 +237,7 @@ ludojApp.controller('DetailController', function DetailController(
                     tooltips: {
                         mode: 'nearest',
                         axis: 'x',
-                        intersect: false,
-                        filter: function (item) { return item.datasetIndex < tooltipThreshold; }
+                        intersect: false
                     },
                     hover: {
                         mode: 'nearest',
@@ -271,7 +247,10 @@ ludojApp.controller('DetailController', function DetailController(
                     scales: {
                         xAxes: [{
                             type: 'time',
-                            distribution: 'linear'
+                            distribution: 'linear',
+                            time: {
+                                tooltipFormat: 'LL'
+                            }
                         }],
                         yAxes: [{
                             ticks: {
@@ -282,10 +261,7 @@ ludojApp.controller('DetailController', function DetailController(
                         }]
                     },
                     legend: {
-                        display: false,
-                        labels: {
-                            filter: function (item) { return _.endsWith(item.text, 'trend'); }
-                        }
+                        display: false
                     }
                 }
             });
@@ -293,7 +269,7 @@ ludojApp.controller('DetailController', function DetailController(
             return findElement('#date-range');
         })
         .then(function (element) {
-            var minDate = moment(_.minBy(rankingData, 'date').date),
+            var minDate = moment(_.minBy($scope.rankings, 'date').date),
                 ranges = _(allRanges)
                     .filter(function (item) { return item[1] >= minDate; })
                     .map(function (item) { return [item[0], [item[1], endDate]]; })

@@ -563,8 +563,6 @@ class GameViewSet(PermissionsModelViewSet):
     def rankings(self, request, pk=None):
         """Find historical rankings of a game."""
 
-        window = request.query_params.get("window")
-
         filters = {
             "game": pk,
             "ranking_type": request.query_params.get("ranking_type"),
@@ -576,31 +574,9 @@ class GameViewSet(PermissionsModelViewSet):
             ),
         }
         filters = {k: v for k, v in filters.items() if v}
-
         queryset = Ranking.objects.filter(**filters)
-
-        if not window:
-            serializer = RankingSerializer(
-                queryset, many=True, context=self.get_serializer_context()
-            )
-            return Response(serializer.data)
-
-        import pandas as pd
-
-        df = pd.DataFrame.from_records(queryset.values("ranking_type", "rank", "date"))
-
-        if df.empty:
-            return Response(())
-
-        groups = df.groupby("ranking_type")
-        rolling = groups.apply(
-            lambda group: group.sort_values("date").rolling(window, on="date").mean()
-        )
-        df["avg"] = rolling["rank"]
-
-        data = (dict(row) for _, row in df.iterrows())
         serializer = RankingSerializer(
-            data, many=True, context=self.get_serializer_context()
+            queryset, many=True, context=self.get_serializer_context()
         )
         return Response(serializer.data)
 

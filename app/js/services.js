@@ -1126,3 +1126,42 @@ ludojApp.factory('filterService', function filterService(
 
     return service;
 });
+
+ludojApp.factory('rankingsService', function rankingsService(
+    $http,
+    $log,
+    $q,
+    API_URL
+) {
+    var service = {},
+        cache = {};
+
+    service.getRankings = function getRankings(id, noblock) {
+        id = _.parseInt(id);
+        var cached = cache[id];
+
+        if (!_.isEmpty(cached)) {
+            return $q.resolve(cached);
+        }
+
+        return $http.get(API_URL + 'games/' + id + '/rankings/', {'noblock': !!noblock})
+            .then(function (response) {
+                var rankings = response.data;
+
+                if (_.isEmpty(rankings)) {
+                    return $q.reject('Unable to load rankings.');
+                }
+
+                cache[id] = rankings;
+                return rankings;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to load rankings.';
+                return $q.reject(response);
+            });
+    };
+
+    return service;
+});
