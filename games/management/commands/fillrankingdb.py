@@ -76,6 +76,7 @@ def _create_instances(
         method,
     )
 
+    # TODO it is inefficient to load all the rankings into memory, see #269
     data = pd.concat(parse_ranking_csvs(path_dir), ignore_index=True)
     rankings = (
         _avg_ranking(data, week_day=week_day)
@@ -125,7 +126,6 @@ class Command(BaseCommand):
 
     def _create_all_instances(self, path, filter_ids=None, week_day="SUN"):
         for ranking_type, (sub_dir, method) in self.ranking_types.items():
-            # TODO it is inefficient to load all the rankings into memory, see #269
             yield from _create_instances(
                 path_dir=os.path.join(path, sub_dir),
                 ranking_type=ranking_type,
