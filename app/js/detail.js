@@ -6,14 +6,14 @@
 
 ludojApp.controller('DetailController', function DetailController(
     $filter,
-    $http,
     $location,
     $log,
     $q,
     $routeParams,
     $scope,
     $timeout,
-    gamesService
+    gamesService,
+    rankingsService
 ) {
     var compilationOf = [],
         containedIn = [],
@@ -205,9 +205,9 @@ ludojApp.controller('DetailController', function DetailController(
         chart.update();
     }
 
-    $http.get('/api/games/' + $routeParams.id + '/rankings/', {'noblock': true})
-        .then(function (response) {
-            rankingData = response.data;
+    rankingsService.getRankings($routeParams.id, true)
+        .then(function (rankings) {
+            rankingData = rankings;
 
             if (_.isEmpty(rankingData)) {
                 $scope.chartVisible = false;
