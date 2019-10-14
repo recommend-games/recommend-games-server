@@ -22,7 +22,6 @@ ludojApp.controller('DetailController', function DetailController(
         integratesWith = [],
         similarPromise = gamesService.getSimilarGames($routeParams.id, 1, true),
         chart = null,
-        rankingData = null,
         startDate = moment().subtract(1, 'year'),
         endDate = moment(),
         allRanges = [
@@ -197,24 +196,24 @@ ludojApp.controller('DetailController', function DetailController(
     }
 
     function updateChart() {
-        if (_.isNil(chart) || _.isEmpty(rankingData)) {
+        if (_.isNil(chart) || _.isEmpty($scope.rankings)) {
             return;
         }
 
-        chart.data.datasets = makeDataSets(rankingData, $scope.display.startDate, $scope.display.endDate);
+        chart.data.datasets = makeDataSets($scope.rankings, $scope.display.startDate, $scope.display.endDate);
         chart.update();
     }
 
     rankingsService.getRankings($routeParams.id, true)
         .then(function (rankings) {
-            rankingData = rankings;
-
-            if (_.isEmpty(rankingData)) {
+            if (_.isEmpty(rankings)) {
                 $scope.chartVisible = false;
-                return;
+                $scope.rankings = null;
+                return $q.reject('unable to load rankings');
             }
 
             $scope.chartVisible = true;
+            $scope.rankings = rankings;
             return findElement('#ranking-history');
         })
         .then(function (element) {
@@ -226,7 +225,7 @@ ludojApp.controller('DetailController', function DetailController(
             chart = new Chart(element, {
                 type: 'line',
                 data: {
-                    datasets: makeDataSets(rankingData, startDate, endDate)
+                    datasets: makeDataSets($scope.rankings, startDate, endDate)
                 },
                 options: {
                     responsive: true,
@@ -271,7 +270,7 @@ ludojApp.controller('DetailController', function DetailController(
             return findElement('#date-range');
         })
         .then(function (element) {
-            var minDate = moment(_.minBy(rankingData, 'date').date),
+            var minDate = moment(_.minBy($scope.rankings, 'date').date),
                 ranges = _(allRanges)
                     .filter(function (item) { return item[1] >= minDate; })
                     .map(function (item) { return [item[0], [item[1], endDate]]; })
