@@ -249,8 +249,7 @@ ludojApp.controller('DetailController', function DetailController(
                             type: 'time',
                             distribution: 'linear',
                             time: {
-                                tooltipFormat: 'LL',
-                                unit: 'week'
+                                tooltipFormat: 'LL'
                             }
                         }],
                         yAxes: [{
