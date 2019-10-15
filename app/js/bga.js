@@ -1,6 +1,6 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global ludojApp, _, $ */
+/*global angular, ludojApp, _ */
 
 'use strict';
 
@@ -29,7 +29,8 @@ ludojApp.controller('BgaController', function BgaController(
         return result.value();
     }
 
-    var users = {},
+    var $ = angular.element,
+        users = {},
         userNames = parseList($routeParams.for, true),
         routeParams = filterService.getParams($routeParams);
 

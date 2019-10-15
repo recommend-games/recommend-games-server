@@ -1,6 +1,6 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global ludojApp, $, _, moment */
+/*global angular, ludojApp, _, moment */
 
 'use strict';
 
@@ -11,6 +11,8 @@ ludojApp.controller('NavController', function NavController(
     $timeout,
     newsService
 ) {
+    var $ = angular.element;
+
     function updatePath() {
         $scope.path = $location.path();
     }

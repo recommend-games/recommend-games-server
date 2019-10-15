@@ -1,6 +1,6 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global ludojApp, _, $, moment, Chart */
+/*global angular, ludojApp, _, moment, Chart */
 
 'use strict';
 
@@ -15,13 +15,13 @@ ludojApp.controller('DetailController', function DetailController(
     gamesService,
     rankingsService
 ) {
-    var compilationOf = [],
+    var $ = angular.element,
+        compilationOf = [],
         containedIn = [],
         implementationOf = [],
         implementedBy = [],
         integratesWith = [],
         similarPromise = gamesService.getSimilarGames($routeParams.id, 1, true),
-        chart = null,
         startDate = moment().subtract(1, 'year'),
         endDate = moment(),
         allRanges = [
@@ -37,7 +37,9 @@ ludojApp.controller('DetailController', function DetailController(
     $scope.implementations = false;
     $scope.expandable = false;
     $scope.expandDescription = false;
+    $scope.chart = null;
     $scope.chartVisible = false;
+    $scope.rankings = null;
     $scope.display = {
         rgFactor: true,
         rgSimilarity: false,
@@ -196,17 +198,18 @@ ludojApp.controller('DetailController', function DetailController(
     }
 
     function updateChart() {
-        if (_.isNil(chart) || _.isEmpty($scope.rankings)) {
+        if (_.isNil($scope.chart) || _.isEmpty($scope.rankings)) {
             return;
         }
 
-        chart.data.datasets = makeDataSets($scope.rankings, $scope.display.startDate, $scope.display.endDate);
-        chart.update();
+        $scope.chart.data.datasets = makeDataSets($scope.rankings, $scope.display.startDate, $scope.display.endDate);
+        $scope.chart.update();
     }
 
     rankingsService.getRankings($routeParams.id, true)
         .then(function (rankings) {
             if (_.isEmpty(rankings)) {
+                $scope.chart = null;
                 $scope.chartVisible = false;
                 $scope.rankings = null;
                 return $q.reject('unable to load rankings');
@@ -214,15 +217,19 @@ ludojApp.controller('DetailController', function DetailController(
 
             $scope.chartVisible = true;
             $scope.rankings = rankings;
-            return findElement('#ranking-history');
+            return findElement('#ranking-history-container');
         })
-        .then(function (element) {
-            if (_.isNil(element) || _.isEmpty(element)) {
+        .then(function (container) {
+            if (_.isNil(container) || _.isEmpty(container)) {
+                $scope.chart = null;
                 $scope.chartVisible = false;
-                return $q.reject('unable to find canvas element');
+                return $q.reject('unable to create canvas');
             }
 
-            chart = new Chart(element, {
+            container.children().remove();
+            var element = $('<canvas id="ranking-history"></canvas>').appendTo(container);
+
+            $scope.chart = new Chart(element, {
                 type: 'line',
                 data: {
                     datasets: makeDataSets($scope.rankings, startDate, endDate)
@@ -266,10 +273,16 @@ ludojApp.controller('DetailController', function DetailController(
                 }
             });
 
-            return findElement('#date-range');
+            return findElement('#date-range-container');
         })
-        .then(function (element) {
-            var minDate = moment(_.minBy($scope.rankings, 'date').date),
+        .then(function (container) {
+            if (_.isNil(container) || _.isEmpty(container)) {
+                return $q.reject('unable to create date range picker');
+            }
+
+            container.children().remove();
+            var element = $('<input type="text" id="date-range" class="form-control" />').appendTo(container),
+                minDate = moment(_.minBy($scope.rankings, 'date').date),
                 ranges = _(allRanges)
                     .filter(function (item) { return item[1] >= minDate; })
                     .map(function (item) { return [item[0], [item[1], endDate]]; })

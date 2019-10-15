@@ -1,6 +1,6 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global ludojApp, _, $ */
+/*global angular, ludojApp, _ */
 
 'use strict';
 
@@ -19,7 +19,8 @@ ludojApp.controller('ListController', function ListController(
     toastr,
     usersService
 ) {
-    var params = filterService.getParams($routeParams),
+    var $ = angular.element,
+        params = filterService.getParams($routeParams),
         searchPromise = null,
         userStats = {},
         fetchPopularGames;
