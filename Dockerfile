@@ -8,14 +8,7 @@ ENV PYTHONPATH=.
 RUN mkdir -p /app
 WORKDIR /app
 
-RUN apt-get -y update && \
-    apt-get -y install --no-install-recommends \
-        git=1:2.7.4-0ubuntu1.6 \
-        libatlas3-base=3.10.2-9 && \
-    apt-get -y autoremove && \
-    apt-get -y clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    pip3 install --upgrade \
+RUN pip3 install --upgrade \
         gsutil==4.44 \
         pipenv==2018.11.26
 COPY Pipfile* ./
