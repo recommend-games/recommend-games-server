@@ -23,7 +23,7 @@ ludojApp.controller('DetailController', function DetailController(
         similarPromise = gamesService.getSimilarGames($routeParams.id, 1, true),
         chart = null,
         startDate = moment().subtract(1, 'year'),
-        endDate = moment(),
+        endDate = moment().isoWeekday(7),
         allRanges = [
             ['90 Days', moment().subtract(90, 'days')],
             ['6 months', moment().subtract(6, 'months')],
