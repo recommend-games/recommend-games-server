@@ -14,7 +14,7 @@ django-rest-framework-proxy = "*"
 djangorestframework = "*"
 google-cloud-pubsub = "*"
 gunicorn = "*"
-ludoj-recommender = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-recommender.git"}
+ludoj-recommender = {editable = true, git = "https://gitlab.com/recommend.games/board-game-recommender.git"}
 markdown = "*"
 pandas = "*"
 python-dateutil = "*"
@@ -26,7 +26,7 @@ black = "==19.3b0" # no released version, so need to pin exact pre-release versi
 csvkit = "*"
 gitpython = "*"
 gsutil = "*"
-ludoj-scraper = {editable = true, git = "https://gitlab.com/mshepherd/ludoj-scraper.git"}
+ludoj-scraper = {editable = true, git = "https://gitlab.com/recommend.games/board-game-scraper.git"}
 lxml = "*"
 psutil = "*"
 pylint = "*"
