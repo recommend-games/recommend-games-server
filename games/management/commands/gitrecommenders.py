@@ -27,7 +27,7 @@ def _cp_files(dst, tree, game_file="bgg_GameItem.jl", rating_dir="bgg_RatingItem
         ratings_dst = dst / f"{rating_dir}.jl"
         with ratings_dst.open("wb") as ratings_fp:
             shutil.copyfileobj(ratings_blob.data_stream, ratings_fp)
-        return game_file, f"{rating_dir}.jl"
+        return games_dst, ratings_dst
 
     ratings_tree = tree / rating_dir
     ratings_dir = dst / rating_dir
@@ -37,7 +37,7 @@ def _cp_files(dst, tree, game_file="bgg_GameItem.jl", rating_dir="bgg_RatingItem
         ratings_dst = ratings_dir / ratings_blob.name
         with ratings_dst.open("wb") as ratings_fp:
             shutil.copyfileobj(ratings_blob.data_stream, ratings_fp)
-    return game_file, rating_dir
+    return games_dst, ratings_dir
 
 
 repo = Repo("/Users/markus/Workspace/ludoj-data-archived")
@@ -54,6 +54,7 @@ for commit in repo.iter_commits(paths="scraped"):
     print(tree)
     with TemporaryDirectory() as dst:
         games_file, ratings_file = _cp_files(dst, tree)
+        print(games_file, ratings_file)
         recommender = BGGRecommender.train_from_files(
             games_file=games_file,
             ratings_file=ratings_file,
