@@ -218,6 +218,20 @@ def model_updated_at(file_path=settings.MODEL_UPDATED_FILE):
     return None
 
 
+def save_recommender_ranking(recommender, dst, similarity_model=False):
+    LOGGER.info(
+        "Saving <%s> ranking to <%s>...",
+        recommender.similarity_model if similarity_model else recommender.model,
+        dst,
+    )
+
+    recommendations = recommender.recommend(similarity_model=similarity_model)
+    if "name" in recommendations.column_names():
+        recommendations.remove_column("name", inplace=True)
+
+    recommendations.export_csv(dst)
+
+
 class Timer:
     """ log execution time: with Timer('message'): do_something() """
 
