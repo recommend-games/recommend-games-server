@@ -2,8 +2,7 @@ import shutil
 from datetime import timezone
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import turicreate as tc
-from git import Blob, Repo, Tree
+from git import Repo
 from ludoj_recommender import BGGRecommender
 
 
@@ -56,8 +55,8 @@ for commit in repo.iter_commits(paths="scraped"):
         games_file, ratings_file = _cp_files(dst, tree)
         print(games_file, ratings_file)
         recommender = BGGRecommender.train_from_files(
-            games_file=games_file,
-            ratings_file=ratings_file,
+            games_file=str(games_file),
+            ratings_file=str(ratings_file),
             similarity_model=True,
             max_iterations=1000,
             verbose=True,
