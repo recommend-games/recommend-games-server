@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Extract ratings from Git repositories and train recommenders."""
+
 import logging
 import shutil
 import sys
@@ -8,6 +10,7 @@ from datetime import timezone
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+from django.core.management.base import BaseCommand
 from git import Repo
 from ludoj_recommender import BGGRecommender
 
@@ -52,8 +55,12 @@ def _cp_files(dst, tree, game_file="bgg_GameItem.jl", rating_dir="bgg_RatingItem
     return games_dst, ratings_dir
 
 
-def _main():
-    repo = Repo("/Users/markus/Workspace/ludoj-data-archived")
+def _process_repo(repo):
+    if isinstance(repo, str):
+        repo = Repo(repo)
+
+    LOGGER.info("Processing repository <%s>...", repo)
+
     recommender_dir = Path.home() / "recommenders-hist"
     ranking_dir = recommender_dir / "rankings"
 
@@ -141,13 +148,25 @@ def _main():
         )
         LOGGER.info("Done processing commit <%s>...", commit)
 
-    LOGGER.info("Done.")
 
+class Command(BaseCommand):
+    """Extract ratings from Git repositories and train recommenders."""
 
-if __name__ == "__main__":
-    logging.basicConfig(
-        stream=sys.stderr,
-        level=logging.INFO,
-        format="%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s",
-    )
-    _main()
+    help = "Extract ratings from Git repositories and train recommenders."
+
+    def add_arguments(self, parser):
+        parser.add_argument("repos", nargs="+")
+
+    def handle(self, *args, **kwargs):
+        logging.basicConfig(
+            stream=sys.stderr,
+            level=logging.DEBUG if kwargs["verbosity"] > 1 else logging.INFO,
+            format="%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s",
+        )
+
+        LOGGER.info(kwargs)
+
+        for repo in kwargs["repos"]:
+            _process_repo(repo)
+
+        LOGGER.info("Done.")
