@@ -520,7 +520,7 @@ def _save_ranking(
     file_name = django.utils.timezone.now().strftime(file_name)
     dst_path = os.path.join(dst_dir, file_name)
 
-    _remove(file_name)
+    _remove(dst_path)
     os.makedirs(dst_dir, exist_ok=True)
 
     save_recommender_ranking(recommender, dst_path, similarity_model)
