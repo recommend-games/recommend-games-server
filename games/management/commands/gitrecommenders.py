@@ -86,6 +86,7 @@ def _process_commit(
     recommender_dir=None,
     ranking_fac_dir=None,
     ranking_sim_dir=None,
+    max_iterations=100,
     date_str=DATE_TEMPLATE,
     overwrite=False,
     dry_run=False,
@@ -147,7 +148,7 @@ def _process_commit(
             games_file=str(games_file),
             ratings_file=str(ratings_file),
             similarity_model=True,
-            max_iterations=100,
+            max_iterations=max_iterations,
             verbose=True,
         )
 
@@ -184,6 +185,7 @@ class Command(BaseCommand):
         parser.add_argument("--dirs", "-d", nargs="+", default=("scraped",))
         parser.add_argument("--out-recommender", "-e")
         parser.add_argument("--out-rankings", "-a")
+        parser.add_argument("--max-iterations", "-m", default=100)
         parser.add_argument("--date-str", "-D", default=DATE_TEMPLATE)
         parser.add_argument("--overwrite", "-O", action="store_true")
         parser.add_argument("--dry-run", "-n", action="store_true")
@@ -196,6 +198,7 @@ class Command(BaseCommand):
         rating_item,
         recommender_dir=None,
         ranking_dir=None,
+        max_iterations=100,
         date_str=DATE_TEMPLATE,
         overwrite=False,
         dry_run=False,
@@ -229,6 +232,7 @@ class Command(BaseCommand):
                         ranking_sim_dir=ranking_sim_dir,
                         game_item=game_item,
                         rating_item=rating_item,
+                        max_iterations=max_iterations,
                         date_str=date_str,
                         overwrite=overwrite,
                         dry_run=dry_run,
@@ -273,6 +277,7 @@ class Command(BaseCommand):
                 ranking_dir=ranking_dir,
                 game_item=f"{site}_GameItem",
                 rating_item=f"{site}_RatingItem",
+                max_iterations=kwargs["max_iterations"],
                 date_str=kwargs["date_str"],
                 overwrite=kwargs["overwrite"],
                 dry_run=kwargs["dry_run"],
