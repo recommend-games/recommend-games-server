@@ -3,6 +3,7 @@
 """Extract ratings from Git repositories and train recommenders."""
 
 import logging
+import os
 import shutil
 import sys
 
@@ -19,7 +20,6 @@ from ...utils import arg_to_iter, save_recommender_ranking
 
 LOGGER = logging.getLogger(__name__)
 DATE_TEMPLATE = "%Y%m%d-%H%M%S"
-OVERWRITE = False
 
 
 def _cp_files(dst, tree, game_item, rating_item, dry_run=False):
@@ -200,7 +200,7 @@ class Command(BaseCommand):
         overwrite=False,
         dry_run=False,
     ):
-        if isinstance(repo, str):
+        if isinstance(repo, (str, os.PathLike)):
             repo = Repo(repo)
 
         LOGGER.info("Processing repository %s...", repo)
