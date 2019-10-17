@@ -181,7 +181,13 @@ def _process_commit(
         )
 
         if recommender_dst:
-            recommender.save(recommender_dst)
+            recommender.save(
+                path=recommender_dst,
+                dir_games=None,
+                dir_ratings=None,
+                dir_clusters=None,
+                dir_compilations=None,
+            )
 
     LOGGER.info(
         "Saving rankings from <%s> to <%s> and <%s>...",
