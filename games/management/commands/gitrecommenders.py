@@ -18,20 +18,28 @@ from ludoj_recommender import BGGRecommender
 from ...models import Ranking
 from ...utils import arg_to_iter, save_recommender_ranking
 
-LOGGER = logging.getLogger(__name__)
 DATE_TEMPLATE = "%Y%m%d-%H%M%S"
+LOGGER = logging.getLogger(__name__)
 
 
-def _cp_files(dst, tree, game_item, rating_item, dry_run=False):
+def _exists(dst, overwrite=False):
+    if not dst:
+        return False
+
     dst = Path(dst)
 
-    LOGGER.info("Copying files from <%s> to <%s>", tree, dst)
+    if not dst.exists():
+        return False
 
-    if dry_run:
-        return None, None
+    if overwrite:
+        LOGGER.info("File <%s> already exists, removing...", dst)
+        dst.unlink()
+        return False
 
-    dst.mkdir(parents=True, exist_ok=True)
+    return True
 
+
+def _cp_jl_files(dst, tree, game_item, rating_item):
     game_file = f"{game_item}.jl"
     games_blob = tree / game_file
     games_dst = dst / game_file
@@ -61,21 +69,37 @@ def _cp_files(dst, tree, game_item, rating_item, dry_run=False):
     return games_dst, ratings_dir
 
 
-def _exists(dst, overwrite=False):
-    if not dst:
-        return False
+def _cp_any_files(dst, tree, files):
+    dst_files = []
 
+    for file in arg_to_iter(files):
+        blob = tree / file
+        dst_file = dst / file
+        with dst_file.open("wb") as dst_fp:
+            shutil.copyfileobj(blob.data_stream, dst_fp)
+        dst_files.append(dst_file)
+
+    return tuple(dst_files)
+
+
+def _cp_files(dst, tree, game_item, rating_item, game_csv, rating_csv, dry_run=False):
     dst = Path(dst)
 
-    if not dst.exists():
-        return False
+    LOGGER.info("Copying files from <%s> to <%s>", tree, dst)
 
-    if overwrite:
-        LOGGER.info("File <%s> already exists, removing...", dst)
-        dst.unlink()
-        return False
+    if dry_run:
+        return None, None
 
-    return True
+    dst.mkdir(parents=True, exist_ok=True)
+
+    try:
+        return _cp_jl_files(
+            dst=dst, tree=tree, game_item=game_item, rating_item=rating_item
+        )
+    except Exception:
+        pass
+
+    return _cp_any_files(dst=dst, tree=tree, files=(game_csv, rating_csv))
 
 
 def _process_commit(
@@ -83,6 +107,8 @@ def _process_commit(
     directory,
     game_item,
     rating_item,
+    game_csv,
+    rating_csv,
     recommender_dir=None,
     ranking_fac_dir=None,
     ranking_sim_dir=None,
@@ -134,6 +160,8 @@ def _process_commit(
             tree=tree,
             game_item=game_item,
             rating_item=rating_item,
+            game_csv=game_csv,
+            rating_csv=rating_csv,
             dry_run=dry_run,
         )
 
@@ -182,7 +210,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("repos", nargs="+")
         parser.add_argument("--site", "-s", default="bgg", choices=("bgg", "bga"))
-        parser.add_argument("--dirs", "-d", nargs="+", default=("scraped",))
+        parser.add_argument("--dirs", "-d", nargs="+", default=("results", "scraped"))
         parser.add_argument("--out-recommender", "-e")
         parser.add_argument("--out-rankings", "-a")
         parser.add_argument("--max-iterations", "-m", default=100)
@@ -196,6 +224,8 @@ class Command(BaseCommand):
         directories,
         game_item,
         rating_item,
+        game_csv,
+        rating_csv,
         recommender_dir=None,
         ranking_dir=None,
         max_iterations=100,
@@ -232,6 +262,8 @@ class Command(BaseCommand):
                         ranking_sim_dir=ranking_sim_dir,
                         game_item=game_item,
                         rating_item=rating_item,
+                        game_csv=game_csv,
+                        rating_csv=rating_csv,
                         max_iterations=max_iterations,
                         date_str=date_str,
                         overwrite=overwrite,
@@ -277,6 +309,8 @@ class Command(BaseCommand):
                 ranking_dir=ranking_dir,
                 game_item=f"{site}_GameItem",
                 rating_item=f"{site}_RatingItem",
+                game_csv=f"{site}.csv",
+                rating_csv=f"{site}_ratings.csv",
                 max_iterations=kwargs["max_iterations"],
                 date_str=kwargs["date_str"],
                 overwrite=kwargs["overwrite"],
