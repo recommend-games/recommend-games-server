@@ -55,11 +55,98 @@ def _cp_files(dst, tree, game_file="bgg_GameItem.jl", rating_dir="bgg_RatingItem
     return games_dst, ratings_dir
 
 
+def _exists(dst, overwrite=False):
+    dst = Path(dst)
+
+    if not dst.exists():
+        return False
+
+    if overwrite:
+        LOGGER.info("File <%s> already exists, removing...", dst)
+        dst.unlink()
+        return False
+
+    return True
+
+
+def _process_commit(
+    commit,
+    recommender_dir,
+    ranking_fac_dir,
+    ranking_sim_dir,
+    date_str=DATE_TEMPLATE,
+    overwrite=False,
+):
+    date = commit.authored_datetime.astimezone(timezone.utc)
+
+    LOGGER.info("Processing commit <%s> from %s", commit, date)
+
+    recommender_dir = Path(recommender_dir)
+    ranking_fac_dir = Path(ranking_fac_dir)
+    ranking_sim_dir = Path(ranking_sim_dir)
+
+    ranking_file = date.strftime(f"{date_str}.csv")
+    ranking_fac_dst = ranking_fac_dir / ranking_file
+    ranking_sim_dst = ranking_sim_dir / ranking_file
+
+    if _exists(ranking_fac_dst, overwrite) or _exists(ranking_sim_dst, overwrite):
+        LOGGER.info(
+            "File <%s> or <%s> already exist, skipping <%s>...",
+            ranking_fac_dst,
+            ranking_sim_dst,
+            commit,
+        )
+        return
+
+    recommender_dst = recommender_dir / date.strftime(date_str)
+    shutil.rmtree(recommender_dst, ignore_errors=True)
+    recommender_dst.mkdir(parents=True, exist_ok=True)
+
+    LOGGER.info(
+        "Will save recommender to <%s> and rankings to <%s> and <%s>...",
+        recommender_dst,
+        ranking_fac_dst,
+        ranking_sim_dst,
+    )
+
+    tree = commit.tree / "scraped"
+
+    with TemporaryDirectory() as dst:
+        games_file, ratings_file = _cp_files(dst, tree)
+
+        LOGGER.info(
+            "Loading games from <%s> and ratings from <%s>...", games_file, ratings_file
+        )
+
+        recommender = BGGRecommender.train_from_files(
+            games_file=str(games_file),
+            ratings_file=str(ratings_file),
+            similarity_model=True,
+            max_iterations=100,
+            verbose=True,
+        )
+        recommender.save(recommender_dst)
+
+    LOGGER.info(
+        "Saving rankings from <%s> to <%s> and <%s>...",
+        recommender,
+        ranking_fac_dst,
+        ranking_sim_dst,
+    )
+    save_recommender_ranking(
+        recommender=recommender, dst=ranking_fac_dst, similarity_model=False
+    )
+    save_recommender_ranking(
+        recommender=recommender, dst=ranking_sim_dst, similarity_model=True
+    )
+    LOGGER.info("Done processing commit <%s>...", commit)
+
+
 def _process_repo(repo):
     if isinstance(repo, str):
         repo = Repo(repo)
 
-    LOGGER.info("Processing repository <%s>...", repo)
+    LOGGER.info("Processing repository %s...", repo)
 
     recommender_dir = Path.home() / "recommenders-hist"
     ranking_dir = recommender_dir / "rankings"
@@ -71,82 +158,17 @@ def _process_repo(repo):
     ranking_sim_dir.mkdir(parents=True, exist_ok=True)
 
     for commit in repo.iter_commits(paths="scraped"):
-        date = commit.authored_datetime.astimezone(timezone.utc)
-
-        LOGGER.info("Processing commit <%s> from %s", commit, date)
-
-        ranking_file = date.strftime(f"{DATE_TEMPLATE}.csv")
-        ranking_fac_dst = ranking_fac_dir / ranking_file
-        ranking_sim_dst = ranking_sim_dir / ranking_file
-
-        if ranking_fac_dst.exists():
-            if OVERWRITE:
-                LOGGER.info("File <%s> already exists, removing...", ranking_fac_dst)
-                ranking_fac_dst.unlink()
-            else:
-                LOGGER.info(
-                    "File <%s> already exists, skipping <%s>...",
-                    ranking_fac_dst,
-                    commit,
-                )
-                continue
-
-        if ranking_sim_dst.exists():
-            if OVERWRITE:
-                LOGGER.info("File <%s> already exists, removing...", ranking_sim_dst)
-                ranking_sim_dst.unlink()
-            else:
-                LOGGER.info(
-                    "File <%s> already exists, skipping <%s>...",
-                    ranking_sim_dst,
-                    commit,
-                )
-                continue
-
-        recommender_dst = recommender_dir / date.strftime(DATE_TEMPLATE)
-        shutil.rmtree(recommender_dst, ignore_errors=True)
-        recommender_dst.mkdir(parents=True, exist_ok=True)
-
-        LOGGER.info(
-            "Will save recommender to <%s> and rankings to <%s> and <%s>...",
-            recommender_dst,
-            ranking_fac_dst,
-            ranking_sim_dst,
-        )
-
-        tree = commit.tree / "scraped"
-
-        with TemporaryDirectory() as dst:
-            games_file, ratings_file = _cp_files(dst, tree)
-
-            LOGGER.info(
-                "Loading games from <%s> and ratings from <%s>...",
-                games_file,
-                ratings_file,
+        try:
+            _process_commit(
+                commit=commit,
+                recommender_dir=recommender_dir,
+                ranking_fac_dir=ranking_fac_dir,
+                ranking_sim_dir=ranking_sim_dir,
+                date_str=DATE_TEMPLATE,
+                overwrite=OVERWRITE,
             )
-
-            recommender = BGGRecommender.train_from_files(
-                games_file=str(games_file),
-                ratings_file=str(ratings_file),
-                similarity_model=True,
-                max_iterations=1000,
-                verbose=True,
-            )
-            recommender.save(recommender_dst)
-
-        LOGGER.info(
-            "Saving recommender <%s> to <%s> and <%s>...",
-            recommender,
-            ranking_fac_dst,
-            ranking_sim_dst,
-        )
-        save_recommender_ranking(
-            recommender=recommender, dst=ranking_fac_dst, similarity_model=False
-        )
-        save_recommender_ranking(
-            recommender=recommender, dst=ranking_sim_dst, similarity_model=True
-        )
-        LOGGER.info("Done processing commit <%s>...", commit)
+        except Exception:
+            LOGGER.exception("There was an error processing commit <%s>...", commit)
 
 
 class Command(BaseCommand):
