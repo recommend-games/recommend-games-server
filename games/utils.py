@@ -229,7 +229,10 @@ def save_recommender_ranking(recommender, dst, similarity_model=False):
     if "name" in recommendations.column_names():
         recommendations.remove_column("name", inplace=True)
 
-    recommendations.export_csv(dst)
+    if similarity_model:
+        recommendations = recommendations[recommendations["score"] > 0]
+
+    recommendations.export_csv(str(dst))
 
 
 class Timer:
