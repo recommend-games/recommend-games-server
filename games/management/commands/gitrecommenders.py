@@ -22,11 +22,15 @@ DATE_TEMPLATE = "%Y%m%d-%H%M%S"
 OVERWRITE = False
 
 
-def _cp_files(dst, tree, game_item="bgg_GameItem", rating_item="bgg_RatingItem"):
+def _cp_files(dst, tree, game_item, rating_item, dry_run=False):
     dst = Path(dst)
-    dst.mkdir(parents=True, exist_ok=True)
 
     LOGGER.info("Copying files from <%s> to <%s>", tree, dst)
+
+    if dry_run:
+        return None, None
+
+    dst.mkdir(parents=True, exist_ok=True)
 
     game_file = f"{game_item}.jl"
     games_blob = tree / game_file
@@ -58,6 +62,9 @@ def _cp_files(dst, tree, game_item="bgg_GameItem", rating_item="bgg_RatingItem")
 
 
 def _exists(dst, overwrite=False):
+    if not dst:
+        return False
+
     dst = Path(dst)
 
     if not dst.exists():
@@ -74,25 +81,26 @@ def _exists(dst, overwrite=False):
 def _process_commit(
     commit,
     directory,
-    recommender_dir,
-    ranking_fac_dir,
-    ranking_sim_dir,
-    game_item="bgg_GameItem",
-    rating_item="bgg_RatingItem",
+    game_item,
+    rating_item,
+    recommender_dir=None,
+    ranking_fac_dir=None,
+    ranking_sim_dir=None,
     date_str=DATE_TEMPLATE,
     overwrite=False,
+    dry_run=False,
 ):
     date = commit.authored_datetime.astimezone(timezone.utc)
 
     LOGGER.info("Processing commit <%s> from %s", commit, date)
 
-    recommender_dir = Path(recommender_dir)
-    ranking_fac_dir = Path(ranking_fac_dir)
-    ranking_sim_dir = Path(ranking_sim_dir)
+    recommender_dir = Path(recommender_dir) if recommender_dir else None
+    ranking_fac_dir = Path(ranking_fac_dir) if ranking_fac_dir else None
+    ranking_sim_dir = Path(ranking_sim_dir) if ranking_sim_dir else None
 
     ranking_file = date.strftime(f"{date_str}.csv")
-    ranking_fac_dst = ranking_fac_dir / ranking_file
-    ranking_sim_dst = ranking_sim_dir / ranking_file
+    ranking_fac_dst = ranking_fac_dir / ranking_file if ranking_fac_dir else None
+    ranking_sim_dst = ranking_sim_dir / ranking_file if ranking_sim_dir else None
 
     if _exists(ranking_fac_dst, overwrite) or _exists(ranking_sim_dst, overwrite):
         LOGGER.info(
@@ -103,9 +111,12 @@ def _process_commit(
         )
         return
 
-    recommender_dst = recommender_dir / date.strftime(date_str)
-    shutil.rmtree(recommender_dst, ignore_errors=True)
-    recommender_dst.mkdir(parents=True, exist_ok=True)
+    recommender_dst = (
+        recommender_dir / date.strftime(date_str) if recommender_dir else None
+    )
+    if recommender_dst:
+        shutil.rmtree(recommender_dst, ignore_errors=True)
+        recommender_dst.mkdir(parents=True, exist_ok=True)
 
     LOGGER.info(
         "Will save recommender to <%s> and rankings to <%s> and <%s>...",
@@ -117,7 +128,16 @@ def _process_commit(
     tree = commit.tree / directory
 
     with TemporaryDirectory() as dst:
-        games_file, ratings_file = _cp_files(dst, tree, game_item, rating_item)
+        games_file, ratings_file = _cp_files(
+            dst=dst,
+            tree=tree,
+            game_item=game_item,
+            rating_item=rating_item,
+            dry_run=dry_run,
+        )
+
+        if not games_file or not ratings_file:
+            return
 
         LOGGER.info(
             "Loading games from <%s> and ratings from <%s>...", games_file, ratings_file
@@ -130,7 +150,9 @@ def _process_commit(
             max_iterations=100,
             verbose=True,
         )
-        recommender.save(recommender_dst)
+
+        if recommender_dst:
+            recommender.save(recommender_dst)
 
     LOGGER.info(
         "Saving rankings from <%s> to <%s> and <%s>...",
@@ -138,12 +160,14 @@ def _process_commit(
         ranking_fac_dst,
         ranking_sim_dst,
     )
-    save_recommender_ranking(
-        recommender=recommender, dst=ranking_fac_dst, similarity_model=False
-    )
-    save_recommender_ranking(
-        recommender=recommender, dst=ranking_sim_dst, similarity_model=True
-    )
+    if ranking_fac_dst:
+        save_recommender_ranking(
+            recommender=recommender, dst=ranking_fac_dst, similarity_model=False
+        )
+    if ranking_sim_dst:
+        save_recommender_ranking(
+            recommender=recommender, dst=ranking_sim_dst, similarity_model=True
+        )
     LOGGER.info("Done processing commit <%s>...", commit)
 
 
@@ -156,31 +180,42 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("repos", nargs="+")
+        parser.add_argument("--site", "-s", default="bgg", choices=("bgg", "bga"))
+        parser.add_argument("--dirs", "-d", nargs="+", default=("scraped",))
+        parser.add_argument("--out-recommender", "-e")
+        parser.add_argument("--out-rankings", "-a")
+        parser.add_argument("--date-str", "-D", default=DATE_TEMPLATE)
+        parser.add_argument("--overwrite", "-O", action="store_true")
+        parser.add_argument("--dry-run", "-n", action="store_true")
 
     def _process_repo(
         self,
         repo,
         directories,
-        recommender_dir,
-        ranking_dir,
-        game_item="bgg_GameItem",
-        rating_item="bgg_RatingItem",
+        game_item,
+        rating_item,
+        recommender_dir=None,
+        ranking_dir=None,
         date_str=DATE_TEMPLATE,
         overwrite=False,
+        dry_run=False,
     ):
         if isinstance(repo, str):
             repo = Repo(repo)
 
         LOGGER.info("Processing repository %s...", repo)
 
-        recommender_dir = Path(recommender_dir)
-        ranking_dir = Path(ranking_dir)
+        recommender_dir = Path(recommender_dir) if recommender_dir else None
+        ranking_dir = Path(ranking_dir) if recommender_dir else None
 
-        ranking_fac_dir = ranking_dir / self.ranking_types[Ranking.FACTOR]
-        ranking_fac_dir.mkdir(parents=True, exist_ok=True)
-
-        ranking_sim_dir = ranking_dir / self.ranking_types[Ranking.SIMILARITY]
-        ranking_sim_dir.mkdir(parents=True, exist_ok=True)
+        if ranking_dir:
+            ranking_fac_dir = ranking_dir / self.ranking_types[Ranking.FACTOR]
+            ranking_fac_dir.mkdir(parents=True, exist_ok=True)
+            ranking_sim_dir = ranking_dir / self.ranking_types[Ranking.SIMILARITY]
+            ranking_sim_dir.mkdir(parents=True, exist_ok=True)
+        else:
+            ranking_fac_dir = None
+            ranking_sim_dir = None
 
         for directory in arg_to_iter(directories):
             LOGGER.info("Looking for all versions of <%s>...", directory)
@@ -196,6 +231,7 @@ class Command(BaseCommand):
                         rating_item=rating_item,
                         date_str=date_str,
                         overwrite=overwrite,
+                        dry_run=dry_run,
                     )
                 except Exception:
                     LOGGER.exception(
@@ -211,19 +247,35 @@ class Command(BaseCommand):
 
         LOGGER.info(kwargs)
 
-        recommender_dir = Path.home() / "recommenders-hist"
-        ranking_dir = recommender_dir / "rankings"
+        site = kwargs["site"]
+
+        if site != "bgg":
+            LOGGER.error("The only site implemented so far is <bgg>!")
+            raise NotImplementedError(f"Site <{site}> is not implemented yet.")
+
+        recommender_dir = (
+            Path(kwargs["out_recommender"]).resolve()
+            if kwargs["out_recommender"]
+            else None
+        )
+        ranking_dir = (
+            Path(kwargs["out_rankings"]).resolve() if kwargs["out_rankings"] else None
+        )
+
+        if not recommender_dir and not ranking_dir:
+            kwargs["dry_run"] = True
 
         for repo in kwargs["repos"]:
             self._process_repo(
-                repo=repo,
-                directories="scraped",
+                repo=Path(repo).resolve(),
+                directories=kwargs["dirs"],
                 recommender_dir=recommender_dir,
                 ranking_dir=ranking_dir,
-                game_item="bgg_GameItem",
-                rating_item="bgg_RatingItem",
-                date_str=DATE_TEMPLATE,
-                overwrite=OVERWRITE,
+                game_item=f"{site}_GameItem",
+                rating_item=f"{site}_RatingItem",
+                date_str=kwargs["date_str"],
+                overwrite=kwargs["overwrite"],
+                dry_run=kwargs["dry_run"],
             )
 
         LOGGER.info("Done.")
