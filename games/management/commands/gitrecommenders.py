@@ -13,7 +13,7 @@ from tempfile import TemporaryDirectory
 
 from django.core.management.base import BaseCommand
 from git import Repo
-from ludoj_recommender import BGGRecommender
+from ludoj_recommender import BGARecommender, BGGRecommender
 
 from ...models import Ranking
 from ...utils import arg_to_iter, save_recommender_ranking
@@ -109,6 +109,7 @@ def _process_commit(
     rating_item,
     game_csv,
     rating_csv,
+    recommender_cls=BGGRecommender,
     recommender_dir=None,
     ranking_fac_dir=None,
     ranking_sim_dir=None,
@@ -172,7 +173,7 @@ def _process_commit(
             "Loading games from <%s> and ratings from <%s>...", games_file, ratings_file
         )
 
-        recommender = BGGRecommender.train_from_files(
+        recommender = recommender_cls.train_from_files(
             games_file=str(games_file),
             ratings_file=str(ratings_file),
             similarity_model=True,
@@ -232,6 +233,7 @@ class Command(BaseCommand):
         rating_item,
         game_csv,
         rating_csv,
+        recommender_cls=BGGRecommender,
         recommender_dir=None,
         ranking_dir=None,
         max_iterations=100,
@@ -264,6 +266,7 @@ class Command(BaseCommand):
                     _process_commit(
                         commit=commit,
                         directory=directory,
+                        recommender_cls=recommender_cls,
                         recommender_dir=recommender_dir,
                         ranking_fac_dir=ranking_fac_dir,
                         ranking_sim_dir=ranking_sim_dir,
@@ -292,17 +295,15 @@ class Command(BaseCommand):
 
         site = kwargs["site"]
 
-        if site != "bgg":
-            LOGGER.error("The only site implemented so far is <bgg>!")
-            raise NotImplementedError(f"Site <{site}> is not implemented yet.")
-
         recommender_dir = (
-            Path(kwargs["out_recommender"]).resolve()
+            Path(kwargs["out_recommender"]).resolve() / site
             if kwargs["out_recommender"]
             else None
         )
         ranking_dir = (
-            Path(kwargs["out_rankings"]).resolve() if kwargs["out_rankings"] else None
+            Path(kwargs["out_rankings"]).resolve() / site
+            if kwargs["out_rankings"]
+            else None
         )
 
         if not recommender_dir and not ranking_dir:
@@ -312,6 +313,7 @@ class Command(BaseCommand):
             self._process_repo(
                 repo=Path(repo).resolve(),
                 directories=kwargs["dirs"],
+                recommender_cls=BGARecommender if site == "bga" else BGGRecommender,
                 recommender_dir=recommender_dir,
                 ranking_dir=ranking_dir,
                 game_item=f"{site}_GameItem",
