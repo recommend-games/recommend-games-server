@@ -85,7 +85,7 @@ def _cp_any_files(dst, tree, files):
 def _cp_files(dst, tree, game_item, rating_item, game_csv, rating_csv, dry_run=False):
     dst = Path(dst)
 
-    LOGGER.info("Copying files from <%s> to <%s>", tree, dst)
+    LOGGER.debug("Copying files from <%s> to <%s>", tree, dst)
 
     if dry_run:
         return None, None
@@ -145,7 +145,7 @@ def _process_commit(
         shutil.rmtree(recommender_dst, ignore_errors=True)
         recommender_dst.mkdir(parents=True, exist_ok=True)
 
-    LOGGER.info(
+    LOGGER.debug(
         "Will save recommender to <%s> and rankings to <%s> and <%s>...",
         recommender_dst,
         ranking_fac_dst,
@@ -168,7 +168,7 @@ def _process_commit(
         if not games_file or not ratings_file:
             return
 
-        LOGGER.info(
+        LOGGER.debug(
             "Loading games from <%s> and ratings from <%s>...", games_file, ratings_file
         )
 
@@ -189,7 +189,7 @@ def _process_commit(
                 dir_compilations=None,
             )
 
-    LOGGER.info(
+    LOGGER.debug(
         "Saving rankings from <%s> to <%s> and <%s>...",
         recommender,
         ranking_fac_dst,
@@ -277,8 +277,8 @@ class Command(BaseCommand):
                         dry_run=dry_run,
                     )
                 except Exception:
-                    LOGGER.exception(
-                        "There was an error processing commit <%s>...", commit
+                    LOGGER.warning(
+                        "There was an error processing commit <%s>, skipping...", commit
                     )
 
     def handle(self, *args, **kwargs):
