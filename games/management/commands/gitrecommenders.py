@@ -141,7 +141,7 @@ def _process_commit(
     recommender_dst = (
         recommender_dir / date.strftime(date_str) if recommender_dir else None
     )
-    if recommender_dst:
+    if not dry_run and recommender_dst:
         shutil.rmtree(recommender_dst, ignore_errors=True)
         recommender_dst.mkdir(parents=True, exist_ok=True)
 
@@ -216,7 +216,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("repos", nargs="+")
         parser.add_argument("--site", "-s", default="bgg", choices=("bgg", "bga"))
-        parser.add_argument("--dirs", "-d", nargs="+", default=("results", "scraped"))
+        parser.add_argument("--dirs", "-d", nargs="+", default=("scraped", "results"))
         parser.add_argument("--out-recommender", "-e")
         parser.add_argument("--out-rankings", "-a")
         parser.add_argument("--max-iterations", "-m", default=100)
@@ -249,9 +249,10 @@ class Command(BaseCommand):
 
         if ranking_dir:
             ranking_fac_dir = ranking_dir / self.ranking_types[Ranking.FACTOR]
-            ranking_fac_dir.mkdir(parents=True, exist_ok=True)
             ranking_sim_dir = ranking_dir / self.ranking_types[Ranking.SIMILARITY]
-            ranking_sim_dir.mkdir(parents=True, exist_ok=True)
+            if not dry_run:
+                ranking_fac_dir.mkdir(parents=True, exist_ok=True)
+                ranking_sim_dir.mkdir(parents=True, exist_ok=True)
         else:
             ranking_fac_dir = None
             ranking_sim_dir = None
@@ -319,7 +320,7 @@ class Command(BaseCommand):
                 rating_csv=f"{site}_ratings.csv",
                 max_iterations=kwargs["max_iterations"],
                 date_str=kwargs["date_str"],
-                overwrite=kwargs["overwrite"],
+                overwrite=False if kwargs["dry_run"] else kwargs["overwrite"],
                 dry_run=kwargs["dry_run"],
             )
 
