@@ -580,6 +580,51 @@ class GameViewSet(PermissionsModelViewSet):
         )
         return Response(serializer.data)
 
+    @action(detail=False)
+    def history(self, request):
+        """History of the top rankings."""
+
+        top = parse_int(request.query_params.get("top")) or 100
+        ranking_type = request.query_params.get("ranking_type") or Ranking.BGG
+
+        filters = {
+            "ranking_type": ranking_type,
+            "date__gte": parse_date(
+                request.query_params.get("date__gte"), tzinfo=timezone.utc
+            ),
+            "date__lte": parse_date(
+                request.query_params.get("date__lte"), tzinfo=timezone.utc
+            ),
+        }
+        filters = {k: v for k, v in filters.items() if v}
+        queryset = Ranking.objects.filter(**filters)
+
+        last_date = queryset.filter(rank=1).dates("date", "day", order="ASC").last()
+        games = [
+            r.game
+            for r in queryset.filter(date=last_date, rank__lte=top)
+            .order_by("rank")
+            .select_related("game")
+        ]
+
+        assert len(games) == top
+
+        game_ids = frozenset(g.bgg_id for g in games)
+        rankings = queryset.filter(game__in=game_ids).order_by("date")
+
+        data = [
+            {
+                "game": self.get_serializer(game).data,
+                "rankings": RankingSerializer(
+                    rankings.filter(game=game.bgg_id),
+                    many=True,
+                    context=self.get_serializer_context(),
+                ).data,
+            }
+            for game in games
+        ]
+        return Response(data)
+
     # pylint: disable=no-self-use
     @action(detail=False)
     def updated_at(self, request):
