@@ -515,23 +515,15 @@ def train():
 def _save_ranking(
     recommender, dst_dir, file_name="%Y%m%d-%H%M%S.csv", similarity_model=False
 ):
+    from games.utils import save_recommender_ranking
+
     file_name = django.utils.timezone.now().strftime(file_name)
     dst_path = os.path.join(dst_dir, file_name)
 
-    LOGGER.info(
-        "Saving <%s> ranking to <%s>...",
-        recommender.similarity_model if similarity_model else recommender.model,
-        dst_path,
-    )
-
-    _remove(file_name)
+    _remove(dst_path)
     os.makedirs(dst_dir, exist_ok=True)
 
-    recommendations = recommender.recommend(similarity_model=similarity_model)
-    if "name" in recommendations.column_names():
-        recommendations.remove_column("name", inplace=True)
-
-    recommendations.export_csv(dst_path)
+    save_recommender_ranking(recommender, dst_path, similarity_model)
 
 
 @task()

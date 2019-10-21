@@ -9,7 +9,7 @@ RUN mkdir -p /app
 WORKDIR /app
 
 RUN pip3 install --upgrade \
-        gsutil==4.44 \
+        gsutil==4.45 \
         pipenv==2018.11.26
 COPY Pipfile* ./
 RUN pipenv install --deploy --verbose
