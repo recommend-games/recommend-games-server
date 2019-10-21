@@ -17,8 +17,17 @@ ludojApp.controller('HistoryController', function HistoryController(
 ) {
     var $ = angular.element,
         rankingType = $routeParams.type || 'fac',
-        startDate = moment().subtract(90, 'days'),
-        endDate = moment().isoWeekday(7),
+        startDateParam = moment($routeParams.startDate || null),
+        startDate = startDateParam.isValid() ? startDateParam : moment().subtract(90, 'days'),
+        endDateParam = moment($routeParams.endDate || null),
+        endDate = endDateParam.isValid() ? endDateParam : moment().isoWeekday(7),
+        top = _.parseInt($routeParams.top) || 100,
+        params = {
+            'ranking_type': $routeParams.type || 'fac',
+            'date__gte': startDate.format('YYYY-MM-DD'),
+            'date__lte': endDate.format('YYYY-MM-DD'),
+            'top': top
+        },
         options = {
             // //Boolean - If we show the scale above the chart data
             // scaleOverlay : false,
@@ -92,7 +101,7 @@ ludojApp.controller('HistoryController', function HistoryController(
                     ticks: {
                         reverse: true,
                         min: 1,
-                        max: 99
+                        max: top
                     }
                 }]
             },
@@ -101,6 +110,10 @@ ludojApp.controller('HistoryController', function HistoryController(
                 position: 'right'
             }
         };
+
+    $scope.top = top;
+    $scope.startDate = startDate;
+    $scope.endDate = endDate;
 
     function findElement(selector, wait, retries) {
         var element = $(selector);
@@ -128,7 +141,7 @@ ludojApp.controller('HistoryController', function HistoryController(
         data = _(data)
             .filter(['ranking_type', rankingType])
             .map(function (item) {
-                return {x: moment(item.date), y: _.min([item.rank, 101])};
+                return {x: moment(item.date), y: _.min([item.rank, top + 1])};
             })
             .sortBy('x');
         data = _.isNil(startDate) ? data : data.filter(function (item) { return item.x >= startDate; });
@@ -165,7 +178,7 @@ ludojApp.controller('HistoryController', function HistoryController(
         });
     }
 
-    $http.get(API_URL + 'games/history/', {'params': {'ranking_type': $routeParams.type || 'fac', 'date__gte': startDate.format('YYYY-MM-DD')}})
+    $http.get(API_URL + 'games/history/', {'params': params})
         .then(function (response) {
             $log.info(response.data);
             $scope.data = response.data;
@@ -185,8 +198,8 @@ ludojApp.controller('HistoryController', function HistoryController(
         .then($log.info)
         .catch($log.error);
 
-    gamesService.setTitle('Top 100 history');
-    gamesService.setDescription('Visualization of the top 100 history');
+    gamesService.setTitle('Top ' + top + ' history');
+    gamesService.setDescription('Visualization of the top ' + top + ' history');
     gamesService.setCanonicalUrl($location.path()); // TODO depends on type
     gamesService.setImage(); // TODO should be an image of the canvas
 });
