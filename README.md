@@ -1,4 +1,4 @@
-# ludoj-server #
+# recommend-games-server
 
 Board game recommendation service. Live demo: https://recommend.games/
 
