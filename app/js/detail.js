@@ -1,10 +1,10 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global ludojApp, _, $, moment, Chart */
+/*global rgApp, _, $, moment, Chart */
 
 'use strict';
 
-ludojApp.controller('DetailController', function DetailController(
+rgApp.controller('DetailController', function DetailController(
     $filter,
     $location,
     $log,

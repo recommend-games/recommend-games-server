@@ -1,10 +1,10 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global ludojApp, _ */
+/*global rgApp, _ */
 
 'use strict';
 
-ludojApp.controller('FaqController', function FaqController(
+rgApp.controller('FaqController', function FaqController(
     $anchorScroll,
     $http,
     $location,
