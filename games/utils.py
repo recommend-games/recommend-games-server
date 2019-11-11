@@ -8,19 +8,12 @@ import timeit
 
 from datetime import datetime, timezone
 from functools import lru_cache
-from itertools import groupby
 
 import dateutil.parser
 
 from django.conf import settings
 
 LOGGER = logging.getLogger(__name__)
-
-
-def batchify(iterable, size):
-    """ make batches of given size """
-    for _, group in groupby(enumerate(iterable), key=lambda x: x[0] // size):
-        yield (x[1] for x in group)
 
 
 def format_from_path(path):
