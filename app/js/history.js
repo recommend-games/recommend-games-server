@@ -18,7 +18,7 @@ rgApp.controller('HistoryController', function HistoryController(
     var $ = angular.element,
         rankingType = $routeParams.type || 'fac',
         startDateParam = moment($routeParams.startDate || null),
-        startDate = startDateParam.isValid() ? startDateParam : moment().subtract(90, 'days'),
+        startDate = startDateParam.isValid() ? startDateParam : moment().subtract(1, 'year'),
         endDateParam = moment($routeParams.endDate || null),
         endDate = endDateParam.isValid() ? endDateParam : moment().isoWeekday(7),
         top = _.parseInt($routeParams.top) || 100,
@@ -84,7 +84,7 @@ rgApp.controller('HistoryController', function HistoryController(
             // animationEasing : "easeOutQuart",
             // //Function - Fires when the animation is complete
             // onAnimationComplete : null
-            responsive: true,
+            responsive: false,
             animation: false,
             title: {display: false},
             tooltips: {enabled: false},
@@ -183,7 +183,18 @@ rgApp.controller('HistoryController', function HistoryController(
             $log.info(response.data);
             $scope.data = response.data;
             $scope.datasets = makeDataSets(response.data, rankingType, startDate, endDate);
-            return findElement('#history-chart');
+            return findElement('#ludoj-history');
+        })
+        .then(function (container) {
+            var rows = _.size($scope.datasets),
+                height = rows * 23,
+                columns = endDate.diff(startDate, 'weeks'),
+                width = (columns + 10) * 18,
+                canvas = $('<canvas id="history-chart" width="' + width + '" height="' + height + '"></canvas>');
+            canvas.height(height);
+            canvas.width(width);
+            canvas.appendTo(container);
+            return canvas;
         })
         .then(function (canvas) {
             $log.info(canvas);
