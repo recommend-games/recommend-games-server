@@ -1,10 +1,10 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global angular, ludojApp, _, moment, Chart */
+/*global angular, rgApp, _, moment, Chart */
 
 'use strict';
 
-ludojApp.controller('HistoryController', function HistoryController(
+rgApp.controller('HistoryController', function HistoryController(
     $http,
     $location,
     $log,
