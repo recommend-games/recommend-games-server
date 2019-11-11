@@ -12,6 +12,7 @@ from django.conf import settings
 from django.db.models import Count, Q, Min
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
+from pytility import arg_to_iter, parse_bool, parse_date, parse_int, take_first
 from rest_framework.decorators import action
 from rest_framework.exceptions import (
     NotAuthenticated,
@@ -45,16 +46,7 @@ from .serializers import (
     RankingSerializer,
     UserSerializer,
 )
-from .utils import (
-    arg_to_iter,
-    load_recommender,
-    model_updated_at,
-    parse_bool,
-    parse_date,
-    parse_int,
-    pubsub_push,
-    take_first,
-)
+from .utils import load_recommender, model_updated_at, pubsub_push
 
 LOGGER = logging.getLogger(__name__)
 

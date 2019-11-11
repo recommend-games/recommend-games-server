@@ -1,4 +1,4 @@
-# ludoj-server #
+# recommend-games-server
 
 Board game recommendation service. Live demo: https://recommend.games/
 
@@ -14,4 +14,4 @@ However, in order to access useful data, you need to fill the SQLite database fi
 
 ## Recommendation engine ##
 
-Personal recommendations are based on data from [BoardGameGeek](https://boardgamegeek.com/) and computed by our [recommendation engine](https://gitlab.com/mshepherd/ludoj-recommender).
+Personal recommendations are based on data from [BoardGameGeek](https://boardgamegeek.com/) and computed by our [recommendation engine](https://gitlab.com/recommend.games/board-game-recommender).
