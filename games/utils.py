@@ -6,12 +6,11 @@ import logging
 import os.path
 import timeit
 
-from datetime import datetime, timezone
+from datetime import timezone
 from functools import lru_cache
 
-import dateutil.parser
-
 from django.conf import settings
+from pytility import parse_date
 
 LOGGER = logging.getLogger(__name__)
 
@@ -23,64 +22,6 @@ def format_from_path(path):
         return ext.lower()[1:] if ext else None
     except Exception:
         pass
-    return None
-
-
-def parse_float(number):
-    """ safely convert an object to float if possible, else return None """
-    try:
-        return float(number)
-    except Exception:
-        pass
-    return None
-
-
-def _add_tz(date, tzinfo=None):
-    return (
-        date if not tzinfo or not date or date.tzinfo else date.replace(tzinfo=tzinfo)
-    )
-
-
-def parse_date(date, tzinfo=None, format_str=None):
-    """try to turn input into a datetime object"""
-
-    if not date:
-        return None
-
-    # already a datetime
-    if isinstance(date, datetime):
-        return _add_tz(date, tzinfo)
-
-    # parse as epoch time
-    timestamp = parse_float(date)
-    if timestamp is not None:
-        return datetime.fromtimestamp(timestamp, tzinfo or timezone.utc)
-
-    if format_str:
-        try:
-            # parse as string in given format
-            return _add_tz(datetime.strptime(date, format_str), tzinfo)
-        except Exception:
-            pass
-
-    try:
-        # parse as string
-        return _add_tz(dateutil.parser.parse(date), tzinfo)
-    except Exception:
-        pass
-
-    try:
-        # parse as (year, month, day, hour, minute, second, microsecond, tzinfo)
-        return datetime(*date)
-    except Exception:
-        pass
-
-    try:
-        # parse as time.struct_time
-        return datetime(*date[:6], tzinfo=tzinfo or timezone.utc)
-    except Exception:
-        pass
-
     return None
 
 
