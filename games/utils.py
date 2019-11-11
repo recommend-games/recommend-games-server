@@ -50,18 +50,6 @@ def parse_float(number):
     return None
 
 
-def parse_bool(item):
-    """ parses an item and converts it to a boolean """
-    if isinstance(item, int):
-        return bool(item)
-    if item in ("True", "true", "Yes", "yes"):
-        return True
-    integer = parse_int(item)
-    if integer is not None:
-        return bool(integer)
-    return False
-
-
 def _add_tz(date, tzinfo=None):
     return (
         date if not tzinfo or not date or date.tzinfo else date.replace(tzinfo=tzinfo)

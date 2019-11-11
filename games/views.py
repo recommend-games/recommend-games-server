@@ -12,7 +12,7 @@ from django.conf import settings
 from django.db.models import Count, Q, Min
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
-from pytility import arg_to_iter, take_first
+from pytility import arg_to_iter, parse_bool, take_first
 from rest_framework.decorators import action
 from rest_framework.exceptions import (
     NotAuthenticated,
@@ -49,7 +49,6 @@ from .serializers import (
 from .utils import (
     load_recommender,
     model_updated_at,
-    parse_bool,
     parse_date,
     parse_int,
     pubsub_push,
