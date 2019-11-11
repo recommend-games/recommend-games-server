@@ -46,11 +46,7 @@ from .serializers import (
     RankingSerializer,
     UserSerializer,
 )
-from .utils import (
-    load_recommender,
-    model_updated_at,
-    pubsub_push,
-)
+from .utils import load_recommender, model_updated_at, pubsub_push
 
 LOGGER = logging.getLogger(__name__)
 
