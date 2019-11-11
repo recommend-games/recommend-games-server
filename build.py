@@ -126,10 +126,11 @@ def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
 def merge(in_paths, out_path, **kwargs):
     """ merge scraped files """
     from board_game_scraper.merge import merge_files
-    from board_game_scraper.utils import now
 
     kwargs.setdefault("log_level", "WARN")
-    out_path = out_path.format(date=now().strftime("%Y-%m-%dT%H-%M-%S"))
+    out_path = out_path.format(
+        date=django.utils.timezone.now().strftime("%Y-%m-%dT%H-%M-%S")
+    )
 
     LOGGER.info(
         "Merging files <%s> into <%s> with args %r...", in_paths, out_path, kwargs
@@ -144,8 +145,6 @@ def merge(in_paths, out_path, **kwargs):
 def _merge_kwargs(
     site, item="GameItem", in_paths=None, out_path=None, full=False, **kwargs
 ):
-    from board_game_scraper.utils import now
-
     kwargs["in_paths"] = in_paths or os.path.join(SCRAPER_DIR, "feeds", site, item, "*")
     kwargs.setdefault("keys", (f"{site}_id",))
     kwargs.setdefault(
@@ -153,7 +152,7 @@ def _merge_kwargs(
     )
     kwargs.setdefault("latest", ("scraped_at",))
     kwargs.setdefault("latest_parsers", (parse_date,))
-    kwargs.setdefault("latest_min", now() - timedelta(days=30))
+    kwargs.setdefault("latest_min", django.utils.timezone.now() - timedelta(days=30))
     kwargs.setdefault("concat_output", True)
 
     if parse_bool(full):
