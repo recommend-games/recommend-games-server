@@ -14,9 +14,10 @@ from tempfile import TemporaryDirectory
 from django.core.management.base import BaseCommand
 from git import Repo
 from board_game_recommender import BGARecommender, BGGRecommender
+from pytility import arg_to_iter
 
 from ...models import Ranking
-from ...utils import arg_to_iter, save_recommender_ranking
+from ...utils import save_recommender_ranking
 
 DATE_TEMPLATE = "%Y%m%d-%H%M%S"
 LOGGER = logging.getLogger(__name__)

@@ -14,25 +14,7 @@ import dateutil.parser
 
 from django.conf import settings
 
-ITERABLE_SINGLE_VALUES = (dict, str, bytes)
 LOGGER = logging.getLogger(__name__)
-
-
-def arg_to_iter(arg):
-    """ wraps arg into tuple if not an iterable """
-    if arg is None:
-        return ()
-    if not isinstance(arg, ITERABLE_SINGLE_VALUES) and hasattr(arg, "__iter__"):
-        return arg
-    return (arg,)
-
-
-def take_first(items):
-    """ take first item """
-    for item in arg_to_iter(items):
-        if item is not None and item != "":
-            return item
-    return None
 
 
 def batchify(iterable, size):
