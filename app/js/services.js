@@ -1,10 +1,10 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global ludojApp, _, $, moment */
+/*global rgApp, _, $, moment */
 
 'use strict';
 
-ludojApp.factory('gamesService', function gamesService(
+rgApp.factory('gamesService', function gamesService(
     $document,
     $localStorage,
     $log,
@@ -610,7 +610,7 @@ ludojApp.factory('gamesService', function gamesService(
     return service;
 });
 
-ludojApp.factory('usersService', function usersService(
+rgApp.factory('usersService', function usersService(
     $log,
     $http,
     $q,
@@ -671,7 +671,7 @@ ludojApp.factory('usersService', function usersService(
     return service;
 });
 
-ludojApp.factory('personsService', function personsService(
+rgApp.factory('personsService', function personsService(
     $http,
     $localStorage,
     $log,
@@ -716,7 +716,7 @@ ludojApp.factory('personsService', function personsService(
     return service;
 });
 
-ludojApp.factory('newsService', function newsService(
+rgApp.factory('newsService', function newsService(
     $http,
     $localStorage,
     $log,
@@ -788,7 +788,7 @@ ludojApp.factory('newsService', function newsService(
     return service;
 });
 
-ludojApp.factory('filterService', function filterService(
+rgApp.factory('filterService', function filterService(
     $sessionStorage
 ) {
     var yearFloor = 1970,
@@ -1127,7 +1127,7 @@ ludojApp.factory('filterService', function filterService(
     return service;
 });
 
-ludojApp.factory('rankingsService', function rankingsService(
+rgApp.factory('rankingsService', function rankingsService(
     $http,
     $log,
     $q,

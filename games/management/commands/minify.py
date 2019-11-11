@@ -11,10 +11,9 @@ from functools import partial
 from shutil import copyfileobj, rmtree
 
 from django.core.management.base import BaseCommand
+from pytility import arg_to_iter
 from rcssmin import cssmin
 from rjsmin import jsmin
-
-from ...utils import arg_to_iter
 
 LOGGER = logging.getLogger(__name__)
 

@@ -7,6 +7,7 @@ verify_ssl = true
 python_version = "3.6"
 
 [packages]
+board-game-recommender = "*"
 django = "*"
 django-extensions = "*"
 django-filter = "*"
@@ -14,20 +15,20 @@ django-rest-framework-proxy = "*"
 djangorestframework = "*"
 google-cloud-pubsub = "*"
 gunicorn = "*"
-ludoj-recommender = {editable = true, git = "https://gitlab.com/recommend.games/board-game-recommender.git"}
 markdown = "*"
 pandas = "*"
-python-dateutil = "*"
+pytility = {extras = ["dates"], version = "*"}
 turicreate = "<5.7"
 whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
-black = "==19.3b0" # no released version, so need to pin exact pre-release version
+black = "==19.10b0" # no released version, so need to pin exact pre-release version
+board-game-scraper = "*"
 csvkit = "*"
 gitpython = "*"
 gsutil = "*"
-ludoj-scraper = {editable = true, git = "https://gitlab.com/recommend.games/board-game-scraper.git"}
 lxml = "*"
+mypy = "*"
 psutil = "*"
 pylint = "*"
 pynt = "*"

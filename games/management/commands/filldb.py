@@ -14,16 +14,10 @@ from itertools import groupby
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.transaction import atomic
+from pytility import arg_to_iter, batchify, parse_int, take_first
 
 from ...models import Category, Collection, Game, GameType, Mechanic, Person, User
-from ...utils import (
-    arg_to_iter,
-    batchify,
-    format_from_path,
-    load_recommender,
-    parse_int,
-    take_first,
-)
+from ...utils import format_from_path, load_recommender
 
 LOGGER = logging.getLogger(__name__)
 VALUE_ID_REGEX = re.compile(r"^(.*?)(:(\d+))?$")

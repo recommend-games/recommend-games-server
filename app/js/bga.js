@@ -1,10 +1,10 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global ludojApp, _, $ */
+/*global rgApp, _, $ */
 
 'use strict';
 
-ludojApp.controller('BgaController', function BgaController(
+rgApp.controller('BgaController', function BgaController(
     $location,
     $log,
     $http,

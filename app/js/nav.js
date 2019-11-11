@@ -1,10 +1,10 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global ludojApp, $, _, moment */
+/*global rgApp, $, _, moment */
 
 'use strict';
 
-ludojApp.controller('NavController', function NavController(
+rgApp.controller('NavController', function NavController(
     $location,
     $rootScope,
     $scope,
@@ -48,6 +48,6 @@ ludojApp.controller('NavController', function NavController(
     updateNewsCount();
 });
 
-ludojApp.controller('FooterController', function FooterController($scope) {
+rgApp.controller('FooterController', function FooterController($scope) {
     $scope.yearNow = new Date().getFullYear();
 });
