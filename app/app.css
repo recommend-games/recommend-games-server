@@ -433,3 +433,13 @@ input:checked + .slider:before {
 .bgg-color {
     color: #FF5100;
 }
+
+.social-link {
+    color: inherit;
+}
+
+.social-link .bgg-icon {
+    filter: brightness(0);
+    height: 32px;
+    vertical-align: text-bottom;
+}
