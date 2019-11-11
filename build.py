@@ -16,6 +16,7 @@ import django
 from dotenv import load_dotenv
 from pynt import task
 from pyntcontrib import execute, safe_cd
+from pytility import parse_bool, parse_date, parse_float, parse_int, to_str
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -68,8 +69,6 @@ def rsync(
     dst=os.path.join(SCRAPER_DIR, "feeds", ""),
 ):
     """ sync remote files """
-    from games.utils import parse_int
-
     port = parse_int(port)
     LOGGER.info("Syncing with <%s:%d> from <%s> to <%s>...", host, port, src, dst)
     os.makedirs(dst, exist_ok=True)
@@ -126,8 +125,8 @@ def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
 @task()
 def merge(in_paths, out_path, **kwargs):
     """ merge scraped files """
-    from ludoj_scraper.merge import merge_files
-    from ludoj_scraper.utils import now
+    from board_game_scraper.merge import merge_files
+    from board_game_scraper.utils import now
 
     kwargs.setdefault("log_level", "WARN")
     out_path = out_path.format(date=now().strftime("%Y-%m-%dT%H-%M-%S"))
@@ -145,7 +144,7 @@ def merge(in_paths, out_path, **kwargs):
 def _merge_kwargs(
     site, item="GameItem", in_paths=None, out_path=None, full=False, **kwargs
 ):
-    from ludoj_scraper.utils import now, parse_bool, parse_date, parse_int, to_str
+    from board_game_scraper.utils import now
 
     kwargs["in_paths"] = in_paths or os.path.join(SCRAPER_DIR, "feeds", site, item, "*")
     kwargs.setdefault("keys", (f"{site}_id",))
@@ -184,8 +183,6 @@ def mergebga(in_paths=None, out_path=None, full=False):
 @task()
 def mergebgaratings(in_paths=None, out_path=None, full=False):
     """ merge Board Game Atlas rating data """
-    from ludoj_scraper.utils import parse_bool
-
     merge(
         **_merge_kwargs(
             site="bga",
@@ -210,7 +207,7 @@ def mergebgg(in_paths=None, out_path=None, full=False):
 @task()
 def mergebggusers(in_paths=None, out_path=None, full=False):
     """ merge BoardGameGeek user data """
-    from ludoj_scraper.utils import parse_bool, to_lower
+    from board_game_scraper.utils import to_lower
 
     merge(
         **_merge_kwargs(
@@ -231,7 +228,7 @@ def mergebggusers(in_paths=None, out_path=None, full=False):
 @task()
 def mergebggratings(in_paths=None, out_path=None, full=False):
     """ merge BoardGameGeek rating data """
-    from ludoj_scraper.utils import parse_int, to_lower
+    from board_game_scraper.utils import to_lower
 
     merge(
         **_merge_kwargs(
@@ -289,8 +286,6 @@ def mergenews(
     out_path=None,
 ):
     """ merge news articles """
-    from ludoj_scraper.utils import parse_date
-
     merge(
         **_merge_kwargs(
             site="news",
@@ -353,7 +348,7 @@ def split(
     construct=False,
 ):
     """ split file along prefixes """
-    from ludoj_scraper.prefixes import split_file
+    from board_game_scraper.prefixes import split_file
 
     _remove(out_dir)
     split_file(
@@ -386,8 +381,7 @@ def link(
     pretty_print=True,
 ):
     """ link items """
-    from ludoj_scraper.cluster import link_games
-    from ludoj_scraper.utils import parse_float
+    from board_game_scraper.cluster import link_games
 
     LOGGER.info("Using model %r to link files %r...", gazetteer, paths)
     link_games(
@@ -474,7 +468,7 @@ def trainbgg(
     max_iterations=1000,
 ):
     """ train BoardGameGeek recommender model """
-    from ludoj_recommender import BGGRecommender
+    from board_game_recommender import BGGRecommender
 
     _train(
         recommender_cls=BGGRecommender,
@@ -495,7 +489,7 @@ def trainbga(
     max_iterations=1000,
 ):
     """ train Board Game Atlas recommender model """
-    from ludoj_recommender import BGARecommender
+    from board_game_recommender import BGARecommender
 
     _train(
         recommender_cls=BGARecommender,
@@ -659,7 +653,7 @@ def cpdirsbga(
 @task()
 def dateflag(dst=SETTINGS.MODEL_UPDATED_FILE, date=None):
     """ write date to file """
-    from games.utils import parse_date, serialize_date
+    from games.utils import serialize_date
 
     date = parse_date(date) or django.utils.timezone.now()
     date_str = serialize_date(date, tzinfo=django.utils.timezone.utc)
@@ -689,7 +683,7 @@ def historicalbggrankings(
 ):
     """Save historical BGG rankings."""
 
-    from games.utils import format_from_path, parse_bool, parse_date
+    from games.utils import format_from_path
 
     LOGGER.info("Loading historical BGG rankings from <%s>...", repo)
 
@@ -735,8 +729,6 @@ def fillrankingdb(path=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg")):
 @task()
 def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_000):
     """Generate sitemap.xml."""
-    from games.utils import parse_int
-
     limit = parse_int(limit) or 50_000
     LOGGER.info(
         "Generating sitemap with URL <%s> to <%s>, limit to %d...", url, dst, limit
@@ -814,8 +806,6 @@ def minify(src=os.path.join(BASE_DIR, "app"), dst=os.path.join(BASE_DIR, ".temp"
 @task(cleanstatic, minify)
 def collectstatic(delete=True):
     """Collect static files."""
-
-    from games.utils import parse_bool
 
     assert not SETTINGS.DEBUG
 

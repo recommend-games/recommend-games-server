@@ -13,7 +13,7 @@ from tempfile import TemporaryDirectory
 
 from django.core.management.base import BaseCommand
 from git import Repo
-from ludoj_recommender import BGARecommender, BGGRecommender
+from board_game_recommender import BGARecommender, BGGRecommender
 
 from ...models import Ranking
 from ...utils import arg_to_iter, save_recommender_ranking

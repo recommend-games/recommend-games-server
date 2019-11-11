@@ -149,10 +149,10 @@ def load_recommender(path, site="bgg"):
         return None
     try:
         if site == "bga":
-            from ludoj_recommender import BGARecommender
+            from board_game_recommender import BGARecommender
 
             return BGARecommender.load(path=path)
-        from ludoj_recommender import BGGRecommender
+        from board_game_recommender import BGGRecommender
 
         return BGGRecommender.load(path=path)
     except Exception:
