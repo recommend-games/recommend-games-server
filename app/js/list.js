@@ -1,10 +1,10 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global angular, ludojApp, _ */
+/*global angular, rgApp, _ */
 
 'use strict';
 
-ludojApp.controller('ListController', function ListController(
+rgApp.controller('ListController', function ListController(
     $location,
     $log,
     $filter,

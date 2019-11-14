@@ -12,6 +12,7 @@ from django.conf import settings
 from django.db.models import Count, Q, Min
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
+from pytility import arg_to_iter, parse_bool, parse_date, parse_int, take_first
 from rest_framework.decorators import action
 from rest_framework.exceptions import (
     NotAuthenticated,
@@ -45,16 +46,7 @@ from .serializers import (
     RankingSerializer,
     UserSerializer,
 )
-from .utils import (
-    arg_to_iter,
-    load_recommender,
-    model_updated_at,
-    parse_bool,
-    parse_date,
-    parse_int,
-    pubsub_push,
-    take_first,
-)
+from .utils import load_recommender, model_updated_at, pubsub_push
 
 LOGGER = logging.getLogger(__name__)
 
@@ -579,6 +571,51 @@ class GameViewSet(PermissionsModelViewSet):
             queryset, many=True, context=self.get_serializer_context()
         )
         return Response(serializer.data)
+
+    @action(detail=False)
+    def history(self, request):
+        """History of the top rankings."""
+
+        top = parse_int(request.query_params.get("top")) or 100
+        ranking_type = request.query_params.get("ranking_type") or Ranking.BGG
+
+        filters = {
+            "ranking_type": ranking_type,
+            "date__gte": parse_date(
+                request.query_params.get("date__gte"), tzinfo=timezone.utc
+            ),
+            "date__lte": parse_date(
+                request.query_params.get("date__lte"), tzinfo=timezone.utc
+            ),
+        }
+        filters = {k: v for k, v in filters.items() if v}
+        queryset = Ranking.objects.filter(**filters)
+
+        last_date = queryset.filter(rank=1).dates("date", "day", order="ASC").last()
+        games = [
+            r.game
+            for r in queryset.filter(date=last_date, rank__lte=top)
+            .order_by("rank")
+            .select_related("game")
+        ]
+
+        assert len(games) == top
+
+        game_ids = frozenset(g.bgg_id for g in games)
+        rankings = queryset.filter(game__in=game_ids).order_by("date")
+
+        data = [
+            {
+                "game": self.get_serializer(game).data,
+                "rankings": RankingSerializer(
+                    rankings.filter(game=game.bgg_id),
+                    many=True,
+                    context=self.get_serializer_context(),
+                ).data,
+            }
+            for game in games
+        ]
+        return Response(data)
 
     # pylint: disable=no-self-use
     @action(detail=False)

@@ -14,8 +14,9 @@ import pandas as pd
 
 from django.core.management.base import BaseCommand
 from git import Repo
+from pytility import arg_to_iter
 
-from ...utils import arg_to_iter, format_from_path
+from ...utils import format_from_path
 
 LOGGER = logging.getLogger(__name__)
 

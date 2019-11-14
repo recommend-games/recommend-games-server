@@ -1,10 +1,10 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global angular, ludojApp, _, moment, Chart */
+/*global angular, rgApp, _, moment, Chart */
 
 'use strict';
 
-ludojApp.controller('DetailController', function DetailController(
+rgApp.controller('DetailController', function DetailController(
     $filter,
     $location,
     $log,
@@ -23,7 +23,7 @@ ludojApp.controller('DetailController', function DetailController(
         integratesWith = [],
         similarPromise = gamesService.getSimilarGames($routeParams.id, 1, true),
         startDate = moment().subtract(1, 'year'),
-        endDate = moment(),
+        endDate = moment().isoWeekday(7),
         allRanges = [
             ['90 Days', moment().subtract(90, 'days')],
             ['6 months', moment().subtract(6, 'months')],

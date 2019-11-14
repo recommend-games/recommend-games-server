@@ -4,7 +4,7 @@
 
 'use strict';
 
-var ludojApp = angular.module('ludojApp', [
+var rgApp = angular.module('rgApp', [
     'blockUI',
     'ngAnimate',
     'ngRoute',
@@ -13,7 +13,7 @@ var ludojApp = angular.module('ludojApp', [
     'toastr'
 ]);
 
-ludojApp.constant('API_URL', '/api/')
+rgApp.constant('API_URL', '/api/')
     .constant('APP_TITLE', 'Recommend.Games – board game recommendations')
     .constant('CANONICAL_URL', 'https://recommend.games/')
     .constant('DEFAULT_IMAGE', 'assets/android-chrome-512x512.png')
@@ -23,7 +23,7 @@ ludojApp.constant('API_URL', '/api/')
     .constant('FAQ_URL', '/assets/faq.json')
     .constant('BGA_CLIENT_ID', '8jfqHypg2l');
 
-ludojApp.config(function (
+rgApp.config(function (
     $locationProvider,
     $routeProvider,
     blockUIConfig,
@@ -42,6 +42,12 @@ ludojApp.config(function (
     }).when('/news', {
         templateUrl: '/partials/news.html',
         controller: 'NewsController'
+    }).when('/history/:type', {
+        templateUrl: '/partials/history.html',
+        controller: 'HistoryController'
+    }).when('/history', {
+        templateUrl: '/partials/history.html',
+        controller: 'HistoryController'
     }).when('/stats', {
         templateUrl: '/partials/stats.html',
         controller: 'StatsController'
@@ -74,7 +80,7 @@ ludojApp.config(function (
     toastrConfig.extendedTimeOut = 60000;
 });
 
-ludojApp.run(function (
+rgApp.run(function (
     $locale,
     $localStorage,
     $log,

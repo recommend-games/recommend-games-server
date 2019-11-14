@@ -1,6 +1,6 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global ludojApp, _ */
+/*global rgApp, _ */
 
 'use strict';
 
@@ -8,7 +8,7 @@ function bgImage(url) {
     return url ? {'background-image': 'url("' + url + '")'} : null;
 }
 
-ludojApp.directive('gameSquare', function gameSquare() {
+rgApp.directive('gameSquare', function gameSquare() {
     return {
         'restrict': 'AE',
         'templateUrl': '/partials/game-square.html',
@@ -25,7 +25,7 @@ ludojApp.directive('gameSquare', function gameSquare() {
     };
 });
 
-ludojApp.directive('articleSquare', function articleSquare() {
+rgApp.directive('articleSquare', function articleSquare() {
     return {
         'restrict': 'AE',
         'templateUrl': '/partials/article-square.html',
@@ -39,7 +39,7 @@ ludojApp.directive('articleSquare', function articleSquare() {
     };
 });
 
-ludojApp.directive('playerCount', function playerCount() {
+rgApp.directive('playerCount', function playerCount() {
     return {
         'restrict': 'E',
         'templateUrl': '/partials/player-count.html',

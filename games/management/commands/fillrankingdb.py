@@ -12,9 +12,10 @@ from datetime import timezone
 import pandas as pd
 
 from django.core.management.base import BaseCommand
+from pytility import batchify, parse_date
 
 from ...models import Game, Ranking
-from ...utils import batchify, format_from_path, parse_date
+from ...utils import format_from_path
 
 csv.field_size_limit(sys.maxsize)
 
