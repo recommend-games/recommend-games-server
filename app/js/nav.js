@@ -1,6 +1,6 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global rgApp, $, _, moment */
+/*global angular, rgApp, _, moment */
 
 'use strict';
 
@@ -11,6 +11,8 @@ rgApp.controller('NavController', function NavController(
     $timeout,
     newsService
 ) {
+    var $ = angular.element;
+
     function updatePath() {
         $scope.path = $location.path();
     }
