@@ -126,7 +126,6 @@ rgApp.controller('HistoryController', function HistoryController(
 
     $http.get(API_URL + 'games/history/', {'params': params})
         .then(function (response) {
-            $log.info(response.data);
             $scope.data = response.data;
             $scope.datasets = makeDataSets(response.data, rankingType, startDate, endDate);
             return findElement('#ludoj-history');
@@ -136,23 +135,22 @@ rgApp.controller('HistoryController', function HistoryController(
                 height = rows * 22 + 100,
                 columns = endDate.diff(startDate, 'weeks'),
                 width = columns * 20 + 180,
-                canvas = $('<canvas id="history-chart" width="' + width + '" height="' + height + '"></canvas>');
+                canvas = $('<canvas id="history-chart" width="' + width + '" height="' + height + '"></canvas>'),
+                chart;
+
             canvas.height(height);
             canvas.width(width);
             canvas.appendTo(container);
-            return canvas;
-        })
-        .then(function (canvas) {
-            $log.info(canvas);
-            var chart = new Chart(canvas, {
-                    type: 'line',
-                    data: {datasets: $scope.datasets},
-                    options: options
-                });
+
+            chart = new Chart(canvas, {
+                type: 'line',
+                data: {datasets: $scope.datasets},
+                options: options
+            });
             $scope.chart = chart;
+
             return chart;
         })
-        .then($log.info)
         .catch($log.error);
 
     gamesService.setTitle('Top ' + top + ' history');
