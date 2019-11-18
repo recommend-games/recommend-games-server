@@ -21,69 +21,14 @@ rgApp.controller('HistoryController', function HistoryController(
         startDate = startDateParam.isValid() ? startDateParam : moment().subtract(1, 'year'),
         endDateParam = moment($routeParams.endDate || null),
         endDate = endDateParam.isValid() ? endDateParam : moment().isoWeekday(7),
-        top = _.parseInt($routeParams.top) || 100,
+        top = _.max([_.min([_.parseInt($routeParams.top) || 100, 250]), 10]),
         params = {
-            'ranking_type': $routeParams.type || 'fac',
+            'ranking_type': rankingType,
             'date__gte': startDate.format('YYYY-MM-DD'),
             'date__lte': endDate.format('YYYY-MM-DD'),
             'top': top
         },
         options = {
-            // //Boolean - If we show the scale above the chart data
-            // scaleOverlay : false,
-            // //Boolean - If we want to override with a hard coded scale
-            // scaleOverride : true,
-            // //** Required if scaleOverride is true **
-            // //Number - The number of steps in a hard coded scale
-            // scaleSteps : 100,
-            // //Number - The value jump in the hard coded scale
-            // scaleStepWidth : -1,
-            // //Number - The scale starting value
-            // scaleStartValue : 100,
-            // //String - Colour of the scale line
-            // scaleLineColor : "rgba(0,0,0,.1)",
-            // //Number - Pixel width of the scale line
-            // scaleLineWidth : 1,
-            // //Boolean - Whether to show labels on the scale
-            // scaleShowLabels : true,
-            // //Interpolated JS string - can access value
-            // scaleLabel : "<%=value%>",
-            // //String - Scale label font declaration for the scale label
-            // scaleFontFamily : "'Arial'",
-            // //Number - Scale label font size in pixels
-            // scaleFontSize : 12,
-            // //String - Scale label font weight style
-            // scaleFontStyle : "normal",
-            // //String - Scale label font colour
-            // scaleFontColor : "#666",
-            // ///Boolean - Whether grid lines are shown across the chart
-            // scaleShowGridLines : false,
-            // //String - Colour of the grid lines
-            // scaleGridLineColor : "rgba(0,0,0,.05)",
-            // //Number - Width of the grid lines
-            // scaleGridLineWidth : 1,
-            // //Boolean - Whether the line is curved between points
-            // bezierCurve : true,
-            // //Boolean - Whether to show a dot for each point
-            // pointDot : false,
-            // //Number - Radius of each point dot in pixels
-            // pointDotRadius : 4,
-            // //Number - Pixel width of point dot stroke
-            // pointDotStrokeWidth : 2,
-            // //Boolean - Whether to show a stroke for datasets
-            // datasetStroke : true,
-            // //Number - Pixel width of dataset stroke
-            // datasetStrokeWidth : 1,
-            // //Boolean - Whether to fill the dataset with a colour ################
-            // datasetFill : false,
-            // //Boolean - Whether to animate the chart
-            // animation : false,
-            // //Number - Number of animation steps
-            // animationSteps : 60,
-            // //String - Animation easing effect
-            // animationEasing : "easeOutQuart",
-            // //Function - Fires when the animation is complete
-            // onAnimationComplete : null
             responsive: false,
             animation: false,
             title: {display: false},
@@ -111,6 +56,7 @@ rgApp.controller('HistoryController', function HistoryController(
             }
         };
 
+    $scope.type = rankingType;
     $scope.top = top;
     $scope.startDate = startDate;
     $scope.endDate = endDate;
@@ -187,9 +133,9 @@ rgApp.controller('HistoryController', function HistoryController(
         })
         .then(function (container) {
             var rows = _.size($scope.datasets),
-                height = rows * 23,
+                height = rows * 22 + 100,
                 columns = endDate.diff(startDate, 'weeks'),
-                width = (columns + 10) * 18,
+                width = columns * 20 + 180,
                 canvas = $('<canvas id="history-chart" width="' + width + '" height="' + height + '"></canvas>');
             canvas.height(height);
             canvas.width(width);
