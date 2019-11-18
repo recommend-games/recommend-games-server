@@ -1,6 +1,6 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global rgApp, _, $ */
+/*global angular, rgApp, _ */
 
 'use strict';
 
@@ -29,7 +29,8 @@ rgApp.controller('BgaController', function BgaController(
         return result.value();
     }
 
-    var users = {},
+    var $ = angular.element,
+        users = {},
         userNames = parseList($routeParams.for, true),
         routeParams = filterService.getParams($routeParams);
 

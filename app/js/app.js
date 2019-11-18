@@ -42,6 +42,12 @@ rgApp.config(function (
     }).when('/news', {
         templateUrl: '/partials/news.html',
         controller: 'NewsController'
+    }).when('/history/:type', {
+        templateUrl: '/partials/history.html',
+        controller: 'HistoryController'
+    }).when('/history', {
+        templateUrl: '/partials/history.html',
+        controller: 'HistoryController'
     }).when('/stats', {
         templateUrl: '/partials/stats.html',
         controller: 'StatsController'
