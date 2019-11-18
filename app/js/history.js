@@ -17,10 +17,12 @@ rgApp.controller('HistoryController', function HistoryController(
 ) {
     var $ = angular.element,
         rankingType = $routeParams.type || 'fac',
+        defaultStartDate = moment().subtract(1, 'year'),
         startDateParam = moment($routeParams.startDate || null),
-        startDate = startDateParam.isValid() ? startDateParam : moment().subtract(1, 'year'),
+        startDate = startDateParam.isValid() ? startDateParam : defaultStartDate,
+        defaultEndDate = moment().isoWeekday(7),
         endDateParam = moment($routeParams.endDate || null),
-        endDate = endDateParam.isValid() ? endDateParam : moment().isoWeekday(7),
+        endDate = endDateParam.isValid() ? endDateParam : defaultEndDate,
         top = _.max([_.min([_.parseInt($routeParams.top) || 100, 250]), 10]),
         params = {
             'ranking_type': rankingType,
@@ -54,7 +56,9 @@ rgApp.controller('HistoryController', function HistoryController(
                 display: true,
                 position: 'right'
             }
-        };
+        },
+        canonicalPath = rankingType === 'fac' ? '/' + _.split($location.path(), '/')[1] : $location.path(),
+        canonicalParams = {};
 
     $scope.type = rankingType;
     $scope.top = top;
@@ -153,8 +157,20 @@ rgApp.controller('HistoryController', function HistoryController(
         })
         .catch($log.error);
 
+    if (top !== 100) {
+        canonicalParams.top = top;
+    }
+
+    if (startDate.format('YYYY-MM-DD') !== defaultStartDate.format('YYYY-MM-DD')) {
+        canonicalParams.startDate = startDate.format('YYYY-MM-DD');
+    }
+
+    if (endDate.format('YYYY-MM-DD') !== defaultEndDate.format('YYYY-MM-DD')) {
+        canonicalParams.endDate = endDate.format('YYYY-MM-DD');
+    }
+
     gamesService.setTitle('Top ' + top + ' history');
     gamesService.setDescription('Visualization of the top ' + top + ' history');
-    gamesService.setCanonicalUrl($location.path()); // TODO depends on type
+    gamesService.setCanonicalUrl(canonicalPath, canonicalParams);
     gamesService.setImage(); // TODO should be an image of the canvas
 });
