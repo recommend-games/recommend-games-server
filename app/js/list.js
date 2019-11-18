@@ -1,6 +1,6 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global rgApp, _, $ */
+/*global angular, rgApp, _ */
 
 'use strict';
 
@@ -19,7 +19,8 @@ rgApp.controller('ListController', function ListController(
     toastr,
     usersService
 ) {
-    var params = filterService.getParams($routeParams),
+    var $ = angular.element,
+        params = filterService.getParams($routeParams),
         searchPromise = null,
         userStats = {},
         fetchPopularGames;

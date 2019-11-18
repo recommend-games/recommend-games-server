@@ -1,6 +1,6 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global rgApp, _, $, moment */
+/*global angular, rgApp, _, moment */
 
 'use strict';
 
@@ -19,7 +19,8 @@ rgApp.factory('gamesService', function gamesService(
     GA_TRACKING_ID,
     SITE_DESCRIPTION
 ) {
-    var service = {},
+    var $ = angular.element,
+        service = {},
         cache = {},
         linkedSites = ['bgg', 'bga', 'wikidata', 'wikipedia', 'luding', 'spielen'];
 
