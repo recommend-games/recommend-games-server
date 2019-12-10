@@ -243,6 +243,38 @@ def mergebggratings(in_paths=None, out_path=None, full=False):
 
 
 @task()
+def mergebggrankings(in_paths=None, out_path=None, full=False):
+    """ merge BoardGameGeek ranking data """
+    print(full, type(full))
+    merge(
+        **_merge_kwargs(
+            site="bgg_rankings",
+            item="GameItem",
+            in_paths=in_paths,
+            out_path=out_path,
+            full=full,
+            keys=("published_at", "bgg_id"),
+            key_parsers=(parse_date, parse_int),
+            latest_min=None,
+            fieldnames=None
+            if full
+            else (
+                "published_at",
+                "bgg_id",
+                "rank",
+                "name",
+                "year",
+                "num_votes",
+                "bayes_rating",
+                "avg_rating",
+                "image_url",
+            ),
+            fieldnames_exclude=None,
+        )
+    )
+
+
+@task()
 def mergedbpedia(in_paths=None, out_path=None, full=False):
     """ merge DBpedia game data """
     merge(
@@ -291,7 +323,7 @@ def mergenews(
             item="ArticleItem",
             in_paths=in_paths,
             out_path=out_path,
-            keys=("article_id"),
+            keys=("article_id",),
             latest=("published_at", "scraped_at"),
             latest_parsers=(parse_date, parse_date),
             latest_min=None,
@@ -332,6 +364,7 @@ def mergenews(
     mergebgaratings,
     mergebggusers,
     mergebggratings,
+    mergebggrankings,
 )
 def mergeall():
     """ merge all sites and items """
