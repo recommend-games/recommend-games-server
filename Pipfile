@@ -8,7 +8,7 @@ python_version = "3.6"
 
 [packages]
 board-game-recommender = "*"
-django = "*"
+django = "<3.0.0"
 django-extensions = "*"
 django-filter = "*"
 django-rest-framework-proxy = "*"
