@@ -245,7 +245,6 @@ def mergebggratings(in_paths=None, out_path=None, full=False):
 @task()
 def mergebggrankings(in_paths=None, out_path=None, full=False):
     """ merge BoardGameGeek ranking data """
-    print(full, type(full))
     merge(
         **_merge_kwargs(
             site="bgg_rankings",
@@ -267,7 +266,6 @@ def mergebggrankings(in_paths=None, out_path=None, full=False):
                 "num_votes",
                 "bayes_rating",
                 "avg_rating",
-                "image_url",
             ),
             fieldnames_exclude=None,
         )
@@ -707,6 +705,19 @@ def bggranking(
 
 
 @task()
+def splitrankings(
+    src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_GameItem.jl"),
+    dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg"),
+    dst_file="%Y%m%d-%H%M%S.csv",
+    overwrite=False,
+):
+    """Saves a snapshot of the BGG rankings."""
+    django.core.management.call_command(
+        "splitrankings", src, out_dir=dst_dir, out_file=dst_file, overwrite=overwrite,
+    )
+
+
+@task()
 def historicalbggrankings(
     repo=os.path.abspath(os.path.join(BASE_DIR, "..", "bgg-ranking-historicals")),
     dst=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg", "%Y%m%d-%H%M%S.csv"),
@@ -772,6 +783,7 @@ def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_00
     cleandata,
     filldb,
     dateflag,
+    splitrankings,
     historicalbggrankings,
     fillrankingdb,
     compressdb,
