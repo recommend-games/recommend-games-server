@@ -440,7 +440,7 @@ input:checked + .slider:before {
 
 .social-link .bgg-icon {
     filter: brightness(0);
-    height: 32px;
+    height: 30px;
     padding-bottom: 4px;
     vertical-align: text-bottom;
 }
