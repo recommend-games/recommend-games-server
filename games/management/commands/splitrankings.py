@@ -32,6 +32,7 @@ def _process_row(row):
 
 def _process_file(file):
     if isinstance(file, str):
+        LOGGER.info("Loading rows from <%s>...", file)
         with open(file) as file_obj:
             yield from _process_file(file_obj)
 
@@ -72,6 +73,7 @@ class Command(BaseCommand):
         parser.add_argument("--out-dir", "-o", default=".")
         parser.add_argument("--out-file", "-O", default="%Y%m%d-%H%M%S.csv")
         # parser.add_argument("--window", "-w", type=float)
+        parser.add_argument("--overwrite", "-W", action="store_true")
         parser.add_argument("--dry-run", "-n", action="store_true")
 
     def handle(self, *args, **kwargs):
@@ -88,16 +90,23 @@ class Command(BaseCommand):
         for published_at, group in groupby(
             _process_files(kwargs["in_files"]), key=lambda row: row.get("published_at")
         ):
+            out_path = published_at.strftime(out_template)
+
+            if not kwargs["overwrite"] and os.path.exists(out_path):
+                LOGGER.debug(
+                    "Output file <%s> already exists, skipping <%s>...",
+                    out_path,
+                    published_at,
+                )
+                continue
+
             data_frame = _process_df(pd.DataFrame.from_records(group))
 
             if data_frame is None:
                 continue
 
-            out_path = published_at.strftime(out_template)
-
             LOGGER.info("Saving <%d> rows to <%s>...", len(data_frame), out_path)
 
             if not kwargs["dry_run"]:
                 # TODO make sure output dir exists
-                # TODO check if file exists
                 data_frame.to_csv(out_path, index=False)
