@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""TODO."""
+"""Split rankings from a GameItem file into separate CSVs."""
 
 import json
 import logging
@@ -63,9 +63,9 @@ def _process_df(data_frame):
 
 
 class Command(BaseCommand):
-    """TODO."""
+    """Split rankings from a GameItem file into separate CSVs."""
 
-    help = "TODO."
+    help = "Split rankings from a GameItem file into separate CSVs."
 
     def add_arguments(self, parser):
         parser.add_argument("in_files", nargs="+")
