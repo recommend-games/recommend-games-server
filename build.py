@@ -245,7 +245,6 @@ def mergebggratings(in_paths=None, out_path=None, full=False):
 @task()
 def mergebggrankings(in_paths=None, out_path=None, full=False):
     """ merge BoardGameGeek ranking data """
-    print(full, type(full))
     merge(
         **_merge_kwargs(
             site="bgg_rankings",
