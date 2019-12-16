@@ -24,6 +24,16 @@ from .models import (
 )
 
 
+class RankingSerializer(ModelSerializer):
+    """Ranking serializer."""
+
+    class Meta:
+        """Meta."""
+
+        model = Ranking
+        exclude = ("id", "game")
+
+
 class GameSerializer(ModelSerializer):
     """ game serializer """
 
@@ -47,6 +57,10 @@ class GameSerializer(ModelSerializer):
     luding_id = ListField(child=IntegerField(min_value=1), required=False)
     spielen_id = ListField(child=CharField(), required=False)
     bga_id = ListField(child=CharField(), required=False)
+
+    highest_ranking_bgg = RankingSerializer(read_only=True)
+    highest_ranking_factor = RankingSerializer(read_only=True)
+    highest_ranking_similarity = RankingSerializer(read_only=True)
 
     class Meta:
         """ meta """
@@ -99,16 +113,6 @@ class MechanicSerializer(ModelSerializer):
 
         model = Mechanic
         fields = "__all__"
-
-
-class RankingSerializer(ModelSerializer):
-    """Ranking serializer."""
-
-    class Meta:
-        """Meta."""
-
-        model = Ranking
-        exclude = ("id", "game")
 
 
 class CollectionSerializer(ModelSerializer):
