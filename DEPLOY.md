@@ -33,6 +33,9 @@ create the topic `users`, then a subscription `crawl` attached to that topic.
 Set this subscription to "Pull" delivery type, "Never expire", 600 seconds
 acknowledgement deadline, and 1 day retention duration.
 
+Also make sure to update the PubSub project, topic, and subscription in the
+[scraper](https://gitlab.com/recommend.games/board-game-scraper/blob/master/.env.example).
+
 ## Create credentials for default service account
 
 Go to the [IAM & admin dashboard](https://console.cloud.google.com/iam-admin),
