@@ -76,6 +76,24 @@ The App Engine domain should be automatically added to `ALLOWED_HOSTS` in
 Should you experience problems with your domain not being whitelisted, check
 there first.
 
+## Deploy
+
+You should now be able to deploy the service. For a full release, simply run
+
+```bash
+./release.sh
+```
+
+If you don't need to build a new recommender and datebase version, it should
+suffice to run
+
+```
+pipenv run pynt syncdata releaseserver
+```
+
+Either way, after successful deployment the service should be available at
+https://$PROJECT.appspot.com/.
+
 ## Quick summary
 
 * Create GC project
