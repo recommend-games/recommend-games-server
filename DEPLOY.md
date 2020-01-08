@@ -10,7 +10,8 @@ new project.
 Open the [App Engine dashboard](https://console.cloud.google.com/appengine) and
 create a new app in the region of your choice with the flexible environment.
 
-Some of the steps required:
+## Quick summary
+
 * Create GC project
 * Create GAE app (default)
 * Create GCS bucket
