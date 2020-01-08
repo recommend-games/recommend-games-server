@@ -5,7 +5,15 @@
 Log in to [Google Cloud console](https://console.cloud.google.com) and create a
 new project. We'll refer to the project ID you chose as `$PROJECT`.
 
-Run `gcloud init` to initialise your project in your terminal.
+You may have to activate billing and upgrade your account to access all features
+required for this project.
+
+Run `gcloud init` to initialise your project in your terminal, then authenticate
+via `gcloud auth login`. In case you're having trouble with Python 2 vs 3, try:
+
+```bash
+CLOUDSDK_PYTHON=python3 gcloud auth login
+```
 
 ## Create App Engine app
 
@@ -24,6 +32,41 @@ Open the [PubSub dashboard](https://console.cloud.google.com/cloudpubsub) and
 create the topic `users`, then a subscription `crawl` attached to that topic.
 Set this subscription to "Pull" delivery type, "Never expire", 600 seconds
 acknowledgement deadline, and 1 day retention duration.
+
+## Create credentials for default service account
+
+Go to the [IAM & admin dashboard](https://console.cloud.google.com/iam-admin),
+section [Service accounts](https://console.cloud.google.com/iam-admin/serviceaccounts),
+and find the App Engine default service account. Select "Create key" from the
+actions, and download the key in JSON format. Move that file to the root of this
+project as `gs.json`. **This is a private key, do not check it into version
+control!**
+
+Now you should be able to log in to [Container Registry](https://console.cloud.google.com/gcr):
+
+```bash
+cat gs.json | docker login -u _json_key --password-stdin https://gcr.io
+```
+
+Read more about using [JSON credentials to access GCR](https://cloud.google.com/container-registry/docs/advanced-authentication#json_key_file).
+
+## Update settings
+
+Edit your [`.env`](.env.example) file to use the correct project:
+
+```bash
+GC_PROJECT=$PROJECT
+```
+
+Similarly, edit [`app.yaml`](app.yaml) to use the correct environment variables:
+
+```yaml
+env_variables:
+    GC_PROJECT: $PROJECT
+    GC_DATA_BUCKET: $PROJECT-data
+    PUBSUB_QUEUE_PROJECT: $PROJECT
+    PUBSUB_QUEUE_TOPIC: users
+```
 
 ## Quick summary
 
