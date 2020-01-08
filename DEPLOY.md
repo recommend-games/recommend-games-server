@@ -3,12 +3,27 @@
 ## Create Google Cloud project
 
 Log in to [Google Cloud console](https://console.cloud.google.com) and create a
-new project.
+new project. We'll refer to the project ID you chose as `$PROJECT`.
+
+Run `gcloud init` to initialise your project in your terminal.
 
 ## Create App Engine app
 
 Open the [App Engine dashboard](https://console.cloud.google.com/appengine) and
 create a new app in the region of your choice with the flexible environment.
+
+## Create Storage buckets
+
+Open the [Storage dashboard](https://console.cloud.google.com/storage) and
+create the bucket `$PROJECT-data` in the same region as the App Engine app
+above. Leave the default options otherwise.
+
+## Create PubSub topic and subscription
+
+Open the [PubSub dashboard](https://console.cloud.google.com/cloudpubsub) and
+create the topic `users`, then a subscription `crawl` attached to that topic.
+Set this subscription to "Pull" delivery type, "Never expire", 600 seconds
+acknowledgement deadline, and 1 day retention duration.
 
 ## Quick summary
 
