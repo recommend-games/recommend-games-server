@@ -1,5 +1,15 @@
 # Deployment to Google Cloud
 
+## Create Google Cloud project
+
+Log in to [Google Cloud console](https://console.cloud.google.com) and create a
+new project.
+
+## Create App Engine app
+
+Open the [App Engine dashboard](https://console.cloud.google.com/appengine) and
+create a new app in the region of your choice with the flexible environment.
+
 Some of the steps required:
 * Create GC project
 * Create GAE app (default)
