@@ -33,7 +33,7 @@ ALLOWED_HOSTS = [
 ]
 
 if os.getenv("GC_PROJECT"):
-    ALLOWED_HOSTS += f".{os.getenv('GC_PROJECT')}.appspot.com"
+    ALLOWED_HOSTS += [f".{os.getenv('GC_PROJECT')}.appspot.com"]
 
 # Application definition
 
