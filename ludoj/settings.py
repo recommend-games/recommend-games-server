@@ -28,11 +28,12 @@ ALLOWED_HOSTS = [
     "localhost",
     "ludoj.herokuapp.com",
     "ludoj-staging.herokuapp.com",
-    ".recommend-games.appspot.com",
-    ".recommend-ludoj.appspot.com",
     ".recommend.games",
     ".recommended.games",
 ]
+
+if os.getenv("GC_PROJECT"):
+    ALLOWED_HOSTS += f".{os.getenv('GC_PROJECT')}.appspot.com"
 
 # Application definition
 
