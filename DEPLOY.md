@@ -92,7 +92,7 @@ pipenv run pynt syncdata releaseserver
 ```
 
 Either way, after successful deployment the service should be available at
-https://$PROJECT.appspot.com/.
+[https://$PROJECT.appspot.com/](https://this-could-be-your-project.appspot.com/).
 
 ## Configure domains
 
