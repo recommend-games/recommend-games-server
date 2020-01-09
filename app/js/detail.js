@@ -144,7 +144,7 @@ rgApp.controller('DetailController', function DetailController(
         data = _(data)
             .filter(['ranking_type', rankingType])
             .map(function (item) {
-                return {x: moment(item.date), y: item.rank};
+                return {x: item.date, y: item.rank};
             })
             .sortBy('x');
         data = _.isNil(startDate) ? data : data.filter(function (item) { return item.x >= startDate; });
@@ -206,17 +206,31 @@ rgApp.controller('DetailController', function DetailController(
         $scope.chart.update();
     }
 
+    function bestRanking(rankings, rankingType) {
+        rankingType = rankingType || 'bgg';
+        return _(rankings)
+            .filter({'ranking_type': rankingType})
+            .orderBy(['rank', 'date'], ['asc', 'desc'])
+            .head();
+    }
+
     rankingsService.getRankings($routeParams.id, true)
         .then(function (rankings) {
             if (_.isEmpty(rankings)) {
                 $scope.chart = null;
                 $scope.chartVisible = false;
                 $scope.rankings = null;
+                $scope.bestRankingBGG = null;
+                $scope.bestRankingRG = null;
+
                 return $q.reject('unable to load rankings');
             }
 
             $scope.chartVisible = true;
             $scope.rankings = rankings;
+            $scope.bestRankingBGG = bestRanking(rankings, 'bgg');
+            $scope.bestRankingRG = bestRanking(rankings, 'fac');
+
             return findElement('#ranking-history-container');
         })
         .then(function (container) {
@@ -282,7 +296,7 @@ rgApp.controller('DetailController', function DetailController(
 
             container.children().remove();
             var element = $('<input type="text" id="date-range" class="form-control" />').appendTo(container),
-                minDate = moment(_.minBy($scope.rankings, 'date').date),
+                minDate = _.minBy($scope.rankings, 'date').date,
                 ranges = _(allRanges)
                     .filter(function (item) { return item[1] >= minDate; })
                     .map(function (item) { return [item[0], [item[1], endDate]]; })

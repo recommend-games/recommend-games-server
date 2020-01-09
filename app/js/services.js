@@ -1153,6 +1153,11 @@ rgApp.factory('rankingsService', function rankingsService(
                     return $q.reject('Unable to load rankings.');
                 }
 
+                rankings = _.map(rankings, function (item) {
+                    item.date = moment(item.date);
+                    return item;
+                });
+
                 cache[id] = rankings;
                 return rankings;
             })

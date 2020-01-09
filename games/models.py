@@ -22,6 +22,28 @@ from django.db.models import (
 from django_extensions.db.fields.json import JSONField
 
 
+class Ranking(Model):
+    """Ranking model."""
+
+    BGG = "bgg"
+    FACTOR = "fac"
+    SIMILARITY = "sim"
+    TYPES = ((BGG, "BoardGameGeek"), (FACTOR, "Factor"), (SIMILARITY, "Similarity"))
+
+    game = ForeignKey("Game", on_delete=CASCADE)
+    ranking_type = CharField(max_length=3, choices=TYPES, default=BGG, db_index=True)
+    rank = PositiveIntegerField(db_index=True)
+    date = DateField(db_index=True)
+
+    class Meta:
+        """Meta."""
+
+        ordering = ("ranking_type", "date", "rank")
+
+    def __str__(self):
+        return f"#{self.rank}: {self.game} ({self.ranking_type}, {self.date})"
+
+
 class Game(Model):
     """ game model """
 
@@ -89,6 +111,30 @@ class Game(Model):
     luding_id = JSONField(default=list)
     spielen_id = JSONField(default=list)
     bga_id = JSONField(default=list)
+
+    def highest_ranking(self, ranking_type=Ranking.BGG):
+        """Find the highest ever rank of the given type."""
+        return (
+            # pylint: disable=no-member
+            self.ranking_set.filter(ranking_type=ranking_type)
+            .order_by("rank", "-date")
+            .first()
+        )
+
+    @property
+    def highest_ranking_bgg(self):
+        """Highest BGG ranking."""
+        return self.highest_ranking(ranking_type=Ranking.BGG)
+
+    @property
+    def highest_ranking_factor(self):
+        """Highest factor model ranking."""
+        return self.highest_ranking(ranking_type=Ranking.FACTOR)
+
+    @property
+    def highest_ranking_similarity(self):
+        """Highest similarity model ranking."""
+        return self.highest_ranking(ranking_type=Ranking.SIMILARITY)
 
     class Meta:
         """ meta """
@@ -158,28 +204,6 @@ class Mechanic(Model):
 
     def __str__(self):
         return self.name
-
-
-class Ranking(Model):
-    """Ranking model."""
-
-    BGG = "bgg"
-    FACTOR = "fac"
-    SIMILARITY = "sim"
-    TYPES = ((BGG, "BoardGameGeek"), (FACTOR, "Factor"), (SIMILARITY, "Similarity"))
-
-    game = ForeignKey(Game, on_delete=CASCADE)
-    ranking_type = CharField(max_length=3, choices=TYPES, default=BGG, db_index=True)
-    rank = PositiveIntegerField(db_index=True)
-    date = DateField(db_index=True)
-
-    class Meta:
-        """Meta."""
-
-        ordering = ("ranking_type", "date", "rank")
-
-    def __str__(self):
-        return f"#{self.rank}: {self.game} ({self.ranking_type}, {self.date})"
 
 
 class User(Model):

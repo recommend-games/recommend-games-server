@@ -24,6 +24,16 @@ from .models import (
 )
 
 
+class RankingSerializer(ModelSerializer):
+    """Ranking serializer."""
+
+    class Meta:
+        """Meta."""
+
+        model = Ranking
+        exclude = ("id", "game")
+
+
 class GameSerializer(ModelSerializer):
     """ game serializer """
 
@@ -99,16 +109,6 @@ class MechanicSerializer(ModelSerializer):
 
         model = Mechanic
         fields = "__all__"
-
-
-class RankingSerializer(ModelSerializer):
-    """Ranking serializer."""
-
-    class Meta:
-        """Meta."""
-
-        model = Ranking
-        exclude = ("id", "game")
 
 
 class CollectionSerializer(ModelSerializer):
