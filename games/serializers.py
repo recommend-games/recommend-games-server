@@ -58,10 +58,6 @@ class GameSerializer(ModelSerializer):
     spielen_id = ListField(child=CharField(), required=False)
     bga_id = ListField(child=CharField(), required=False)
 
-    # highest_ranking_bgg = RankingSerializer(read_only=True)
-    # highest_ranking_factor = RankingSerializer(read_only=True)
-    # highest_ranking_similarity = RankingSerializer(read_only=True)
-
     class Meta:
         """ meta """
 
