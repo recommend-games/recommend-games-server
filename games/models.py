@@ -115,6 +115,7 @@ class Game(Model):
     def highest_ranking(self, ranking_type=Ranking.BGG):
         """Find the highest ever rank of the given type."""
         return (
+            # pylint: disable=no-member
             self.ranking_set.filter(ranking_type=ranking_type)
             .order_by("rank", "-date")
             .first()
@@ -122,14 +123,17 @@ class Game(Model):
 
     @property
     def highest_ranking_bgg(self):
+        """Highest BGG ranking."""
         return self.highest_ranking(ranking_type=Ranking.BGG)
 
     @property
     def highest_ranking_factor(self):
+        """Highest factor model ranking."""
         return self.highest_ranking(ranking_type=Ranking.FACTOR)
 
     @property
     def highest_ranking_similarity(self):
+        """Highest similarity model ranking."""
         return self.highest_ranking(ranking_type=Ranking.SIMILARITY)
 
     class Meta:
