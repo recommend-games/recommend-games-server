@@ -220,6 +220,9 @@ rgApp.controller('DetailController', function DetailController(
                 $scope.chart = null;
                 $scope.chartVisible = false;
                 $scope.rankings = null;
+                $scope.bestRankingBGG = null;
+                $scope.bestRankingRG = null;
+
                 return $q.reject('unable to load rankings');
             }
 
