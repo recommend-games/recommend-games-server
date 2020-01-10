@@ -50,6 +50,16 @@ rgApp.controller('NavController', function NavController(
     updateNewsCount();
 });
 
-rgApp.controller('FooterController', function FooterController($scope) {
+rgApp.controller('FooterController', function FooterController(
+    $log,
+    $scope,
+    metaService
+) {
     $scope.yearNow = new Date().getFullYear();
+
+    metaService.getServerVersion(true)
+        .then(function (version) {
+            $scope.version = version.server_version || version.project_version || null;
+        })
+        .catch($log.error);
 });
