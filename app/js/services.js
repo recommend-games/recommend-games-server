@@ -131,9 +131,15 @@ rgApp.factory('gamesService', function gamesService(
         game.description_short = _.size(game.description) > 250 ? _.truncate(game.description, {'length': 250, 'separator': /,? +/}) : null;
 
         game.designer_data = _.isEmpty(game.designer) || _.isEmpty(game.designer_name) ?
-                null : _.fromPairs(_.zip(game.designer, game.designer_name));
+                null : _.zipObject(game.designer, game.designer_name);
         game.artist_data = _.isEmpty(game.artist) || _.isEmpty(game.artist_name) ?
-                null : _.fromPairs(_.zip(game.artist, game.artist_name));
+                null : _.zipObject(game.artist, game.artist_name);
+        game.game_type_data = _.isEmpty(game.game_type) || _.isEmpty(game.game_type_name) ?
+                null : _.zipObject(game.game_type, game.game_type_name);
+        game.category_data = _.isEmpty(game.category) || _.isEmpty(game.category_name) ?
+                null : _.zipObject(game.category, game.category_name);
+        game.mechanic_data = _.isEmpty(game.mechanic) || _.isEmpty(game.mechanic_name) ?
+                null : _.zipObject(game.mechanic, game.mechanic_name);
 
         var counts = _.map(_.range(1, 11), function (count) {
                 return between(game.min_players_best, count, game.max_players_best) ? 3
