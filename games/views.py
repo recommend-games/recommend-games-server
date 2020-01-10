@@ -640,8 +640,7 @@ class GameViewSet(PermissionsModelViewSet):
         return Response(
             {
                 "project_version": project_version(),
-                "server_version": normalize_space(os.getenv("CURRENT_VERSION_ID"))
-                or None,
+                "server_version": normalize_space(os.getenv("GAE_VERSION")) or None,
             }
         )
 
