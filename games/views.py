@@ -3,6 +3,7 @@
 """ views """
 
 import logging
+import os
 
 from datetime import timezone
 from functools import reduce
@@ -12,7 +13,14 @@ from django.conf import settings
 from django.db.models import Count, Q, Min
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
-from pytility import arg_to_iter, parse_bool, parse_date, parse_int, take_first
+from pytility import (
+    arg_to_iter,
+    normalize_space,
+    parse_bool,
+    parse_date,
+    parse_int,
+    take_first,
+)
 from rest_framework.decorators import action
 from rest_framework.exceptions import (
     NotAuthenticated,
@@ -46,7 +54,7 @@ from .serializers import (
     RankingSerializer,
     UserSerializer,
 )
-from .utils import load_recommender, model_updated_at, pubsub_push
+from .utils import load_recommender, model_updated_at, project_version, pubsub_push
 
 LOGGER = logging.getLogger(__name__)
 
@@ -620,11 +628,22 @@ class GameViewSet(PermissionsModelViewSet):
     # pylint: disable=no-self-use
     @action(detail=False)
     def updated_at(self, request):
-        """ recommend games """
+        """Get date of last model update."""
         updated_at = model_updated_at()
         if not updated_at:
             raise NotFound("unable to retrieve latest update")
         return Response({"updated_at": updated_at})
+
+    @action(detail=False)
+    def version(self, request):
+        """Get project and server version."""
+        return Response(
+            {
+                "project_version": project_version(),
+                "server_version": normalize_space(os.getenv("CURRENT_VERSION_ID"))
+                or None,
+            }
+        )
 
     @action(detail=False)
     def stats(self, request):

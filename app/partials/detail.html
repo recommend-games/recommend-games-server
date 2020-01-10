@@ -80,21 +80,24 @@
 		</p>
 		<!-- TODO super uply – this should be done in controller -->
 		<p ng-if="(game.game_type_name &amp;&amp; game.game_type_name.length) || (game.category_name &amp;&amp; game.category_name.length) || (game.mechanic_name &amp;&amp; game.mechanic_name.length)">
-			<span ng-repeat="game_type in game.game_type_name"
+			<a ng-repeat="(id, game_type) in game.game_type_data"
+					ng-href="/#/?gameType={{ id }}"
 					class="badge badge-dark mr-1">
 				<i class="fas fa-user-ninja"></i>
 				{{ game_type }}
-			</span>
-			<span ng-repeat="category in game.category_name"
+			</a>
+			<a ng-repeat="(id, category) in game.category_data"
+					ng-href="/#/?category={{ id }}"
 					class="badge badge-secondary mr-1">
 				<i class="fas fa-scroll"></i>
 				{{ category }}
-			</span>
-			<span ng-repeat="mechanic in game.mechanic_name"
+			</a>
+			<a ng-repeat="(id, mechanic) in game.mechanic_data"
+					ng-href="/#/?mechanic={{ id }}"
 					class="badge badge-light mr-1">
 				<i class="fas fa-cogs"></i>
 				{{ mechanic }}
-			</span>
+			</a>
 		</p>
 		<div ng-if="expandable"
 				ng-click="toggleDescription()"

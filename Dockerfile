@@ -14,7 +14,7 @@ RUN pip3 install --upgrade \
 COPY Pipfile* ./
 RUN pipenv install --deploy --verbose
 
-COPY .boto gs.json startup.sh ./
+COPY VERSION .boto gs.json startup.sh ./
 COPY ludoj ludoj
 COPY games games
 COPY static static
