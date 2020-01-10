@@ -1177,3 +1177,37 @@ rgApp.factory('rankingsService', function rankingsService(
 
     return service;
 });
+
+rgApp.factory('metaService', function metaService(
+    $http,
+    $log,
+    $q,
+    $sessionStorage,
+    API_URL
+) {
+    var service = {};
+
+    service.getServerVersion = function getServerVersion(noblock) {
+        if (!_.isEmpty($sessionStorage.version)) {
+            return $q.resolve($sessionStorage.version);
+        }
+
+        return $http.get(API_URL + 'games/version/', {'noblock': !!noblock})
+            .then(function (response) {
+                var version = response.data;
+                if (_.isEmpty(version) || !_.isPlainObject(version)) {
+                    return $q.reject('Unable to retrieve version.');
+                }
+                $sessionStorage.version = version;
+                return version;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to retrieve version.';
+                return $q.reject(response);
+            });
+    };
+
+    return service;
+});

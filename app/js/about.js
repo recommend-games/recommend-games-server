@@ -6,8 +6,10 @@
 
 rgApp.controller('AboutController', function AboutController(
     $location,
+    $log,
     $scope,
-    gamesService
+    gamesService,
+    metaService
 ) {
     gamesService.getGames(1, {
         'ordering': '-avg_rating',
@@ -25,6 +27,12 @@ rgApp.controller('AboutController', function AboutController(
         .then(function (response) {
             $scope.topBayes = _.head(response.results);
         });
+
+    metaService.getServerVersion(true)
+        .then(function (version) {
+            $scope.version = version.server_version || version.project_version || null;
+        })
+        .catch($log.error);
 
     gamesService.setTitle('About Recommend.Games: how it all works');
     gamesService.setCanonicalUrl($location.path());
