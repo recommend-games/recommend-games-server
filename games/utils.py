@@ -10,7 +10,7 @@ from datetime import timezone
 from functools import lru_cache
 
 from django.conf import settings
-from pytility import parse_date
+from pytility import normalize_space, parse_date
 
 LOGGER = logging.getLogger(__name__)
 
@@ -100,7 +100,7 @@ def model_updated_at(file_path=settings.MODEL_UPDATED_FILE):
     try:
         with open(file_path) as file_obj:
             updated_at = file_obj.read()
-        updated_at = " ".join(updated_at.split())
+        updated_at = normalize_space(updated_at)
         return parse_date(updated_at, tzinfo=timezone.utc)
     except Exception:
         pass
@@ -110,12 +110,10 @@ def model_updated_at(file_path=settings.MODEL_UPDATED_FILE):
 @lru_cache(maxsize=8)
 def project_version(file_path=settings.PROJECT_VERSION_FILE):
     """Project version."""
-    print(file_path)
     try:
         with open(file_path) as file_obj:
             version = file_obj.read()
-        print(version)
-        return " ".join(version.split())
+        return normalize_space(version) or None
     except Exception:
         pass
     return None
