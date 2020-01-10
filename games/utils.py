@@ -4,6 +4,7 @@
 
 import logging
 import os.path
+import re
 import timeit
 
 from datetime import timezone
@@ -13,6 +14,7 @@ from django.conf import settings
 from pytility import normalize_space, parse_date
 
 LOGGER = logging.getLogger(__name__)
+VERSION_REGEX = re.compile(r"^\D*(.+)$")
 
 
 def format_from_path(path):
@@ -107,13 +109,22 @@ def model_updated_at(file_path=settings.MODEL_UPDATED_FILE):
     return None
 
 
+def parse_version(version):
+    """Parse a version string to strip leading "v" etc."""
+    version = normalize_space(version)
+    if not version:
+        return None
+    match = VERSION_REGEX.match(version)
+    return match.group(1) if match else None
+
+
 @lru_cache(maxsize=8)
 def project_version(file_path=settings.PROJECT_VERSION_FILE):
     """Project version."""
     try:
         with open(file_path) as file_obj:
             version = file_obj.read()
-        return normalize_space(version) or None
+        return parse_version(version)
     except Exception:
         pass
     return None
