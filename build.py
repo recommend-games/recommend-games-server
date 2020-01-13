@@ -900,7 +900,7 @@ def releaseserver(
     """ build, push, and deploy new server version """
     image = image or f"gcr.io/{GC_PROJECT}/ludoj-server"
     version = version or _server_version()
-    date = django.utils.timezone.now().strftime("%Y%m%d%H%M%S")
+    date = django.utils.timezone.now().strftime("%Y%m%d-%H%M%S")
     LOGGER.info("Deploying server v%s-%s from file <%s>...", version, date, app_file)
     execute(
         "gcloud",
@@ -912,7 +912,7 @@ def releaseserver(
         "--image-url",
         f"{image}:{version}",
         "--version",
-        f"v{version}-{date}",
+        f"{version}-{date}",
         "--promote",
         "--quiet",
     )
