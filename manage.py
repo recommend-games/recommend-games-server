@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 if __name__ == "__main__":
     load_dotenv(verbose=True)
 
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ludoj.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "rg.settings")
 
     try:
         from django.core.management import execute_from_command_line

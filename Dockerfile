@@ -15,9 +15,9 @@ COPY Pipfile* ./
 RUN pipenv install --deploy --verbose
 
 COPY VERSION .boto gs.json startup.sh ./
-COPY ludoj ludoj
+COPY rg rg
 COPY games games
 COPY static static
 
 ENTRYPOINT ["pipenv", "run", "/bin/bash", "startup.sh"]
-CMD ["gunicorn", "--bind", ":8080", "--workers", "1", "--threads", "16", "ludoj.wsgi:application"]
+CMD ["gunicorn", "--bind", ":8080", "--workers", "1", "--threads", "16", "rg.wsgi:application"]

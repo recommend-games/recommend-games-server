@@ -132,7 +132,7 @@ rgApp.controller('HistoryController', function HistoryController(
         .then(function (response) {
             $scope.data = response.data;
             $scope.datasets = makeDataSets(response.data, rankingType, startDate, endDate);
-            return findElement('#ludoj-history');
+            return findElement('#rg-history');
         })
         .then(function (container) {
             var rows = _.size($scope.datasets),

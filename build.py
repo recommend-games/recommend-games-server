@@ -21,7 +21,7 @@ from pytility import parse_bool, parse_date, parse_float, parse_int, to_str
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 load_dotenv(verbose=True)
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ludoj.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "rg.settings")
 os.environ.setdefault("PYTHONPATH", BASE_DIR)
 os.environ["DEBUG"] = ""
 sys.path.insert(0, BASE_DIR)
@@ -30,11 +30,13 @@ django.setup()
 LOGGER = logging.getLogger(__name__)
 SETTINGS = django.conf.settings
 DATA_DIR = SETTINGS.DATA_DIR
-SCRAPER_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "ludoj-scraper"))
-RECOMMENDER_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "ludoj-recommender"))
-SCRAPED_DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "ludoj-data"))
+SCRAPER_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "board-game-scraper"))
+RECOMMENDER_DIR = os.path.abspath(
+    os.path.join(BASE_DIR, "..", "board-game-recommender")
+)
+SCRAPED_DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "board-game-data"))
 URL_LIVE = "https://recommend.games/"
-GC_PROJECT = os.getenv("GC_PROJECT") or "recommend-ludoj"
+GC_PROJECT = os.getenv("GC_PROJECT") or "recommend-games"
 GC_DATA_BUCKET = os.getenv("GC_DATA_BUCKET") or f"{GC_PROJECT}-data"
 
 logging.basicConfig(
@@ -59,30 +61,6 @@ def _remove(path):
         os.remove(path)
     except OSError:
         shutil.rmtree(path, ignore_errors=True)
-
-
-@task()
-def rsync(
-    host="ludoj-hq",
-    port=2222,
-    src=os.path.join(SCRAPER_DIR, "feeds", ""),
-    dst=os.path.join(SCRAPER_DIR, "feeds", ""),
-):
-    """ sync remote files """
-    port = parse_int(port)
-    LOGGER.info("Syncing with <%s:%d> from <%s> to <%s>...", host, port, src, dst)
-    os.makedirs(dst, exist_ok=True)
-    execute(
-        "rsync",
-        "--archive",
-        "--verbose",
-        "--human-readable",
-        "--progress",
-        "--rsh",
-        f"ssh -p {port}",
-        f"{host}:{src}",
-        dst,
-    )
 
 
 @task()
@@ -869,7 +847,7 @@ def collectstatic(delete=True):
 def buildserver(images=None, tags=None):
     """ build Docker image """
 
-    images = images or ("ludoj-server", f"gcr.io/{GC_PROJECT}/ludoj-server")
+    images = images or ("rg-server", f"gcr.io/{GC_PROJECT}/rg-server")
     tags = tags or ("latest", _server_version())
     all_tags = [f"{i}:{t}" for i in images if i for t in tags if t]
 
@@ -887,7 +865,7 @@ def buildserver(images=None, tags=None):
 @task()
 def pushserver(image=None, version=None):
     """ push Docker image to remote repo """
-    image = image or f"gcr.io/{GC_PROJECT}/ludoj-server"
+    image = image or f"gcr.io/{GC_PROJECT}/rg-server"
     version = version or _server_version()
     LOGGER.info("Pushing Docker image <%s:%s> to repo...", image, version)
     execute("docker", "push", f"{image}:{version}")
@@ -898,7 +876,7 @@ def releaseserver(
     app_file=os.path.join(BASE_DIR, "app.yaml"), image=None, version=None
 ):
     """ build, push, and deploy new server version """
-    image = image or f"gcr.io/{GC_PROJECT}/ludoj-server"
+    image = image or f"gcr.io/{GC_PROJECT}/rg-server"
     version = version or _server_version()
     date = django.utils.timezone.now().strftime("%Y%m%d-%H%M%S")
     LOGGER.info("Deploying server v%s-%s from file <%s>...", version, date, app_file)
@@ -955,7 +933,7 @@ def lintdocker(base_dir=BASE_DIR):
 @task()
 def lintpy(*modules):
     """ lint Python files """
-    modules = modules or ("ludoj", "games", "build.py", "manage.py")
+    modules = modules or ("games", "rg", "build.py", "manage.py")
     with safe_cd(BASE_DIR):
         execute("black", "--diff", "--exclude", "/migrations/", *modules)
         execute("pylint", "--exit-zero", *modules)
