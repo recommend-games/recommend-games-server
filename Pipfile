@@ -11,7 +11,7 @@ board-game-recommender = "*"
 django = "*"
 django-extensions = "*"
 django-filter = "*"
-django-rest-framework-proxy = "*"
+django-rest-framework-proxy = {editable = true, ref = "django3", git = "https://github.com/MarkusShepherd/django-rest-framework-proxy.git"}
 djangorestframework = "*"
 google-cloud-pubsub = "*"
 gunicorn = "*"

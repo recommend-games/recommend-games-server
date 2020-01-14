@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "abf31a80bc7b444c06433e70b73561b3ead273bfa09815a658cf424fa0a37ad0"
+            "sha256": "6ade188da1858c075fd577ce008329f52fc3deb7c814c6e76fccf7db8b91e085"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -139,11 +139,9 @@
             "version": "==2.2.0"
         },
         "django-rest-framework-proxy": {
-            "hashes": [
-                "sha256:f5154c525c851f98680a960f43526de98af545e1cb9b4cfaa08a230fb7f1e58d"
-            ],
-            "index": "pypi",
-            "version": "==1.6.0"
+            "editable": true,
+            "git": "https://github.com/MarkusShepherd/django-rest-framework-proxy.git",
+            "ref": "3b9d8389174acc1a41b72fefe32f0d7d87b070ba"
         },
         "djangorestframework": {
             "hashes": [
