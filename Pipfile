@@ -8,10 +8,10 @@ python_version = "3.6"
 
 [packages]
 board-game-recommender = "*"
-django = "<3.0.0"
+django = "*"
 django-extensions = "*"
 django-filter = "*"
-django-rest-framework-proxy = "*"
+django-rest-framework-proxy = {editable = true, ref = "django3", git = "https://github.com/MarkusShepherd/django-rest-framework-proxy.git"}
 djangorestframework = "*"
 google-cloud-pubsub = "*"
 gunicorn = "*"
