@@ -25,6 +25,11 @@ rgApp.controller('ListController', function ListController(
         userStats = {},
         fetchPopularGames;
 
+    $scope.loadItems = function loadItems(query) {
+        $log.info(query);
+        return _.uniq(query);
+    }
+
     function filtersActive() {
         return _.sum([
             !!$scope.count.enabled,

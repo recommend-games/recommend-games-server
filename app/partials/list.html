@@ -176,6 +176,10 @@
 						</button>
 					</div>
 				</div>
+				<tags-input ng-model="tags">
+					<auto-complete source="loadItems($query)"></auto-complete>
+				</tags-input>
+				<div>{{ tags | json }}</div>
 				<div id="form-exclude-filters" class="collapse">
 					<div class="{{ user &amp;&amp; !groupRecommendation ? 'text-success' : 'text-muted' }} mb-0">
 						Exclude games from recommendations:

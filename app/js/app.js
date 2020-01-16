@@ -9,6 +9,7 @@ var rgApp = angular.module('rgApp', [
     'ngAnimate',
     'ngRoute',
     'ngStorage',
+    'ngTagsInput',
     'rzModule',
     'toastr'
 ]);
