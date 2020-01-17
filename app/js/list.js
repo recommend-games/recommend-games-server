@@ -5,6 +5,7 @@
 'use strict';
 
 rgApp.controller('ListController', function ListController(
+    $http,
     $location,
     $log,
     $filter,
@@ -13,6 +14,7 @@ rgApp.controller('ListController', function ListController(
     $routeParams,
     $scope,
     $timeout,
+    API_URL,
     filterService,
     gamesService,
     personsService,
@@ -25,10 +27,23 @@ rgApp.controller('ListController', function ListController(
         userStats = {},
         fetchPopularGames;
 
-    $scope.loadItems = function loadItems(query) {
-        $log.info(query);
-        return _.uniq(query);
-    }
+    $scope.loadUsers = function loadUsers(user) {
+        var userUri = encodeURIComponent(user);
+
+        return $http.get(API_URL + 'users/?search=' + userUri + '&ordering=-updated_at', {'noblock': true})
+            .then(function (response) {
+                return _(_.get(response, 'data.results', []))
+                    .map('name')
+                    .uniq()
+                    .value();
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to find "' + user + '".';
+                return $q.reject(response);
+            });
+    };
 
     function filtersActive() {
         return _.sum([

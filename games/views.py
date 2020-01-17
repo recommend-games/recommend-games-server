@@ -764,6 +764,10 @@ class UserViewSet(PermissionsModelViewSet):
     lookup_url_kwarg = "pk"
     stats_sites = GameViewSet.stats_sites
 
+    filter_backends = (OrderingFilter, SearchFilter)
+    ordering_fields = ("name", "updated_at")
+    search_fields = ("name",)
+
     # pylint: disable=unused-argument,invalid-name
     @action(detail=True)
     def stats(self, request, pk=None):

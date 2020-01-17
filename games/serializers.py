@@ -126,10 +126,10 @@ class CollectionSerializer(ModelSerializer):
 class UserSerializer(ModelSerializer):
     """ user serializer """
 
-    games = CollectionSerializer(source="collection_set", many=True, read_only=True)
+    # games = CollectionSerializer(source="collection_set", many=True, read_only=True)
 
     class Meta:
         """ meta """
 
         model = User
-        fields = "__all__"
+        exclude = ("games",)
