@@ -27,6 +27,10 @@ rgApp.controller('ListController', function ListController(
         userStats = {},
         fetchPopularGames;
 
+    $scope.tags = _.map(params.for, function (user) {
+        return {'text': user};
+    });
+
     $scope.loadUsers = function loadUsers(user) {
         var userUri = encodeURIComponent(user);
 

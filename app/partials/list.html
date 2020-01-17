@@ -176,8 +176,14 @@
 						</button>
 					</div>
 				</div>
-				<tags-input ng-model="tags">
-					<auto-complete source="loadUsers($query)"></auto-complete>
+				<tags-input ng-model="tags"
+						placeholder="BoardGameGeek user name"
+						max-length="20"
+						add-on-paste="true"
+						replace-spaces-with-dashes="false">
+					<auto-complete source="loadUsers($query)"
+						max-results-to-show="25"
+						select-first-match="false"></auto-complete>
 				</tags-input>
 				<div>{{ tags | json }}</div>
 				<div id="form-exclude-filters" class="collapse">
