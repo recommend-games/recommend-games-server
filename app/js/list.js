@@ -27,7 +27,7 @@ rgApp.controller('ListController', function ListController(
         userStats = {},
         fetchPopularGames;
 
-    $scope.tags = _.map(params.for, function (user) {
+    $scope.users = _.map(params.for, function (user) {
         return {'text': user};
     });
 

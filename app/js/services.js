@@ -951,7 +951,7 @@ rgApp.factory('filterService', function filterService(
     service.paramsFromScope = function paramsFromScope(scope) {
         scope = scope || {};
 
-        var userList = parseList(scope.user, true),
+        var userList = parseList(_.isEmpty(scope.users) ? scope.user : _.map(scope.users, 'text'), true),
             result = {
                 'for': _.isEmpty(userList) ? null : userList,
                 'search': scope.search,

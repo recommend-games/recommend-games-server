@@ -151,7 +151,7 @@
 						class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
 					Personal recommendations for:
 				</label>
-				<div class="input-group">
+				<!-- <div class="input-group">
 					<input type="search"
 						id="user"
 						name="user"
@@ -175,17 +175,33 @@
 							<i class="fas fa-dice"></i>
 						</button>
 					</div>
+				</div> -->
+				<div class="input-group">
+					<tags-input ng-model="users"
+							placeholder="BoardGameGeek user name"
+							max-length="20"
+							add-on-enter="true"
+							add-on-paste="true"
+							replace-spaces-with-dashes="false"
+							style="flex: 1 1 0%;">
+						<auto-complete source="loadUsers($query)"
+							max-results-to-show="25"
+							select-first-match="false"></auto-complete>
+					</tags-input>
+					<div class="input-group-append">
+						<button type="button"
+								ng-disabled="isEmpty(users)"
+								ng-click="clearField('users'); toggleCollapse('#form-exclude-filters', false)"
+								class="btn btn-outline-secondary">
+							<i class="fas fa-times"></i>
+						</button>
+						<button type="submit"
+								ng-disabled="isEmpty(users)"
+								class="btn btn-primary">
+							<i class="fas fa-dice"></i>
+						</button>
+					</div>
 				</div>
-				<tags-input ng-model="tags"
-						placeholder="BoardGameGeek user name"
-						max-length="20"
-						add-on-paste="true"
-						replace-spaces-with-dashes="false">
-					<auto-complete source="loadUsers($query)"
-						max-results-to-show="25"
-						select-first-match="false"></auto-complete>
-				</tags-input>
-				<div>{{ tags | json }}</div>
 				<div id="form-exclude-filters" class="collapse">
 					<div class="{{ user &amp;&amp; !groupRecommendation ? 'text-success' : 'text-muted' }} mb-0">
 						Exclude games from recommendations:
