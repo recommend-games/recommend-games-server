@@ -8,7 +8,7 @@ ENV PYTHONPATH=.
 RUN mkdir -p /app
 WORKDIR /app
 
-RUN pip3 install --upgrade \
+RUN python3.7 -m pip install --upgrade \
         gsutil==4.47 \
         pipenv==2018.11.26
 COPY Pipfile* ./
