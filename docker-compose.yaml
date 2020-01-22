@@ -2,8 +2,8 @@ version: '3'
 
 services:
     web:
-        image: ludoj-server:latest
-        container_name: ludoj
+        image: rg-server:latest
+        container_name: rg
         build:
             context: '.'
             dockerfile: Dockerfile
@@ -17,8 +17,8 @@ services:
             - ./data:/app/data
         restart: always
         networks:
-            - ludoj
+            - rg
 
 networks:
-    ludoj:
+    rg:
         driver: bridge

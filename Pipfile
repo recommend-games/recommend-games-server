@@ -4,7 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"
 
 [packages]
 board-game-recommender = "*"
@@ -18,7 +18,7 @@ gunicorn = "*"
 markdown = "*"
 pandas = "*"
 pytility = {extras = ["dates"], version = "*"}
-turicreate = "<5.7"
+turicreate = "*"
 whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
