@@ -5,7 +5,7 @@ set -euxo pipefail
 DATA_DIR="${DATA_DIR:-data}"
 SITEMAP_SRC="${SITEMAP_SRC:-"${DATA_DIR}/sitemap.xml"}"
 SITEMAP_DST="${SITEMAP_DST:-"static/sitemap.xml"}"
-GC_PROJECT="${GC_PROJECT:-recommend-ludoj}"
+GC_PROJECT="${GC_PROJECT:-recommend-games}"
 GC_DATA_BUCKET="${GC_DATA_BUCKET:-"${GC_PROJECT}-data"}"
 
 if [[ -d "${DATA_DIR}" ]] && [[ "$(find "${DATA_DIR}" -type f | wc -m)" != '0' ]]; then

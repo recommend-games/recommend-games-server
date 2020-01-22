@@ -26,8 +26,6 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "[::1]",
     "localhost",
-    "ludoj.herokuapp.com",
-    "ludoj-staging.herokuapp.com",
     ".recommend.games",
     ".recommended.games",
 ]
@@ -63,7 +61,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "ludoj.urls"
+ROOT_URLCONF = "rg.urls"
 
 TEMPLATES = [
     {
@@ -81,7 +79,7 @@ TEMPLATES = [
     }
 ]
 
-WSGI_APPLICATION = "ludoj.wsgi.application"
+WSGI_APPLICATION = "rg.wsgi.application"
 
 SECURE_SSL_REDIRECT = bool(os.getenv("SECURE_SSL_REDIRECT"))
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

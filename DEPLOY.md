@@ -72,7 +72,7 @@ env_variables:
 ```
 
 The App Engine domain should be automatically added to `ALLOWED_HOSTS` in
-[settings.py](ludoj/settings.py) if `$GC_PROJECT` is configured correctly.
+[settings.py](rg/settings.py) if `$GC_PROJECT` is configured correctly.
 Should you experience problems with your domain not being whitelisted, check
 there first.
 
