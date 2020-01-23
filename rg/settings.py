@@ -30,6 +30,9 @@ ALLOWED_HOSTS = [
     ".recommended.games",
 ]
 
+if DEBUG:
+    ALLOWED_HOSTS += [".local"]
+
 if os.getenv("GC_PROJECT"):
     ALLOWED_HOSTS += [f".{os.getenv('GC_PROJECT')}.appspot.com"]
 
