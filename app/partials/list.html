@@ -179,10 +179,12 @@
 				<div class="input-group">
 					<tags-input ng-model="users"
 							placeholder="BoardGameGeek user name"
+							min-length="3"
 							max-length="20"
-							add-on-enter="true"
 							add-on-paste="true"
 							replace-spaces-with-dashes="false"
+							enable-editing-last-tag="true"
+							spellcheck="false"
 							style="flex: 1 1 0%;">
 						<auto-complete source="loadUsers($query)"
 							max-results-to-show="25"
