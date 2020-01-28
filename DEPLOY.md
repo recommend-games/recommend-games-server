@@ -1,5 +1,9 @@
 # Deployment to Google Cloud
 
+This document describes the deployment process to a new Google Cloud environment.
+If you just want to learn how to get started or what tools you need to install,
+read the [contribution guidelines](CONTRIBUTING.md).
+
 ## Create Google Cloud project
 
 Log in to [Google Cloud console](https://console.cloud.google.com) and create a
