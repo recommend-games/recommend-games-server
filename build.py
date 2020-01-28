@@ -778,22 +778,27 @@ def builddbfull():
     """ merge, link, train, and build, all relevant files """
 
 
+def _sync_data(src, dst, retries=0):
+    LOGGER.info("Syncing <%s> with <%s>...", src, dst)
+    try:
+        execute(
+            "gsutil", "-m", "rsync", "-d", "-r", src, dst,
+        )
+
+    except SystemExit:
+        LOGGER.exception("An error occurred when syncing <%s> with <%s>", src, dst)
+
+        if retries <= 0:
+            raise
+
+        LOGGER.info("%d retries left...", retries)
+        _sync_data(src, dst, retries - 1)
+
+
 @task()
-def syncdata(src=os.path.join(DATA_DIR, ""), bucket=GC_DATA_BUCKET):
+def syncdata(src=os.path.join(DATA_DIR, ""), bucket=GC_DATA_BUCKET, retries=3):
     """ sync data with GCS """
-    LOGGER.info("Syncing <%s> with GCS bucket <%s>...", src, bucket)
-    os.environ["CLOUDSDK_PYTHON"] = ""
-    execute(
-        "gsutil",
-        "-m",
-        "-o",
-        "GSUtil:parallel_composite_upload_threshold=100M",
-        "rsync",
-        "-d",
-        "-r",
-        src,
-        f"gs://{bucket}/",
-    )
+    _sync_data(src=src, dst=f"gs://{bucket}/", retries=retries)
 
 
 @task(builddb, syncdata)
