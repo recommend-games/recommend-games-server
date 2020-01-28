@@ -26,7 +26,6 @@ black = "==19.10b0" # no released version, so need to pin exact pre-release vers
 board-game-scraper = "*"
 csvkit = "*"
 gitpython = "*"
-gsutil = "*"
 lxml = "*"
 mypy = "*"
 psutil = "*"
