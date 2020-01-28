@@ -1042,15 +1042,24 @@ def releasefull():
 @task()
 def lintshell(base_dir=BASE_DIR):
     """ lint Shell scripts """
-    execute("find", base_dir, "-name", "*.sh", "-ls", "-exec", "shellcheck", "{}", ";")
+    execute("find", base_dir, "-iname", "*.sh", "-ls", "-exec", "shellcheck", "{}", ";")
 
 
 @task()
 def lintdocker(base_dir=BASE_DIR):
     """Lint Dockerfiles."""
     execute(
-        "find", base_dir, "-name", "Dockerfile*", "-ls", "-exec", "hadolint", "{}", ";"
+        "find", base_dir, "-iname", "Dockerfile*", "-ls", "-exec", "hadolint", "{}", ";"
     )
+
+
+@task()
+def lintmarkdown(base_dir=BASE_DIR):
+    """Lint Markdown documents."""
+    execute(
+        "find", base_dir, "-iname", "*.md", "-ls", "-exec", "markdownlint", "{}", ";"
+    )
+    execute("find", base_dir, "-iname", "*.md", "-ls", "-exec", "mdl", "{}", ";")
 
 
 @task()
@@ -1085,7 +1094,7 @@ def lintcss():
         execute("csslint", "app.css")
 
 
-@task(lintshell, lintdocker, lintpy, linthtml, lintjs, lintcss)
+@task(lintshell, lintdocker, lintmarkdown, lintpy, linthtml, lintjs, lintcss)
 def lint():
     """ lint everything """
 
