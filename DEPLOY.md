@@ -87,7 +87,7 @@ You should now be able to deploy the service. For a full release, simply run
 If you don't need to build a new recommender and datebase version, it should
 suffice to run
 
-```
+```bash
 pipenv run pynt syncdata releaseserver
 ```
 
