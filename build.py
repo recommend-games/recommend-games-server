@@ -23,6 +23,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(verbose=True)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "rg.settings")
 os.environ.setdefault("PYTHONPATH", BASE_DIR)
+os.environ.setdefault("CLOUDSDK_PYTHON", "python3")
 os.environ["DEBUG"] = ""
 sys.path.insert(0, BASE_DIR)
 django.setup()
