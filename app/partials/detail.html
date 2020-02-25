@@ -303,23 +303,12 @@
 					<input type="checkbox"
 						id="display-rg-factor"
 						name="display-rg-factor"
-						ng-model="display.rgFactor" />
-					<span class="slider {{ display.rgFactor ? 'bg-success' : 'bg-secondary' }}"></span>
+						ng-model="display.factor" />
+					<span class="slider {{ display.factor ? 'bg-success' : 'bg-secondary' }}"></span>
 				</label>
-				<label class="{{ display.rgFactor ? 'rg-color' : 'text-muted' }} mr-2"
+				<label class="{{ display.factor ? 'rg-color' : 'text-muted' }} mr-2"
 						for="display-rg-factor">
 					<strong class="recommend-games">Recommend.Games</strong>
-				</label>
-				<label class="switch mr-1">
-					<input type="checkbox"
-						id="display-rg-similarity"
-						name="display-rg-similarity"
-						ng-model="display.rgSimilarity" />
-					<span class="slider {{ display.rgSimilarity ? 'bg-success' : 'bg-secondary' }}"></span>
-				</label>
-				<label class="{{ display.rgSimilarity ? 'rg-color-light' : 'text-muted' }} mr-2"
-						for="display-rg-similarity">
-					<strong class="recommend-games">Recommend.Games</strong> similarity
 				</label>
 				<label class="switch mr-1">
 					<input type="checkbox"
