@@ -41,8 +41,7 @@ rgApp.controller('DetailController', function DetailController(
     $scope.chartVisible = false;
     $scope.rankings = null;
     $scope.display = {
-        rgFactor: true,
-        rgSimilarity: false,
+        factor: true,
         bgg: true,
         startDate: startDate,
         endDate: endDate
@@ -168,8 +167,7 @@ rgApp.controller('DetailController', function DetailController(
 
     function makeDataSets(data, startDate, endDate) {
         var datasets = [
-                $scope.display.rgFactor ? makeDataSet(data, 'fac', startDate, endDate, 'R.G', 'rgba(0, 0, 0, 1)') : null,
-                $scope.display.rgSimilarity ? makeDataSet(data, 'sim', startDate, endDate, 'R.G sim', 'rgba(100, 100, 100, 1)') : null,
+                $scope.display.factor ? makeDataSet(data, 'fac', startDate, endDate, 'R.G', 'rgba(0, 0, 0, 1)') : null,
                 $scope.display.bgg ? makeDataSet(data, 'bgg', startDate, endDate, 'BGG', 'rgba(255, 81, 0, 1)') : null
             ];
         return _.filter(datasets);
@@ -320,7 +318,7 @@ rgApp.controller('DetailController', function DetailController(
         .catch($log.error);
 
     $scope.$watchGroup(
-        ['display.rgFactor', 'display.rgSimilarity', 'display.bgg'],
+        ['display.factor', 'display.bgg'],
         updateChart
     );
 
