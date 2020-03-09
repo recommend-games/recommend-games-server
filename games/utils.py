@@ -9,6 +9,7 @@ import timeit
 
 from datetime import timezone
 from functools import lru_cache
+from pathlib import Path
 
 from django.conf import settings
 from pytility import normalize_space, parse_date
@@ -147,6 +148,19 @@ def save_recommender_ranking(recommender, dst, similarity_model=False):
         recommendations = recommendations[recommendations["score"] > 0]
 
     recommendations.export_csv(str(dst))
+
+
+def count_lines(path) -> int:
+    """Return the line count of a given path."""
+    with open(path) as file:
+        return sum(1 for _ in file)
+
+
+def count_files(path, glob=None) -> int:
+    """Return the number of files and subdirectories in a given directory."""
+    path = Path(path)
+    files = path.glob(glob) if glob else path.iterdir()
+    return sum(1 for _ in files)
 
 
 class Timer:
