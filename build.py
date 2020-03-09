@@ -222,8 +222,14 @@ def mergebggratings(in_paths=None, out_path=None, full=False):
 
 
 @task()
-def mergebggrankings(in_paths=None, out_path=None, full=False):
+def mergebggrankings(in_paths=None, out_path=None, full=False, days=None):
     """ merge BoardGameGeek ranking data """
+
+    full = parse_bool(full)
+    days = parse_int(days)
+    days = 7 if not days and not full else days
+    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
+
     merge(
         **_merge_kwargs(
             site="bgg_rankings",
@@ -233,7 +239,7 @@ def mergebggrankings(in_paths=None, out_path=None, full=False):
             full=full,
             keys=("published_at", "bgg_id"),
             key_parsers=(parse_date, parse_int),
-            latest_min=None,
+            latest_min=latest_min,
             fieldnames=None
             if full
             else (
