@@ -41,7 +41,7 @@ def _week_day_number(day):
 @lru_cache(maxsize=128)
 def _make_instruction(day):
     day_number = day if isinstance(day, int) else _week_day_number(day)
-    return f"@w{day_number}+1w" if isinstance(day_number, int) else day
+    return f"@w{day_number + 1}+1w-1d" if isinstance(day_number, int) else day
 
 
 def _following(date, week_day="SUN", tzinfo=timezone.utc):
@@ -105,8 +105,7 @@ def _last_ranking(data, date=None):
 
 def _avg_ranking(data, date=None):
     groups = data.groupby("bgg_id")
-    rankings = groups["score"].mean()
-    rankings.reset_index(inplace=True)
+    rankings = groups["score"].mean().reset_index()
     rankings.sort_values("score", ascending=False, inplace=True)
     rankings["rank"] = range(1, len(rankings) + 1)
     if date is not None:
