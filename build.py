@@ -80,7 +80,7 @@ def gitprepare(repo=SCRAPED_DATA_DIR):
 @task()
 def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
     """ commit and push Git repo """
-    paths = paths or ("rankings", "scraped", "links.json", "prefixes.txt")
+    paths = paths or ("COUNT.md", "rankings", "scraped", "links.json", "prefixes.txt")
     LOGGER.info("Updating paths %r in Git repo <%s>...", paths, repo)
     with safe_cd(repo):
         try:
@@ -755,6 +755,38 @@ def fillrankingdb(path=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg")):
 
 
 @task()
+def updatecount(
+    dst=os.path.join(SCRAPED_DATA_DIR, "COUNT.md"),
+    template=os.path.join(BASE_DIR, "templates", "COUNT.md"),
+    paths_lines=os.path.join(SCRAPED_DATA_DIR, "scraped"),
+    line_glob="*.jl",
+    paths_files=os.path.join(SCRAPED_DATA_DIR, "rankings"),
+    file_glob="*.csv",
+):
+    """Update the line and file counts in the destination file."""
+
+    from games.utils import count_lines_and_files
+
+    counts = count_lines_and_files(
+        paths_lines=paths_lines,
+        line_glob=line_glob,
+        paths_files=paths_files,
+        file_glob=file_glob,
+    )
+
+    now = django.utils.timezone.now()
+    counts["date"] = now.date().isoformat()
+    counts["date_iso"] = now.isoformat(timespec="seconds")
+
+    LOGGER.info("Reading template from <%s>, writing result to <%s>...", template, dst)
+    # TODO make sure parent dir of dst exists
+    with open(template) as template_file, open(dst, "w") as dst_file:
+        template_str = template_file.read()
+        count_str = template_str.format(**counts)
+        dst_file.write(count_str)
+
+
+@task()
 def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_000):
     """Generate sitemap.xml."""
     limit = parse_int(limit) or 50_000
@@ -780,7 +812,9 @@ def builddb():
     """ build a new database """
 
 
-@task(gitprepare, mergeall, train, saverankings, builddb, gitupdate)  # link
+@task(
+    gitprepare, mergeall, train, saverankings, builddb, updatecount, gitupdate  # link
+)
 def builddbfull():
     """ merge, link, train, and build, all relevant files """
 

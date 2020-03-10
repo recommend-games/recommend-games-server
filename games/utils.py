@@ -9,9 +9,10 @@ import timeit
 
 from datetime import timezone
 from functools import lru_cache
+from pathlib import Path
 
 from django.conf import settings
-from pytility import normalize_space, parse_date
+from pytility import arg_to_iter, normalize_space, parse_date
 
 LOGGER = logging.getLogger(__name__)
 VERSION_REGEX = re.compile(r"^\D*(.+)$")
@@ -147,6 +148,55 @@ def save_recommender_ranking(recommender, dst, similarity_model=False):
         recommendations = recommendations[recommendations["score"] > 0]
 
     recommendations.export_csv(str(dst))
+
+
+def count_lines(path) -> int:
+    """Return the line count of a given path."""
+    with open(path) as file:
+        return sum(1 for _ in file)
+
+
+def count_files(path, glob=None) -> int:
+    """Return the number of files in a given directory."""
+    path = Path(path)
+    files = path.glob(glob) if glob else path.iterdir()
+    return sum(1 for file in files if file.is_file())
+
+
+def count_lines_and_files(
+    paths_lines=None, paths_files=None, line_glob=None, file_glob=None
+) -> dict:
+    """Counts lines and files in the given paths."""
+
+    result = {}
+
+    for path in arg_to_iter(paths_lines):
+        path = Path(path).resolve()
+        if path.is_dir():
+            files = path.glob(line_glob) if line_glob else path.iterdir()
+        elif path.is_file():
+            files = (path,)
+        else:
+            files = ()
+        for file in files:
+            LOGGER.info("Counting lines in <%s>...", file)
+            name = os.path.splitext(file.name)[0]
+            result[f"lc_{name}"] = count_lines(file)
+
+    for path in arg_to_iter(paths_files):
+        path = Path(path).resolve()
+        if not path.is_dir():
+            continue
+        for subdir in path.glob("**"):
+            LOGGER.info("Counting files in <%s>...", subdir)
+            if path == subdir:
+                name = path.name
+            else:
+                relative = subdir.relative_to(path)
+                name = "_".join(relative.parts)
+            result[f"fc_{name}"] = count_files(subdir, glob=file_glob)
+
+    return result
 
 
 class Timer:
