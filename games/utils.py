@@ -179,6 +179,7 @@ def count_lines_and_files(
         else:
             files = ()
         for file in files:
+            LOGGER.info("Counting lines in <%s>...", file)
             name = os.path.splitext(file.name)[0]
             result[f"lc_{name}"] = count_lines(file)
 
@@ -187,6 +188,7 @@ def count_lines_and_files(
         if not path.is_dir():
             continue
         for subdir in path.glob("**"):
+            LOGGER.info("Counting files in <%s>...", subdir)
             if path == subdir:
                 name = path.name
             else:
