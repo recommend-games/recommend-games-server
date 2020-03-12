@@ -228,6 +228,10 @@ def jl_to_csv(in_path, out_path, columns=None, joiner=","):
 
     columns = tuple(arg_to_iter(columns))
 
+    LOGGER.info(
+        "Reading JSON lines from <%s> and writing CSV to <%s>...", in_path, out_path
+    )
+
     with open(in_path) as in_file, open(out_path, "w") as out_file:
         if not columns:
             row = next(in_file, None)
