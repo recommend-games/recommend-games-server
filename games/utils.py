@@ -2,13 +2,15 @@
 
 """ utils """
 
+import json
 import logging
 import os.path
 import re
 import timeit
 
+from csv import DictWriter
 from datetime import timezone
-from functools import lru_cache
+from functools import lru_cache, partial
 from pathlib import Path
 
 from django.conf import settings
@@ -197,6 +199,50 @@ def count_lines_and_files(
             result[f"fc_{name}"] = count_files(subdir, glob=file_glob)
 
     return result
+
+
+def _process_value(value, joiner=","):
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, (list, tuple)):
+        return joiner.join(
+            str(v).split(":")[-1] for v in value if v is not None and v != ""
+        )
+    return value
+
+
+def _process_row(row, columns=None, joiner=","):
+    if isinstance(row, str):
+        row = json.loads(row)
+    if columns is None:
+        return {key: _process_value(value, joiner=joiner) for key, value in row.items()}
+    return {
+        column: _process_value(row.get(column), joiner=joiner) for column in columns
+    }
+
+
+def jl_to_csv(in_path, out_path, columns=None, joiner=","):
+    """Convert a JSON lines file into CSV."""
+
+    columns = tuple(arg_to_iter(columns))
+
+    with open(in_path) as in_file, open(out_path, "w") as out_file:
+        if not columns:
+            row = next(in_file, None)
+            row = _process_row(row, joiner=joiner) if row else {}
+            columns = tuple(row.keys())
+        else:
+            row = None
+
+        rows = map(partial(_process_row, columns=columns, joiner=joiner), in_file)
+
+        writer = DictWriter(out_file, fieldnames=columns)
+        writer.writeheader()
+        if row:
+            writer.writerow(row)
+        writer.writerows(rows)
 
 
 class Timer:
