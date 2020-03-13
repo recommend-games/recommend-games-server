@@ -882,7 +882,15 @@ def builddb():
 
 
 @task(
-    gitprepare, mergeall, train, saverankings, builddb, updatecount, gitupdate  # link
+    gitprepare,
+    mergeall,
+    makecsvs,
+    # link,
+    train,
+    saverankings,
+    builddb,
+    updatecount,
+    gitupdate,
 )
 def builddbfull():
     """ merge, link, train, and build, all relevant files """
