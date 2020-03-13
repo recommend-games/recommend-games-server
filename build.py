@@ -10,13 +10,14 @@ import sys
 
 from datetime import timedelta, timezone
 from functools import lru_cache
+from pathlib import Path
 
 import django
 
 from dotenv import load_dotenv
 from pynt import task
 from pyntcontrib import execute, safe_cd
-from pytility import parse_bool, parse_date, parse_float, parse_int, to_str
+from pytility import arg_to_iter, parse_bool, parse_date, parse_float, parse_int, to_str
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -39,6 +40,47 @@ SCRAPED_DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "board-game-data
 URL_LIVE = "https://recommend.games/"
 GC_PROJECT = os.getenv("GC_PROJECT") or "recommend-games"
 GC_DATA_BUCKET = os.getenv("GC_DATA_BUCKET") or f"{GC_PROJECT}-data"
+
+GAMES_CSV_COLUMNS = (
+    "bgg_id",
+    "name",
+    "year",
+    "game_type",
+    "designer",
+    "artist",
+    "publisher",
+    "min_players",
+    "max_players",
+    "min_players_rec",
+    "max_players_rec",
+    "min_players_best",
+    "max_players_best",
+    "min_age",
+    "min_age_rec",
+    "min_time",
+    "max_time",
+    "category",
+    "mechanic",
+    "cooperative",
+    "compilation",
+    "compilation_of",
+    "family",
+    "implementation",
+    "integration",
+    "rank",
+    "num_votes",
+    "avg_rating",
+    "stddev_rating",
+    "bayes_rating",
+    "complexity",
+    "language_dependency",
+    "bga_id",
+    "dbpedia_id",
+    "luding_id",
+    "spielen_id",
+    "wikidata_id",
+    "wikipedia_id",
+)
 
 logging.basicConfig(
     stream=sys.stderr,
@@ -787,6 +829,33 @@ def updatecount(
 
 
 @task()
+def makecsvs(
+    in_dir=os.path.join(SCRAPED_DATA_DIR, "scraped"),
+    glob="*_GameItem.jl",
+    file_ext=".csv",
+    columns=GAMES_CSV_COLUMNS,
+    joiner=",",
+    exclude=("bgg_rankings_GameItem.jl",),
+):
+    """Create CSV versions of JSON lines files in in_dir."""
+
+    from games.utils import jl_to_csv
+
+    in_dir = Path(in_dir)
+    exclude = frozenset(arg_to_iter(exclude))
+    LOGGER.info("Processing JSON lines files in <%s>, excluding %s...", in_dir, exclude)
+
+    for in_path in in_dir.rglob(glob):
+        if os.path.basename(in_path) in exclude:
+            LOGGER.info("Skipping <%s>...", in_path)
+        else:
+            out_path = os.path.splitext(in_path)[0] + file_ext
+            jl_to_csv(
+                in_path=in_path, out_path=out_path, columns=columns, joiner=joiner
+            )
+
+
+@task()
 def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_000):
     """Generate sitemap.xml."""
     limit = parse_int(limit) or 50_000
@@ -813,7 +882,15 @@ def builddb():
 
 
 @task(
-    gitprepare, mergeall, train, saverankings, builddb, updatecount, gitupdate  # link
+    gitprepare,
+    mergeall,
+    makecsvs,
+    # link,
+    train,
+    saverankings,
+    builddb,
+    updatecount,
+    gitupdate,
 )
 def builddbfull():
     """ merge, link, train, and build, all relevant files """
