@@ -17,7 +17,7 @@ import django
 from dotenv import load_dotenv
 from pynt import task
 from pyntcontrib import execute, safe_cd
-from pytility import parse_bool, parse_date, parse_float, parse_int, to_str
+from pytility import arg_to_iter, parse_bool, parse_date, parse_float, parse_int, to_str
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -835,17 +835,24 @@ def makecsvs(
     file_ext=".csv",
     columns=GAMES_CSV_COLUMNS,
     joiner=",",
+    exclude=("bgg_rankings_GameItem.jl",),
 ):
     """Create CSV versions of JSON lines files in in_dir."""
 
     from games.utils import jl_to_csv
 
     in_dir = Path(in_dir)
-    LOGGER.info("Processing JSON lines files in <%s>...", in_dir)
+    exclude = frozenset(arg_to_iter(exclude))
+    LOGGER.info("Processing JSON lines files in <%s>, excluding %s...", in_dir, exclude)
 
     for in_path in in_dir.rglob(glob):
-        out_path = os.path.splitext(in_path)[0] + file_ext
-        jl_to_csv(in_path=in_path, out_path=out_path, columns=columns, joiner=joiner)
+        if os.path.basename(in_path) in exclude:
+            LOGGER.info("Skipping <%s>...", in_path)
+        else:
+            out_path = os.path.splitext(in_path)[0] + file_ext
+            jl_to_csv(
+                in_path=in_path, out_path=out_path, columns=columns, joiner=joiner
+            )
 
 
 @task()
