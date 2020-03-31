@@ -12,6 +12,7 @@ Current item count as of **{date}**:
   * {lc_bgg_UserItem:,d} users
   * {lc_bgg_RatingItem:,d} ratings
   * {lc_bgg_rankings_GameItem:,d} rankings
+  * {lc_bgg_hotness_GameItem:,d} hotness
 * [DBpedia](https://wiki.dbpedia.org/):
   * {lc_dbpedia_GameItem:,d} games
 * [Luding.org](https://luding.org/):

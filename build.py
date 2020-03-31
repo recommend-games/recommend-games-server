@@ -300,6 +300,32 @@ def mergebggrankings(in_paths=None, out_path=None, full=False, days=None):
 
 
 @task()
+def mergebgghotness(in_paths=None, out_path=None, full=False, days=None):
+    """Merge BoardGameGeek hotness data."""
+
+    full = parse_bool(full)
+    days = parse_int(days)
+    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
+
+    merge(
+        **_merge_kwargs(
+            site="bgg_hotness",
+            item="GameItem",
+            in_paths=in_paths,
+            out_path=out_path,
+            full=full,
+            keys=("published_at", "bgg_id"),
+            key_parsers=(parse_date, parse_int),
+            latest_min=latest_min,
+            fieldnames=None
+            if full
+            else ("published_at", "rank", "bgg_id", "name", "year", "image_url",),
+            fieldnames_exclude=None,
+        )
+    )
+
+
+@task()
 def mergedbpedia(in_paths=None, out_path=None, full=False):
     """ merge DBpedia game data """
     merge(
@@ -390,6 +416,7 @@ def mergenews(
     mergebggusers,
     mergebggratings,
     mergebggrankings,
+    mergebgghotness,
 )
 def mergeall():
     """ merge all sites and items """
