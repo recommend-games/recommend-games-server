@@ -765,12 +765,30 @@ def splitrankings(
     dst_file="%Y%m%d-%H%M%S.csv",
     overwrite=False,
 ):
-    """Saves a snapshot of the BGG rankings."""
+    """Split the rankings data as one CSV file per date."""
     django.core.management.call_command(
         "splitrankings",
         src,
         out_dir=dst_dir,
         out_file=dst_file,
+        overwrite=parse_bool(overwrite),
+    )
+
+
+@task()
+def splithotness(
+    src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_hotness_GameItem.jl"),
+    dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "hotness"),
+    dst_file="%Y%m%d-%H%M%S.csv",
+    overwrite=False,
+):
+    """Split the hotness data as one CSV file per date."""
+    django.core.management.call_command(
+        "splitrankings",
+        src,
+        out_dir=dst_dir,
+        out_file=dst_file,
+        columns=("rank", "bgg_id"),
         overwrite=parse_bool(overwrite),
     )
 
