@@ -862,7 +862,7 @@ def makecsvs(
     file_ext=".csv",
     columns=GAMES_CSV_COLUMNS,
     joiner=",",
-    exclude=("bgg_rankings_GameItem.jl",),
+    exclude=("bgg_hotness_GameItem.jl", "bgg_rankings_GameItem.jl"),
 ):
     """Create CSV versions of JSON lines files in in_dir."""
 
