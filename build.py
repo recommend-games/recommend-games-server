@@ -440,8 +440,8 @@ def split(
         out_file=os.path.join(out_dir, "{prefix}.jl"),
         fields=fields,
         trie_file=trie_file,
-        limits=(limit,),
-        construct=construct,
+        limits=(parse_int(limit),),
+        construct=parse_bool(construct),
     )
     _remove(in_file)
 
@@ -473,11 +473,11 @@ def link(
         paths=paths,
         id_prefixes=id_prefixes,
         training_file=training_file if manual_labelling else None,
-        manual_labelling=manual_labelling,
+        manual_labelling=parse_bool(manual_labelling),
         threshold=parse_float(threshold),
         recall_weight=parse_float(recall_weight),
         output=output,
-        pretty_print=pretty_print,
+        pretty_print=parse_bool(pretty_print),
     )
 
 
@@ -505,10 +505,10 @@ def labellinks(
         id_prefixes=id_prefixes,
         training_file=training_file,
         manual_labelling=True,
-        threshold=threshold,
-        recall_weight=recall_weight,
+        threshold=parse_float(threshold),
+        recall_weight=parse_float(recall_weight),
         output=output,
-        pretty_print=pretty_print,
+        pretty_print=parse_bool(pretty_print),
     )
 
 
@@ -530,7 +530,7 @@ def _train(
         games_file=games_file,
         ratings_file=ratings_file,
         similarity_model=True,
-        max_iterations=max_iterations,
+        max_iterations=parse_int(max_iterations),
         verbose=True,
     )
 
@@ -765,9 +765,31 @@ def splitrankings(
     dst_file="%Y%m%d-%H%M%S.csv",
     overwrite=False,
 ):
-    """Saves a snapshot of the BGG rankings."""
+    """Split the rankings data as one CSV file per date."""
     django.core.management.call_command(
-        "splitrankings", src, out_dir=dst_dir, out_file=dst_file, overwrite=overwrite,
+        "splitrankings",
+        src,
+        out_dir=dst_dir,
+        out_file=dst_file,
+        overwrite=parse_bool(overwrite),
+    )
+
+
+@task()
+def splithotness(
+    src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_hotness_GameItem.jl"),
+    dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "hotness"),
+    dst_file="%Y%m%d-%H%M%S.csv",
+    overwrite=False,
+):
+    """Split the hotness data as one CSV file per date."""
+    django.core.management.call_command(
+        "splitrankings",
+        src,
+        out_dir=dst_dir,
+        out_file=dst_file,
+        columns=("rank", "bgg_id"),
+        overwrite=parse_bool(overwrite),
     )
 
 
@@ -847,9 +869,12 @@ def updatecount(
     counts["date"] = now.date().isoformat()
     counts["date_iso"] = now.isoformat(timespec="seconds")
 
+    template = Path(template).resolve()
+    dst = Path(dst).resolve()
+    dst.parent.mkdir(parents=True, exist_ok=True)
     LOGGER.info("Reading template from <%s>, writing result to <%s>...", template, dst)
-    # TODO make sure parent dir of dst exists
-    with open(template) as template_file, open(dst, "w") as dst_file:
+
+    with template.open() as template_file, dst.open("w") as dst_file:
         template_str = template_file.read()
         count_str = template_str.format(**counts)
         dst_file.write(count_str)
@@ -862,7 +887,7 @@ def makecsvs(
     file_ext=".csv",
     columns=GAMES_CSV_COLUMNS,
     joiner=",",
-    exclude=("bgg_rankings_GameItem.jl",),
+    exclude=("bgg_hotness_GameItem.jl", "bgg_rankings_GameItem.jl"),
 ):
     """Create CSV versions of JSON lines files in in_dir."""
 
@@ -897,6 +922,7 @@ def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_00
     filldb,
     dateflag,
     splitrankings,
+    splithotness,
     historicalbggrankings,
     fillrankingdb,
     compressdb,
@@ -943,7 +969,7 @@ def _sync_data(src, dst, retries=0):
 @task()
 def syncdata(src=os.path.join(DATA_DIR, ""), bucket=GC_DATA_BUCKET, retries=3):
     """ sync data with GCS """
-    _sync_data(src=src, dst=f"gs://{bucket}/", retries=retries)
+    _sync_data(src=src, dst=f"gs://{bucket}/", retries=parse_int(retries))
 
 
 @task(builddb, syncdata)
