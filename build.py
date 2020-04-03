@@ -922,6 +922,7 @@ def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_00
     filldb,
     dateflag,
     splitrankings,
+    splithotness,
     historicalbggrankings,
     fillrankingdb,
     compressdb,
