@@ -23750,6 +23750,1042 @@
                     "year": 2016
                 }
             ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Sword of Fire: the Battle of Lutter, 27th August 1626"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Giulia Canova"
+                        ]
+                    },
+                    "avg_rating": 5.33333,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 68039,
+                    "category": [
+                        "Pike and Shot:2725",
+                        "Print & Play:1120",
+                        "Renaissance:1070",
+                        "Wargame:1019"
+                    ],
+                    "compilation": false,
+                    "complexity": 1.0,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "After having passed most of the summer season waiting for event, Christian of Denmark decided to stir himself up and join the other part of his army to combat Tilly, left a little unmanned after having lost several detachments to guard conquered cities. His movements where to slow, and when the two armies joined battle, Tilly was probably a little superior to his opponent. Christian was unable to avoid the clash, and he suffered a defeat.\n\nEach combat unit represents from 250 to 1500 soldiers, and it is rated, from left to right, for combat morale and movement. Each infantry strength point is around 150 men, each cavalry strength point around 80 men. Each leader is rated for Command (indicating how many activation chits that leader has) and Movement.\n\nEach hex is about 75 meters.\nEach turn is half on hour.\n\nContains:\n6 page rules\n11x17\" map (in 2 8.5x11\" parts)\n1 player aid\n216 counters and markers",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Roberto Chiavini"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "family": [
+                        "History: Thirty Years War:58007",
+                        "TCS 30 years war series:6388"
+                    ],
+                    "freebase_id": null,
+                    "game_type": [
+                        "War Game:4664"
+                    ],
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/YTX40qLILiHu60-uu0J3NgQ7oN8=/0x0/pic685630.jpg",
+                        "https://cf.geekdo-images.com/thumb/img/0OYByuwOwhoVJyNS6QY0X8DAoac=/fit-in/200x150/pic685630.jpg"
+                    ],
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 2,
+                    "max_players_best": 2,
+                    "max_players_rec": 2,
+                    "mechanic": [
+                        "Chit-Pull System:2057",
+                        "Hexagon Grid:2026"
+                    ],
+                    "min_age": 12,
+                    "min_players": 2,
+                    "min_players_best": 2,
+                    "min_players_rec": 2,
+                    "name": "Sword of Fire: the Battle of Lutter, 27th August 1626",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Sword of Fire: the Battle of Lutter, 27th August 1626"
+                        ]
+                    },
+                    "num_votes": 3,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "TCS Games"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "stddev_rating": 3.39935,
+                    "url": "https://boardgamegeek.com/boardgame/68039",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2010
+                },
+                {
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Giulia Canova"
+                        ]
+                    },
+                    "best_rating": 5,
+                    "bga_id": "avhXQDMGrf",
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Roberto Chiavini"
+                        ]
+                    },
+                    "freebase_id": null,
+                    "image_url": [
+                        "https://s3-us-west-1.amazonaws.com/5cc.images/games/uploaded/1578348276425"
+                    ],
+                    "luding_id": null,
+                    "max_players": 2,
+                    "max_time": 60,
+                    "min_age": 12,
+                    "min_players": 1,
+                    "min_time": 60,
+                    "name": "The Glory that Was Vol. I: Greece. Episode IV \u2013 Socrates' Battles",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "The Glory that Was Vol. I: Greece. Episode IV \u2013 Socrates' Battles"
+                        ]
+                    },
+                    "num_votes": 0,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "TCS Games"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "url": "https://www.boardgameatlas.com/search/game/avhXQDMGrf/the-glory-that-was-vol-i-greece-episode-iv--socrates-battles",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2012
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Fresco: The Card Game"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Oliver Schlemmer"
+                        ]
+                    },
+                    "avg_rating": 6.66667,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 145603,
+                    "category": [
+                        "Renaissance:1070"
+                    ],
+                    "compilation": false,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "The ceiling in the cathedral is getting on a bit and is in urgent need of restoration. The bishop is awaiting important visitors and wants to show off his church from its best side. The players slip into the role of the fresco painters in this colorful family game and have to prove their abilities: But only the player who plans cleverly can win! This fascinating game already contains 3 expansion modules which can be combined with the basic game in any desired manner to influence the scope of the game. Elaborately structured game cards, additional colored pieces and lots of bonus counters provide even more excitement!",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Wolfgang Panning",
+                            "Marco Ruskowski",
+                            "Marcel S\u00fc\u00dfelbeck"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "family": [
+                        "Admin: Better Description Needed!:22783",
+                        "Admin: Unreleased Games:22184",
+                        "Visual Arts:56419",
+                        "Visual Arts: Painting:39521"
+                    ],
+                    "freebase_id": null,
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/kNY8252uTC97FHKFAEsnz08QIfk=/0x0/pic1769137.jpg",
+                        "https://cf.geekdo-images.com/thumb/img/nTl7IOKw9JbMC_Or3wXHmBSC_RY=/fit-in/200x150/pic1769137.jpg"
+                    ],
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 4,
+                    "max_players_best": 4,
+                    "max_players_rec": 4,
+                    "max_time": 45,
+                    "mechanic": [
+                        "Hand Management:2040"
+                    ],
+                    "min_age": 10,
+                    "min_players": 2,
+                    "min_players_best": 2,
+                    "min_players_rec": 2,
+                    "min_time": 45,
+                    "name": "Fresco: The Card Game",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Fresco: The Card Game"
+                        ]
+                    },
+                    "num_votes": 3,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Queen Games"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "stddev_rating": 1.24722,
+                    "url": "https://boardgamegeek.com/boardgame/145603",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": null
+                },
+                {
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Oliver Schlemmer"
+                        ]
+                    },
+                    "avg_rating": 3.4117647058823524,
+                    "best_rating": 5,
+                    "bga_id": "0fmLB8rB2G",
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "description": "This is an engaging game for families and gamers that has been recognized with over 15 major award nominations and wins worldwide, including a nomination for the Spiel de Jahres (German Board Game of the Year) and the winner of the Deutscher Spiel Preis.\n\nIn Fresco, you take the role of a master painter. By order of the bishop, you have been commissioned to restore a large fresco painting on the cathedral's ceiling. But not surprisingly, you are not the only master commissioned for the project.\n\nYou will need to carefully plan your workday: when to wake the apprentices, what stalls to visit, which paints to buy, which tiles to paint, and when it is appropriate to make a generous donation to the bishop. Buying materials costs money, so be prepared to take on additional projects to earn money to acquire the paints and materials necessary for completing your tasks; but your apprentices are not automatons, you need to keep them happy too.\n\nAn evening at the theater can go a long way toward keeping your apprentices happy. By managing your decisions carefully and planning ahead, you can become one of the masters of the ages.The decisions you make in Fresco are all wonderfully woven into the theme of managing the challenging undertaking of restoring a Renaissance masterpiece!\n\nContains:\nFresco base game, including modules 1, 2 and 3\nFresco expansion 1, including Modules 4, 5 and 6\nFresco Scrolls including, module 7\nFresco expansion 2, including modules 8, 9 and 10",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Wolfgang Panning",
+                            "Marco Ruskowski",
+                            "Marcel S\u00fc\u00dfelbeck"
+                        ]
+                    },
+                    "external_link": [
+                        "http://www.Queen-Games.com/2015/10/fresko/?utm_source=boardgameatlas.com&utm_medium=search&utm_campaign=bga_ads"
+                    ],
+                    "freebase_id": null,
+                    "image_url": [
+                        "https://s3-us-west-1.amazonaws.com/5cc.images/games/uploaded/1559254973792-61wY3DgmqTL.jpg"
+                    ],
+                    "list_price": "USD62.99",
+                    "luding_id": null,
+                    "max_players": 4,
+                    "max_time": 75,
+                    "mechanic": [
+                        "PGjmKGi26h",
+                        "lA3KUtVFCy",
+                        "fBOTEBUAmV"
+                    ],
+                    "min_age": 10,
+                    "min_players": 2,
+                    "min_time": 60,
+                    "name": "Fresco Big Box",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Fresco Big Box"
+                        ]
+                    },
+                    "num_votes": 17,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Queen Games"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "url": "https://www.boardgameatlas.com/search/game/0fmLB8rB2G/fresco-big-box",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2014
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Fresco: The Card Game"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Oliver Schlemmer"
+                        ]
+                    },
+                    "avg_rating": 6.66667,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 145603,
+                    "category": [
+                        "Renaissance:1070"
+                    ],
+                    "compilation": false,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "The ceiling in the cathedral is getting on a bit and is in urgent need of restoration. The bishop is awaiting important visitors and wants to show off his church from its best side. The players slip into the role of the fresco painters in this colorful family game and have to prove their abilities: But only the player who plans cleverly can win! This fascinating game already contains 3 expansion modules which can be combined with the basic game in any desired manner to influence the scope of the game. Elaborately structured game cards, additional colored pieces and lots of bonus counters provide even more excitement!",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Wolfgang Panning",
+                            "Marco Ruskowski",
+                            "Marcel S\u00fc\u00dfelbeck"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "family": [
+                        "Admin: Better Description Needed!:22783",
+                        "Admin: Unreleased Games:22184",
+                        "Visual Arts:56419",
+                        "Visual Arts: Painting:39521"
+                    ],
+                    "freebase_id": null,
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/kNY8252uTC97FHKFAEsnz08QIfk=/0x0/pic1769137.jpg",
+                        "https://cf.geekdo-images.com/thumb/img/nTl7IOKw9JbMC_Or3wXHmBSC_RY=/fit-in/200x150/pic1769137.jpg"
+                    ],
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 4,
+                    "max_players_best": 4,
+                    "max_players_rec": 4,
+                    "max_time": 45,
+                    "mechanic": [
+                        "Hand Management:2040"
+                    ],
+                    "min_age": 10,
+                    "min_players": 2,
+                    "min_players_best": 2,
+                    "min_players_rec": 2,
+                    "min_time": 45,
+                    "name": "Fresco: The Card Game",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Fresco: The Card Game"
+                        ]
+                    },
+                    "num_votes": 3,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Queen Games"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "stddev_rating": 1.24722,
+                    "url": "https://boardgamegeek.com/boardgame/145603",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": null
+                },
+                {
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Oliver Schlemmer"
+                        ]
+                    },
+                    "avg_rating": 4.0,
+                    "best_rating": 5,
+                    "bga_id": "ApcN9YjOhl",
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "description": "Fresco: The Bishop's Favor , a promotional item from Queen Games for Spiel 2011, consists of 25 small tiles and rules.\n\nAt the start of the game, these tiles are placed face-down, randomized and placed one per fresco tile on the game board. Whenever a player completes a fresco tile where the bishop is currently located, the player claims both the fresco tile and the favor tile \u2013 which is revealed and grants an immediate reward of paint (red, blue, yellow), money (1 or 5), one VP, or one mood improvement.\n\nIf a player completes a fresco tile where the bishop is not located, the favor tile is removed from the game face-down with no benefit for anyone.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Wolfgang Panning",
+                            "Marco Ruskowski",
+                            "Marcel S\u00fc\u00dfelbeck"
+                        ]
+                    },
+                    "freebase_id": null,
+                    "image_url": [
+                        "https://s3-us-west-1.amazonaws.com/5cc.images/games/uploaded/1548109221658"
+                    ],
+                    "luding_id": null,
+                    "max_players": 4,
+                    "max_time": 60,
+                    "mechanic": [
+                        "qu5BcGjAzk",
+                        "lA3KUtVFCy",
+                        "DEvPj5twid",
+                        "fBOTEBUAmV"
+                    ],
+                    "min_age": 10,
+                    "min_players": 2,
+                    "min_time": 60,
+                    "name": "Fresco: The Bishop's Favor",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Fresco: The Bishop's Favor"
+                        ]
+                    },
+                    "num_votes": 2,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Queen Games"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "url": "https://www.boardgameatlas.com/search/game/ApcN9YjOhl/fresco-the-bishops-favor",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2011
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Kampen om S\u00f6dert\u00e4lje"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Christensons Grafiska"
+                        ]
+                    },
+                    "avg_rating": 2.5,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 182906,
+                    "category": [
+                        "Economic:1021",
+                        "Trivia:1027"
+                    ],
+                    "compilation": false,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "This belongs to a series of promotional Monopoly clones featuring local businesses and trivia, published around 1988-1992. As in Monopoly you move around a board collecting \"shares\" and hope for others to land on your properties, although the specifics are slightly different. Obviously the trivia elements vary from game to game within the series, and there are also some small mechanical variations, e.g. in the composition of event cards and how rent is calculated.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Knut Helleland"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "freebase_id": null,
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/Hi_OXnHEM6X7i98c9xlBti8O2rk=/0x0/pic2599751.jpg",
+                        "https://cf.geekdo-images.com/thumb/img/PPMC8WPpZw5tgQdT3B6liY2Cho0=/fit-in/200x150/pic2599751.jpg"
+                    ],
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 6,
+                    "max_players_best": 6,
+                    "max_players_rec": 6,
+                    "mechanic": [
+                        "Point to Point Movement:2078",
+                        "Roll / Spin and Move:2035",
+                        "Set Collection:2004"
+                    ],
+                    "min_players": 2,
+                    "min_players_best": 2,
+                    "min_players_rec": 2,
+                    "name": "Kampen om S\u00f6dert\u00e4lje",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Kampen om S\u00f6dert\u00e4lje"
+                        ]
+                    },
+                    "num_votes": 2,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Lokalspelet I Skandinavien AB"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "stddev_rating": 0.5,
+                    "url": "https://boardgamegeek.com/boardgame/182906",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": null
+                },
+                {
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Christensons Grafiska"
+                        ]
+                    },
+                    "best_rating": 5,
+                    "bga_id": "edvnu4euHB",
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Knut Helleland"
+                        ]
+                    },
+                    "freebase_id": null,
+                    "image_url": [
+                        "https://s3-us-west-1.amazonaws.com/5cc.images/games/uploaded/1578877891162"
+                    ],
+                    "luding_id": null,
+                    "max_players": 6,
+                    "min_players": 2,
+                    "name": "Kampen om Uppsala",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Kampen om Uppsala"
+                        ]
+                    },
+                    "num_votes": 0,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Lokalspelet I Skandinavien AB"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "url": "https://www.boardgameatlas.com/search/game/edvnu4euHB/kampen-om-uppsala",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 1991
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Arena"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": []
+                    },
+                    "avg_rating": 6.0,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 32643,
+                    "category": [
+                        "Science Fiction:1016"
+                    ],
+                    "compilation": false,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "By keeping track of, and selecting, the speed of your ship you will move around an imaginable arena for space combat, where the galaxy's aces settle the score! But watch out - if you crash into the walls or any of the arenas obstacles, your ship will be hard to control. Goal of the game: To kill your opponents!\n\nEquipment:\n\n* As many Icehouse stashes as possible, a minimum of 1 per player\n* Tiled/checkered playing area, such as a chessboard, but the game has been optimized for a 8*8*8 board.\n* A way of indicating height if not enough pyramids are available (8-sided dice are perfect)\n* A way of indicating speed (again, 8-sided or even 6-sided (as you don't want to go very much faster than 6 in most cases) dice are good)\n* Markers to use for obstacles and power-ups, such as coins (different values of coin can be different power-ups) or Icehouse pyramids.\n* Several 8-sided die\n\nGame System\n\nIcehouse Pieces",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Christoffer Fogelstr\u00f6m"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "family": [
+                        "Looney Pyramid Games:20"
+                    ],
+                    "freebase_id": null,
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 4,
+                    "max_players_best": 4,
+                    "max_players_rec": 4,
+                    "max_time": 30,
+                    "min_players": 2,
+                    "min_players_best": 2,
+                    "min_players_rec": 2,
+                    "min_time": 30,
+                    "name": "Arena",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Arena"
+                        ]
+                    },
+                    "num_votes": 1,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "(Web published)"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "stddev_rating": 0.0,
+                    "url": "https://boardgamegeek.com/boardgame/32643",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2004
+                },
+                {
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": []
+                    },
+                    "bga_id": null,
+                    "bgg_id": 13534,
+                    "dbpedia_id": null,
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": []
+                    },
+                    "external_link": [
+                        "http://www.boardgamegeek.com/game/13534"
+                    ],
+                    "freebase_id": null,
+                    "game_type": [
+                        "Board"
+                    ],
+                    "luding_id": 16919,
+                    "max_players": 4,
+                    "min_players": 2,
+                    "name": "Arena",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Arena"
+                        ]
+                    },
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Lakeside Industries"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "url": "https://www.luding.org/cgi-bin/GameData.py/ENgameid/16919",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "year": 1962
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Schnellboote"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "John Kula"
+                        ]
+                    },
+                    "avg_rating": 6.35714,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 7024,
+                    "category": [
+                        "Nautical:1008",
+                        "Wargame:1019",
+                        "World War II:1049"
+                    ],
+                    "compilation": false,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "Schnellboote, Tactical Small Craft Warfare, 1939-1945.\n\nSimCan says: \"Darkness cloaks the Slot. Off the bow two other boats of the squadron idle along silently at 4 knots, almost invisible. The radio crackles into muffled life. The Tokyo Express has just passed the other half of the squadron, too distant to attack, but they are coming in. And they will now be between the fires of all six boats. The giant motors crank over, phosphorescent wakes building along the hulls, as the PTs rush to the attack point at 40 knots. Not all will return, but the Express will derail tonight.\"",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Stephen Newberg"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "family": [
+                        "SimCan's Tactical WWII Naval Wargames:6414"
+                    ],
+                    "freebase_id": null,
+                    "game_type": [
+                        "War Game:4664"
+                    ],
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/R7mtWvGtDcvFKHB8SYMth69MnhM=/0x0/pic30052.jpg",
+                        "https://cf.geekdo-images.com/thumb/img/YH8eLlxQ8_6NbxvR0vjSHdoNh1s=/fit-in/200x150/pic30052.jpg"
+                    ],
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 2,
+                    "max_players_best": 2,
+                    "max_players_rec": 2,
+                    "max_time": 120,
+                    "mechanic": [
+                        "Hexagon Grid:2026"
+                    ],
+                    "min_age": 12,
+                    "min_players": 2,
+                    "min_players_best": 2,
+                    "min_players_rec": 2,
+                    "min_time": 120,
+                    "name": "Schnellboote",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Schnellboote"
+                        ]
+                    },
+                    "num_votes": 7,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Simulations Canada"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "stddev_rating": 1.02519,
+                    "url": "https://boardgamegeek.com/boardgame/7024",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 1984
+                },
+                {
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": []
+                    },
+                    "best_rating": 5,
+                    "bga_id": "ALzURPIFvG",
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Stephen Newberg"
+                        ]
+                    },
+                    "freebase_id": null,
+                    "image_url": [
+                        "https://s3-us-west-1.amazonaws.com/5cc.images/games/uploaded/1578070257476"
+                    ],
+                    "luding_id": null,
+                    "max_players": 2,
+                    "max_time": 180,
+                    "min_age": 12,
+                    "min_players": 2,
+                    "min_time": 180,
+                    "name": "Battle Stations: An Operational Game of Modern Seapower",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Battle Stations: An Operational Game of Modern Seapower"
+                        ]
+                    },
+                    "num_votes": 0,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Simulations Canada"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "url": "https://www.boardgameatlas.com/search/game/ALzURPIFvG/battle-stations-an-operational-game-of-modern-seapower",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 1984
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Les Guerres Indiennes Volume I: Custer"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Lionel Liron"
+                        ]
+                    },
+                    "avg_rating": 7.0,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 168678,
+                    "category": [
+                        "American Indian Wars:1108",
+                        "Wargame:1019"
+                    ],
+                    "compilation": false,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "Les Guerres Indiennes (\"The Indian Wars\") is a series of solo games feigning all the conflicts which set the federal government of the United States against the Amerindian tribes throughout the XIXth century. The first volume of this series is centered on one of the characters the most known for this epic, colonel Georges Armstrong Custer.\n\nIn this game, three game boards represent the historic space of three major fights which delivers this hero of the western conquest to tribes Lakotas, Cheyenne and Arapaho: Washita (in November 27th, 1868), Honsinger Bluff (in August 4th, 1873) and Little Big Horn (in June 26th, 1876). On these maps, 1 cm represents approximately 200 meters and a game turn represent approximately half an hour of time.\nThe lenght of this game is 10 turns, it is the time which you have to manage the 7th of cavalry, the famous regiment of Custer, and allow him to fil his mission in spite of Indians warriors which will oppose you vehemently.\n\nYou can repel the American Indians who threaten your survival? You will try to replay history, but you can also explore new tracks by following the thread of the numerous proposed hypothetical scenarios. The task is difficult, but glorious. One thing's for sure, trust, it is a good day to win!",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Lionel Liron"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "freebase_id": null,
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/-KLFtf21HF_bte9Ua5MV6VXFA6I=/0x0/pic2297115.jpg",
+                        "https://cf.geekdo-images.com/thumb/img/8zJwyKoV4g1RsrBAhaspp77p3Xw=/fit-in/200x150/pic2297115.jpg"
+                    ],
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 1,
+                    "max_players_best": 1,
+                    "max_players_rec": 1,
+                    "max_time": 80,
+                    "mechanic": [
+                        "Simulation:2070"
+                    ],
+                    "min_age": 12,
+                    "min_players": 1,
+                    "min_players_best": 1,
+                    "min_players_rec": 1,
+                    "min_time": 80,
+                    "name": "Les Guerres Indiennes Volume I: Custer",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Les Guerres Indiennes Volume I: Custer"
+                        ]
+                    },
+                    "num_votes": 5,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Les Jeux du Griffon"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "stddev_rating": 0.894427,
+                    "url": "https://boardgamegeek.com/boardgame/168678",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2014
+                },
+                {
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Lionel Liron"
+                        ]
+                    },
+                    "best_rating": 5,
+                    "bga_id": "s7dbk65b6k",
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Lionel Liron"
+                        ]
+                    },
+                    "freebase_id": null,
+                    "image_url": [
+                        "https://s3-us-west-1.amazonaws.com/5cc.images/games/uploaded/1578609691813"
+                    ],
+                    "luding_id": null,
+                    "max_players": 1,
+                    "max_time": 180,
+                    "min_players": 1,
+                    "min_time": 180,
+                    "name": "Le Sultan du Feu",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Le Sultan du Feu"
+                        ]
+                    },
+                    "num_votes": 0,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Les Jeux du Griffon"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "url": "https://www.boardgameatlas.com/search/game/s7dbk65b6k/le-sultan-du-feu",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2014
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Kelowna On Board"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Eryn Mathias"
+                        ]
+                    },
+                    "avg_rating": 3.0,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 33303,
+                    "category": [
+                        "Economic:1021",
+                        "Negotiation:1026"
+                    ],
+                    "compilation": false,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "Kelowna On Board is a Monopoly clone based on the city in British Columbia, Canada. Board squares are replaced with landmarks and businesses from the area. Proceeds from the game go to benefit the Junior Achievement of British Columbia - Okanagan.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Ben Farella"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "family": [
+                        "... On Board:9311"
+                    ],
+                    "freebase_id": null,
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/j2lGhCrAIHykYGsMgIWSUrdDcY0=/0x0/pic275375.jpg",
+                        "https://cf.geekdo-images.com/thumb/img/euiXtanc1p10_yCXVDDL-QBs7QI=/fit-in/200x150/pic275375.jpg"
+                    ],
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 8,
+                    "max_players_best": 8,
+                    "max_players_rec": 8,
+                    "max_time": 90,
+                    "mechanic": [
+                        "Roll / Spin and Move:2035",
+                        "Set Collection:2004",
+                        "Trading:2008"
+                    ],
+                    "min_age": 8,
+                    "min_players": 2,
+                    "min_players_best": 2,
+                    "min_players_rec": 2,
+                    "min_time": 90,
+                    "name": "Kelowna On Board",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Kelowna On Board"
+                        ]
+                    },
+                    "num_votes": 3,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Help On Board"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "stddev_rating": 0.0,
+                    "url": "https://boardgamegeek.com/boardgame/33303",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2005
+                },
+                {
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Eryn Mathias"
+                        ]
+                    },
+                    "best_rating": 5,
+                    "bga_id": "wK65CjCBQc",
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Ben Farella"
+                        ]
+                    },
+                    "freebase_id": null,
+                    "image_url": [
+                        "https://s3-us-west-1.amazonaws.com/5cc.images/games/uploaded/1578426851517"
+                    ],
+                    "luding_id": null,
+                    "max_players": 8,
+                    "max_time": 90,
+                    "min_age": 8,
+                    "min_players": 2,
+                    "min_time": 90,
+                    "name": "Greater Saint John On Board",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Greater Saint John On Board"
+                        ]
+                    },
+                    "num_votes": 0,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Help On Board"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "url": "https://www.boardgameatlas.com/search/game/wK65CjCBQc/greater-saint-john-on-board",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2005
+                }
+            ]
         }
     ],
     "match": [
@@ -38399,6 +39435,2582 @@
                     "wikidata_id": null,
                     "wikipedia_id": null,
                     "worst_rating": 1,
+                    "year": null
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Tetris Link",
+                        "Tetris Link and Tetris Link Travel",
+                        "\ud14c\ud2b8\ub9ac\uc2a4 \ub9c1\ud06c"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": []
+                    },
+                    "avg_rating": 5.98845,
+                    "bayes_rating": 5.60796,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 93185,
+                    "category": [
+                        "Abstract Strategy:1009",
+                        "Puzzle:1028",
+                        "Video Game Theme:1101"
+                    ],
+                    "compilation": false,
+                    "complexity": 1.3125,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "In Tetris Link, based on the popular video game Tetris, players take turns dropping tetromino blocks into a grid, attempting to link same-colored tetrominos to score while simultaneously blocking opponents from doing the same. Players score points by linking three or more tetrominos together, but they lose points if they leave empty spaces in the tower grid. Once the tower is full, the game ends and the player with the most points wins.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": []
+                    },
+                    "easiest_complexity": 1,
+                    "family": [
+                        "Mensa Select:6485",
+                        "Tetris:9700"
+                    ],
+                    "freebase_id": null,
+                    "game_type": [
+                        "Abstract Game:4666",
+                        "Family Game:5499"
+                    ],
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/n5FCKV_zDAyznWEJoWucAqNVWNk=/0x0/pic1068120.jpg",
+                        "https://cf.geekdo-images.com/thumb/img/XAp50ssnm2__SD0xmWrZYzZ0ZeM=/fit-in/200x150/pic1068120.jpg"
+                    ],
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 4,
+                    "max_players_best": 4,
+                    "max_players_rec": 4,
+                    "max_time": 15,
+                    "mechanic": [
+                        "Pattern Building:2048"
+                    ],
+                    "min_age": 6,
+                    "min_players": 2,
+                    "min_players_best": 2,
+                    "min_players_rec": 2,
+                    "min_time": 15,
+                    "name": "Tetris Link",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Tetris Link",
+                            "Tetris Link and Tetris Link Travel",
+                            "\ud14c\ud2b8\ub9ac\uc2a4 \ub9c1\ud06c"
+                        ]
+                    },
+                    "num_votes": 479,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Asmodee",
+                            "Ideal",
+                            "John Adams Toys",
+                            "Korea Boardgames co., Ltd.",
+                            "Techno Source"
+                        ]
+                    },
+                    "rank": 6491,
+                    "spielen_id": null,
+                    "stddev_rating": 1.37829,
+                    "url": "https://boardgamegeek.com/boardgame/93185",
+                    "video_url": [
+                        "http://www.youtube.com/watch?v=kU80E_VrKx4",
+                        "http://www.youtube.com/watch?v=m8GMNuS8PGA",
+                        "http://www.youtube.com/watch?v=o6vCN7aeF4U",
+                        "http://www.youtube.com/watch?v=tLPM43KSnEI",
+                        "http://www.youtube.com/watch?v=6WxAWH2AKjE",
+                        "http://www.youtube.com/watch?v=EcjfusgPaGQ",
+                        "http://www.youtube.com/watch?v=Z_uV0zarg34",
+                        "http://www.youtube.com/watch?v=4-qBzOlcBbQ",
+                        "http://www.youtube.com/watch?v=cfNG13ZgmrY"
+                    ],
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2011
+                },
+                {
+                    "alt_name": [
+                        "Techno Source Tetris Link Game by University Games |Challenging Brainteaser Game Based on the Classic Video Game | For Ages 6 Years and Up"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "(Uncredited)"
+                        ]
+                    },
+                    "avg_rating": 3.0,
+                    "best_rating": 5,
+                    "bga_id": "i1MbiQn3nK",
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "description": "In Tetris Link , based on the popular video game Tetris , players take turns dropping tetromino blocks into a grid, attempting to link same-colored tetrominos to score while simultaneously blocking opponents from doing the same. Players score points by linking three or more tetrominos together, but they lose points if they leave empty spaces in the tower grid. Once the tower is full, the game ends and the player with the most points wins.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "(Uncredited)"
+                        ]
+                    },
+                    "freebase_id": null,
+                    "image_url": [
+                        "https://s3-us-west-1.amazonaws.com/5cc.images/games/uploaded/1547307933215"
+                    ],
+                    "luding_id": null,
+                    "max_players": 4,
+                    "max_time": 15,
+                    "mechanic": [
+                        "9YdRn9J9oZ"
+                    ],
+                    "min_age": 6,
+                    "min_players": 2,
+                    "min_time": 15,
+                    "name": "Tetris Link",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Tetris Link",
+                            "Techno Source Tetris Link Game by University Games |Challenging Brainteaser Game Based on the Classic Video Game | For Ages 6 Years and Up"
+                        ]
+                    },
+                    "num_votes": 5,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Asmodee",
+                            "Ideal",
+                            "John Adams Toys",
+                            "Techno Source"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "url": "https://www.boardgameatlas.com/search/game/i1MbiQn3nK/tetris-link",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2011
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "VENOM Assault"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Phil Cho",
+                            "Roberto Garcia",
+                            "Roger Bonet Martinez"
+                        ]
+                    },
+                    "avg_rating": 7.55582,
+                    "bayes_rating": 5.72303,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 174802,
+                    "category": [
+                        "Card Game:1002",
+                        "Fighting:1046",
+                        "Science Fiction:1016"
+                    ],
+                    "compilation": false,
+                    "complexity": 2.25,
+                    "cooperative": true,
+                    "dbpedia_id": null,
+                    "description": "In the year 2050 the United Nations made a startling discovery that changed the course of the future. They learned of the existence of a global terrorist organization known only as VENOM. This group was responsible not only for every act of terror in the past two decades, but they were also the ones who brought about the start of World War III.\n\nTheir only goal is that of world domination, and armed with this knowledge the UN enacted Project Freedom. Their chosen general, Abraham Steele, would be in charge of recruiting an elite task force whose only goal would be to stop VENOM once and for all.\n\nVenom Assault is a Cooperative Deck Building game with Dice based combat for 1-5 players. Players will use their turns to recruit new Freedom Squadron Soldiers and Vehicles into their hands that they will use to challenge one of the seven VENOM leaders on the board. Each card will have set abilities that can help bring about victory, but VENOM can also call upon their own troops to help them out as well.\n\nEach game will be played using one of ten missions in the base game, which will tell players what goals they need to accomplish to win the game. However VENOM is not going to be idle and if the players are not careful and quick, they may find they have lost to their devious foes while they weren't looking.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Jeff Arbough",
+                            "Michael Knight",
+                            "Dave Ploense"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "expansion": [
+                        "VENOM Assault: Villains & Valor:275410",
+                        "VENOM Assault: Walker:235906"
+                    ],
+                    "family": [
+                        "Crowdfunding: Kickstarter:8374"
+                    ],
+                    "freebase_id": null,
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/RICvnTVda7qmyEPjJbGuPD-MRIA=/0x0/pic2600739.jpg",
+                        "https://cf.geekdo-images.com/thumb/img/ki7CtBCawtkm2OEvW2M91p92OYk=/fit-in/200x150/pic2600739.jpg"
+                    ],
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 5,
+                    "max_players_best": 5,
+                    "max_players_rec": 5,
+                    "max_time": 120,
+                    "mechanic": [
+                        "Cooperative Game:2023",
+                        "Deck, Bag, and Pool Building:2664",
+                        "Dice Rolling:2072",
+                        "Hand Management:2040"
+                    ],
+                    "min_age": 13,
+                    "min_players": 1,
+                    "min_players_best": 1,
+                    "min_players_rec": 1,
+                    "min_time": 60,
+                    "name": "VENOM Assault",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "VENOM Assault"
+                        ]
+                    },
+                    "num_votes": 189,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Spyglass Games"
+                        ]
+                    },
+                    "rank": 4276,
+                    "spielen_id": null,
+                    "stddev_rating": 1.47501,
+                    "url": "https://boardgamegeek.com/boardgame/174802",
+                    "video_url": [
+                        "http://www.youtube.com/watch?v=LldAiSKFAcE",
+                        "http://www.youtube.com/watch?v=n3bw3zzeEEY",
+                        "http://www.youtube.com/watch?v=WAO7Cw1lY14",
+                        "http://www.youtube.com/watch?v=Fy0MG6qoaJE",
+                        "http://www.youtube.com/watch?v=ReXqVNgIPws",
+                        "http://www.youtube.com/watch?v=oeK0umANbyg",
+                        "http://www.youtube.com/watch?v=2wzO86fc1GM",
+                        "http://www.youtube.com/watch?v=Gpku4gUAbVo",
+                        "http://www.youtube.com/watch?v=LBDStUTiHl0",
+                        "http://www.youtube.com/watch?v=7zNRgYNliC0",
+                        "http://www.youtube.com/watch?v=LmWzuKXFBNc",
+                        "http://www.youtube.com/watch?v=h3MD6RbbrfQ",
+                        "http://www.youtube.com/watch?v=lQQYSVv34LQ",
+                        "http://www.youtube.com/watch?v=Q18hqVVAK0g",
+                        "http://www.youtube.com/watch?v=AnIbSRBPdQ0"
+                    ],
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2016
+                },
+                {
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Phil Cho",
+                            "Roberto Garcia",
+                            "Roger Bonet Martinez"
+                        ]
+                    },
+                    "bga_id": null,
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Jeff Arbough",
+                            "Michael Knight",
+                            "Dave Ploense"
+                        ]
+                    },
+                    "freebase_id": null,
+                    "game_type": [
+                        "Board"
+                    ],
+                    "luding_id": 30709,
+                    "max_players": 5,
+                    "min_age": 13,
+                    "min_players": 1,
+                    "name": "Venom Assault",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Venom Assault"
+                        ]
+                    },
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Spyglass Games"
+                        ]
+                    },
+                    "review_url": [
+                        "https://muwins.ch/2017/01/31/venom-assault-deckbau-wuerfel-kawumm/"
+                    ],
+                    "spielen_id": null,
+                    "url": "https://www.luding.org/cgi-bin/GameData.py/ENgameid/30709",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "year": null
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Basilinda"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": []
+                    },
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 99036,
+                    "category": [
+                        "Abstract Strategy:1009"
+                    ],
+                    "compilation": false,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "The game involves the placing of cannon and pieces on either side of a screen that is then removed and the results imposed. Pieces are removed and play resumes with the screen back in place. This is repeated until one side has lost its \"Captain\" piece, which ends the game.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "George Howard Monks"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "freebase_id": null,
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/5vpSRShB5I-Guv__Y5XJgRz_310=/0x0/pic1187893.png",
+                        "https://cf.geekdo-images.com/thumb/img/e5ucEbyW9ZZsswDpV5UwoH3lY_U=/fit-in/200x150/pic1187893.png"
+                    ],
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 2,
+                    "max_players_best": 2,
+                    "max_players_rec": 2,
+                    "min_players": 2,
+                    "min_players_best": 2,
+                    "min_players_rec": 2,
+                    "name": "Basilinda",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Basilinda"
+                        ]
+                    },
+                    "num_votes": 0,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "E.I. Horsman"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "stddev_rating": 0.0,
+                    "url": "https://boardgamegeek.com/boardgame/99036",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 1890
+                },
+                {
+                    "alt_name": [
+                        "Basilinda"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": []
+                    },
+                    "bga_id": null,
+                    "bgg_id": null,
+                    "dbpedia_id": "Basilinda",
+                    "description": "Basilinda is a board game that was created by George Howard Monks, the author of Halma. Basilinda was first published and manufactured in 1890, by E.I. Horsman, a toy manufacturer from New York. The game originally sold for $1.00 when it was released, and is said to resemble Chinese checkers.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "George Howard Monks"
+                        ]
+                    },
+                    "external_link": [
+                        "https://www.digitalcommonwealth.org/search/commonwealth:7m01c100q",
+                        "http://en.wikipedia.org/wiki/Basilinda",
+                        "http://www.wikidata.org/entity/Q4867433",
+                        "http://rdf.freebase.com/ns/m.0czf1j7",
+                        "http://wikidata.dbpedia.org/resource/Q4867433",
+                        "http://yago-knowledge.org/resource/Basilinda"
+                    ],
+                    "freebase_id": "/m/0czf1j7",
+                    "luding_id": null,
+                    "max_players": null,
+                    "min_players": 2,
+                    "name": "Basilinda",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Basilinda"
+                        ]
+                    },
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": []
+                    },
+                    "spielen_id": null,
+                    "url": "http://dbpedia.org/resource/Basilinda",
+                    "wikidata_id": "Q4867433",
+                    "wikipedia_id": "Basilinda",
+                    "year": null
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "The Kids of Catan",
+                        "Barna fra Catan",
+                        "Catan Gyerekeknek",
+                        "Cat\u00e1n Junior",
+                        "Catan Junior",
+                        "Les Enfants de Catane",
+                        "Kids from Catan",
+                        "Die Kinder von Catan",
+                        "Kinderen van Catan"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Tanja Donner",
+                            "Michaela Kienle",
+                            "Annette Nora Kara",
+                            "Susanne Reichardt"
+                        ]
+                    },
+                    "avg_rating": 5.27015,
+                    "bayes_rating": 5.42171,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 5824,
+                    "category": [
+                        "Children's Game:1041"
+                    ],
+                    "compilation": false,
+                    "complexity": 1.0602,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "A simplified building game for kids, based on the immensely popular The Settlers of Catan, wherein all players take part in the game at all times. The high quality wooden pieces are suitable not only for the game, but also for \"free play.\"\n\nEach player in turn rolls the die, and rotates the village plan clockwise that number of spaces. Resources are collected by each player depending on where their piece lands, and if one of each resource type has been collected by any player, that player may place one of their buildings on the village plan. If a player has built all of their buildings, they may build the Town Hall. The first player to build the Town Hall wins.\n\nBelongs to the Catan Series.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Klaus Teuber"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "family": [
+                        "Catan:3"
+                    ],
+                    "freebase_id": null,
+                    "game_type": [
+                        "Children's Game:4665"
+                    ],
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/2Tpnp2HdhjRV1kAXzhiwuNvTPU0=/0x0/pic222987.jpg",
+                        "https://cf.geekdo-images.com/thumb/img/zMXZtYAd-tqsE7LDMHkhZ-hcyq4=/fit-in/200x150/pic222987.jpg"
+                    ],
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 4,
+                    "max_players_best": 4,
+                    "max_players_rec": 4,
+                    "max_time": 20,
+                    "mechanic": [
+                        "Dice Rolling:2072",
+                        "Roll / Spin and Move:2035"
+                    ],
+                    "min_age": 4,
+                    "min_players": 2,
+                    "min_players_best": 2,
+                    "min_players_rec": 2,
+                    "min_time": 20,
+                    "name": "The Kids of Catan",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "The Kids of Catan",
+                            "Barna fra Catan",
+                            "Catan Gyerekeknek",
+                            "Cat\u00e1n Junior",
+                            "Catan Junior",
+                            "Les Enfants de Catane",
+                            "Kids from Catan",
+                            "Die Kinder von Catan",
+                            "Kinderen van Catan"
+                        ]
+                    },
+                    "num_votes": 650,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "KOSMOS",
+                            "999 Games",
+                            "danspil",
+                            "Devir",
+                            "Mayfair Games",
+                            "Ticado",
+                            "Tilsit"
+                        ]
+                    },
+                    "rank": 18342,
+                    "spielen_id": null,
+                    "stddev_rating": 1.6531,
+                    "url": "https://boardgamegeek.com/boardgame/5824",
+                    "video_url": [
+                        "http://www.youtube.com/watch?v=x9eO5Jrg0ac"
+                    ],
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2003
+                },
+                {
+                    "alt_name": [
+                        "The Kids of Catan"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Tanja Donner",
+                            "Michaela Kienle",
+                            "Annette Nora Kara",
+                            "Susanne Reichardt"
+                        ]
+                    },
+                    "avg_rating": 2.2,
+                    "best_rating": 5,
+                    "bga_id": "0FHk0Elx84",
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "description": "Each player has a set of buildings to place. Placing a building uses a whole wagon load of resources. The roll of the die determines how far the wagons will move. When any child stops beside a resource that they need, they can load the resource into their wagon. When your wagon is full, you get to build a new house. The house must be placed in the right spot in the village. Then the resources are returned to the board so they can be collected again. After you build all your houses, you begin collecting resources again to build the Town Hall. The player who builds the Town Hall wins the game. Of course, children are also encouraged to play with the wonderful wooden buildings by themselves, and to create their own games and adventures in Catan. The game is for 2 to 4 players and takes about 15 minutes to play.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Klaus Teuber"
+                        ]
+                    },
+                    "freebase_id": null,
+                    "image_url": [
+                        "https://s3-us-west-1.amazonaws.com/5cc.images/games/uploaded/1559257960601-51AC5M0Y0GL.jpg"
+                    ],
+                    "luding_id": null,
+                    "max_players": 4,
+                    "max_time": 20,
+                    "mechanic": [
+                        "R0bGq4cAl4",
+                        "mGBzR68m8Z"
+                    ],
+                    "min_age": 4,
+                    "min_players": 2,
+                    "min_time": 20,
+                    "name": "Kids of Catan",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Kids of Catan",
+                            "The Kids of Catan"
+                        ]
+                    },
+                    "num_votes": 5,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Mayfair Games"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "url": "https://www.boardgameatlas.com/search/game/0FHk0Elx84/kids-of-catan",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2003
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Legend of the Five Rings: The Card Game",
+                        "Legend of the Five Rings: Das Kartenspiel",
+                        "Legenda Pi\u0119ciu Kr\u0119g\u00f3w: Gra karciana",
+                        "La L\u00e9gende des Cinq Anneaux: Le jeux de cartes",
+                        "La Leggenda dei Cinque Anelli: Il Gioco di Carte",
+                        "La Leyenda de los Cinco Anillos: El Juego de Cartas"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": []
+                    },
+                    "avg_rating": 7.61327,
+                    "bayes_rating": 6.61364,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 184151,
+                    "category": [
+                        "Card Game:1002",
+                        "Collectible Components:1044",
+                        "Fantasy:1010"
+                    ],
+                    "compilation": false,
+                    "complexity": 4.0,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "Description from the publisher:\n\nWelcome to the realm of Rokugan: a land of samurai and mystics, mad dragons and divine beings \u2014 a land where honor is stronger than steel. Here, the clans serve the Emperor and engage in courtly deceptions and power plays, even as they wage war against each other and the evil forces that plague their realm. This is the world of Legend of the Five Rings!\n\nLegend of the Five Rings: The Card Game is a Living Card Game set in the world of Rokugan, the original setting for the Legend of the Five Rings collectible card game. To play a Living Card Game, players create individual decks of cards from a base game with a fixed set of cards; they can then add supplemental card packs to this game world, with each pack also having a fixed set of cards, in order to vary their game experience.\n\nWhile the connection of Legend of the Five Rings: The Card Game to Rokugan and the Colonies \u2014 as well as its pervasive themes of honor, nobility, magic, intrigue, duty, and warfare \u2014 should carry over from the original L5R CCG, Legend of the Five Rings: The Card Game is not compatible with that original game and will feature significant changes in the game mechanisms.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Brad Andres",
+                            "Erik Dahlman",
+                            "Nate French",
+                            "Tyler Parrot"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "expansion": [
+                        "Legend of the Five Rings: The Card Game \u2013 A Champion's Foresight:283479",
+                        "Legend of the Five Rings: The Card Game \u2013 All and Nothing:251395",
+                        "Legend of the Five Rings: The Card Game \u2013 Bonds of Blood:277421",
+                        "Legend of the Five Rings: The Card Game \u2013 Breath of the Kami:251391",
+                        "Legend of the Five Rings: The Card Game \u2013 Campaigns of Conquest:305707",
+                        "Legend of the Five Rings: The Card Game \u2013 Children of the Empire:262597",
+                        "Legend of the Five Rings: The Card Game \u2013 Clan War:294453",
+                        "Legend of the Five Rings: The Card Game \u2013 Defenders of Rokugan:294387",
+                        "Legend of the Five Rings: The Card Game \u2013 Disciples of the Void:245350",
+                        "Legend of the Five Rings: The Card Game \u2013 Draft Starter Pack:296610",
+                        "Legend of the Five Rings: The Card Game \u2013 Elements Unbound:251396",
+                        "Legend of the Five Rings: The Card Game \u2013 Fate Has No Secrets:237717",
+                        "Legend of the Five Rings: The Card Game \u2013 For Honor and Glory:237713",
+                        "Legend of the Five Rings: The Card Game \u2013 For the Empire:272605",
+                        "Legend of the Five Rings: The Card Game \u2013 Into the Forbidden City:237714",
+                        "Legend of the Five Rings: The Card Game \u2013 Justice for Satsume:278323",
+                        "Legend of the Five Rings: The Card Game \u2013 Masters of the Court: Crane Clan Pack:270215",
+                        "Legend of the Five Rings: The Card Game \u2013 Meditations on the Ephemeral:237718",
+                        "Legend of the Five Rings: The Card Game \u2013 Seekers of Wisdom:294356",
+                        "Legend of the Five Rings: The Card Game \u2013 Shoju's Duty:294390",
+                        "Legend of the Five Rings: The Card Game \u2013 Tainted Lands:251392",
+                        "Legend of the Five Rings: The Card Game \u2013 Tears of Amaterasu:236478",
+                        "Legend of the Five Rings: The Card Game \u2013 The Children of Heaven:289588",
+                        "Legend of the Five Rings: The Card Game \u2013 The Chrysanthemum Throne:237716",
+                        "Legend of the Five Rings: The Card Game \u2013 The Ebb and Flow:251394",
+                        "Legend of the Five Rings: The Card Game \u2013 The Emperor's Legion:291902",
+                        "Legend of the Five Rings: The Card Game \u2013 The Fires Within:251393",
+                        "Legend of the Five Rings: The Card Game \u2013 Underhand of the Emperor:256369",
+                        "Legend of the Five Rings: The Card Game \u2013 Warriors of the Wind: Unicorn Clan Pack:270214"
+                    ],
+                    "family": [
+                        "Asian Theme:9470",
+                        "Legend of the Five Rings:4712",
+                        "Living Card Game:5337"
+                    ],
+                    "freebase_id": null,
+                    "game_type": [
+                        "Customizable:4667"
+                    ],
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/7l0CBqvksO4Wi1nLkp0tmP4FxH0=/0x0/pic3763363.jpg",
+                        "https://cf.geekdo-images.com/thumb/img/NDA4Wm7rOMa9tnOxO_oN0AJEsLg=/fit-in/200x150/pic3763363.jpg"
+                    ],
+                    "implementation": [
+                        1887
+                    ],
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 2,
+                    "max_players_best": 2,
+                    "max_players_rec": 2,
+                    "max_time": 90,
+                    "mechanic": [
+                        "Action Points:2001",
+                        "Deck, Bag, and Pool Building:2664",
+                        "Hand Management:2040",
+                        "Secret Unit Deployment:2016",
+                        "Variable Player Powers:2015"
+                    ],
+                    "min_age": 14,
+                    "min_players": 2,
+                    "min_players_best": 2,
+                    "min_players_rec": 2,
+                    "min_time": 45,
+                    "name": "Legend of the Five Rings: The Card Game",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Legend of the Five Rings: The Card Game",
+                            "Legend of the Five Rings: Das Kartenspiel",
+                            "Legenda Pi\u0119ciu Kr\u0119g\u00f3w: Gra karciana",
+                            "La L\u00e9gende des Cinq Anneaux: Le jeux de cartes",
+                            "La Leggenda dei Cinque Anelli: Il Gioco di Carte",
+                            "La Leyenda de los Cinco Anillos: El Juego de Cartas"
+                        ]
+                    },
+                    "num_votes": 1929,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Fantasy Flight Games",
+                            "Asmodee",
+                            "Asterion Press",
+                            "Galakta"
+                        ]
+                    },
+                    "rank": 804,
+                    "spielen_id": null,
+                    "stddev_rating": 1.65733,
+                    "url": "https://boardgamegeek.com/boardgame/184151",
+                    "video_url": [
+                        "http://www.youtube.com/watch?v=lBmjEnnzvlw",
+                        "http://www.youtube.com/watch?v=qH4Lg6zbfSU",
+                        "http://www.youtube.com/watch?v=c-aAlX-6P-8",
+                        "http://www.youtube.com/watch?v=P1WJkjq30Eo",
+                        "http://www.youtube.com/watch?v=-R3jNd5HAwE",
+                        "http://www.youtube.com/watch?v=YetI_L1HuRQ",
+                        "http://www.youtube.com/watch?v=giv9GwqthhU",
+                        "http://www.youtube.com/watch?v=tOOb4zWgKbY",
+                        "http://www.youtube.com/watch?v=EZpEVEYYjuY",
+                        "http://www.youtube.com/watch?v=KOSHDksvvDE",
+                        "http://www.youtube.com/watch?v=hK_-GrUFO7c",
+                        "http://www.youtube.com/watch?v=tjL9AsA-svc",
+                        "http://www.youtube.com/watch?v=IBuTHGE-jGg",
+                        "http://www.youtube.com/watch?v=KTCHfpeJPmk",
+                        "http://www.youtube.com/watch?v=X0PeiGayIvI"
+                    ],
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2017
+                },
+                {
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": []
+                    },
+                    "avg_rating": 3.166666666666667,
+                    "best_rating": 5,
+                    "bga_id": "R7sq7FBdKd",
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "description": "Legend of the Five Rings: The Card Game is a player-influenced Living Card Game that sees two players take on the role of one of the seven Great Clans of Rokugan, vying for military and political control while maintaining Rokugan society\u2019s strict code of honor. Each player commands their forces with two separate decks: a dynasty deck fills their provinces with characters and holdings while a conflict deck consisting of tactics, maneuvers, followers, and attachments is used to turn the tide in a struggle for supremacy. During a game, players will engage in conflicts, both political and military based, with the goal of breaking their opponent\u2019s strongholds and winning the game. But the rules of society are absolute, and even in the fire of battle and heat of Rokugan\u2019s courts, clans must remember the tenets of Bushido, lest they lose everything in their single-minded pursuit of glory. The Legend of the Five Rings: The Card Game Core Set comes with everything a player needs to explore the seven great clans of Rokugan, the Crab Clan, Crane Clan, Dragon Clan, Lion Clan, Phoenix Clan, Scorpion Clan, and Unicorn Clan. It also includes a variety of tokens, cards, and rule sheets that make the Core Set the definitive starting point for Legend of the Five Rings: The Card Game.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Brad Andres",
+                            "Erik Dahlman",
+                            "Nate French"
+                        ]
+                    },
+                    "external_link": [
+                        "https://www.fantasyflightgames.com/en/products/legend-of-the-five-rings-the-card-game/?utm_source=boardgameatlas.com&utm_medium=search&utm_campaign=bga_ads"
+                    ],
+                    "freebase_id": null,
+                    "image_url": [
+                        "https://s3-us-west-1.amazonaws.com/5cc.images/games/uploaded/1559257541310-51L6t9t6TxL.jpg"
+                    ],
+                    "luding_id": null,
+                    "max_players": 2,
+                    "max_time": 90,
+                    "mechanic": [
+                        "oeg6wN9Eoc",
+                        "vZsDDAdOoe",
+                        "WPytek5P8l",
+                        "RwgEONzIzc",
+                        "XM2FYZmBHH"
+                    ],
+                    "min_age": 14,
+                    "min_players": 2,
+                    "min_time": 45,
+                    "name": "Legend of the Five Rings: The Card Game",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Legend of the Five Rings: The Card Game"
+                        ]
+                    },
+                    "num_votes": 12,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Fantasy Flight Publishing"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "url": "https://www.boardgameatlas.com/search/game/R7sq7FBdKd/legend-of-the-five-rings-the-card-game",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2017
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Heroscape Master Set: Rise of the Valkyrie",
+                        "Heroscape Master Set: Aufstieg der Walk\u00fcren",
+                        "Heroscape Meesterset: Opkomst van de Walkyrie",
+                        "Heroscape Set Maestro: el Auge de la Valquirias",
+                        "Heroscape: La Battaglia Eterna"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Stephen Baker",
+                            "Rob Daviau",
+                            "Craig Van Ness"
+                        ]
+                    },
+                    "avg_rating": 7.42583,
+                    "bayes_rating": 7.05368,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 11170,
+                    "category": [
+                        "Adventure:1022",
+                        "Fantasy:1010",
+                        "Fighting:1046",
+                        "Miniatures:1047",
+                        "Science Fiction:1016"
+                    ],
+                    "compilation": false,
+                    "complexity": 2.2906,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "This Fantasy Battle Board Game comes with dozens of painted plastic miniatures, each representing a warrior from a different era, and hex-based hard plastic terrain pieces which can be put together in many different ways. The warriors include 30 plastic figures, including World War II soldiers, futuristic robots, aliens, a T-Rex-riding orc, a large dragon, and many more. Each hero or squad has its own card that details both movement and combat abilities.\n\nThere are 2 large ruins and 85 tiles of terrain in the base game. Some terrain tiles are large (up to 24 hexes) while others are small (1 hex). There are water, sand, rock and grass tiles (in roughly increasing order). Many different battlefields can be built by attaching and stacking the tiles.\n\nThe rulebook features two games: a basic and a master version. In the basic version (designed for younger players < 8 years), characters move, attack, defend, and have range -- but there are no special powers and some other rules are minimized and/or eliminated. The master game includes special powers, wounds, engagement rules, falling rules, and a few other additions.\n\nA battlefield/scenario book shows how to build five battlefields, layer by layer. Each battlefield may have multiple scenarios, where the goals vary. It can be opponent elimination, getting to a certain space, protecting a certain figure, or holding out for a certain number of turns.\n\nEach unit in the Master Set has a movement rating ranging from 4 to 8, which is the number of hexes it can move in a turn. Moving up a level counts as a hex; moving down does not incur that penalty. Moving down more levels than your height when moving from one hex to another counts as falling and you might take damage --unless you are falling into water.\n\nCombat in the game is fairly straightforward. You roll attack dice as listed on your unit's card (1 to 8 dice in the Master Set), and the opponent rolls defense dice equal to the number on their unit's card (1 to 9 dice). Skulls rolled in excess of shields count as wounds (hero figures may have more than one Life).\n\nThe master game uses a point system in which players alternate drafting cards until they reach the pre-assigned point value for the scenario. It's possible to bring a \"pre-fab\" army to the battle in order to save time.\n\nThe basic game is for two players. The master game is for 2 to 4 (and more) players.\nThe game is eminently customizable, with many expansions which add more abilities, terrain, and options. There are also user-created maps, scenarios, custom units and advanced rules available online.\n\nHeroScape: Rise of the Valkyrie is the original master set for the HeroScape series of games.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Stephen Baker",
+                            "Rob Daviau",
+                            "Craig Van Ness"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "expansion": [
+                        "Heroscape Expansion Set D1: Champions of the Forgotten Realms:66312",
+                        "Heroscape Expansion Set D2: Warriors of Eberron:72936",
+                        "Heroscape Expansion Set D3: Moltenclaw's Invasion:80889",
+                        "Heroscape Expansion Set: Aquilla's Alliance :30976",
+                        "Heroscape Expansion Set: Blackmoon's Siege :41815",
+                        "Heroscape Expansion Set: Crest of the Valkyrie (Flagbearer series):25044",
+                        "Heroscape Expansion Set: Dawn of Darkness:26586",
+                        "Heroscape Expansion Set: Defenders of Kinsland:31005",
+                        "Heroscape Expansion Set: Fields of Valor:28165",
+                        "Heroscape Expansion Set: Fortress of the Archkyrie:22646",
+                        "Heroscape Expansion Set: Jandar's Oath:16621",
+                        "Heroscape Expansion Set: Malliddon's Prophecy :15155",
+                        "Heroscape Expansion Set: Orm's Return :16694",
+                        "Heroscape Expansion Set: Raknar's Vision :22357",
+                        "Heroscape Expansion Set: Road to the Forgotten Forest:42350",
+                        "Heroscape Expansion Set: Thaelenk Tundra:22356",
+                        "Heroscape Expansion Set: Thora's Vengeance:22507",
+                        "Heroscape Expansion Set: Ticalla Jungle:30977",
+                        "Heroscape Expansion Set: Utgar's Rage :15825",
+                        "Heroscape Expansion Set: Valkrill's Gambit:53396",
+                        "Heroscape Expansion Set: Volcarren Wasteland:19248",
+                        "Heroscape Expansion Set: Zanafor's Discovery:21615",
+                        "Heroscape: Arrival of the Master:101639",
+                        "Heroscape: Nerak's Return :25153",
+                        "Heroscape: Samuel Brown:101745",
+                        "Heroscape: Sir Hawthorne's Arrival :25154",
+                        "Heroscape: Skahen's Rescue:37303",
+                        "Heroscape: Viper's Vengeance:39303"
+                    ],
+                    "family": [
+                        "3D Games:5607",
+                        "Heroscape:35"
+                    ],
+                    "freebase_id": null,
+                    "game_type": [
+                        "Customizable:4667",
+                        "Thematic:5496"
+                    ],
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/4Pu-KjApGRYUiZBhnefExDSDKBQ=/0x0/pic244662.jpg",
+                        "https://cf.geekdo-images.com/thumb/img/Hsyq0E5fEomAhmwK5D8onujdV54=/fit-in/200x150/pic244662.jpg"
+                    ],
+                    "integration": [
+                        24703,
+                        54361,
+                        27976
+                    ],
+                    "language_dependency": 3.107142857142857,
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 4,
+                    "max_players_best": 2,
+                    "max_players_rec": 4,
+                    "max_time": 90,
+                    "mechanic": [
+                        "Dice Rolling:2072",
+                        "Grid Movement:2676",
+                        "Line of Sight:2975",
+                        "Modular Board:2011",
+                        "Three Dimensional Movement:2944"
+                    ],
+                    "min_age": 8,
+                    "min_age_rec": 7.9772727272727275,
+                    "min_players": 2,
+                    "min_players_best": 2,
+                    "min_players_rec": 2,
+                    "min_time": 90,
+                    "name": "Heroscape Master Set: Rise of the Valkyrie",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Heroscape Master Set: Rise of the Valkyrie",
+                            "Heroscape Master Set: Aufstieg der Walk\u00fcren",
+                            "Heroscape Meesterset: Opkomst van de Walkyrie",
+                            "Heroscape Set Maestro: el Auge de la Valquirias",
+                            "Heroscape: La Battaglia Eterna"
+                        ]
+                    },
+                    "num_votes": 7600,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Hasbro",
+                            "Milton Bradley"
+                        ]
+                    },
+                    "rank": 320,
+                    "spielen_id": null,
+                    "stddev_rating": 1.55154,
+                    "url": "https://boardgamegeek.com/boardgame/11170",
+                    "video_url": [
+                        "http://www.youtube.com/watch?v=iqJ2bJxKm2E",
+                        "http://www.youtube.com/watch?v=HO_gN9E6B6A",
+                        "http://www.youtube.com/watch?v=2KBK3eXSpZg",
+                        "http://www.youtube.com/watch?v=t6gOs0YUw6Q",
+                        "http://www.youtube.com/watch?v=DyNukC9_M5Q",
+                        "http://www.youtube.com/watch?v=j4BXJ8TRJ1E",
+                        "http://www.youtube.com/watch?v=QDyaE-VIjac",
+                        "http://www.youtube.com/watch?v=8V_X22ZqmSE",
+                        "http://www.youtube.com/watch?v=feRRaJ6KSuM",
+                        "http://www.youtube.com/watch?v=EqNHtVdP1kc",
+                        "http://www.youtube.com/watch?v=TSxtkwve2IE",
+                        "http://www.youtube.com/watch?v=dx6N6vd0uHw",
+                        "http://www.youtube.com/watch?v=fLS5DUtXaU4",
+                        "http://www.youtube.com/watch?v=Ueh7TQStJto",
+                        "http://www.youtube.com/watch?v=xpETprFwD_c"
+                    ],
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2004
+                },
+                {
+                    "alt_name": [
+                        "Heroscape Master Set: Rise of the Valkyrie"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Stephen Baker",
+                            "Rob Daviau",
+                            "Craig Van Ness"
+                        ]
+                    },
+                    "avg_rating": 3.40625,
+                    "best_rating": 5,
+                    "bga_id": "7baZpro7Pw",
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "description": "Stage the greatest battle of all time and use 85 interlocking terrain tiles to build the 3D battlefield that is different every game. Thirty detailed, painted plastic miniatures represent warriors and heroes from all worlds and eras brought together for your incredible battle. Cards describe movements and combat strengths of the various figures and multiple-figure battle units. Game offers 2 versions: basic for 2 players and master for 2-4 players.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Stephen Baker",
+                            "Rob Daviau",
+                            "Craig Van Ness"
+                        ]
+                    },
+                    "freebase_id": null,
+                    "image_url": [
+                        "https://s3-us-west-1.amazonaws.com/5cc.images/games/uploaded/1559257235011-51DPZA8329L.jpg"
+                    ],
+                    "luding_id": null,
+                    "max_players": 4,
+                    "max_time": 90,
+                    "mechanic": [
+                        "R0bGq4cAl4",
+                        "qu5BcGjAzk",
+                        "U3zhCQH7Et"
+                    ],
+                    "min_age": 8,
+                    "min_players": 2,
+                    "min_time": 90,
+                    "name": "Hasbro Heroscape Master Set: Rise of the Valkyrie",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Hasbro Heroscape Master Set: Rise of the Valkyrie",
+                            "Heroscape Master Set: Rise of the Valkyrie"
+                        ]
+                    },
+                    "num_votes": 32,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Hasbro Gaming"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "url": "https://www.boardgameatlas.com/search/game/7baZpro7Pw/hasbro-heroscape-master-set-rise-of-the-valkyrie",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2004
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Connect Four",
+                        "4",
+                        "4 \u00e0 la Suite",
+                        "4 Across",
+                        "4 em Linha",
+                        "4 en L\u00ednea",
+                        "4 en Raya",
+                        "4 Gewinnt",
+                        "4 gewinnt",
+                        "4 in a Line",
+                        "4 in a Row",
+                        "4 Oczka",
+                        "4 op een Rij",
+                        "4 p\u00e5 rad",
+                        "4 Verliert",
+                        "4 \u05d1\u05e9\u05d5\u05e8\u05d4",
+                        "4-es sor",
+                        "4er Reihe!",
+                        "4GEWINNT",
+                        "4x is de Winnaar",
+                        "Acierta 4",
+                        "Bingo Chess",
+                        "The Captain's Duel",
+                        "The Captain's Mistress",
+                        "Clone 4",
+                        "Coloca 4",
+                        "Conecta 4",
+                        "Connect 4",
+                        "Connect Four/ Puissance 4",
+                        "Fire p\u00e5 Stribe",
+                        "Forza 4",
+                        "Four in a Row",
+                        "Four to Win",
+                        "Four-in-a-Row",
+                        "Fyra i rad",
+                        "Gewinn mit ...",
+                        "Gewinn mit 4",
+                        "Gewinn mit 4!",
+                        "Go for 4",
+                        "Hedef 4",
+                        "Koordina",
+                        "Lig 4",
+                        "Linea 4",
+                        "Magnetic Fridge Four-In-A-Row",
+                        "Master Score 4",
+                        "Mini Line Up 4",
+                        "N\u00e9gy a nyer\u0151!",
+                        "Nelj\u00e4n suora",
+                        "Le Passe Temps",
+                        "Penguin Parade",
+                        "Puissance 4",
+                        "Quatre en Ligne",
+                        "Quattro",
+                        "Quattro: Gewinn mit 4",
+                        "Reise Vier Gewinnt",
+                        "Score 4",
+                        "Spiel mit 4",
+                        "stop 4",
+                        "Super Quatre",
+                        "Take Four",
+                        "Travel Connect Four",
+                        "Travel Four in a Row Counter Strategy",
+                        "V\u00e4risuora",
+                        "Die verflixten 4",
+                        "die Vier",
+                        "Vier achter elkaar",
+                        "Vier gewinnt",
+                        "Vier Gewinnt",
+                        "Vier op 'n rij",
+                        "Vier op een rij",
+                        "Vier Wint",
+                        "Vierer-Champion",
+                        "Vierer-Reihe",
+                        "Wer hat die 4?",
+                        "Zet er 4",
+                        "\u039a\u03bf\u03bd\u03c4\u03c1\u03b1-4",
+                        "\u03a3\u03ba\u03bf\u03c1 4",
+                        "\u0421\u043e\u0431\u0435\u0440\u0438 4",
+                        "\u05d0\u05e8\u05d1\u05e2 \u05d1\u05e8\u05d9\u05d1\u05d5\u05e2"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": []
+                    },
+                    "avg_rating": 4.85891,
+                    "bayes_rating": 4.94552,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 2719,
+                    "category": [
+                        "Abstract Strategy:1009",
+                        "Animals:1089",
+                        "Children's Game:1041"
+                    ],
+                    "compilation": false,
+                    "complexity": 1.2051,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "Connect 4 is a well known vertical game played with \"checkers\" (it is more akin to Tic Tac Toe or Go Moku).\n\nThe board is placed in the stand to hold it vertically and the players drop checkers into one of the 7 slots, each of which holds 6 of the \"checker's\" men, until one player succeeds in getting 4 in a row--horizontally, vertically or diagonally.\n\nThe game is actually non-proprietary and nicer adult versions can be found under the name The Captain's Mistress.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Ned Strongin",
+                            "Howard Wexler"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "family": [
+                        "Animals: Penguins:7488",
+                        "Combinatorial:26432",
+                        "Connect 4:20542",
+                        "GoPlay:10267",
+                        "n in a row:4220",
+                        "TV Series: Spongebob Squarepants:5860"
+                    ],
+                    "freebase_id": null,
+                    "game_type": [
+                        "Children's Game:4665",
+                        "Abstract Game:4666"
+                    ],
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/lrJ1p0AI4ghZdmZkEzwIle3YDUw=/0x0/pic859430.jpg",
+                        "https://cf.geekdo-images.com/thumb/img/RbMram5xq-BllPwPUXzLhtEZx2w=/fit-in/200x150/pic859430.jpg"
+                    ],
+                    "language_dependency": 1.0,
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 2,
+                    "max_players_best": 2,
+                    "max_players_rec": 2,
+                    "max_time": 10,
+                    "mechanic": [
+                        "Pattern Building:2048"
+                    ],
+                    "min_age": 6,
+                    "min_age_rec": 4.7631578947368425,
+                    "min_players": 2,
+                    "min_players_best": 2,
+                    "min_players_rec": 2,
+                    "min_time": 10,
+                    "name": "Connect Four",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Connect Four",
+                            "4",
+                            "4 \u00e0 la Suite",
+                            "4 Across",
+                            "4 em Linha",
+                            "4 en L\u00ednea",
+                            "4 en Raya",
+                            "4 Gewinnt",
+                            "4 gewinnt",
+                            "4 in a Line",
+                            "4 in a Row",
+                            "4 Oczka",
+                            "4 op een Rij",
+                            "4 p\u00e5 rad",
+                            "4 Verliert",
+                            "4 \u05d1\u05e9\u05d5\u05e8\u05d4",
+                            "4-es sor",
+                            "4er Reihe!",
+                            "4GEWINNT",
+                            "4x is de Winnaar",
+                            "Acierta 4",
+                            "Bingo Chess",
+                            "The Captain's Duel",
+                            "The Captain's Mistress",
+                            "Clone 4",
+                            "Coloca 4",
+                            "Conecta 4",
+                            "Connect 4",
+                            "Connect Four/ Puissance 4",
+                            "Fire p\u00e5 Stribe",
+                            "Forza 4",
+                            "Four in a Row",
+                            "Four to Win",
+                            "Four-in-a-Row",
+                            "Fyra i rad",
+                            "Gewinn mit ...",
+                            "Gewinn mit 4",
+                            "Gewinn mit 4!",
+                            "Go for 4",
+                            "Hedef 4",
+                            "Koordina",
+                            "Lig 4",
+                            "Linea 4",
+                            "Magnetic Fridge Four-In-A-Row",
+                            "Master Score 4",
+                            "Mini Line Up 4",
+                            "N\u00e9gy a nyer\u0151!",
+                            "Nelj\u00e4n suora",
+                            "Le Passe Temps",
+                            "Penguin Parade",
+                            "Puissance 4",
+                            "Quatre en Ligne",
+                            "Quattro",
+                            "Quattro: Gewinn mit 4",
+                            "Reise Vier Gewinnt",
+                            "Score 4",
+                            "Spiel mit 4",
+                            "stop 4",
+                            "Super Quatre",
+                            "Take Four",
+                            "Travel Connect Four",
+                            "Travel Four in a Row Counter Strategy",
+                            "V\u00e4risuora",
+                            "Die verflixten 4",
+                            "die Vier",
+                            "Vier achter elkaar",
+                            "Vier gewinnt",
+                            "Vier Gewinnt",
+                            "Vier op 'n rij",
+                            "Vier op een rij",
+                            "Vier Wint",
+                            "Vierer-Champion",
+                            "Vierer-Reihe",
+                            "Wer hat die 4?",
+                            "Zet er 4",
+                            "\u039a\u03bf\u03bd\u03c4\u03c1\u03b1-4",
+                            "\u03a3\u03ba\u03bf\u03c1 4",
+                            "\u0421\u043e\u0431\u0435\u0440\u0438 4",
+                            "\u05d0\u05e8\u05d1\u05e2 \u05d1\u05e8\u05d9\u05d1\u05d5\u05e2"
+                        ]
+                    },
+                    "num_votes": 6184,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "(Public Domain)",
+                            "(Unknown)",
+                            "Aero Lloyd",
+                            "Arxon",
+                            "ASS Altenburger Spielkarten",
+                            "Aventis",
+                            "Berliner Spielkarten",
+                            "Cayro Juegos",
+                            "CHH Games",
+                            "Creative Crafthouse",
+                            "Daddy-O Productions",
+                            "Damm / Egmont",
+                            "Dilemma Games",
+                            "Estrela",
+                            "Falomir Juegos",
+                            "Fundex",
+                            "Gibsons",
+                            "El Greco",
+                            "HABA",
+                            "HaPe International",
+                            "Hasbro",
+                            "IMC Games",
+                            "Impag Toys Europe B.V.",
+                            "Innovakids GmbH",
+                            "Inovac Rima SA",
+                            "International Playthings, Inc.",
+                            "Invicta Games",
+                            "John Jaques of London",
+                            "Kod Kod",
+                            "Lagoon Games",
+                            "Leksam",
+                            "Loncraine Broxton & Partners Ltd",
+                            "MB Giochi",
+                            "MB Jeux",
+                            "MB Spellen",
+                            "MB Spiele",
+                            "Melissa & Doug",
+                            "MIKA",
+                            "Milton Bradley",
+                            "Monkey Pod Games",
+                            "Nilco S.A.",
+                            "Noris Spiele",
+                            "Northwest Corner, Inc.",
+                            "Oriental Trading Company",
+                            "Ottensten",
+                            "Paul Lamond Games Ltd",
+                            "Pavilion",
+                            "Peri Spiele",
+                            "Pin International",
+                            "Plasticart",
+                            "Plastolus Szarvas",
+                            "Pressman Toy Corp.",
+                            "Pusser's",
+                            "Ravensburger Spieleverlag GmbH",
+                            "Remy Martin",
+                            "RIWA Spiele",
+                            "Ruibal Hermanos S.A.",
+                            "Schmidt Spiele",
+                            "Schylling",
+                            "Simba Toys",
+                            "Sparkasse",
+                            "Spear's Games",
+                            "Sterling Games",
+                            "Stillmark Oy",
+                            "Super Accord",
+                            "Swing Ltd.",
+                            "Tesco",
+                            "Tiger",
+                            "Tiimari",
+                            "Trixy Games",
+                            "Unikatoy",
+                            "Westside Fun Games",
+                            "WHSmith",
+                            "Wicked Vision",
+                            "Woodstock Spiele",
+                            "ZPH Elbar"
+                        ]
+                    },
+                    "rank": 18701,
+                    "spielen_id": null,
+                    "stddev_rating": 1.5399,
+                    "url": "https://boardgamegeek.com/boardgame/2719",
+                    "video_url": [
+                        "http://www.youtube.com/watch?v=PVvVlper8ak",
+                        "http://www.youtube.com/watch?v=xfzgin5Ogws",
+                        "http://www.youtube.com/watch?v=TY7lIvCEhrY",
+                        "http://www.youtube.com/watch?v=Mi-rHLf4PSU",
+                        "http://www.youtube.com/watch?v=u4pVGN0aHMs",
+                        "http://www.youtube.com/watch?v=7TTNrbADVxw",
+                        "http://www.youtube.com/watch?v=pzG6YnKuNjg",
+                        "http://www.youtube.com/watch?v=h3VIQTy9HOg",
+                        "http://www.youtube.com/watch?v=U5N-mUgJYMc",
+                        "http://www.youtube.com/watch?v=6lNZLeUEYwI",
+                        "http://www.youtube.com/watch?v=ACMy4XZb4v0",
+                        "http://www.youtube.com/watch?v=s02N4NM2DE8",
+                        "http://www.youtube.com/watch?v=AIMBURj3gqE",
+                        "http://www.youtube.com/watch?v=fzLrnjNqEFY",
+                        "http://www.youtube.com/watch?v=gSm-4sNe11A"
+                    ],
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 1974
+                },
+                {
+                    "alt_name": [
+                        "Connect Four",
+                        "Travel Connect Four"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "(Uncredited)"
+                        ]
+                    },
+                    "avg_rating": 2.125,
+                    "best_rating": 5,
+                    "bga_id": "WZvNYdIlyO",
+                    "bgg_id": null,
+                    "category": [
+                        "[{\"name\":\"Strategy\"",
+                        "\"id\":\"O0ogzwLUe8\"}]"
+                    ],
+                    "dbpedia_id": null,
+                    "description": "Challenge a friend to disc-dropping fun with the classic game of Connect 4! Drop your red or yellow discs in the grid and be the first to get 4 in a row to win. If your opponent is getting too close to 4 in a row, block them with your own disc! Whoever wins can pull out the slider bar to release all the discs and start the fun all over again! Connect 4 and all related characters are trademarks of Hasbro.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Ned Strongin",
+                            "Howard Wexler"
+                        ]
+                    },
+                    "external_link": [
+                        "https://shop.hasbro.com/en-us/product/connect-4-game:80FB5BCA-5056-9047-F5F4-5EB5DF88DAF4?utm_source=boardgameatlas.com&utm_medium=search&utm_campaign=bga_ads"
+                    ],
+                    "freebase_id": null,
+                    "image_url": [
+                        "https://s3-us-west-1.amazonaws.com/5cc.images/games/uploaded/1559254200327-61eEJMGY3YL.jpg"
+                    ],
+                    "luding_id": null,
+                    "max_players": 2,
+                    "max_time": 15,
+                    "mechanic": [
+                        "24FWssBC3o"
+                    ],
+                    "min_age": 6,
+                    "min_players": 2,
+                    "min_time": 5,
+                    "name": "Connect 4",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Connect 4",
+                            "Connect Four",
+                            "Travel Connect Four"
+                        ]
+                    },
+                    "num_votes": 40,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Hasbro"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "url": "https://www.boardgameatlas.com/search/game/WZvNYdIlyO/connect-4-game",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 1974
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Die Inseln im Nebel"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Michael Menzel"
+                        ]
+                    },
+                    "avg_rating": 7.1434,
+                    "bayes_rating": 5.59111,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 285895,
+                    "category": [
+                        "Aviation / Flight:2650",
+                        "Exploration:1020",
+                        "Territory Building:1086"
+                    ],
+                    "compilation": false,
+                    "complexity": 2.25,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "The islands still lie beneath the dense fog. The farther you go over the island with your balloon, the more the fog lifts and you explore the breathtaking landscape.\n\nUse the local wind skilfully to save energy. Because you still need it often enough to accelerate or decelerate. Steer completely against the wind at the right time to reach your goal.\n\nYou will discover the neighbouring landscape where the balloon is by placing tiles on the adjacent fields. This is how cities are built, monuments are erected and landscapes grow.\n\nAs the first of the game round you have the possibility to get more landscape tiles. As the last one you will probably only get one tile, but you can determine the wind direction, which can also be a decisive advantage.\n\nOnce a player has connected all the landscapes to the balloon yard, the game ends.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Volker Sch\u00e4chtele"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "family": [
+                        "Balloons:14044"
+                    ],
+                    "freebase_id": null,
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/UIoby-vgOwq29JTtYWj5oNxtGG0=/0x0/pic4931113.jpg",
+                        "https://cf.geekdo-images.com/thumb/img/h0k1imFGIr-v7mp2lJl47LzJ4Js=/fit-in/200x150/pic4931113.jpg"
+                    ],
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 4,
+                    "max_players_best": 4,
+                    "max_players_rec": 4,
+                    "max_time": 60,
+                    "mechanic": [
+                        "Tile Placement:2002"
+                    ],
+                    "min_age": 10,
+                    "min_players": 2,
+                    "min_players_best": 2,
+                    "min_players_rec": 2,
+                    "min_time": 45,
+                    "name": "Die Inseln im Nebel",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Die Inseln im Nebel"
+                        ]
+                    },
+                    "num_votes": 94,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Schmidt Spiele"
+                        ]
+                    },
+                    "rank": 7093,
+                    "spielen_id": null,
+                    "stddev_rating": 1.2101,
+                    "url": "https://boardgamegeek.com/boardgame/285895",
+                    "video_url": [
+                        "http://www.youtube.com/watch?v=69J9TmyuUew",
+                        "http://www.youtube.com/watch?v=cAzN5fuG_qU",
+                        "http://www.youtube.com/watch?v=UX-nVjcBZrU",
+                        "http://www.youtube.com/watch?v=wfOAKpns4hY",
+                        "http://www.youtube.com/watch?v=4EGsSWExG94",
+                        "http://www.youtube.com/watch?v=ImuRbWRRkk0",
+                        "http://www.youtube.com/watch?v=DJ_HsRMZrhU",
+                        "http://www.youtube.com/watch?v=HUReWUSZ-iE",
+                        "http://www.youtube.com/watch?v=DqmBGgq-fQQ",
+                        "http://www.youtube.com/watch?v=0dCv9rCPry4",
+                        "http://www.youtube.com/watch?v=sUaa1Gyg8Ws",
+                        "http://www.youtube.com/watch?v=JHnAQrBePwA",
+                        "http://www.youtube.com/watch?v=Vhk88Ym26OE"
+                    ],
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2019
+                },
+                {
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Michael Menzel"
+                        ]
+                    },
+                    "bga_id": null,
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Volker Sch\u00e4chtele"
+                        ]
+                    },
+                    "freebase_id": null,
+                    "game_type": [
+                        "Board"
+                    ],
+                    "image_url": [
+                        "http://luding.org/luding/press/2019DieInselnImNebel.jpg"
+                    ],
+                    "luding_id": 33539,
+                    "max_players": null,
+                    "min_age": 10,
+                    "min_players": null,
+                    "name": "Die Inseln im Nebel",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Die Inseln im Nebel"
+                        ]
+                    },
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Schmidt"
+                        ]
+                    },
+                    "review_url": [
+                        "https://www.brettspiegel.de/rezensionen-1/kennerspiele-part-2/die-inseln-im-nebel/",
+                        "http://www.boardgamemonkeys.com/2020/04/die-inseln-im-nebel.html",
+                        "http://www.brettspielblog.ch/spielkritik/die-inseln-im-nebel-spielkritik/",
+                        "https://brettspielpoesie.de/die-inseln-im-nebel-12896/",
+                        "http://theboardgamejournal.com/2020/02/09/die-inseln-im-nebel/",
+                        "http://www.spieleleiter.de/2020/03/08/spielbesprechungen-4-in-1/",
+                        "https://spielstil.net/rezension/die-inseln-im-nebel/"
+                    ],
+                    "spielen_id": null,
+                    "url": "https://www.luding.org/cgi-bin/GameData.py/ENgameid/33539",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "year": null
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Antidote",
+                        "\ud574\ub3c5\uc81c"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Jonathan Logan Clark",
+                            "Dennis Hoyle"
+                        ]
+                    },
+                    "avg_rating": 6.3519,
+                    "bayes_rating": 5.84106,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 150783,
+                    "category": [
+                        "Card Game:1002",
+                        "Deduction:1039",
+                        "Medical:2145",
+                        "Print & Play:1120"
+                    ],
+                    "compilation": false,
+                    "complexity": 1.6596,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "In Antidote, you are a laboratory scientist working for a giant chemical research conglomerate. When a deadly toxin suddenly infects you and everyone in your lab, you must work quickly to share your research and discover the Antidote before it's too late.\n\nIn the game, players take turns deciding what action all other players take: either discard from their hand or trade research with other players. Eventually all your cards will run-out and you will be left with just one that you must \"drink\" and hope it's the Antidote. If this card is the true Antidote, you're cured and live to play again! If not... you die, but you can always try again!\n\nAntidote has 6 core elements:\n\n\nDeduction: Players \"live\" or \"die\" by deducing the one card type that has been removed from the game (similar to Clue).\nSemi-Cooperative Gameplay: You live or die alone, but it may be impossible to deduce the Antidote without working with the other players.\nSimultaneous action selection: Every turn involves every player. Whether it is making trades for valuable information or simultaneously declassifying your research, all players are constantly engaged. This makes the game experience more fulfilling and eliminates long-periods of \"down-time\" between turns.\nPlayer-controlled game length: Players have sole control over the pace of the game. If you think you know the answer you can speed the game towards its conclusion. If not...well, don't hold your breath! No one is going to wait for you to figure it out! This element adds a feeling of tension and excitement.\nMultiple levels of player interaction: Even a \"wink\" or a \"nod\" can have meaning in this game if you are trying to learn or pass information between players. At the same time, a blatant statement such as \"Blue formulas are toxic\" may have no meaning at all, but everyone will judge you by your actions (everyone can see the cards you choose to discard).\nSurprise ending: It is unlikely that anyone can know with 100% certainty what the Antidote is by the end of the game. This means the revealing of the Antidote is often a surprise.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Dennis Hoyle"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "expansion": [
+                        "Antidote: Lab Alliance:218495"
+                    ],
+                    "family": [
+                        "Crowdfunding: Kickstarter:8374"
+                    ],
+                    "freebase_id": null,
+                    "game_type": [
+                        "Party Game:5498",
+                        "Family Game:5499"
+                    ],
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/ycB0jYJysb_L9jTJuZMzjP8C3qQ=/0x0/pic2056454.jpg",
+                        "https://cf.geekdo-images.com/thumb/img/nZdwErLxeb79UmyRYn39MN5sh14=/fit-in/200x150/pic2056454.jpg"
+                    ],
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 7,
+                    "max_players_best": 7,
+                    "max_players_rec": 7,
+                    "max_time": 30,
+                    "mechanic": [
+                        "Hand Management:2040",
+                        "Simultaneous Action Selection:2020",
+                        "Team-Based Game:2019",
+                        "Variable Phase Order:2079"
+                    ],
+                    "min_age": 13,
+                    "min_players": 2,
+                    "min_players_best": 2,
+                    "min_players_rec": 3,
+                    "min_time": 20,
+                    "name": "Antidote",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Antidote",
+                            "\ud574\ub3c5\uc81c"
+                        ]
+                    },
+                    "num_votes": 1068,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "(Web published)",
+                            "Bellwether Games",
+                            "Popcorn Games"
+                        ]
+                    },
+                    "rank": 3195,
+                    "spielen_id": null,
+                    "stddev_rating": 1.44899,
+                    "url": "https://boardgamegeek.com/boardgame/150783",
+                    "video_url": [
+                        "http://www.youtube.com/watch?v=M4eyL7s6Vuc",
+                        "http://www.youtube.com/watch?v=onndUbufVR8",
+                        "http://www.youtube.com/watch?v=WbqdRWm76S8",
+                        "http://www.youtube.com/watch?v=LsWflz5WuiU",
+                        "http://www.youtube.com/watch?v=Gcv2uAoA4DE",
+                        "http://www.youtube.com/watch?v=qwAZeBzrB-U",
+                        "http://www.youtube.com/watch?v=Wa--Xl1n6PQ",
+                        "http://www.youtube.com/watch?v=3C9GtZ7FSNM",
+                        "http://www.youtube.com/watch?v=kKs2IfnZRPE",
+                        "http://www.youtube.com/watch?v=dJCCdtsmrgc",
+                        "http://www.youtube.com/watch?v=Y6MEkmJFdD8"
+                    ],
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2013
+                },
+                {
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Jonathan Logan Clark",
+                            "Dennis Hoyle"
+                        ]
+                    },
+                    "avg_rating": 2.818181818181818,
+                    "best_rating": 5,
+                    "bga_id": "T6u4BtPtJQ",
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "description": "In Antidote, you are a laboratory scientist working for a giant chemical research conglomerate. When you and your lab are suddenly exposed to a deadly toxin, you must work quickly to share your research and discover the Antidote before it's too late!\n\nIn the game, players take turns deciding what action all other players take: either discard from their hand or trade research with other players. Eventually all your cards will run-out and you will be left with just one that you must \"drink\" and hope its the Antidote. If this card is the true Antidote, you're cured and live! If not...you die, but you can always try again!",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Dennis Hoyle"
+                        ]
+                    },
+                    "external_link": [
+                        "http://bellwethergames.com/product/antidote/?utm_source=boardgameatlas.com&utm_medium=search&utm_campaign=bga_ads"
+                    ],
+                    "freebase_id": null,
+                    "image_url": [
+                        "https://s3-us-west-1.amazonaws.com/5cc.images/games/uploaded/1559255053275-51WrYziAToL.jpg"
+                    ],
+                    "list_price": "USD12.99",
+                    "luding_id": null,
+                    "max_players": 6,
+                    "max_time": 30,
+                    "mechanic": [
+                        "WPytek5P8l",
+                        "GNtouC8NLm",
+                        "DEvPj5twid",
+                        "zzsE4jtI1b"
+                    ],
+                    "min_age": 12,
+                    "min_players": 2,
+                    "min_time": 20,
+                    "name": "Antidote",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Antidote"
+                        ]
+                    },
+                    "num_votes": 11,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Bellwether Games"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "url": "https://www.boardgameatlas.com/search/game/T6u4BtPtJQ/antidote",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2013
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Sherlock Holmes Consulting Detective: Jack the Ripper & West End Adventures",
+                        "Sherlock Holmes Consulente Investigativo: Jack lo Squartatore & Avventure nel West End",
+                        "Sherlock Holmes Consulente Investigativo: Jack lo Squartatore e Avventure nel West End",
+                        "Sherlock Holmes Detective Asesor: Jack el Destripador y Aventuras en el West End",
+                        "Sherlock Holmes: D\u00e9tective Conseil \u2013 Jack l'Eventreur et Aventures \u00e0 West End",
+                        "Sherlock Holmes: Detektyw doradczy \u2013 \"Zagadka Kuby Rozpruwacza\" i \"Przygody na West Endzie\"",
+                        "\u03a3\u03ad\u03c1\u03bb\u03bf\u03ba \u03a7\u03cc\u03bb\u03bc\u03c2 \u0399\u03b4\u03b9\u03c9\u03c4\u03b9\u03ba\u03cc\u03c2 \u0395\u03c1\u03b5\u03c5\u03bd\u03b7\u03c4\u03ae\u03c2: \u03a4\u03b6\u03b1\u03ba \u03bf \u0391\u03bd\u03c4\u03b5\u03c1\u03bf\u03b2\u03b3\u03ac\u03bb\u03c4\u03b7\u03c2 \u03ba\u03b1\u03b9 \u03a0\u03b5\u03c1\u03b9\u03c0\u03ad\u03c4\u03b5\u03b9\u03b5\u03c2 \u03c3\u03c4\u03bf \u0393\u03bf\u03c5\u03ad\u03c3\u03c4 \u0395\u03bd\u03c4",
+                        "\u0428\u0435\u0440\u043b\u043e\u043a \u0425\u043e\u043b\u043c\u0441 \u0434\u0435\u0442\u0435\u043a\u0442\u0438\u0432-\u043a\u043e\u043d\u0441\u0443\u043b\u044c\u0442\u0430\u043d\u0442: \u0414\u0436\u0435\u043a \u041f\u043e\u0442\u0440\u043e\u0448\u0438\u0442\u0435\u043b\u044c \u0438 \u0432\u0435\u0441\u0442-\u044d\u043d\u0434\u0441\u043a\u0438\u0435 \u043f\u0440\u0438\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u044f"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Bernard Bittler",
+                            "Arnaud Demaegd",
+                            "Neriac",
+                            "Pascal Quidault"
+                        ]
+                    },
+                    "avg_rating": 7.83388,
+                    "bayes_rating": 7.10146,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 204305,
+                    "category": [
+                        "Deduction:1039",
+                        "Murder/Mystery:1040",
+                        "Novel-based:1093",
+                        "Post-Napoleonic:2710",
+                        "Puzzle:1028",
+                        "Spies/Secret Agents:1081"
+                    ],
+                    "compilation": false,
+                    "complexity": 2.1489,
+                    "cooperative": true,
+                    "dbpedia_id": null,
+                    "description": "Sherlock Holmes Consulting Detective: Jack the Ripper & West End Adventures is a standalone expansion to Sherlock Holmes Consulting Detective with updated graphics that features ten more cases to be solved in Sherlock Holmes' Victorian-era London, England. A \"London Directory\", map, and newspaper archives are included with the cases.\n\nIncluded are six independent \"West End Adventures\" cases (redesigned and updated from the 1995 expansion), and a series of four new cases based on the Jack the Ripper murders.\n\nJack the Ripper Cases:\n\nMary Ann Nichols\nAnnie Chapman\nElizabeth Stride, Catherine Eddowes\nMary Jane Kelly\n\n\n\n\nWest End Adventures:\n\nThe Strange Case of Dr. Goldfire\nThe Murder of Sherlock Holmes\nA Case of Identity\nThe Death of a Transylvanian Count\nA Royal Huggermugger at the Savage Club\nA Simple Case of Murder",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Suzanne Goldberg",
+                            "Gary Grady",
+                            "J\u00e9r\u00f4me Ropert"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "family": [
+                        "Characters: Jack the Ripper:11971",
+                        "Characters: Sherlock Holmes:7510",
+                        "Cities: London (England):17446",
+                        "Country: England:14759",
+                        "Mystery Novels:28631",
+                        "Sherlock Holmes Consulting Detective:46472",
+                        "Solitaire Games:5666"
+                    ],
+                    "freebase_id": null,
+                    "game_type": [
+                        "Thematic:5496"
+                    ],
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/aMSijyTnYi1Y_3wHtMCfn7Cftho=/0x0/pic3238299.jpg",
+                        "https://cf.geekdo-images.com/thumb/img/mtsURRLdE95XbGPJh4sWafR1uNQ=/fit-in/200x150/pic3238299.jpg"
+                    ],
+                    "implementation": [
+                        6266
+                    ],
+                    "integration": [
+                        223931,
+                        2511,
+                        270213
+                    ],
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 8,
+                    "max_players_best": 2,
+                    "max_players_rec": 4,
+                    "max_time": 120,
+                    "mechanic": [
+                        "Cooperative Game:2023",
+                        "Solo / Solitaire Game:2819",
+                        "Storytelling:2027"
+                    ],
+                    "min_age": 10,
+                    "min_players": 1,
+                    "min_players_best": 2,
+                    "min_players_rec": 1,
+                    "min_time": 60,
+                    "name": "Sherlock Holmes Consulting Detective: Jack the Ripper & West End Adventures",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Sherlock Holmes Consulting Detective: Jack the Ripper & West End Adventures",
+                            "Sherlock Holmes Consulente Investigativo: Jack lo Squartatore & Avventure nel West End",
+                            "Sherlock Holmes Consulente Investigativo: Jack lo Squartatore e Avventure nel West End",
+                            "Sherlock Holmes Detective Asesor: Jack el Destripador y Aventuras en el West End",
+                            "Sherlock Holmes: D\u00e9tective Conseil \u2013 Jack l'Eventreur et Aventures \u00e0 West End",
+                            "Sherlock Holmes: Detektyw doradczy \u2013 \"Zagadka Kuby Rozpruwacza\" i \"Przygody na West Endzie\"",
+                            "\u03a3\u03ad\u03c1\u03bb\u03bf\u03ba \u03a7\u03cc\u03bb\u03bc\u03c2 \u0399\u03b4\u03b9\u03c9\u03c4\u03b9\u03ba\u03cc\u03c2 \u0395\u03c1\u03b5\u03c5\u03bd\u03b7\u03c4\u03ae\u03c2: \u03a4\u03b6\u03b1\u03ba \u03bf \u0391\u03bd\u03c4\u03b5\u03c1\u03bf\u03b2\u03b3\u03ac\u03bb\u03c4\u03b7\u03c2 \u03ba\u03b1\u03b9 \u03a0\u03b5\u03c1\u03b9\u03c0\u03ad\u03c4\u03b5\u03b9\u03b5\u03c2 \u03c3\u03c4\u03bf \u0393\u03bf\u03c5\u03ad\u03c3\u03c4 \u0395\u03bd\u03c4",
+                            "\u0428\u0435\u0440\u043b\u043e\u043a \u0425\u043e\u043b\u043c\u0441 \u0434\u0435\u0442\u0435\u043a\u0442\u0438\u0432-\u043a\u043e\u043d\u0441\u0443\u043b\u044c\u0442\u0430\u043d\u0442: \u0414\u0436\u0435\u043a \u041f\u043e\u0442\u0440\u043e\u0448\u0438\u0442\u0435\u043b\u044c \u0438 \u0432\u0435\u0441\u0442-\u044d\u043d\u0434\u0441\u043a\u0438\u0435 \u043f\u0440\u0438\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u044f"
+                        ]
+                    },
+                    "num_votes": 3297,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Asmodee",
+                            "Asmodee Italia",
+                            "Asterion Press",
+                            "CrowD Games",
+                            "Kaissa Chess & Games",
+                            "Rebel",
+                            "Space Cowboys"
+                        ]
+                    },
+                    "rank": 289,
+                    "spielen_id": null,
+                    "stddev_rating": 1.40829,
+                    "url": "https://boardgamegeek.com/boardgame/204305",
+                    "video_url": [
+                        "http://www.youtube.com/watch?v=CsCdwf4LVcs",
+                        "http://www.youtube.com/watch?v=XpPThu1USTc",
+                        "http://www.youtube.com/watch?v=y1pp0o7n7nE",
+                        "http://www.youtube.com/watch?v=nYKHM2J4uVA",
+                        "http://www.youtube.com/watch?v=QgHM7iFM-cs",
+                        "http://www.youtube.com/watch?v=x30cDvxE3gQ",
+                        "http://www.youtube.com/watch?v=jY2o1LcioI8",
+                        "http://www.youtube.com/watch?v=eXDGLrcFOjM",
+                        "http://www.youtube.com/watch?v=oePldCTkcDo",
+                        "http://www.youtube.com/watch?v=AmgufjIXylI",
+                        "http://www.youtube.com/watch?v=Q64C4n137eU",
+                        "http://www.youtube.com/watch?v=ITc-1wfRTzo",
+                        "http://www.youtube.com/watch?v=S2QQ4SQurLI",
+                        "http://www.youtube.com/watch?v=r1O0cm-CSqE",
+                        "http://www.youtube.com/watch?v=8GuokBw6YyQ"
+                    ],
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2017
+                },
+                {
+                    "alt_name": [
+                        "Sherlock Holmes Consulting Detective: Jack the Ripper and West End Adventures",
+                        "Sherlock Holmes Consulting: Detective Jack the Ripper & West End Adventures Strategy Board Game"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Bernard Bittler",
+                            "Arnaud Demaegd",
+                            "Neriac",
+                            "Pascal Quidault"
+                        ]
+                    },
+                    "avg_rating": 3.8787878787878785,
+                    "best_rating": 5,
+                    "bga_id": "Qvd6HFMI9t",
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "description": "Enter the gaslit world of Sherlock Holmes in Jack the Ripper & West End Adventures! A brand new standalone game in the beloved Sherlock Holmes Consulting Detective series, Jack the Ripper & West End Adventures will throw ten entirely new cases cases your way. Six of these cases are one-off adventures, while four others form a campaign that challenges you to stop the notorious Jack the Ripper! With a new map of Whitechapel, newspapers hot-off-the-press for every case, and ten unique casebooks, it\u2019s time to put your mind to the test!",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Suzanne Goldberg",
+                            "Gary Grady",
+                            "J\u00e9r\u00f4me Ropert"
+                        ]
+                    },
+                    "external_link": [
+                        "https://www.asmodee.us/en/games/sherlock-holmes/products/jack-ripper-west-end-adventures/?utm_source=boardgameatlas.com&utm_medium=search&utm_campaign=bga_ads"
+                    ],
+                    "freebase_id": null,
+                    "image_url": [
+                        "https://s3-us-west-1.amazonaws.com/5cc.images/games/uploaded/1559254970101-51OcyTODfDL.jpg"
+                    ],
+                    "list_price": "USD49.99",
+                    "luding_id": null,
+                    "max_players": 8,
+                    "max_time": 120,
+                    "mechanic": [
+                        "9mNukNBxfZ",
+                        "GUoWg3Mfh5"
+                    ],
+                    "min_age": 10,
+                    "min_players": 1,
+                    "min_time": 60,
+                    "name": "Sherlock Holmes Consulting Detective: Jack the Ripper & West End Adventures",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Sherlock Holmes Consulting Detective: Jack the Ripper & West End Adventures",
+                            "Sherlock Holmes Consulting Detective: Jack the Ripper and West End Adventures",
+                            "Sherlock Holmes Consulting: Detective Jack the Ripper & West End Adventures Strategy Board Game"
+                        ]
+                    },
+                    "num_votes": 33,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Asmodee Editions"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "url": "https://www.boardgameatlas.com/search/game/Qvd6HFMI9t/sherlock-holmes-consulting-detective-jack-the-ripper--west-end-adventures",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2017
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Marienk\u00e4fer Puck",
+                        "La Coccinella Puck",
+                        "Le jeu de coccinelle",
+                        "Ladybird Puck",
+                        "Puck het lieveheersbeestje",
+                        "Puck la Coccinelle"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": []
+                    },
+                    "avg_rating": 5.0,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 37378,
+                    "category": [
+                        "Educational:1094"
+                    ],
+                    "compilation": false,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "A ladybug flies through the flowering seasons, from winter flurries to the end of Fall. Through his travels he (and all of the players) learn about many flowers and about how a wonderfully pretty a planned garden can be.\n\n---\n\nEin Marienk\u00e4fer fliegt durch das Blumenjahr, vom Schneegl\u00f6ckchen bis zur Herbstzeitlosen. Dabei lernt er (und alle Mitspieler) viele Blumen und auch mancherlei Getier auf einem wundersch\u00f6nen bunten Plan kennen.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Ingrid Schaumburg"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "family": [
+                        "Admin: Better Description Needed!:22783",
+                        "Animals: Ladybugs:7833"
+                    ],
+                    "freebase_id": null,
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/3OguavOSf5xrL04Jtqk1kEHVn2E=/0x0/pic878882.jpg",
+                        "https://cf.geekdo-images.com/thumb/img/o1ey9x6-zvNcWwBoWpTy5H6g2JQ=/fit-in/200x150/pic878882.jpg"
+                    ],
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 6,
+                    "max_players_best": 6,
+                    "max_players_rec": 6,
+                    "max_time": 30,
+                    "mechanic": [
+                        "Roll / Spin and Move:2035"
+                    ],
+                    "min_age": 5,
+                    "min_players": 2,
+                    "min_players_best": 2,
+                    "min_players_rec": 2,
+                    "min_time": 30,
+                    "name": "Marienk\u00e4fer Puck",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Marienk\u00e4fer Puck",
+                            "La Coccinella Puck",
+                            "Le jeu de coccinelle",
+                            "Ladybird Puck",
+                            "Puck het lieveheersbeestje",
+                            "Puck la Coccinelle"
+                        ]
+                    },
+                    "num_votes": 2,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Otto Maier Verlag",
+                            "Ravensburger Spieleverlag GmbH"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "stddev_rating": 1.0,
+                    "url": "https://boardgamegeek.com/boardgame/37378",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 1954
+                },
+                {
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": []
+                    },
+                    "bga_id": null,
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Ingrid Schaumburg"
+                        ]
+                    },
+                    "freebase_id": null,
+                    "game_type": [
+                        "Board"
+                    ],
+                    "luding_id": 12352,
+                    "max_players": 6,
+                    "min_age": 5,
+                    "min_players": 2,
+                    "name": "Marienk\u00e4fer Puck",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Marienk\u00e4fer Puck"
+                        ]
+                    },
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Ravensburger"
+                        ]
+                    },
+                    "review_url": [
+                        "http://www.spieletest.at/gesellschaftsspiel/92/Marienk\u00e4fer-Puck"
+                    ],
+                    "spielen_id": null,
+                    "url": "https://www.luding.org/cgi-bin/GameData.py/ENgameid/12352",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "year": 1973
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Femigoa Trigoa"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": []
+                    },
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 130057,
+                    "category": [
+                        "Card Game:1002",
+                        "Party Game:1030"
+                    ],
+                    "compilation": false,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "Advertising edition of Activity kompakt for a drug company from Leipzig: Leipziger Arzneimittelwerk burner Epeka.\n\nPlayers have to describe words verbal, pantomimic or by drawing.\nTeammates must guess player's descriptions to score a point. Team with the most cards wins.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Ulrike Catty",
+                            "Paul Catty",
+                            "Maria F\u00fchrer",
+                            "Ernst F\u00fchrer"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "family": [
+                        "Activity:5489"
+                    ],
+                    "freebase_id": null,
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 6,
+                    "max_players_best": 6,
+                    "max_players_rec": 6,
+                    "max_time": 45,
+                    "mechanic": [
+                        "Acting:2073",
+                        "Dice Rolling:2072",
+                        "Line Drawing:2039",
+                        "Team-Based Game:2019"
+                    ],
+                    "min_age": 12,
+                    "min_players": 3,
+                    "min_players_best": 3,
+                    "min_players_rec": 3,
+                    "min_time": 45,
+                    "name": "Femigoa Trigoa",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Femigoa Trigoa"
+                        ]
+                    },
+                    "num_votes": 0,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Piatnik"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "stddev_rating": 0.0,
+                    "url": "https://boardgamegeek.com/boardgame/130057",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": null
+                },
+                {
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": []
+                    },
+                    "best_rating": 5,
+                    "bga_id": "7rNFcRrQ7W",
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Ulrike Catty,Paul Catty,Maria F\u00fchrer,Ernst F\u00fchrer"
+                        ]
+                    },
+                    "freebase_id": null,
+                    "image_url": [
+                        "https://s3-us-west-1.amazonaws.com/5cc.images/games/uploaded/1578352512957"
+                    ],
+                    "luding_id": null,
+                    "max_players": 6,
+                    "max_time": 45,
+                    "min_age": 12,
+                    "min_players": 3,
+                    "min_time": 45,
+                    "name": "Femigoa Trigoa",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Femigoa Trigoa"
+                        ]
+                    },
+                    "num_votes": 0,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Piatnik"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "url": "https://www.boardgameatlas.com/search/game/7rNFcRrQ7W/femigoa-trigoa",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": null
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "A Union So Tested: Look, Sarge, No Charts American Civil War"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": []
+                    },
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 61488,
+                    "category": [
+                        "American Civil War:1048",
+                        "Book:1117",
+                        "Miniatures:1047",
+                        "Wargame:1019"
+                    ],
+                    "compilation": false,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "User Comments:\n\n\"A Union So Tested\" is an adaptation of the \"Look Sarge, No Charts\" WWII system. The game allows players to command approximately a division each. Individual bases represent regiments (approximately 250-500 men). The ground scale is 1\" = 50 yds., regimental bases are 3\"x1.5\" in size. Each turn represents 15-30 minutes of time. The authors use 10mm miniatures, but any size figures can be used as long as the base size is maintained.\n\nDuring each turn, each brigade, division and corps HQ throws a six-sided die for activation. Players then draw cards one by one from a deck composed of black and red cards from 1-6 plus a single joker. Each time a card matching the dice result thrown by the HQ is drawn, elements of that HQ can activate for movement, fire, etc. HQ's can exchange dice with the HQ above or below it, in order to seize the initiative. When the joker is drawn, the turn ends.\n\nEach stand fires by adding its attack factor to a d10 roll; hits are caused by equalling or exceeding the target's defense factor varies with unit type and terrain. Regiments have 3 step losses.: when a unit takes one hit, it fires at half strength (factors are not modified, but any odd die roll is an automatic miss); on a second hit, fire is at half strength and units may fire only on black cards; on the third hit, the unit is eliminated. Long range fire cannot cause hits, only morale checks.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Christopher Palmer",
+                            "John R. \"Buck\" Surdu",
+                            "David Wood"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "family": [
+                        "Look, Sarge, No Charts!:58925"
+                    ],
+                    "freebase_id": null,
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/sCJFG7QsDlA17SYRHTGDpXDbDdY=/0x0/pic1008869.png",
+                        "https://cf.geekdo-images.com/thumb/img/oqCyP-WOmQmHKC2xamINlYDnIm8=/fit-in/200x150/pic1008869.png"
+                    ],
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 8,
+                    "max_players_best": 8,
+                    "max_players_rec": 8,
+                    "max_time": 300,
+                    "mechanic": [
+                        "Chit-Pull System:2057",
+                        "Simulation:2070"
+                    ],
+                    "min_age": 10,
+                    "min_players": 2,
+                    "min_players_best": 2,
+                    "min_players_rec": 2,
+                    "min_time": 300,
+                    "name": "A Union So Tested: Look, Sarge, No Charts American Civil War",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "A Union So Tested: Look, Sarge, No Charts American Civil War"
+                        ]
+                    },
+                    "num_votes": 0,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "BuckSurdu.com",
+                            "LMW Works"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "stddev_rating": 0.0,
+                    "url": "https://boardgamegeek.com/boardgame/61488",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2009
+                },
+                {
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": []
+                    },
+                    "best_rating": 5,
+                    "bga_id": "hpBBaI6Ity",
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Christopher Palmer,John R. \"Buck\" Surdu,David Wood"
+                        ]
+                    },
+                    "freebase_id": null,
+                    "image_url": [
+                        "https://s3-us-west-1.amazonaws.com/5cc.images/games/uploaded/1578079863768"
+                    ],
+                    "luding_id": null,
+                    "max_players": 8,
+                    "max_time": 300,
+                    "min_age": 10,
+                    "min_players": 2,
+                    "min_time": 300,
+                    "name": "A Union So Tested: Look, Sarge, No Charts American Civil War",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "A Union So Tested: Look, Sarge, No Charts American Civil War"
+                        ]
+                    },
+                    "num_votes": 0,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "LMW Works"
+                        ]
+                    },
+                    "spielen_id": null,
+                    "url": "https://www.boardgameatlas.com/search/game/hpBBaI6Ity/a-union-so-tested--look-sarge-no-charts-american-civil-war",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2009
+                }
+            ]
+        },
+        {
+            "__class__": "tuple",
+            "__value__": [
+                {
+                    "alt_name": [
+                        "Blue Lagoon",
+                        "Laguna",
+                        "Modr\u00e1 laguna",
+                        "\u0413\u043e\u043b\u0443\u0431\u0430\u044f \u043b\u0430\u0433\u0443\u043d\u0430",
+                        "\u30d6\u30eb\u30fc\u30e9\u30b0\u30fc\u30f3",
+                        "\u9752\u9752\u73ca\u745a\u5cf6",
+                        "\ube14\ub8e8\ub77c\uad70"
+                    ],
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Tomasz Larek"
+                        ]
+                    },
+                    "avg_rating": 7.23893,
+                    "bayes_rating": 6.55914,
+                    "best_rating": 10,
+                    "bga_id": null,
+                    "bgg_id": 244331,
+                    "category": [
+                        "Abstract Strategy:1009"
+                    ],
+                    "compilation": false,
+                    "complexity": 2.039,
+                    "cooperative": false,
+                    "dbpedia_id": null,
+                    "description": "Blue Lagoon is an area control and set collection game in which players manage a group of settlers spreading out over the islands of a newly discovered archipelago.\n\nThe game is played over two phases (the exploration phase followed by the settlement phase). Over the course of both phases, you will expand your presence on the board by adding one new token each turn (either a settler or a village token). The goal is to collect the resources scattered over the map by placing your tokens on top of them. In the first phase, you can place a new token anywhere you like, as long as it is touching either the lagoon OR one of your previously played tokens. In the second phase, the board is cleared, except for the villages, and now you can only expand from the villages you played in the first phase! At the end of both phases, players score points for the sets of resources they collected. Most points wins.",
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Reiner Knizia"
+                        ]
+                    },
+                    "easiest_complexity": 1,
+                    "family": [
+                        "Tropical Islands:51732"
+                    ],
+                    "freebase_id": null,
+                    "game_type": [
+                        "Abstract Game:4666",
+                        "Family Game:5499"
+                    ],
+                    "hardest_complexity": 5,
+                    "highest_language_dependency": 5,
+                    "image_url": [
+                        "https://cf.geekdo-images.com/original/img/_HIXptfYVd0tzLONk1qR5iT0k1E=/0x0/pic4122624.png",
+                        "https://cf.geekdo-images.com/thumb/img/WzybSsTZFc3CHN1kM-N_gt7TGl8=/fit-in/200x150/pic4122624.png"
+                    ],
+                    "lowest_language_dependency": 1,
+                    "luding_id": null,
+                    "max_players": 4,
+                    "max_players_best": 4,
+                    "max_players_rec": 4,
+                    "max_time": 45,
+                    "mechanic": [
+                        "Area Majority / Influence:2080",
+                        "Network and Route Building:2081",
+                        "Score-and-Reset Game:2823",
+                        "Set Collection:2004"
+                    ],
+                    "min_age": 8,
+                    "min_players": 2,
+                    "min_players_best": 4,
+                    "min_players_rec": 2,
+                    "min_time": 30,
+                    "name": "Blue Lagoon",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Blue Lagoon",
+                            "Laguna",
+                            "Modr\u00e1 laguna",
+                            "\u0413\u043e\u043b\u0443\u0431\u0430\u044f \u043b\u0430\u0433\u0443\u043d\u0430",
+                            "\u30d6\u30eb\u30fc\u30e9\u30b0\u30fc\u30f3",
+                            "\u9752\u9752\u73ca\u745a\u5cf6",
+                            "\ube14\ub8e8\ub77c\uad70"
+                        ]
+                    },
+                    "num_votes": 2293,
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Blue Orange (EU)",
+                            "Blue Orange Games",
+                            "ADC Blackfire Entertainment",
+                            "Amo Oy",
+                            "Arclight",
+                            "Broadway Toys LTD",
+                            "Funiverse",
+                            "Gemblo, Inc.",
+                            "Mandoo Games",
+                            "Zvezda"
+                        ]
+                    },
+                    "rank": 886,
+                    "spielen_id": null,
+                    "stddev_rating": 1.10881,
+                    "url": "https://boardgamegeek.com/boardgame/244331",
+                    "video_url": [
+                        "http://www.youtube.com/watch?v=YjEeGIOQtY4",
+                        "http://www.youtube.com/watch?v=nnmuaxVPPXQ",
+                        "http://www.youtube.com/watch?v=DuICMr_m-Bw",
+                        "http://www.youtube.com/watch?v=aEKcRS51tIs",
+                        "http://www.youtube.com/watch?v=hW7oDoLMmHA",
+                        "http://www.youtube.com/watch?v=q3DLHJ-NmTA",
+                        "http://www.youtube.com/watch?v=SrZgHspFDvU",
+                        "http://www.youtube.com/watch?v=D0ELrOxVqzA",
+                        "http://www.youtube.com/watch?v=fKh_iWgw2Bk",
+                        "http://www.youtube.com/watch?v=oWEcPFKAqTI",
+                        "http://www.youtube.com/watch?v=OOQl8OS-lWk",
+                        "http://www.youtube.com/watch?v=HzFgp0K7NDA",
+                        "http://www.youtube.com/watch?v=O7YmLv5GAqs",
+                        "http://www.youtube.com/watch?v=1vxsdYD38Wk",
+                        "http://www.youtube.com/watch?v=Sn89YXL95Nk"
+                    ],
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
+                    "worst_rating": 1,
+                    "year": 2018
+                },
+                {
+                    "artist": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Tomek Larek"
+                        ]
+                    },
+                    "bga_id": null,
+                    "bgg_id": null,
+                    "dbpedia_id": null,
+                    "designer": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Reiner Knizia"
+                        ]
+                    },
+                    "freebase_id": null,
+                    "game_type": [
+                        "Board"
+                    ],
+                    "image_url": [
+                        "http://luding.org/luding/press/2018BlueLagoon.jpg"
+                    ],
+                    "luding_id": 32652,
+                    "max_players": 4,
+                    "min_age": 8,
+                    "min_players": 2,
+                    "name": "Blue Lagoon",
+                    "names": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "Blue Lagoon"
+                        ]
+                    },
+                    "publisher": {
+                        "__class__": "tuple",
+                        "__value__": [
+                            "blue orange"
+                        ]
+                    },
+                    "review_url": [
+                        "http://www.spielkult.de/bluelagoon.htm",
+                        "https://www.spielezar.ch/blog/brettspiele/blue-lagoon"
+                    ],
+                    "spielen_id": null,
+                    "url": "https://www.luding.org/cgi-bin/GameData.py/ENgameid/32652",
+                    "wikidata_id": null,
+                    "wikipedia_id": null,
                     "year": null
                 }
             ]

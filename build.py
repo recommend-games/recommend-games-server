@@ -456,11 +456,9 @@ def link(
         os.path.join(SCRAPED_DATA_DIR, "scraped", "luding_GameItem.jl"),
         os.path.join(SCRAPED_DATA_DIR, "scraped", "wikidata_GameItem.jl"),
     ),
-    id_prefixes=("bgg", "bga", "spielen", "luding", "wikidata"),
     training_file=os.path.join(BASE_DIR, "cluster", "training.json"),
     manual_labelling=False,
     threshold=None,
-    recall_weight=0.5,
     output=os.path.join(SCRAPED_DATA_DIR, "links.json"),
     pretty_print=True,
 ):
@@ -471,11 +469,9 @@ def link(
     link_games(
         gazetteer=gazetteer,
         paths=paths,
-        id_prefixes=id_prefixes,
         training_file=training_file if manual_labelling else None,
         manual_labelling=parse_bool(manual_labelling),
         threshold=parse_float(threshold),
-        recall_weight=parse_float(recall_weight),
         output=output,
         pretty_print=parse_bool(pretty_print),
     )
@@ -491,10 +487,8 @@ def labellinks(
         os.path.join(SCRAPED_DATA_DIR, "scraped", "luding_GameItem.jl"),
         os.path.join(SCRAPED_DATA_DIR, "scraped", "wikidata_GameItem.jl"),
     ),
-    id_prefixes=("bgg", "bga", "spielen", "luding", "wikidata"),
     training_file=os.path.join(BASE_DIR, "cluster", "training.json"),
     threshold=None,
-    recall_weight=0.5,
     output=os.path.join(SCRAPED_DATA_DIR, "links.json"),
     pretty_print=True,
 ):
@@ -502,11 +496,9 @@ def labellinks(
     link(
         gazetteer=gazetteer,
         paths=paths,
-        id_prefixes=id_prefixes,
         training_file=training_file,
         manual_labelling=True,
         threshold=parse_float(threshold),
-        recall_weight=parse_float(recall_weight),
         output=output,
         pretty_print=parse_bool(pretty_print),
     )
