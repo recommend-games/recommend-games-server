@@ -14110,6 +14110,684 @@
                 "wikipedia_id": null,
                 "year": 2005
             }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "bga_id": null,
+                "bgg_id": 28697,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Alessandro Crespi",
+                        "Lloyd Krassner"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 2,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "StarWars DogFight"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Warp Spawn Games"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2005
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "bga_id": "8yU7r6E1ZV",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Alessandro Crespi",
+                        "Lloyd Krassner"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 2,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Commodore"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Warp Spawn Games"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2005
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "bga_id": null,
+                "bgg_id": 36264,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Lloyd Krassner"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 2,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Tanker Skirmish"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Warp Spawn Games"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2005
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "bga_id": "ZGMuU4W2us",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Lloyd Krassner"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 2,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Death in the Sand"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Warp Spawn Games"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2005
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Eryn Mathias"
+                    ]
+                },
+                "bga_id": null,
+                "bgg_id": 33348,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Ben Farella"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 8,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Springfield On Board"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Help On Board"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2005
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Eryn Mathias"
+                    ]
+                },
+                "bga_id": "UkDdg2dkWh",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Ben Farella"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 8,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Saskatoon On Board"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Help On Board"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2005
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Carlo Amaddeo"
+                    ]
+                },
+                "bga_id": null,
+                "bgg_id": 250892,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Carlo Amaddeo"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 9,
+                "min_players": 1,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Pocket Air War: Mediterranean Front"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "WBS Games"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2018
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Carlo Amaddeo"
+                    ]
+                },
+                "bga_id": "ETEX5I3LkB",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Carlo Amaddeo"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 9,
+                "min_players": 1,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Pocket Air War: Western Front"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "WBS Games"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2018
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "G\u00e9raud Souli\u00e9"
+                    ]
+                },
+                "bga_id": null,
+                "bgg_id": 242569,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Henri Kermarrec"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 99,
+                "min_players": 1,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Penny Papers Adventures: The Valley of Wiraqocha",
+                        "Penny Papers Adventures: El Valle de Wiraqocha",
+                        "Penny Papers Adventures: Im Tal des Wiraqucha"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Sit Down!",
+                        "2Tomatoes",
+                        "Pegasus Spiele"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2018
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "G\u00e9raud Souli\u00e9"
+                    ]
+                },
+                "bga_id": "flha0zEiDW",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Henri Kermarrec"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 99,
+                "min_players": 1,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Penny Papers Adventures: Skull Island"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Sit Down!",
+                        "2Tomatoes",
+                        "Pegasus Spiele"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2018
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Eryn Mathias"
+                    ]
+                },
+                "bga_id": null,
+                "bgg_id": 33376,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Ben Farella"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 8,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Saskatoon On Board"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Help On Board"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2005
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Eryn Mathias"
+                    ]
+                },
+                "bga_id": "sF2EDb2WNu",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Ben Farella"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 8,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Danbury On Board"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Help On Board"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2005
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Bruce Yearian"
+                    ]
+                },
+                "bga_id": null,
+                "bgg_id": 29373,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Paul Rohrbaugh"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 2,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Devil Takes All!: The Battle of Opequon Creek, 1864"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "High Flying Dice Games"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2011
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Bruce Yearian"
+                    ]
+                },
+                "bga_id": "istNlkSCRz",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Paul Rohrbaugh"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 2,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Six Days of War: The Arab-Israeli Conflict, 1967"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "High Flying Dice Games"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2011
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Jes\u00fas Fuentes"
+                    ]
+                },
+                "bga_id": null,
+                "bgg_id": 286363,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Jes\u00fas Fuentes"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 2,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "SPELL: A Magic Duel for Two Players"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Perro Loko Games"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2019
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Jes\u00fas Fuentes"
+                    ]
+                },
+                "bga_id": "HLgAAbNgUD",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Jes\u00fas Fuentes"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 2,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "FLAM!"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Perro Loko Games"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2019
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "bga_id": null,
+                "bgg_id": 233626,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Bruce Loren Miller"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 2,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Stellar Wars"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Fantasy & Hobby Sales & Mfg."
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 1977
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "bga_id": "lMS3vJ9npP",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Timothy Swenson"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 2,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Stellar Wars"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 1989
+            }
         ]
     ],
     "match": [
@@ -23914,6 +24592,1619 @@
                 "wikidata_id": null,
                 "wikipedia_id": null,
                 "year": 2013
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Matthew Inman",
+                        "Elan Lee",
+                        "Shane Small"
+                    ]
+                },
+                "bga_id": null,
+                "bgg_id": 172225,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Matthew Inman",
+                        "Elan Lee",
+                        "Shane Small"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 5,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Exploding Kittens",
+                        "Eksploduj\u0105ce kotki",
+                        "Exploding Kittens \u0628\u0633\u0628\u0633 \u0628\u0648\u0645\u0628\u0627",
+                        "Robban\u00f3 cic\u00e1k",
+                        "V\u00fdbu\u0161n\u00e1 ko\u0165\u00e1tka",
+                        "\u0395\u03ba\u03c1\u03b7\u03ba\u03c4\u03b9\u03ba\u03ac \u0393\u03b1\u03c4\u03ac\u03ba\u03b9\u03b1",
+                        "\u0412\u0437\u0440\u044b\u0432\u043d\u044b\u0435 \u043a\u043e\u0442\u044f\u0442\u0430",
+                        "\u05d7\u05ea\u05d5\u05dc\u05d9\u05dd \u05de\u05ea\u05e4\u05d5\u05e6\u05e6\u05d9\u05dd",
+                        "\u0e40\u0e2b\u0e21\u0e35\u0e22\u0e27\u0e23\u0e30\u0e40\u0e1a\u0e34\u0e14",
+                        "\u3053\u306d\u3053\u3070\u304f\u306f\u3064"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Ad Magic, Inc.",
+                        "(Self-Published)",
+                        "ADC Blackfire Entertainment",
+                        "Asmodee",
+                        "Boardgame Space",
+                        "Exploding Kittens",
+                        "Gal\u00e1pagos Jogos",
+                        "G\u00e9m Klub Kft.",
+                        "HaKubia",
+                        "Hobby Japan",
+                        "Hobby World",
+                        "Kaissa Chess & Games",
+                        "Rebel",
+                        "Siam Board Games"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2015
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Matthew Inman",
+                        "Elan Lee",
+                        "Shane Small"
+                    ]
+                },
+                "bga_id": "74f9mzbw9Y",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Matthew Inman",
+                        "Elan Lee",
+                        "Shane Small"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 5,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Exploding Kittens Card Game",
+                        "Exploding Kittens",
+                        "Exploding Kittens: Original Edition",
+                        "Exploding Kittens: First Edition"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Exploding Kittens LLC",
+                        "Speck",
+                        "Ad Magic Inc."
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2015
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Christof Tisch"
+                    ]
+                },
+                "bga_id": null,
+                "bgg_id": 193,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 10,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Fill or Bust",
+                        "Tutto",
+                        "Tutto!",
+                        "Tutto! Volle Lotte",
+                        "Volle Lotte!"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "ABACUSSPIELE",
+                        "Bowman Games",
+                        "Game Factory",
+                        "PS-Games"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 1981
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Christof Tisch"
+                    ]
+                },
+                "bga_id": "Om0mb7dk0A",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "(Uncredited)"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 10,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Fill or Bust"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Bowman Games",
+                        "ABACUSSPIELE",
+                        "Game Factory",
+                        "PS-Games"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 1981
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Volkan Baga",
+                        "Tanja Donner",
+                        "Pete Fenlon",
+                        "Jason Hawkins",
+                        "Michaela Kienle",
+                        "Harald Lieske",
+                        "Michael Menzel",
+                        "Marion Pott",
+                        "Matt Schwabel",
+                        "Franz Vohwinkel",
+                        "Stephen Graham Walsh"
+                    ]
+                },
+                "bga_id": null,
+                "bgg_id": 13,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Klaus Teuber"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 4,
+                "min_players": 3,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Catan",
+                        "CATAN",
+                        "Catan (\u041a\u043e\u043b\u043e\u043d\u0438\u0437\u0430\u0442\u043e\u0440\u044b)",
+                        "Catan telepesei",
+                        "Catan: Das Spiel",
+                        "Catan: Die Bordspel",
+                        "Catan: El Juego",
+                        "Catan: Gra planszowa",
+                        "Catan: Il Gioco",
+                        "Catan: Landnemarnir",
+                        "Catan: O Jogo",
+                        "Catan: Osnovna igra",
+                        "Catane",
+                        "Catanin Uudisasukkaat",
+                        "I Coloni di Catan",
+                        "I Coloni di Katan",
+                        "Coloni\u0219tii din Catan",
+                        "Colonizadores de Catan",
+                        "Los Colonos de Cat\u00e1n",
+                        "Les Colons de Catane",
+                        "Les Colons de Katane",
+                        "Os Descobridores de Catan",
+                        "Los Descubridores de Cat\u00e1n",
+                        "Els Colons de Catan",
+                        "Katan",
+                        "Katan no Kaitakusya",
+                        "Katanas iece\u00efot\u00e2ji",
+                        "Katanas Iece\u013cot\u0101ji",
+                        "Katani Asustajad",
+                        "Katano salos naujakuriai",
+                        "Katano Salos Naujakuriai",
+                        "De Kolonisten van Catan",
+                        "Naseljenci otoka Catan",
+                        "Naseljenici ostrva Katan",
+                        "Naseljenici ostrva Katan / \u041d\u0430\u0441\u0435\u0459\u0435\u043d\u0438\u0446\u0438 \u043e\u0441\u0442\u0440\u0432\u0430 \u041a\u0430\u0442\u0430\u043d",
+                        "Naseljenici Otoka Catan",
+                        "Die Ontdekkers van Catan",
+                        "Osadn\u00edci z Katanu",
+                        "Osadnicy z Catanu",
+                        "The Settlers",
+                        "Settlers fra Catan",
+                        "The Settlers fra Catan",
+                        "Settlers fr\u00e5n Catan",
+                        "The Settlers fr\u00e5n Catan",
+                        "The Settlers of Catan",
+                        "Die Siedler von Catan",
+                        "\u039f\u03b9 \u0386\u03c0\u03bf\u03b9\u03ba\u03bf\u03b9 \u03c4\u03bf\u03c5 \u039a\u03b1\u03c4\u03ac\u03bd",
+                        "\u0417\u0430\u0441\u0435\u043b\u043d\u0438\u0446\u0438\u0442\u0435 \u043d\u0430 \u041a\u0430\u0442\u0430\u043d",
+                        "\u041a\u043e\u043b\u043e\u043d\u0438\u0437\u0430\u0442\u043e\u0440\u044b",
+                        "\u05d4\u05de\u05ea\u05d9\u05d9\u05e9\u05d1\u05d9\u05dd \u05e9\u05dc \u05e7\u05d8\u05d0\u05df",
+                        "\u0e19\u0e31\u0e01\u0e1a\u0e38\u0e01\u0e40\u0e1a\u0e34\u0e01\u0e41\u0e2b\u0e48\u0e07 Catan",
+                        "\u30ab\u30bf\u30f3\u306e\u958b\u62d3\u8005",
+                        "\u30ab\u30bf\u30f3\u306e\u958b\u62d3\u8005\u305f\u3061",
+                        "\u30ab\u30bf\u30f3\u306e\u958b\u62d3\u8005\u305f\u3061 \u30b9\u30bf\u30f3\u30c0\u30fc\u30c9\u7248",
+                        "\u5361\u5766\u5c9b",
+                        "\u5361\u5766\u5cf6",
+                        "\uce74\ud0c4",
+                        "\uce74\ud0c4\uc758 \uac1c\ucc99\uc790"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "KOSMOS",
+                        "999 Games",
+                        "Albi",
+                        "Astrel Games",
+                        "Bergsala Enigma",
+                        "Brain Games",
+                        "Capcom Co., Ltd.",
+                        "Catan Studio",
+                        "Competo / Marektoy",
+                        "danspil",
+                        "Descartes Editeur",
+                        "Devir",
+                        "Dexy Co",
+                        "Eurogames",
+                        "Filosofia \u00c9ditions",
+                        "Galakta",
+                        "Giochi Uniti",
+                        "GP Games",
+                        "Grow Jogos e Brinquedos",
+                        "HaKubia",
+                        "Hanayama",
+                        "Hobby World",
+                        "Ideal Board Games",
+                        "Igroljub",
+                        "IntelliGames.BG",
+                        "\u00cds\u00f6ld ehf.",
+                        "Kaissa Chess & Games",
+                        "Korea Boardgames co., Ltd.",
+                        "L&M Games",
+                        "Laser plus",
+                        "Lautapelit.fi",
+                        "Logojogos",
+                        "Mayfair Games",
+                        "Ninive Games",
+                        "Piatnik",
+                        "Smart Ltd",
+                        "Stupor Mundi",
+                        "Swan Panasia Co., Ltd.",
+                        "Tilsit",
+                        "Top Toys",
+                        "TRY SOFT"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 1995
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Volkan Baga",
+                        "Tanja Donner",
+                        "Pete Fenlon",
+                        "Jason Hawkins",
+                        "Michaela Kienle",
+                        "Harald Lieske",
+                        "Michael Menzel",
+                        "Marion Pott",
+                        "Matt Schwabel",
+                        "Franz Vohwinkel",
+                        "Stephen Graham Walsh"
+                    ]
+                },
+                "bga_id": "OIXt3DmJU0",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Klaus Teuber"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 4,
+                "min_players": 3,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Catan",
+                        "Settlers of Catan",
+                        "Settlers",
+                        "trade build settle",
+                        "Catan 5th Edition",
+                        "Catan: 5th Edition",
+                        "Die Siedler von Catan",
+                        "Catan - Das Spiel",
+                        "Les Colons de Catane"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Catan Studio",
+                        "Kosmos (Germany)",
+                        "Filosofia (France)",
+                        "999 Games (Benelux)",
+                        "Capcom (Japan)",
+                        "Smart (Russia)",
+                        "\u039a\u03ac\u03b9\u03c3\u03c3\u03b1 (Greece)",
+                        "Devir (Brazil)",
+                        "HaKubia (Israel)",
+                        "Grow Jogos e Brinquedos (Brazil)",
+                        "Galakta (Poland)",
+                        "Albi (Czech republic and Slovakia)"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 1995
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Roger Hargreaves",
+                        "Hank Ketcham",
+                        "Charles M. Schulz",
+                        "Eelco Martinus ten Harmsen van der Beek"
+                    ]
+                },
+                "bga_id": null,
+                "bgg_id": 4792,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Joseph Assheton Fincher"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 6,
+                "min_players": 1,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Tiddledy Winks",
+                        "Big Mini: Flohspiel",
+                        "Bull's Eye Tiddly Winks",
+                        "Championship Tiddley Winks",
+                        "Combination Tiddledy Winks",
+                        "Dennis the Menace Tiddly Winks",
+                        "Donald Duck Tiddly Winks",
+                        "Eclipse Tiddlywinks",
+                        "Elephant Tiddledy Winks",
+                        "Enid Blyton Giant Tiddley Winks",
+                        "Fairies Cauldron",
+                        "Flips",
+                        "Floh-H\u00fcpfen",
+                        "Floh-Spiel",
+                        "Floh-Springen",
+                        "Das Flohspiel",
+                        "Flohspiel",
+                        "Flohspringen",
+                        "Foster's Lager Official Tiddlywinks",
+                        "Gioco delle Pulci",
+                        "Huckleberry Hound Tiddly Winks",
+                        "Hupkins",
+                        "The Jamboree Tidley Winks",
+                        "Jeu de Puces",
+                        "Jumbo Tiddledy Winks",
+                        "Jumpy",
+                        "Kirppupeli",
+                        "Knips",
+                        "Knips-Spiel",
+                        "Loppespil",
+                        "Loppespill",
+                        "Loppspel",
+                        "Luxury Tiddly Winks",
+                        "Mickey Mouse Tidley-Winks",
+                        "Mr. Tickle's Tiddlywinks",
+                        "The New Round Game of Tiddledy Winks",
+                        "Noddy's Tiddley Winks Game",
+                        "Pche\u0142ki",
+                        "Peter Pan Tiddledy Winks",
+                        "Popular Tiddledy Winks",
+                        "La Puce",
+                        "Puces",
+                        "Pulci",
+                        "Round Game of Tiddledy Winks",
+                        "Ruimtevaart Vlooienspel",
+                        "Saute-Jeton",
+                        "Schijf Tiddledy Winks",
+                        "Snoopy Vlooienspel",
+                        "Snoopy's Game of Tiddlywinks",
+                        "Sooty Tidleywinks",
+                        "Space Target Tiddly Winks",
+                        "Spring",
+                        "Spring Tiddledey Winks",
+                        "Target Tiddly-Winks",
+                        "Target Tidleywinks",
+                        "Tiddledy Winks Tiddledy Tots",
+                        "Tiddley Winks",
+                        "Tiddleywinks",
+                        "Tiddly Winks",
+                        "Tiddly Winks and Tic-Tac-Toe",
+                        "Tiddlywinks",
+                        "Tidley Winks",
+                        "Tidleywinks",
+                        "Tinkle Bell Tiddledy Winks",
+                        "Tip Top Tiddledy Winks",
+                        "Tom & Jerry Tiddlywinks",
+                        "Turtley Winks",
+                        "Vlooienspel",
+                        "Vlooientoren",
+                        "Walt Disney's Ludwig Von Drake Tiddly Winks",
+                        "Walt Disney's Tiddly Winks",
+                        "Widdly Tinks",
+                        "Winnie the Pooh Tiddly Winks",
+                        "Word Building Tiddley Winks",
+                        "\u0411\u043b\u043e\u0448\u043a\u0438"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "(Unknown)",
+                        "American Toy Works",
+                        "B & S Company",
+                        "Berwick's Toy Co. Ltd.",
+                        "Bookmark Verlag",
+                        "Carlit",
+                        "Cayro Juegos",
+                        "Chad Valley Co Ltd.",
+                        "Codeg",
+                        "Concorde Toy Company",
+                        "Copp Clark Publishing Company",
+                        "Damm / Egmont",
+                        "Defiance",
+                        "Drivabolagen AB",
+                        "E. E. Fairchild Corporation",
+                        "E.I. Horsman",
+                        "Foster's Group",
+                        "Fundex",
+                        "Gibsons",
+                        "Globe Series of Games",
+                        "Gold Medal Toy Co.",
+                        "H-B Productions, Inc.",
+                        "H. P. Gibson & Sons",
+                        "Harlesden Games",
+                        "Hasbro",
+                        "HEMA",
+                        "House of Marbles",
+                        "Janod Jeux",
+                        "John Adams Toys",
+                        "John Jaques of London",
+                        "John Lewis",
+                        "John Sands Pty Ltd",
+                        "Joker",
+                        "Jumbo",
+                        "Kay",
+                        "King International",
+                        "Kitfix Swallow Group",
+                        "Marchant",
+                        "MB Spellen",
+                        "McLoughlin Brothers",
+                        "Merit",
+                        "Milton Bradley",
+                        "Mulder",
+                        "Noris Spiele",
+                        "Otto Maier Verlag",
+                        "Papita",
+                        "Parker Brothers",
+                        "Peri Spiele",
+                        "Peter Pan Playthings",
+                        "Philmar",
+                        "Piatnik",
+                        "Pin International",
+                        "Pintoy",
+                        "Playtime House",
+                        "Pressman Toy Corp.",
+                        "Ravensburger Spieleverlag GmbH",
+                        "Rocket Toys and Games",
+                        "Safari Ltd.",
+                        "Schmidt Spiele",
+                        "Schylling",
+                        "Selecta Spel en Hobby",
+                        "Somerville Ltd.",
+                        "Spear's Games",
+                        "Thomas Salter Ltd",
+                        "Toysmith",
+                        "Transogram",
+                        "Verlag Bing Werke AG",
+                        "Walbert Toy Manufacturing Co.",
+                        "Wari",
+                        "Whitman",
+                        "Wilder Manufacturing Co",
+                        "World Games"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 1888
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Roger Hargreaves",
+                        "Hank Ketcham",
+                        "Charles M. Schulz",
+                        "Eelco Martinus ten Harmsen van der Beek"
+                    ]
+                },
+                "bga_id": "gQdSNebf3q",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Joseph Assheton Fincher"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 6,
+                "min_players": 1,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Tiddledy Winks",
+                        "TTW Tiddly Winks in a Classic Toy Tin"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Channel Craft",
+                        "American Toy Works",
+                        "B & S Company",
+                        "Berwick's Toy Co. Ltd.",
+                        "Bookmark Verlag",
+                        "Carlit"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 1888
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Alberto Tavira",
+                        "Francisco Rico Torres"
+                    ]
+                },
+                "bga_id": null,
+                "bgg_id": 198487,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Paul Peterson"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 2,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Smash Up: Cease and Desist",
+                        "Smash Up: Ressemblances fortuites",
+                        "Smash Up: Vergessene Helden"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Alderac Entertainment Group",
+                        "Pegasus Spiele"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2016
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "bga_id": null,
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "freebase_id": null,
+                "luding_id": 31649,
+                "max_players": 2,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Smash Up: Vergessene Helden"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Pegasus Spiele",
+                        "AEG"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": null
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "J\u00fcrgen Martens"
+                    ]
+                },
+                "bga_id": null,
+                "bgg_id": 6880,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Karsten Adlung"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": null,
+                "min_players": null,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Nix"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Adlung-Spiele"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 1999
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "bga_id": null,
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Karsten Adlung",
+                        "Werner M\u00fcller"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 99,
+                "min_players": 1,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Nix"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Adlung-Spiele"
+                    ]
+                },
+                "spielen_id": "nix",
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 1999
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Kris Aubin",
+                        "Roberto Cirillo",
+                        "Benoit Crosse",
+                        "Matt DiPietro",
+                        "Brian Dugas",
+                        "Kimberly Goddard",
+                        "Jason Hendricks",
+                        "Ron Kruzie",
+                        "Dan LuVisi",
+                        "Josh Manderville",
+                        "Ben Misenar",
+                        "Javier Rodriguez",
+                        "Ben Saunders",
+                        "Stuart Spengler",
+                        "Chris Walton"
+                    ]
+                },
+                "bga_id": null,
+                "bgg_id": 32674,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Matt Wilson (I)",
+                        "Erik Yaple"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 4,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Monsterpocalypse",
+                        "MonPoc",
+                        "Monsterpocalypse D.M.Z.(Dangerous Monster Zone)"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Privateer Press"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2008
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Kris Aubin",
+                        "Roberto Cirillo",
+                        "Benoit Crosse",
+                        "Matt DiPietro",
+                        "Brian Dugas",
+                        "Kimberly Goddard",
+                        "Jason Hendricks",
+                        "Ron Kruzie",
+                        "Dan LuVisi",
+                        "Josh Manderville",
+                        "Ben Misenar",
+                        "Javier Rodriguez",
+                        "Ben Saunders",
+                        "Stuart Spengler",
+                        "Chris Walton"
+                    ]
+                },
+                "bga_id": "vm4bwnbiOf",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Matt Wilson",
+                        "Erik Yaple"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 4,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Monsterpocalypse Collectible Miniature Game Starter Set",
+                        "Monsterpocalypse"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Privateer Press"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2008
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "bga_id": null,
+                "bgg_id": 200740,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Jean-Fran\u00e7ois Chr\u00e9tien",
+                        "Simon Jutras",
+                        "Jean-Gabriel Lebel",
+                        "Vincent Petit"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 8,
+                "min_players": 1,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Elites"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "(Unpublished)"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": null
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "bga_id": "fw9yXYfTxN",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Jean-Fran\u00e7ois Chr\u00e9tien,Simon Jutras,Jean-Gabriel Lebel,Vincent Petit"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 8,
+                "min_players": 1,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Elites"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": null
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Atha Kanaani",
+                        "Chris Quilliams"
+                    ]
+                },
+                "bga_id": null,
+                "bgg_id": 198928,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Jes\u00fas Torres Castro",
+                        "Matt Leacock"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 5,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Pandemic: Iberia",
+                        "\u30d1\u30f3\u30c7\u30df\u30c3\u30af\uff1a\u30a4\u30d9\u30ea\u30a2"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Asterion Press",
+                        "Devir",
+                        "Filosofia \u00c9ditions",
+                        "Hobby Japan",
+                        "Z-Man Games, Inc."
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2016
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Atha Kanaani",
+                        "Chris Quilliams"
+                    ]
+                },
+                "bga_id": "jPKgqDSmKv",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Jes\u00fas Torres Castro",
+                        "Matt Leacock"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 4,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Pandemic: Iberia"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Z-Man Games"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2016
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Stephen Conway"
+                    ]
+                },
+                "bga_id": null,
+                "bgg_id": 15889,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 6,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Scopa",
+                        "Escoba (alternate)",
+                        "Escoba del 15 (alternate)",
+                        "Escoba del quince (alternate)",
+                        "Escoba italiana"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "(Public Domain)",
+                        "ASS Altenburger Spielkarten",
+                        "Cartamundi",
+                        "Geoludie",
+                        "Italian Scopa",
+                        "Outset Media",
+                        "Pressman Toy Corp.",
+                        "The Spiel",
+                        "Winning Moves Games (USA)"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 1600
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Stephen Conway"
+                    ]
+                },
+                "bga_id": "u5Gj53Cbj9",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "(Uncredited)"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 6,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Scopa"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Geoludie",
+                        "ASS Altenburger Spielkarten",
+                        "Cartamundi",
+                        "Italian Scopa",
+                        "Outset Media"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 1600
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "bga_id": null,
+                "bgg_id": 134150,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 8,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Mini Curling Game",
+                        "Compact Curling",
+                        "Curling: Gra planszowa",
+                        "Indoor Curling"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Egmont Polska",
+                        "IELLO",
+                        "KOSMOS",
+                        "Mindtwister AB",
+                        "Peliko",
+                        "Sunnyland",
+                        "Venner\u00f8d Forlag AS"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2012
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "bga_id": "lFbnq1GbDp",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 8,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Mini Curling Game"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Egmont Polska",
+                        "IELLO",
+                        "KOSMOS",
+                        "Mindtwister AB",
+                        "Peliko",
+                        "Sunnyland"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2012
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "bga_id": null,
+                "bgg_id": 2719,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Ned Strongin",
+                        "Howard Wexler"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 2,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Connect Four",
+                        "4",
+                        "4 \u00e0 la Suite",
+                        "4 Across",
+                        "4 em Linha",
+                        "4 en L\u00ednea",
+                        "4 en Raya",
+                        "4 Gewinnt",
+                        "4 gewinnt",
+                        "4 in a Line",
+                        "4 in a Row",
+                        "4 Oczka",
+                        "4 op een Rij",
+                        "4 p\u00e5 rad",
+                        "4 Verliert",
+                        "4 \u05d1\u05e9\u05d5\u05e8\u05d4",
+                        "4-es sor",
+                        "4er Reihe!",
+                        "4GEWINNT",
+                        "4x is de Winnaar",
+                        "Acierta 4",
+                        "Bingo Chess",
+                        "The Captain's Duel",
+                        "The Captain's Mistress",
+                        "Clone 4",
+                        "Coloca 4",
+                        "Conecta 4",
+                        "Connect 4",
+                        "Connect Four/ Puissance 4",
+                        "Fire p\u00e5 Stribe",
+                        "Forza 4",
+                        "Four in a Row",
+                        "Four to Win",
+                        "Four-in-a-Row",
+                        "Fyra i rad",
+                        "Gewinn mit ...",
+                        "Gewinn mit 4",
+                        "Gewinn mit 4!",
+                        "Go for 4",
+                        "Hedef 4",
+                        "Koordina",
+                        "Lig 4",
+                        "Linea 4",
+                        "Magnetic Fridge Four-In-A-Row",
+                        "Master Score 4",
+                        "Mini Line Up 4",
+                        "N\u00e9gy a nyer\u0151!",
+                        "Nelj\u00e4n suora",
+                        "Le Passe Temps",
+                        "Penguin Parade",
+                        "Puissance 4",
+                        "Quatre en Ligne",
+                        "Quattro",
+                        "Quattro: Gewinn mit 4",
+                        "Reise Vier Gewinnt",
+                        "Score 4",
+                        "Spiel mit 4",
+                        "stop 4",
+                        "Super Quatre",
+                        "Take Four",
+                        "Travel Connect Four",
+                        "Travel Four in a Row Counter Strategy",
+                        "V\u00e4risuora",
+                        "Die verflixten 4",
+                        "die Vier",
+                        "Vier achter elkaar",
+                        "Vier gewinnt",
+                        "Vier Gewinnt",
+                        "Vier op 'n rij",
+                        "Vier op een rij",
+                        "Vier Wint",
+                        "Vierer-Champion",
+                        "Vierer-Reihe",
+                        "Wer hat die 4?",
+                        "Zet er 4",
+                        "\u039a\u03bf\u03bd\u03c4\u03c1\u03b1-4",
+                        "\u03a3\u03ba\u03bf\u03c1 4",
+                        "\u0421\u043e\u0431\u0435\u0440\u0438 4",
+                        "\u05d0\u05e8\u05d1\u05e2 \u05d1\u05e8\u05d9\u05d1\u05d5\u05e2"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "(Public Domain)",
+                        "(Unknown)",
+                        "Aero Lloyd",
+                        "Arxon",
+                        "ASS Altenburger Spielkarten",
+                        "Aventis",
+                        "Berliner Spielkarten",
+                        "Cayro Juegos",
+                        "CHH Games",
+                        "Creative Crafthouse",
+                        "Daddy-O Productions",
+                        "Damm / Egmont",
+                        "Dilemma Games",
+                        "Estrela",
+                        "Falomir Juegos",
+                        "Fundex",
+                        "Gibsons",
+                        "El Greco",
+                        "HABA",
+                        "HaPe International",
+                        "Hasbro",
+                        "IMC Games",
+                        "Impag Toys Europe B.V.",
+                        "Innovakids GmbH",
+                        "Inovac Rima SA",
+                        "International Playthings, Inc.",
+                        "Invicta Games",
+                        "John Jaques of London",
+                        "Kod Kod",
+                        "Lagoon Games",
+                        "Leksam",
+                        "Loncraine Broxton & Partners Ltd",
+                        "MB Giochi",
+                        "MB Jeux",
+                        "MB Spellen",
+                        "MB Spiele",
+                        "Melissa & Doug",
+                        "MIKA",
+                        "Milton Bradley",
+                        "Monkey Pod Games",
+                        "Nilco S.A.",
+                        "Noris Spiele",
+                        "Northwest Corner, Inc.",
+                        "Oriental Trading Company",
+                        "Ottensten",
+                        "Paul Lamond Games Ltd",
+                        "Pavilion",
+                        "Peri Spiele",
+                        "Pin International",
+                        "Plasticart",
+                        "Plastolus Szarvas",
+                        "Pressman Toy Corp.",
+                        "Pusser's",
+                        "Ravensburger Spieleverlag GmbH",
+                        "Remy Martin",
+                        "RIWA Spiele",
+                        "Ruibal Hermanos S.A.",
+                        "Schmidt Spiele",
+                        "Schylling",
+                        "Simba Toys",
+                        "Sparkasse",
+                        "Spear's Games",
+                        "Sterling Games",
+                        "Stillmark Oy",
+                        "Super Accord",
+                        "Swing Ltd.",
+                        "Tesco",
+                        "Tiger",
+                        "Tiimari",
+                        "Trixy Games",
+                        "Unikatoy",
+                        "Westside Fun Games",
+                        "WHSmith",
+                        "Wicked Vision",
+                        "Woodstock Spiele",
+                        "ZPH Elbar"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 1974
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "(Uncredited)"
+                    ]
+                },
+                "bga_id": "WZvNYdIlyO",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Ned Strongin",
+                        "Howard Wexler"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 2,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Connect 4",
+                        "Connect Four",
+                        "Travel Connect Four"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Hasbro"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 1974
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "bga_id": null,
+                "bgg_id": 146997,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Marsha J. Falco"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 6,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Five Crowns Junior"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "AMIGO",
+                        "Set Enterprises, Inc."
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2013
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "bga_id": null,
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Marsha Falco"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": 28236,
+                "max_players": 6,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Five Crowns Junior"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Amigo"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": null
+            }
+        ],
+        [
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "V\u00edctor P\u00e9rez Corbella",
+                        "Darko Tomic"
+                    ]
+                },
+                "bga_id": null,
+                "bgg_id": 173118,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Jason Kirkpatrick",
+                        "Will Kirkpatrick",
+                        "Sara Kirkpatrick",
+                        "Christen Pedersen"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 99,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Quest for Arete"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "(Self-Published)"
+                    ]
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2015
+            },
+            {
+                "artist": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "V\u00edctor P\u00e9rez Corbella,Darko Tomic"
+                    ]
+                },
+                "bga_id": "t869qEg8jx",
+                "bgg_id": null,
+                "dbpedia_id": null,
+                "designer": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Jason Kirkpatrick,Will Kirkpatrick,Sara Kirkpatrick,Christen Pedersen"
+                    ]
+                },
+                "freebase_id": null,
+                "luding_id": null,
+                "max_players": 99,
+                "min_players": 2,
+                "names": {
+                    "__class__": "tuple",
+                    "__value__": [
+                        "Quest for Arete"
+                    ]
+                },
+                "publisher": {
+                    "__class__": "tuple",
+                    "__value__": []
+                },
+                "spielen_id": null,
+                "wikidata_id": null,
+                "wikipedia_id": null,
+                "year": 2015
             }
         ]
     ]
