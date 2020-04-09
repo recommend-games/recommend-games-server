@@ -930,7 +930,7 @@ def builddb():
     gitprepare,
     mergeall,
     makecsvs,
-    # link,
+    link,
     train,
     saverankings,
     builddb,
