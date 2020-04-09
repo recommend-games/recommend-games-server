@@ -108,6 +108,7 @@ pip-selfcheck.json
 
 static/
 
+analytics/
 feeds/
 recommender/
 .tc*

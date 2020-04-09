@@ -23,7 +23,7 @@ whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
 black = "==19.10b0" # no released version, so need to pin exact pre-release version
-board-game-scraper = "*"
+board-game-scraper = ">=2.5.7"
 csvkit = "*"
 gitpython = "*"
 lxml = "*"
