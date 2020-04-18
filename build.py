@@ -289,6 +289,8 @@ def mergebggrankings(in_paths=None, out_path=None, full=False, days=None):
                 "avg_rating",
             ),
             fieldnames_exclude=None,
+            sort_keys=False,
+            sort_fields=("published_at", "rank"),
         )
     )
 
@@ -315,6 +317,8 @@ def mergebgghotness(in_paths=None, out_path=None, full=False, days=None):
             if full
             else ("published_at", "rank", "bgg_id", "name", "year", "image_url",),
             fieldnames_exclude=None,
+            sort_keys=False,
+            sort_fields=("published_at", "rank"),
         )
     )
 
