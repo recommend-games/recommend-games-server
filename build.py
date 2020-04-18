@@ -17,7 +17,7 @@ import django
 from dotenv import load_dotenv
 from pynt import task
 from pyntcontrib import execute, safe_cd
-from pytility import arg_to_iter, parse_bool, parse_date, parse_float, parse_int, to_str
+from pytility import arg_to_iter, parse_bool, parse_date, parse_float, parse_int
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -167,12 +167,10 @@ def _merge_kwargs(
     site, item="GameItem", in_paths=None, out_path=None, full=False, **kwargs
 ):
     kwargs["in_paths"] = in_paths or os.path.join(SCRAPER_DIR, "feeds", site, item, "*")
-    kwargs.setdefault("keys", (f"{site}_id",))
-    kwargs.setdefault(
-        "key_parsers", (parse_int,) if site in ("bgg", "luding") else (to_str,)
-    )
-    kwargs.setdefault("latest", ("scraped_at",))
-    kwargs.setdefault("latest_parsers", (parse_date,))
+    kwargs.setdefault("keys", f"{site}_id")
+    kwargs.setdefault("key_types", "int" if site in ("bgg", "luding") else "str")
+    kwargs.setdefault("latest", "scraped_at")
+    kwargs.setdefault("latest_types", "date")
     kwargs.setdefault("latest_min", django.utils.timezone.now() - timedelta(days=30))
     kwargs.setdefault("concat_output", True)
 
@@ -189,7 +187,7 @@ def _merge_kwargs(
             "fieldnames_exclude",
             ("image_file", "rules_file", "published_at", "updated_at", "scraped_at"),
         )
-        kwargs.setdefault("sort_output", True)
+        kwargs.setdefault("sort_keys", True)
 
     return kwargs
 
@@ -227,8 +225,6 @@ def mergebgg(in_paths=None, out_path=None, full=False):
 @task()
 def mergebggusers(in_paths=None, out_path=None, full=False):
     """ merge BoardGameGeek user data """
-    from board_game_scraper.utils import to_lower
-
     merge(
         **_merge_kwargs(
             site="bgg",
@@ -236,8 +232,8 @@ def mergebggusers(in_paths=None, out_path=None, full=False):
             in_paths=in_paths,
             out_path=out_path,
             full=full,
-            keys=("bgg_user_name",),
-            key_parsers=(to_lower,),
+            keys="bgg_user_name",
+            key_types="istr",
             fieldnames_exclude=None
             if parse_bool(full)
             else ("published_at", "scraped_at"),
@@ -248,8 +244,6 @@ def mergebggusers(in_paths=None, out_path=None, full=False):
 @task()
 def mergebggratings(in_paths=None, out_path=None, full=False):
     """ merge BoardGameGeek rating data """
-    from board_game_scraper.utils import to_lower
-
     merge(
         **_merge_kwargs(
             site="bgg",
@@ -258,7 +252,7 @@ def mergebggratings(in_paths=None, out_path=None, full=False):
             out_path=out_path,
             full=full,
             keys=("bgg_user_name", "bgg_id"),
-            key_parsers=(to_lower, parse_int),
+            key_types=("istr", "int"),
         )
     )
 
@@ -280,7 +274,7 @@ def mergebggrankings(in_paths=None, out_path=None, full=False, days=None):
             out_path=out_path,
             full=full,
             keys=("published_at", "bgg_id"),
-            key_parsers=(parse_date, parse_int),
+            key_types=("date", "int"),
             latest_min=latest_min,
             fieldnames=None
             if full
@@ -315,7 +309,7 @@ def mergebgghotness(in_paths=None, out_path=None, full=False, days=None):
             out_path=out_path,
             full=full,
             keys=("published_at", "bgg_id"),
-            key_parsers=(parse_date, parse_int),
+            key_types=("date", "int"),
             latest_min=latest_min,
             fieldnames=None
             if full
@@ -376,7 +370,7 @@ def mergenews(
             out_path=out_path,
             keys=("article_id",),
             latest=("published_at", "scraped_at"),
-            latest_parsers=(parse_date, parse_date),
+            latest_types=("date", "date"),
             latest_min=None,
             fieldnames=(
                 "article_id",
@@ -398,8 +392,9 @@ def mergenews(
                 "source_name",
             ),
             fieldnames_exclude=None,
-            sort_output=False,
-            sort_latest="desc",
+            sort_keys=False,
+            sort_latest=True,
+            sort_descending=True,
         )
     )
 
