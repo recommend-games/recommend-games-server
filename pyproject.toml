@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "recommend-games-server"
+version = "1-17-9"
+description = "Board game recommendation service."
+authors = ["Markus Shepherd <markus@recommend.games>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "3.7"
+board-game-recommender = "^2.1"
+django = "^3.0"
+django-extensions = "^2.2"
+django-filter = "^2.2"
+django-rest-framework-proxy = {git = "https://github.com/MarkusShepherd/django-rest-framework-proxy.git", branch = "django3"}
+djangorestframework = "^3.11"
+google-cloud-pubsub = "^1.4"
+gunicorn = "^20.0"
+markdown = "^3.2"
+pandas = "^1.0"
+pytility = {extras = ["dates"], version = "^0.1"}
+turicreate = "^6.2"
+whitenoise = {extras = ["brotli"], version = "^5.0"}
+
+[tool.poetry.dev-dependencies]
+board-game-scraper = "^2.7"
+csvkit = "^1.0"
+gitpython = "^3.1"
+lxml = "^4.5"
+mypy = "^0"
+psutil = "^5.7"
+pylint = "^2.4"
+pynt = "^0.8"
+pynt-contrib = "^0.2"
+python-dotenv = "^0.13"
+rcssmin = "^1.0"
+requests = "^2.23"
+rjsmin = "^1.1"
+snaptime = "^0.2"
+black = "^19.10b0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
