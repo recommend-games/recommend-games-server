@@ -590,4 +590,6 @@ rgApp.controller('ListController', function ListController(
     gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
     gamesService.setImage();
     gamesService.setDescription();
+
+    $scope.disqusId = gamesService.canonicalPath($location.path());
 });

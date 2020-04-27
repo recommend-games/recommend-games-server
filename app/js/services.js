@@ -547,6 +547,8 @@ rgApp.factory('gamesService', function gamesService(
         return qString ? path + '?' + qString : path;
     }
 
+    service.canonicalPath = canonicalPath;
+
     service.setCanonicalUrl = function setCanonicalUrl(path, params) {
         $('link[rel="canonical"]').remove();
         $('meta[property="og:url"]').remove();
