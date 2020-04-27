@@ -7,6 +7,7 @@
 rgApp.controller('NewsController', function NewsController(
     $location,
     $scope,
+    CANONICAL_URL,
     gamesService,
     newsService
 ) {
@@ -32,4 +33,7 @@ rgApp.controller('NewsController', function NewsController(
     gamesService.setCanonicalUrl($location.path());
 
     newsService.setLastVisit();
+
+    $scope.disqusId = gamesService.canonicalPath($location.path());
+    $scope.disqusUrl = CANONICAL_URL + $scope.disqusId;
 });

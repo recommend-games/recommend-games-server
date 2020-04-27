@@ -12,6 +12,7 @@ rgApp.controller('DetailController', function DetailController(
     $routeParams,
     $scope,
     $timeout,
+    CANONICAL_URL,
     gamesService,
     rankingsService
 ) {
@@ -323,4 +324,7 @@ rgApp.controller('DetailController', function DetailController(
     );
 
     gamesService.setCanonicalUrl($location.path());
+
+    $scope.disqusId = gamesService.canonicalPath($location.path());
+    $scope.disqusUrl = CANONICAL_URL + $scope.disqusId;
 });

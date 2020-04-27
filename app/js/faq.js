@@ -11,6 +11,7 @@ rgApp.controller('FaqController', function FaqController(
     $sce,
     $scope,
     $timeout,
+    CANONICAL_URL,
     FAQ_URL,
     gamesService
 ) {
@@ -33,4 +34,7 @@ rgApp.controller('FaqController', function FaqController(
     gamesService.setCanonicalUrl($location.path());
     gamesService.setImage();
     gamesService.setDescription('Frequently asked questions – and their answers.');
+
+    $scope.disqusId = gamesService.canonicalPath($location.path());
+    $scope.disqusUrl = CANONICAL_URL + $scope.disqusId;
 });

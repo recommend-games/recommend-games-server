@@ -8,6 +8,7 @@ rgApp.controller('AboutController', function AboutController(
     $location,
     $log,
     $scope,
+    CANONICAL_URL,
     gamesService,
     metaService
 ) {
@@ -40,4 +41,7 @@ rgApp.controller('AboutController', function AboutController(
     gamesService.setDescription('Recommend.Games strives to recommend the best board games for you. ' +
         'We take the user ratings from BoardGameGeek, apply some black magic, and present recommendations that suit you. ' +
         'Read more about how it works.');
+
+    $scope.disqusId = gamesService.canonicalPath($location.path());
+    $scope.disqusUrl = CANONICAL_URL + $scope.disqusId;
 });

@@ -26,10 +26,10 @@ rgApp.constant('API_URL', '/api/')
     .constant('DISQUS_SHORT_NAME', 'recommend-games');
 
 rgApp.config(function (
-    DISQUS_SHORT_NAME,
     $disqusProvider,
     $locationProvider,
     $routeProvider,
+    DISQUS_SHORT_NAME,
     blockUIConfig,
     toastrConfig
 ) {

@@ -5,7 +5,6 @@
 'use strict';
 
 rgApp.controller('ListController', function ListController(
-    CANONICAL_URL,
     $location,
     $log,
     $filter,
@@ -14,6 +13,7 @@ rgApp.controller('ListController', function ListController(
     $routeParams,
     $scope,
     $timeout,
+    CANONICAL_URL,
     filterService,
     gamesService,
     personsService,

@@ -14,6 +14,7 @@ rgApp.controller('BgaController', function BgaController(
     $scope,
     API_URL,
     BGA_CLIENT_ID,
+    CANONICAL_URL,
     filterService,
     gamesService,
     toastr
@@ -188,4 +189,7 @@ rgApp.controller('BgaController', function BgaController(
     gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
     gamesService.setImage();
     gamesService.setDescription();
+
+    $scope.disqusId = gamesService.canonicalPath($location.path());
+    $scope.disqusUrl = CANONICAL_URL + $scope.disqusId;
 });
