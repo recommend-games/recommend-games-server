@@ -1,7 +1,7 @@
-/* 
+/*
  * angular-disqus 1.1.0
  * http://github.com/kirstein/angular-disqus
- * 
+ *
  * Licensed under the MIT license
  */
 (function (angular, window) {
@@ -113,12 +113,12 @@
      * @param  {String} $location location service
      * @param  {String} id Thread id
      */
-    function resetCommit($location, id) {
+    function resetCommit($location, id, url) {
       window.DISQUS.reset({
         reload: true,
         config : function() {
           this.page.identifier = id;
-          this.page.url        = $location.absUrl();
+          this.page.url        = url || $location.absUrl();
         }
       });
     }
@@ -167,17 +167,19 @@
        *
        * @param  {String} id required thread id
        */
-      function commit(id) {
+      function commit(id, url) {
         var shortname = getShortname();
+
+        url = url || $location.absUrl();
 
         if (!angular.isDefined(shortname)) {
           throw new Error('No disqus shortname defined');
         } else if (!angular.isDefined(id)) {
           throw new Error('No disqus thread id defined');
         } else if (angular.isDefined(window.DISQUS)) {
-          resetCommit($location, id);
+          resetCommit($location, id, url);
         } else {
-          setGlobals(id, $location.absUrl(), shortname);
+          setGlobals(id, url, shortname);
           addScriptTag(shortname, TYPE_EMBED);
         }
       }
@@ -190,8 +192,9 @@
        *
        * @param {String} id thread id
        */
-      function loadCount(id) {
-        setGlobals(id, $location.absUrl(), shortname);
+      function loadCount(id, url) {
+        url = url || $location.absUrl();
+        setGlobals(id, url, shortname);
         addScriptTag(getShortname(), TYPE_EMBED);
         addScriptTag(getShortname(), TYPE_COUNT);
         getCount();
@@ -213,16 +216,19 @@
   disqusModule.directive('disqus', [ '$disqus', function($disqus) {
 
     return {
-      restrict : 'AC',
+      restrict : 'E',
       replace  : true,
       scope    : {
-        id : '=disqus',
+        id  : '=identifier',
+        url : '=url'
       },
       template : '<div id="disqus_thread"></div>',
       link: function link(scope) {
-        scope.$watch('id', function(id) {
+        scope.$watchGroup(['id', 'url'], function(values) {
+          var id = values[0],
+              url = values[1];
           if (angular.isDefined(id)) {
-            $disqus.commit(id);
+            $disqus.commit(id, url);
           }
         });
       }

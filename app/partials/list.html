@@ -935,7 +935,9 @@
 		</div>
 	</section>
 
-	<div ng-if="disqusId" disqus="disqusId"></div>
+	<disqus ng-if="disqusId &amp;&amp; disqusUrl"
+		identifier="disqusId"
+		url="disqusUrl"></disqus>
 
 	<script type="application/ld+json">
 		{

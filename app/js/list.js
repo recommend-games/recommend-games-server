@@ -5,6 +5,7 @@
 'use strict';
 
 rgApp.controller('ListController', function ListController(
+    CANONICAL_URL,
     $location,
     $log,
     $filter,
@@ -592,4 +593,5 @@ rgApp.controller('ListController', function ListController(
     gamesService.setDescription();
 
     $scope.disqusId = gamesService.canonicalPath($location.path());
+    $scope.disqusUrl = CANONICAL_URL + $scope.disqusId;
 });
