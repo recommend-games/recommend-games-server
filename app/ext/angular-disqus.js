@@ -213,7 +213,7 @@
    * Disqus thread comment directive.
    * Used to display the comments block for a thread.
    */
-  disqusModule.directive('disqus', [ '$disqus', function($disqus) {
+  disqusModule.directive('disqus', [ '$disqus', '$timeout', function($disqus, $timeout) {
 
     return {
       restrict : 'E',
@@ -228,7 +228,9 @@
           var id = values[0],
               url = values[1];
           if (angular.isDefined(id)) {
-            $disqus.commit(id, url);
+            $timeout(function () {
+              $disqus.commit(id, url);
+            }, 1000);
           }
         });
       }
