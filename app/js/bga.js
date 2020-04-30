@@ -14,7 +14,6 @@ rgApp.controller('BgaController', function BgaController(
     $scope,
     API_URL,
     BGA_CLIENT_ID,
-    CANONICAL_URL,
     filterService,
     gamesService,
     toastr
@@ -33,7 +32,8 @@ rgApp.controller('BgaController', function BgaController(
     var $ = angular.element,
         users = {},
         userNames = parseList($routeParams.for, true),
-        routeParams = filterService.getParams($routeParams);
+        routeParams = filterService.getParams($routeParams),
+        canonical;
 
     function fetchUser(userName) {
         if (users[userName]) {
@@ -186,10 +186,10 @@ rgApp.controller('BgaController', function BgaController(
     fetchGames(1);
 
     gamesService.setTitle(routeParams.for ? 'BGA recommendations for ' + routeParams.for : 'BGA recommendations');
-    gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
+    canonical = gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
     gamesService.setImage();
     gamesService.setDescription();
 
-    $scope.disqusId = gamesService.canonicalPath($location.path());
-    $scope.disqusUrl = CANONICAL_URL + $scope.disqusId;
+    $scope.disqusId = canonical.path;
+    $scope.disqusUrl = canonical.url;
 });

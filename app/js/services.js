@@ -547,7 +547,13 @@ rgApp.factory('gamesService', function gamesService(
         return qString ? path + '?' + qString : path;
     }
 
-    service.canonicalPath = canonicalPath;
+    function urlAndPath(path, params) {
+        var canPath = canonicalPath(path, params);
+        return {
+            'path': canPath,
+            'url': CANONICAL_URL + canPath
+        };
+    }
 
     service.setCanonicalUrl = function setCanonicalUrl(path, params) {
         $('link[rel="canonical"]').remove();
@@ -557,19 +563,18 @@ rgApp.factory('gamesService', function gamesService(
             return;
         }
 
-        path = canonicalPath(path, params);
-        var url = CANONICAL_URL + path;
+        var canonical = urlAndPath(path, params);
 
         $('head').append(
-            '<link rel="canonical" href="' + url + '" />',
-            '<meta property="og:url" content="' + url + '" />'
+            '<link rel="canonical" href="' + canonical.url + '" />',
+            '<meta property="og:url" content="' + canonical.url + '" />'
         );
 
         if (GA_TRACKING_ID && $window.gtag) {
-            $window.gtag('config', GA_TRACKING_ID, {'page_path': '/' + path});
+            $window.gtag('config', GA_TRACKING_ID, {'page_path': '/' + canonical.path});
         }
 
-        return url;
+        return canonical;
     };
 
     service.setTitle = function setTitle(title) {
