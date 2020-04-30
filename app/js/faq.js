@@ -20,6 +20,8 @@ rgApp.controller('FaqController', function FaqController(
         return question;
     }
 
+    var canonical;
+
     $http.get(FAQ_URL)
         .then(function (response) {
             $scope.questions = _.map(response.data, parseQuestion);
@@ -30,7 +32,10 @@ rgApp.controller('FaqController', function FaqController(
     $scope.scroll = $anchorScroll;
 
     gamesService.setTitle('FAQ');
-    gamesService.setCanonicalUrl($location.path());
+    canonical = gamesService.setCanonicalUrl($location.path());
     gamesService.setImage();
     gamesService.setDescription('Frequently asked questions – and their answers.');
+
+    $scope.disqusId = canonical.path;
+    $scope.disqusUrl = canonical.url;
 });

@@ -10,6 +10,8 @@ rgApp.controller('StatsController', function StatsController(
     $scope,
     gamesService
 ) {
+    var canonical;
+
     gamesService.getGamesStats()
         .then(function (response) {
             $scope.data = response;
@@ -18,6 +20,9 @@ rgApp.controller('StatsController', function StatsController(
 
     gamesService.setTitle('Statistics');
     gamesService.setDescription('Analyses of the Recommend.Games and BoardGameGeek top 100 games.');
-    gamesService.setCanonicalUrl($location.path());
+    canonical = gamesService.setCanonicalUrl($location.path());
     gamesService.setImage();
+
+    $scope.disqusId = canonical.path;
+    $scope.disqusUrl = canonical.url;
 });

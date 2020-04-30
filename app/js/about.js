@@ -11,6 +11,8 @@ rgApp.controller('AboutController', function AboutController(
     gamesService,
     metaService
 ) {
+    var canonical;
+
     gamesService.getGames(1, {
         'ordering': '-avg_rating',
         'num_votes__gte': 100,
@@ -35,9 +37,12 @@ rgApp.controller('AboutController', function AboutController(
         .catch($log.error);
 
     gamesService.setTitle('About Recommend.Games: how it all works');
-    gamesService.setCanonicalUrl($location.path());
+    canonical = gamesService.setCanonicalUrl($location.path());
     gamesService.setImage();
     gamesService.setDescription('Recommend.Games strives to recommend the best board games for you. ' +
         'We take the user ratings from BoardGameGeek, apply some black magic, and present recommendations that suit you. ' +
         'Read more about how it works.');
+
+    $scope.disqusId = canonical.path;
+    $scope.disqusUrl = canonical.url;
 });

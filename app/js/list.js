@@ -23,6 +23,7 @@ rgApp.controller('ListController', function ListController(
         params = filterService.getParams($routeParams),
         searchPromise = null,
         userStats = {},
+        canonical,
         fetchPopularGames;
 
     function filtersActive() {
@@ -587,7 +588,10 @@ rgApp.controller('ListController', function ListController(
         .catch($log.error);
 
     gamesService.setTitle(!_.isEmpty(params.for) ? 'Recommendations for ' + _.join(params.for, ', ') : null);
-    gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
+    canonical = gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
     gamesService.setImage();
     gamesService.setDescription();
+
+    $scope.disqusId = canonical.path;
+    $scope.disqusUrl = canonical.url;
 });

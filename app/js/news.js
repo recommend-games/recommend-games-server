@@ -20,6 +20,8 @@ rgApp.controller('NewsController', function NewsController(
             });
     }
 
+    var canonical;
+
     $scope.fetchNews = fetchNews;
 
     fetchNews(0)
@@ -29,7 +31,10 @@ rgApp.controller('NewsController', function NewsController(
 
     gamesService.setTitle('News aggregator');
     gamesService.setDescription('News about board games, aggregated for you from the top sources of the hobby.');
-    gamesService.setCanonicalUrl($location.path());
+    canonical = gamesService.setCanonicalUrl($location.path());
 
     newsService.setLastVisit();
+
+    $scope.disqusId = canonical.path;
+    $scope.disqusUrl = canonical.url;
 });

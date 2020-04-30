@@ -12,8 +12,8 @@ rgApp.controller('HistoryController', function HistoryController(
     $routeParams,
     $scope,
     $timeout,
-    gamesService,
-    API_URL
+    API_URL,
+    gamesService
 ) {
     var $ = angular.element,
         rankingType = $routeParams.type || 'fac',
@@ -58,7 +58,8 @@ rgApp.controller('HistoryController', function HistoryController(
             }
         },
         canonicalPath = rankingType === 'fac' ? '/' + _.split($location.path(), '/')[1] : $location.path(),
-        canonicalParams = {};
+        canonicalParams = {},
+        canonical;
 
     $scope.type = rankingType;
     $scope.top = top;
@@ -171,6 +172,9 @@ rgApp.controller('HistoryController', function HistoryController(
 
     gamesService.setTitle('Top ' + top + ' history');
     gamesService.setDescription('Visualization of the top ' + top + ' history');
-    gamesService.setCanonicalUrl(canonicalPath, canonicalParams);
+    canonical = gamesService.setCanonicalUrl(canonicalPath, canonicalParams);
     gamesService.setImage(); // TODO should be an image of the canvas
+
+    $scope.disqusId = canonical.path;
+    $scope.disqusUrl = canonical.url;
 });
