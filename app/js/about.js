@@ -37,12 +37,13 @@ rgApp.controller('AboutController', function AboutController(
         .catch($log.error);
 
     gamesService.setTitle('About Recommend.Games: how it all works');
-    canonical = gamesService.setCanonicalUrl($location.path());
+    gamesService.setCanonicalUrl($location.path());
     gamesService.setImage();
     gamesService.setDescription('Recommend.Games strives to recommend the best board games for you. ' +
         'We take the user ratings from BoardGameGeek, apply some black magic, and present recommendations that suit you. ' +
         'Read more about how it works.');
 
+    canonical = gamesService.urlAndPath($location.path(), undefined, true);
     $scope.disqusId = canonical.path;
     $scope.disqusUrl = canonical.url;
 });

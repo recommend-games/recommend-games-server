@@ -186,10 +186,11 @@ rgApp.controller('BgaController', function BgaController(
     fetchGames(1);
 
     gamesService.setTitle(routeParams.for ? 'BGA recommendations for ' + routeParams.for : 'BGA recommendations');
-    canonical = gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
+    gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
     gamesService.setImage();
     gamesService.setDescription();
 
+    canonical = gamesService.urlAndPath($location.path(), undefined, true);
     $scope.disqusId = canonical.path;
     $scope.disqusUrl = canonical.url;
 });

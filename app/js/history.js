@@ -172,9 +172,10 @@ rgApp.controller('HistoryController', function HistoryController(
 
     gamesService.setTitle('Top ' + top + ' history');
     gamesService.setDescription('Visualization of the top ' + top + ' history');
-    canonical = gamesService.setCanonicalUrl(canonicalPath, canonicalParams);
+    gamesService.setCanonicalUrl(canonicalPath, canonicalParams);
     gamesService.setImage(); // TODO should be an image of the canvas
 
+    canonical = gamesService.urlAndPath($location.path(), canonicalParams, true);
     $scope.disqusId = canonical.path;
     $scope.disqusUrl = canonical.url;
 });

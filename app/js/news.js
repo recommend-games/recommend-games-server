@@ -31,10 +31,11 @@ rgApp.controller('NewsController', function NewsController(
 
     gamesService.setTitle('News aggregator');
     gamesService.setDescription('News about board games, aggregated for you from the top sources of the hobby.');
-    canonical = gamesService.setCanonicalUrl($location.path());
+    gamesService.setCanonicalUrl($location.path());
 
     newsService.setLastVisit();
 
+    canonical = gamesService.urlAndPath($location.path(), undefined, true);
     $scope.disqusId = canonical.path;
     $scope.disqusUrl = canonical.url;
 });

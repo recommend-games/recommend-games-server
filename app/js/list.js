@@ -588,10 +588,11 @@ rgApp.controller('ListController', function ListController(
         .catch($log.error);
 
     gamesService.setTitle(!_.isEmpty(params.for) ? 'Recommendations for ' + _.join(params.for, ', ') : null);
-    canonical = gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
+    gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
     gamesService.setImage();
     gamesService.setDescription();
 
+    canonical = gamesService.urlAndPath($location.path(), undefined, true);
     $scope.disqusId = canonical.path;
     $scope.disqusUrl = canonical.url;
 });

@@ -323,8 +323,9 @@ rgApp.controller('DetailController', function DetailController(
         updateChart
     );
 
-    canonical = gamesService.setCanonicalUrl($location.path());
+    gamesService.setCanonicalUrl($location.path());
 
+    canonical = gamesService.urlAndPath($location.path(), undefined, true);
     $scope.disqusId = canonical.path;
     $scope.disqusUrl = canonical.url;
 });
