@@ -11,6 +11,7 @@ from operator import or_
 
 from django.conf import settings
 from django.db.models import Count, Q, Min
+from django.shortcuts import redirect
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from pytility import arg_to_iter, parse_bool, parse_date, parse_int, take_first
@@ -780,7 +781,7 @@ class UserViewSet(PermissionsModelViewSet):
                 .order_by()
                 .values_list("bgg_id", flat=True)
             )
-            filters = {f"game__in": games}
+            filters = {"game__in": games}
             collection = user.collection_set.filter(**filters)
             result = {
                 "total": len(games),
@@ -803,3 +804,9 @@ class CollectionViewSet(ModelViewSet):
     def get_permissions(self):
         cls = AllowAny if settings.DEBUG else IsAuthenticated
         return (cls(),)
+
+
+def redirect_view(request):
+    """Redirect to a given path."""
+    path = request.GET.get("to") or "/"
+    return redirect(path if path.startswith("/") else f"/{path}")

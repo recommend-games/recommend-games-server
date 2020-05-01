@@ -14,6 +14,7 @@ from .views import (
     MechanicViewSet,
     PersonViewSet,
     UserViewSet,
+    redirect_view,
 )
 
 ROUTER = DefaultRouter()
@@ -28,6 +29,7 @@ ROUTER.register("users", UserViewSet)
 # pylint: disable=invalid-name
 urlpatterns = [
     path("", include(ROUTER.urls)),
+    path("redirect", redirect_view),
     re_path(
         r"^news/(?P<path>.+)$", ProxyView.as_view(source="%(path)s"), name="news-list"
     ),
