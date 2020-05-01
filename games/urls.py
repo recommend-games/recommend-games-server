@@ -30,6 +30,7 @@ ROUTER.register("users", UserViewSet)
 urlpatterns = [
     path("", include(ROUTER.urls)),
     path("redirect", redirect_view),
+    path("redirect/", redirect_view),
     re_path(
         r"^news/(?P<path>.+)$", ProxyView.as_view(source="%(path)s"), name="news-list"
     ),

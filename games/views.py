@@ -809,4 +809,4 @@ class CollectionViewSet(ModelViewSet):
 def redirect_view(request):
     """Redirect to a given path."""
     path = request.GET.get("to") or "/"
-    return redirect(path if path.startswith("/") else f"/{path}")
+    return redirect(path if path.startswith("/") else f"/{path}", permanent=True)
