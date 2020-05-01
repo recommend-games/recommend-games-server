@@ -547,13 +547,16 @@ rgApp.factory('gamesService', function gamesService(
         return qString ? path + '?' + qString : path;
     }
 
-    function urlAndPath(path, params) {
-        var canPath = canonicalPath(path, params);
+    function urlAndPath(path, params, redirect) {
+        var canPath = canonicalPath(path, params),
+            urlPath = redirect ? API_URL.substring(1) + 'redirect?to=' + encodeURIComponent('/' + canPath) : canPath;
         return {
-            'path': canPath,
-            'url': CANONICAL_URL + canPath
+            'path': urlPath,
+            'url': CANONICAL_URL + urlPath
         };
     }
+
+    service.urlAndPath = urlAndPath;
 
     service.setCanonicalUrl = function setCanonicalUrl(path, params) {
         $('link[rel="canonical"]').remove();

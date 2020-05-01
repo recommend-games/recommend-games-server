@@ -32,10 +32,11 @@ rgApp.controller('FaqController', function FaqController(
     $scope.scroll = $anchorScroll;
 
     gamesService.setTitle('FAQ');
-    canonical = gamesService.setCanonicalUrl($location.path());
+    gamesService.setCanonicalUrl($location.path());
     gamesService.setImage();
     gamesService.setDescription('Frequently asked questions – and their answers.');
 
+    canonical = gamesService.urlAndPath($location.path(), undefined, true);
     $scope.disqusId = canonical.path;
     $scope.disqusUrl = canonical.url;
 });
