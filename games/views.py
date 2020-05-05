@@ -27,7 +27,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-# from rest_framework.utils.urls import remove_query_param, replace_query_param
+from rest_framework.utils.urls import remove_query_param, replace_query_param
 from rest_framework.viewsets import ModelViewSet
 
 from .models import (
@@ -100,15 +100,47 @@ class GamesActionViewSet(PermissionsModelViewSet):
 
 
 class BodyParamsPagination(PageNumberPagination):
+    """Parse params from body and use in pagination."""
+
+    keys = None
+    parsers = None
+
     def get_next_link(self):
-        # TODO
-        print("BodyParamsPagination.get_next_link()")
-        return super().get_next_link()
+        url = super().get_next_link()
+        if url is None:
+            return None
+        for key, parser in zip(arg_to_iter(self.keys), arg_to_iter(self.parsers)):
+            params = ",".join(
+                map(str, sorted(_extract_params(self.request, key, parser)))
+            )
+            url = (
+                replace_query_param(url, key, params)
+                if params
+                else remove_query_param(url, key)
+            )
+        return url
 
     def get_previous_link(self):
-        # TODO
-        print("BodyParamsPagination.get_previous_link()")
-        return super().get_previous_link()
+        url = super().get_previous_link()
+        if url is None:
+            return None
+        for key, parser in zip(arg_to_iter(self.keys), arg_to_iter(self.parsers)):
+            params = ",".join(
+                map(str, sorted(_extract_params(self.request, key, parser)))
+            )
+            url = (
+                replace_query_param(url, key, params)
+                if params
+                else remove_query_param(url, key)
+            )
+        return url
+
+
+class RecommendParamsPagination(BodyParamsPagination):
+    """Pagination for /recommend endpoints."""
+
+    keys = ("user", "like")
+    parsers = (str, parse_int)
 
 
 def _exclude(user=None, ids=None):
@@ -395,12 +427,12 @@ class GameViewSet(PermissionsModelViewSet):
         return recommender.recommend_similar(games=like, items=games)
 
     @action(
-        detail=False, methods=("GET", "POST"), pagination_class=BodyParamsPagination
+        detail=False,
+        methods=("GET", "POST"),
+        pagination_class=RecommendParamsPagination,
     )
     def recommend(self, request):
         """ recommend games """
-
-        # TODO "next" and "previous" only contain query params
 
         site = request.query_params.get("site")
 
@@ -494,7 +526,11 @@ class GameViewSet(PermissionsModelViewSet):
 
         return recommendations
 
-    @action(detail=False, methods=("GET", "POST"))
+    @action(
+        detail=False,
+        methods=("GET", "POST"),
+        pagination_class=RecommendParamsPagination,
+    )
     def recommend_bga(self, request):
         """ recommend games with Board Game Atlas data """
 
