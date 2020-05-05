@@ -380,7 +380,7 @@ class GameViewSet(PermissionsModelViewSet):
 
         return recommender.recommend_similar(games=like, items=games)
 
-    @action(detail=False)
+    @action(detail=False, methods=("GET", "POST"))
     def recommend(self, request):
         """ recommend games """
 
@@ -478,7 +478,7 @@ class GameViewSet(PermissionsModelViewSet):
 
         return recommendations
 
-    @action(detail=False)
+    @action(detail=False, methods=("GET", "POST"))
     def recommend_bga(self, request):
         """ recommend games with Board Game Atlas data """
 
@@ -488,8 +488,8 @@ class GameViewSet(PermissionsModelViewSet):
         if recommender is None:
             return self.list(request)
 
-        users = list(_parse_parts(request.query_params.getlist("user")))
-        like = list(_parse_parts(request.query_params.getlist("like")))
+        users = list(_extract_params(request, "user", str))
+        like = list(_extract_params(request, "like", str))
 
         recommendation = (
             recommender.recommend_similar(games=like)
