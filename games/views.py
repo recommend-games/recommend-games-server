@@ -7,6 +7,7 @@ import os
 
 from datetime import timezone
 from functools import reduce
+from itertools import chain
 from operator import or_
 
 from django.conf import settings
@@ -141,6 +142,25 @@ def _parse_ints(args):
     for parsed in map(parse_int, _parse_parts(args)):
         if parsed is not None:
             yield parsed
+
+
+def _extract_params(request, key, parser=None):
+    data_values = (
+        arg_to_iter(request.data.get(key))
+        if isinstance(request.data, dict)
+        else arg_to_iter(request.data)
+    )
+    query_values = arg_to_iter(request.query_params.getlist(key))
+    values = _parse_parts(chain(data_values, query_values))
+
+    if not callable(parser):
+        yield from values
+        return
+
+    values = map(parser, values)
+    for value in values:
+        if value is not None:
+            yield value
 
 
 class GameFilter(FilterSet):
@@ -364,13 +384,15 @@ class GameViewSet(PermissionsModelViewSet):
     def recommend(self, request):
         """ recommend games """
 
+        # TODO "next" and "previous" only contain query params
+
         site = request.query_params.get("site")
 
         if site == "bga":
             return self.recommend_bga(request)
 
-        users = list(_parse_parts(request.query_params.getlist("user")))
-        like = list(_parse_ints(request.query_params.getlist("like")))
+        users = list(_extract_params(request, "user", str))
+        like = list(_extract_params(request, "like", parse_int))
 
         if not users and not like:
             return self.list(request)
