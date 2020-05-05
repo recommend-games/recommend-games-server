@@ -24,8 +24,10 @@ from rest_framework.exceptions import (
     PermissionDenied,
 )
 from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+# from rest_framework.utils.urls import remove_query_param, replace_query_param
 from rest_framework.viewsets import ModelViewSet
 
 from .models import (
@@ -95,6 +97,18 @@ class GamesActionViewSet(PermissionsModelViewSet):
             queryset, many=True, context=self.get_serializer_context()
         )
         return Response(serializer.data)
+
+
+class BodyParamsPagination(PageNumberPagination):
+    def get_next_link(self):
+        # TODO
+        print("BodyParamsPagination.get_next_link()")
+        return super().get_next_link()
+
+    def get_previous_link(self):
+        # TODO
+        print("BodyParamsPagination.get_previous_link()")
+        return super().get_previous_link()
 
 
 def _exclude(user=None, ids=None):
@@ -380,7 +394,9 @@ class GameViewSet(PermissionsModelViewSet):
 
         return recommender.recommend_similar(games=like, items=games)
 
-    @action(detail=False, methods=("GET", "POST"))
+    @action(
+        detail=False, methods=("GET", "POST"), pagination_class=BodyParamsPagination
+    )
     def recommend(self, request):
         """ recommend games """
 
