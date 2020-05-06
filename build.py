@@ -1027,6 +1027,11 @@ def buildserver(images=None, tags=None):
 
     with safe_cd(BASE_DIR):
         execute(*command)
+        # TODO git tag
+        # try:
+        #     execute("git", "tag", TODO)
+        # except SystemExit:
+        #     pass # tag already exists
 
 
 @task()
