@@ -32,7 +32,8 @@ rgApp.controller('DetailController', function DetailController(
             ['3 years', moment().subtract(3, 'years')],
             ['5 years', moment().subtract(5, 'years')],
             ['10 years', moment().subtract(10, 'years')]
-        ];
+        ],
+        canonical;
 
     $scope.implementations = false;
     $scope.expandable = false;
@@ -323,4 +324,8 @@ rgApp.controller('DetailController', function DetailController(
     );
 
     gamesService.setCanonicalUrl($location.path());
+
+    canonical = gamesService.urlAndPath($location.path(), undefined, true);
+    $scope.disqusId = canonical.path;
+    $scope.disqusUrl = canonical.url;
 });

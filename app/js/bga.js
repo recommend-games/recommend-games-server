@@ -32,7 +32,8 @@ rgApp.controller('BgaController', function BgaController(
     var $ = angular.element,
         users = {},
         userNames = parseList($routeParams.for, true),
-        routeParams = filterService.getParams($routeParams);
+        routeParams = filterService.getParams($routeParams),
+        canonical;
 
     function fetchUser(userName) {
         if (users[userName]) {
@@ -188,4 +189,8 @@ rgApp.controller('BgaController', function BgaController(
     gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
     gamesService.setImage();
     gamesService.setDescription();
+
+    canonical = gamesService.urlAndPath($location.path(), undefined, true);
+    $scope.disqusId = canonical.path;
+    $scope.disqusUrl = canonical.url;
 });

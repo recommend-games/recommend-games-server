@@ -7,10 +7,12 @@ import os
 
 from datetime import timezone
 from functools import reduce
+from itertools import chain
 from operator import or_
 
 from django.conf import settings
 from django.db.models import Count, Q, Min
+from django.shortcuts import redirect
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from pytility import arg_to_iter, parse_bool, parse_date, parse_int, take_first
@@ -22,8 +24,10 @@ from rest_framework.exceptions import (
     PermissionDenied,
 )
 from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.utils.urls import remove_query_param, replace_query_param
 from rest_framework.viewsets import ModelViewSet
 
 from .models import (
@@ -95,6 +99,50 @@ class GamesActionViewSet(PermissionsModelViewSet):
         return Response(serializer.data)
 
 
+class BodyParamsPagination(PageNumberPagination):
+    """Parse params from body and use in pagination."""
+
+    keys = None
+    parsers = None
+
+    def get_next_link(self):
+        url = super().get_next_link()
+        if url is None:
+            return None
+        for key, parser in zip(arg_to_iter(self.keys), arg_to_iter(self.parsers)):
+            params = ",".join(
+                map(str, sorted(_extract_params(self.request, key, parser)))
+            )
+            url = (
+                replace_query_param(url, key, params)
+                if params
+                else remove_query_param(url, key)
+            )
+        return url
+
+    def get_previous_link(self):
+        url = super().get_previous_link()
+        if url is None:
+            return None
+        for key, parser in zip(arg_to_iter(self.keys), arg_to_iter(self.parsers)):
+            params = ",".join(
+                map(str, sorted(_extract_params(self.request, key, parser)))
+            )
+            url = (
+                replace_query_param(url, key, params)
+                if params
+                else remove_query_param(url, key)
+            )
+        return url
+
+
+class RecommendParamsPagination(BodyParamsPagination):
+    """Pagination for /recommend endpoints."""
+
+    keys = ("user", "like")
+    parsers = (str, parse_int)
+
+
 def _exclude(user=None, ids=None):
     if ids is None:
         return None
@@ -140,6 +188,25 @@ def _parse_ints(args):
     for parsed in map(parse_int, _parse_parts(args)):
         if parsed is not None:
             yield parsed
+
+
+def _extract_params(request, key, parser=None):
+    data_values = (
+        arg_to_iter(request.data.get(key))
+        if isinstance(request.data, dict)
+        else arg_to_iter(request.data)
+    )
+    query_values = arg_to_iter(request.query_params.getlist(key))
+    values = _parse_parts(chain(data_values, query_values))
+
+    if not callable(parser):
+        yield from values
+        return
+
+    values = map(parser, values)
+    for value in values:
+        if value is not None:
+            yield value
 
 
 class GameFilter(FilterSet):
@@ -359,7 +426,11 @@ class GameViewSet(PermissionsModelViewSet):
 
         return recommender.recommend_similar(games=like, items=games)
 
-    @action(detail=False)
+    @action(
+        detail=False,
+        methods=("GET", "POST"),
+        pagination_class=RecommendParamsPagination,
+    )
     def recommend(self, request):
         """ recommend games """
 
@@ -368,8 +439,8 @@ class GameViewSet(PermissionsModelViewSet):
         if site == "bga":
             return self.recommend_bga(request)
 
-        users = list(_parse_parts(request.query_params.getlist("user")))
-        like = list(_parse_ints(request.query_params.getlist("like")))
+        users = list(_extract_params(request, "user", str))
+        like = list(_extract_params(request, "like", parse_int))
 
         if not users and not like:
             return self.list(request)
@@ -455,7 +526,11 @@ class GameViewSet(PermissionsModelViewSet):
 
         return recommendations
 
-    @action(detail=False)
+    @action(
+        detail=False,
+        methods=("GET", "POST"),
+        pagination_class=RecommendParamsPagination,
+    )
     def recommend_bga(self, request):
         """ recommend games with Board Game Atlas data """
 
@@ -465,8 +540,8 @@ class GameViewSet(PermissionsModelViewSet):
         if recommender is None:
             return self.list(request)
 
-        users = list(_parse_parts(request.query_params.getlist("user")))
-        like = list(_parse_parts(request.query_params.getlist("like")))
+        users = list(_extract_params(request, "user", str))
+        like = list(_extract_params(request, "like", str))
 
         recommendation = (
             recommender.recommend_similar(games=like)
@@ -780,7 +855,7 @@ class UserViewSet(PermissionsModelViewSet):
                 .order_by()
                 .values_list("bgg_id", flat=True)
             )
-            filters = {f"game__in": games}
+            filters = {"game__in": games}
             collection = user.collection_set.filter(**filters)
             result = {
                 "total": len(games),
@@ -803,3 +878,9 @@ class CollectionViewSet(ModelViewSet):
     def get_permissions(self):
         cls = AllowAny if settings.DEBUG else IsAuthenticated
         return (cls(),)
+
+
+def redirect_view(request):
+    """Redirect to a given path."""
+    path = request.GET.get("to") or "/"
+    return redirect(path if path.startswith("/") else f"/{path}", permanent=True)

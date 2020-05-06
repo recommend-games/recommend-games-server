@@ -7,6 +7,7 @@
 var rgApp = angular.module('rgApp', [
     'blockUI',
     'ngAnimate',
+    'ngDisqus',
     'ngRoute',
     'ngStorage',
     'rzModule',
@@ -21,14 +22,19 @@ rgApp.constant('API_URL', '/api/')
         'Find the best board and card games with personal recommendations for your taste!')
     .constant('GA_TRACKING_ID', 'UA-128891980-1')
     .constant('FAQ_URL', '/assets/faq.json')
-    .constant('BGA_CLIENT_ID', '8jfqHypg2l');
+    .constant('BGA_CLIENT_ID', '8jfqHypg2l')
+    .constant('DISQUS_SHORT_NAME', 'recommend-games');
 
 rgApp.config(function (
+    $disqusProvider,
     $locationProvider,
     $routeProvider,
+    DISQUS_SHORT_NAME,
     blockUIConfig,
     toastrConfig
 ) {
+    $disqusProvider.setShortname(DISQUS_SHORT_NAME);
+
     $locationProvider
         .html5Mode({
             enabled: false,
