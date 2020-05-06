@@ -17,7 +17,14 @@ import django
 from dotenv import load_dotenv
 from pynt import task
 from pyntcontrib import execute, safe_cd
-from pytility import arg_to_iter, parse_bool, parse_date, parse_float, parse_int
+from pytility import (
+    arg_to_iter,
+    normalize_space,
+    parse_bool,
+    parse_date,
+    parse_float,
+    parse_int,
+)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -92,10 +99,34 @@ LOGGER.info("currently in Google Cloud project <%s>", GC_PROJECT)
 
 
 @lru_cache(maxsize=8)
-def _server_version(path=os.path.join(BASE_DIR, "VERSION")):
-    with open(path) as file:
-        version = file.read()
-    return version.strip()
+def _server_version(base_path=BASE_DIR):
+    base_path = Path(base_path).resolve()
+    pyproject_path = base_path / "pyproject.toml"
+    version_path = base_path / "VERSION"
+
+    try:
+        import toml
+
+        LOGGER.info("Loading version information from <%s>", pyproject_path)
+        with pyproject_path.open() as pyproject_file:
+            pyproject = toml.load(pyproject_file)
+        version = normalize_space(pyproject["tool"]["poetry"]["version"])
+    except Exception:
+        LOGGER.exception("Unable to read version information from <%s>", pyproject_path)
+        version = None
+
+    if version:
+        return version
+
+    try:
+        LOGGER.info("Loading version information from <%s>", version_path)
+        with version_path.open() as version_file:
+            version = version_file.read()
+    except Exception:
+        LOGGER.exception("Unable to read version information from <%s>", version_path)
+        version = None
+
+    return normalize_space(version)
 
 
 def _remove(path):

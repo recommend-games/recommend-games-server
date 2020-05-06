@@ -554,6 +554,7 @@ six = ">=1.10.0"
 reference = "3b9d8389174acc1a41b72fefe32f0d7d87b070ba"
 type = "git"
 url = "https://github.com/MarkusShepherd/django-rest-framework-proxy.git"
+
 [[package]]
 category = "main"
 description = "Web APIs for Django, made easy."
@@ -1973,7 +1974,7 @@ test = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [metadata]
-content-hash = "f57afa3fb0c1f18bc15177583f36337e89bb89af377dee4a2d3eba09926803cd"
+content-hash = "29851531f8db54c62e7a6a06cd1eb9a589405c4c5158a8839e43ce82516dbd75"
 python-versions = "~3.7"
 
 [metadata.files]

@@ -38,6 +38,7 @@ rcssmin = "^1.0"
 requests = "^2.23"
 rjsmin = "^1.1"
 snaptime = "^0.2"
+toml = "^0.10.0"
 
 [build-system]
 requires = ["poetry>=0.12"]
