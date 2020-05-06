@@ -22,6 +22,8 @@ turicreate = "^6.2"
 whitenoise = {extras = ["brotli"], version = "^5.0"}
 
 [tool.poetry.dev-dependencies]
+awscli = "^1.18"
+black = "^19.10b0"
 board-game-scraper = "^2.7"
 csvkit = "^1.0"
 gitpython = "^3.1"
@@ -36,7 +38,6 @@ rcssmin = "^1.0"
 requests = "^2.23"
 rjsmin = "^1.1"
 snaptime = "^0.2"
-black = "^19.10b0"
 
 [build-system]
 requires = ["poetry>=0.12"]
