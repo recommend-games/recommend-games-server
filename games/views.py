@@ -15,7 +15,7 @@ from django.db.models import Count, Q, Min
 from django.shortcuts import redirect
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
-from pytility import arg_to_iter, parse_bool, parse_date, parse_int, take_first
+from pytility import arg_to_iter, parse_bool, parse_date, parse_int, take_first, to_str
 from rest_framework.decorators import action
 from rest_framework.exceptions import (
     NotAuthenticated,
@@ -136,11 +136,18 @@ class BodyParamsPagination(PageNumberPagination):
         return url
 
 
-class RecommendParamsPagination(BodyParamsPagination):
+class BGGParamsPagination(BodyParamsPagination):
     """Pagination for /recommend endpoints."""
 
     keys = ("user", "like")
-    parsers = (str, parse_int)
+    parsers = (to_str, parse_int)
+
+
+class BGAParamsPagination(BodyParamsPagination):
+    """Pagination for /recommend_bga endpoints."""
+
+    keys = ("user", "like")
+    parsers = (to_str, to_str)
 
 
 def _exclude(user=None, ids=None):
@@ -427,9 +434,7 @@ class GameViewSet(PermissionsModelViewSet):
         return recommender.recommend_similar(games=like, items=games)
 
     @action(
-        detail=False,
-        methods=("GET", "POST"),
-        pagination_class=RecommendParamsPagination,
+        detail=False, methods=("GET", "POST"), pagination_class=BGGParamsPagination,
     )
     def recommend(self, request):
         """ recommend games """
@@ -527,9 +532,7 @@ class GameViewSet(PermissionsModelViewSet):
         return recommendations
 
     @action(
-        detail=False,
-        methods=("GET", "POST"),
-        pagination_class=RecommendParamsPagination,
+        detail=False, methods=("GET", "POST"), pagination_class=BGAParamsPagination,
     )
     def recommend_bga(self, request):
         """ recommend games with Board Game Atlas data """
