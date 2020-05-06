@@ -6,7 +6,7 @@ authors = ["Markus Shepherd <markus@recommend.games>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "3.7"
+python = "~3.7"
 board-game-recommender = "^2.1"
 django = "^3.0"
 django-extensions = "^2.2"

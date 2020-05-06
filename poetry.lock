@@ -734,10 +734,6 @@ version = "1.51.0"
 [package.dependencies]
 protobuf = ">=3.6.0"
 
-[package.dependencies.grpcio]
-optional = true
-version = ">=1.0.0"
-
 [package.extras]
 grpc = ["grpcio (>=1.0.0)"]
 
@@ -1220,7 +1216,6 @@ pyasn1 = ">=0.4.6,<0.5.0"
 [[package]]
 category = "dev"
 description = "C parser in Python"
-marker = "platform_python_implementation == \"CPython\""
 name = "pycparser"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
@@ -1978,8 +1973,8 @@ test = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [metadata]
-content-hash = "41ac20097549875885ad36b1e8335605c0f38018503e73ca553a2f9cb70eea3e"
-python-versions = "3.7"
+content-hash = "f57afa3fb0c1f18bc15177583f36337e89bb89af377dee4a2d3eba09926803cd"
+python-versions = "~3.7"
 
 [metadata.files]
 absl-py = [
