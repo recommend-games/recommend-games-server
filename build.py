@@ -1015,7 +1015,8 @@ def buildserver(images=None, tags=None):
     """ build Docker image """
 
     images = images or ("rg-server", f"gcr.io/{GC_PROJECT}/rg-server")
-    tags = tags or ("latest", _server_version())
+    version = _server_version()
+    tags = tags or ("latest", version)
     all_tags = [f"{i}:{t}" for i in images if i for t in tags if t]
 
     LOGGER.info("Building Docker image with tags %s...", all_tags)
@@ -1027,6 +1028,15 @@ def buildserver(images=None, tags=None):
 
     with safe_cd(BASE_DIR):
         execute(*command)
+
+        if not version:
+            return
+
+        LOGGER.info("Adding Git tag <v%s> if it doesn't exist", version)
+        try:
+            execute("git", "tag", f"v{version}")
+        except SystemExit:
+            pass  # tag already exists
 
 
 @task()
