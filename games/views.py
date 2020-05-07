@@ -9,6 +9,7 @@ from datetime import timezone
 from functools import reduce
 from itertools import chain
 from operator import or_
+from typing import Callable, Iterable, Optional, Union
 
 from django.conf import settings
 from django.db.models import Count, Q, Min
@@ -102,8 +103,8 @@ class GamesActionViewSet(PermissionsModelViewSet):
 class BodyParamsPagination(PageNumberPagination):
     """Parse params from body and use in pagination."""
 
-    keys = None
-    parsers = None
+    keys: Union[str, Iterable[str]]
+    parsers: Union[Callable, Iterable[Optional[Callable]]]
 
     def get_next_link(self):
         url = super().get_next_link()
