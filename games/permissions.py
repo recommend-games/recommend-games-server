@@ -2,7 +2,7 @@
 
 """ permissions """
 
-from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.permissions import AllowAny, BasePermission, SAFE_METHODS
 
 
 class ReadOnly(BasePermission):
@@ -12,3 +12,7 @@ class ReadOnly(BasePermission):
 
     def has_permission(self, request, view):
         return request.method in SAFE_METHODS
+
+
+class AlwaysAllowAny(AllowAny):
+    """Always allow everything. Always."""
