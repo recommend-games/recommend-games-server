@@ -41,7 +41,7 @@ from .models import (
     Ranking,
     User,
 )
-from .permissions import ReadOnly
+from .permissions import AlwaysAllowAny, ReadOnly
 from .serializers import (
     CategorySerializer,
     CollectionSerializer,
@@ -67,6 +67,9 @@ class PermissionsModelViewSet(ModelViewSet):
     """ add permissions based on settings """
 
     def get_permissions(self):
+        for permission in super().get_permissions():
+            if isinstance(permission, AlwaysAllowAny):
+                return (permission,)
         cls = ReadOnly if settings.READ_ONLY else AllowAny
         return (cls(),)
 
@@ -435,7 +438,10 @@ class GameViewSet(PermissionsModelViewSet):
         return recommender.recommend_similar(games=like, items=games)
 
     @action(
-        detail=False, methods=("GET", "POST"), pagination_class=BGGParamsPagination,
+        detail=False,
+        methods=("GET", "POST"),
+        permission_classes=(AlwaysAllowAny,),
+        pagination_class=BGGParamsPagination,
     )
     def recommend(self, request):
         """ recommend games """
@@ -533,7 +539,10 @@ class GameViewSet(PermissionsModelViewSet):
         return recommendations
 
     @action(
-        detail=False, methods=("GET", "POST"), pagination_class=BGAParamsPagination,
+        detail=False,
+        methods=("GET", "POST"),
+        permission_classes=(AlwaysAllowAny,),
+        pagination_class=BGAParamsPagination,
     )
     def recommend_bga(self, request):
         """ recommend games with Board Game Atlas data """
