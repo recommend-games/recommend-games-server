@@ -4,7 +4,9 @@
 
 from django.conf import settings
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
+
+from .views import hashbang_redirect
 
 # pylint: disable=invalid-name
 urlpatterns = [
@@ -14,3 +16,5 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns.append(path("admin/", admin.site.urls))
+
+urlpatterns.append(re_path(r"^.+$", hashbang_redirect))
