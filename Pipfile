@@ -18,6 +18,7 @@ gunicorn = "*"
 markdown = "*"
 pandas = "*"
 pytility = {extras = ["dates"], version = "*"}
+seaborn = "*"
 turicreate = "*"
 whitenoise = {extras = ["brotli"], version = "*"}
 
