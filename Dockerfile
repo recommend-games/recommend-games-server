@@ -9,7 +9,7 @@ RUN mkdir -p /app
 WORKDIR /app
 
 RUN python3.7 -m pip install --upgrade \
-        gsutil==4.51 \
+        gsutil==4.52 \
         pipenv==2020.6.2
 COPY Pipfile* ./
 RUN pipenv install --deploy --verbose

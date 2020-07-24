@@ -376,6 +376,7 @@ def mergenews(
             latest=("published_at", "scraped_at"),
             latest_types=("date", "date"),
             latest_min=None,
+            latest_required=True,
             fieldnames=(
                 "article_id",
                 "url_canonical",
