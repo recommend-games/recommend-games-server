@@ -511,6 +511,7 @@ def _train(
     out_path=None,
     users=None,
     max_iterations=100,
+    **filters,
 ):
     LOGGER.info(
         "Training %r recommender model with games <%s> and ratings <%s>...",
@@ -524,6 +525,7 @@ def _train(
         similarity_model=True,
         max_iterations=parse_int(max_iterations),
         verbose=True,
+        **filters,
     )
 
     recommendations = recommender.recommend(users=users, num_games=100)
@@ -542,9 +544,13 @@ def trainbgg(
     out_path=os.path.join(RECOMMENDER_DIR, ".bgg"),
     users=None,
     max_iterations=1000,
+    min_votes=None,
 ):
     """ train BoardGameGeek recommender model """
     from board_game_recommender import BGGRecommender
+
+    min_votes = parse_int(min_votes)
+    filters = {} if min_votes is None else {"num_votes__gte": min_votes}
 
     _train(
         recommender_cls=BGGRecommender,
@@ -553,6 +559,7 @@ def trainbgg(
         out_path=out_path,
         users=users,
         max_iterations=max_iterations,
+        **filters,
     )
 
 
