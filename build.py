@@ -14,6 +14,7 @@ from pathlib import Path
 
 import django
 
+from board_game_recommender import BGARecommender, BGGRecommender
 from dotenv import load_dotenv
 from pynt import task
 from pyntcontrib import execute, safe_cd
@@ -31,12 +32,17 @@ django.setup()
 
 LOGGER = logging.getLogger(__name__)
 SETTINGS = django.conf.settings
+
 DATA_DIR = SETTINGS.DATA_DIR
 SCRAPER_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "board-game-scraper"))
 RECOMMENDER_DIR = os.path.abspath(
     os.path.join(BASE_DIR, "..", "board-game-recommender")
 )
 SCRAPED_DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "board-game-data"))
+
+MIN_VOTES_ANCHOR_DATE = SETTINGS.MIN_VOTES_ANCHOR_DATE
+MIN_VOTES_SECONDS_PER_STEP = SETTINGS.MIN_VOTES_SECONDS_PER_STEP
+
 URL_LIVE = "https://recommend.games/"
 GC_PROJECT = os.getenv("GC_PROJECT") or "recommend-games"
 GC_DATA_BUCKET = os.getenv("GC_DATA_BUCKET") or f"{GC_PROJECT}-data"
@@ -511,6 +517,7 @@ def _train(
     out_path=None,
     users=None,
     max_iterations=100,
+    **filters,
 ):
     LOGGER.info(
         "Training %r recommender model with games <%s> and ratings <%s>...",
@@ -524,6 +531,7 @@ def _train(
         similarity_model=True,
         max_iterations=parse_int(max_iterations),
         verbose=True,
+        **filters,
     )
 
     recommendations = recommender.recommend(users=users, num_games=100)
@@ -535,6 +543,43 @@ def _train(
         recommender.save(out_path)
 
 
+def _min_votes_from_date(
+    first_date, second_date, seconds_per_step, max_value, min_value=1
+):
+    first_date = parse_date(first_date, tzinfo=timezone.utc)
+    second_date = (
+        parse_date(second_date, tzinfo=timezone.utc) or django.utils.timezone.now()
+    )
+    seconds_per_step = parse_float(seconds_per_step)
+    max_value = parse_int(max_value)
+    min_value = parse_int(min_value)
+
+    if (
+        not first_date
+        or not second_date
+        or not seconds_per_step
+        or max_value is None
+        or min_value is None
+    ):
+        return None
+
+    LOGGER.info(
+        "Comparing %s and %s to compute required votes", first_date, second_date
+    )
+
+    delta = second_date - first_date
+    seconds = delta.total_seconds()
+    steps = parse_int(seconds / seconds_per_step)
+
+    LOGGER.info(
+        "%.1f seconds have passed between first and second date, i.e., %d steps",
+        seconds,
+        steps,
+    )
+
+    return min(max(max_value - steps, min_value), max_value)
+
+
 @task()
 def trainbgg(
     games_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_GameItem.jl"),
@@ -542,9 +587,26 @@ def trainbgg(
     out_path=os.path.join(RECOMMENDER_DIR, ".bgg"),
     users=None,
     max_iterations=1000,
+    min_votes=None,
+    min_votes_anchor_date=MIN_VOTES_ANCHOR_DATE,
+    min_votes_seconds_per_step=MIN_VOTES_SECONDS_PER_STEP,
+    min_votes_max_value=BGGRecommender.default_filters.get("num_votes__gte"),
 ):
     """ train BoardGameGeek recommender model """
-    from board_game_recommender import BGGRecommender
+
+    filters = {}
+
+    min_votes = parse_int(min_votes) or _min_votes_from_date(
+        first_date=min_votes_anchor_date,
+        second_date=None,
+        seconds_per_step=min_votes_seconds_per_step,
+        max_value=min_votes_max_value,
+        min_value=1,
+    )
+
+    if min_votes is not None:
+        LOGGER.info("Filter out games with less than %d votes", min_votes)
+        filters["num_votes__gte"] = min_votes
 
     _train(
         recommender_cls=BGGRecommender,
@@ -553,6 +615,7 @@ def trainbgg(
         out_path=out_path,
         users=users,
         max_iterations=max_iterations,
+        **filters,
     )
 
 
@@ -565,8 +628,6 @@ def trainbga(
     max_iterations=1000,
 ):
     """ train Board Game Atlas recommender model """
-    from board_game_recommender import BGARecommender
-
     _train(
         recommender_cls=BGARecommender,
         games_file=games_file,
