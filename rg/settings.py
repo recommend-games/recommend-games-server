@@ -131,6 +131,8 @@ STATICFILES_STORAGE = (
     else "whitenoise.storage.CompressedManifestStaticFilesStorage"
 )
 
+MEDIA_URL = "media/"
+
 # WhiteNoise
 
 WHITENOISE_INDEX_FILE = True
