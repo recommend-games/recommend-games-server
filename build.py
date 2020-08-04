@@ -603,10 +603,10 @@ def trainbgg(
         max_value=min_votes_max_value,
         min_value=1,
     )
+
     if min_votes is not None:
         LOGGER.info("Filter out games with less than %d votes", min_votes)
         filters["num_votes__gte"] = min_votes
-    filters = {} if min_votes is None else {"num_votes__gte": min_votes}
 
     _train(
         recommender_cls=BGGRecommender,
