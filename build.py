@@ -169,6 +169,7 @@ def merge(in_paths, out_path, **kwargs):
     merge_files(in_paths=in_paths, out_path=out_path, **kwargs)
 
 
+# TODO use merge_config from board-game-scraper (#328)
 def _merge_kwargs(
     site, item="GameItem", in_paths=None, out_path=None, full=False, **kwargs
 ):
@@ -177,7 +178,7 @@ def _merge_kwargs(
     kwargs.setdefault("key_types", "int" if site in ("bgg", "luding") else "str")
     kwargs.setdefault("latest", "scraped_at")
     kwargs.setdefault("latest_types", "date")
-    kwargs.setdefault("latest_min", django.utils.timezone.now() - timedelta(days=30))
+    kwargs.setdefault("latest_min", django.utils.timezone.now() - timedelta(days=90))
     kwargs.setdefault("concat_output", True)
 
     if parse_bool(full):
