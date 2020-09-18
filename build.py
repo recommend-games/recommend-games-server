@@ -138,7 +138,7 @@ def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
             LOGGER.exception("There was a problem in repo <%s>...", repo)
 
         try:
-            execute("git", "commit", "--message", f"automatic commit by <{name}>")
+            execute("git", "commit", "--no-gpg-sign", "--message", f"automatic commit by <{name}>")
             execute("git", "gc", "--prune=now")
         except SystemExit:
             LOGGER.info("Nothing to commit...")
