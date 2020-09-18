@@ -1,7 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-""" pynt build file """
+"""
+Pynt build file.
+
+Make sure you installed all the Python dependencies (including dev) from Pipfile.lock:
+
+```bash
+pipenv shell
+pipenv install --dev
+```
+
+Non-Python dependencies:
+
+* Docker
+* Google Cloud SDK: `gcloud components install docker-credential-gcr gsutil`
+* `brew install git sqlite shellcheck hadolint`
+* `npm install --global htmlhint jslint jshint csslint`
+"""
 
 import logging
 import os
@@ -138,7 +154,13 @@ def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
             LOGGER.exception("There was a problem in repo <%s>...", repo)
 
         try:
-            execute("git", "commit", "--no-gpg-sign", "--message", f"automatic commit by <{name}>")
+            execute(
+                "git",
+                "commit",
+                "--no-gpg-sign",
+                "--message",
+                f"automatic commit by <{name}>",
+            )
             execute("git", "gc", "--prune=now")
         except SystemExit:
             LOGGER.info("Nothing to commit...")
