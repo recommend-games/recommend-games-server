@@ -80,9 +80,7 @@ class Command(BaseCommand):
         parser.add_argument("in_files", nargs="+")
         parser.add_argument("--out-dir", "-o", default=".")
         parser.add_argument("--out-file", "-O", default="%Y%m%d-%H%M%S.csv")
-        parser.add_argument(
-            "--columns", "-c", nargs="+", default=("rank", "bgg_id", "bayes_rating")
-        )
+        parser.add_argument("--columns", "-c", nargs="+", default=("rank", "bgg_id"))
         parser.add_argument("--target-column", "-t")
         parser.add_argument("--overwrite", "-W", action="store_true")
         parser.add_argument("--dry-run", "-n", action="store_true")
