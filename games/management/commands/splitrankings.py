@@ -48,19 +48,31 @@ def _process_files(files):
         yield from _process_file(file)
 
 
-def _process_df(data_frame, columns, target_column=None):
+def _process_df(data_frame, columns=None, required_columns=None, target_column=None):
     if data_frame is None or data_frame.empty:
         LOGGER.error("DataFrame is empty")
         return None
 
     columns = clear_list(arg_to_iter(columns))
+    required_columns = clear_list(arg_to_iter(required_columns)) or columns
+    columns = clear_list(columns + required_columns)
+
     if not columns:
         LOGGER.error("No columns given")
         return None
 
-    if any(column not in data_frame for column in columns):
-        LOGGER.error("DataFrame does not contain the expected columns")
+    missing_columns = [
+        column for column in required_columns if column not in data_frame
+    ]
+    if missing_columns:
+        LOGGER.error(
+            "DataFrame does not contain the expected columns %s", missing_columns
+        )
         return None
+
+    for column in columns:
+        if column not in data_frame:
+            data_frame[column] = None
 
     target_column = target_column or columns[0]
     return (
@@ -80,7 +92,12 @@ class Command(BaseCommand):
         parser.add_argument("in_files", nargs="+")
         parser.add_argument("--out-dir", "-o", default=".")
         parser.add_argument("--out-file", "-O", default="%Y%m%d-%H%M%S.csv")
-        parser.add_argument("--columns", "-c", nargs="+", default=("rank", "bgg_id"))
+        parser.add_argument(
+            "--columns", "-c", nargs="+", default=("rank", "bgg_id", "bayes_rating")
+        )
+        parser.add_argument(
+            "--required-columns", "-r", nargs="+", default=("rank", "bgg_id")
+        )
         parser.add_argument("--target-column", "-t")
         parser.add_argument("--overwrite", "-W", action="store_true")
         parser.add_argument("--dry-run", "-n", action="store_true")
@@ -117,6 +134,7 @@ class Command(BaseCommand):
             data_frame = _process_df(
                 data_frame=pd.DataFrame.from_records(group),
                 columns=kwargs["columns"],
+                required_columns=kwargs["required_columns"],
                 target_column=kwargs["target_column"],
             )
 
