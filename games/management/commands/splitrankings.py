@@ -121,6 +121,8 @@ class Command(BaseCommand):
         for published_at, group in groupby(
             _process_files(kwargs["in_files"]), key=lambda row: row.get("published_at")
         ):
+            LOGGER.info("Processing rankings from <%s>", published_at)
+
             out_path = published_at.strftime(out_template)
 
             if not kwargs["overwrite"] and os.path.exists(out_path):
