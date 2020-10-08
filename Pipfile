@@ -24,7 +24,7 @@ whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
 black = "==19.10b0" # no released version, so need to pin exact pre-release version
-board-game-scraper = ">=2.7.0"
+board-game-scraper = {extras = ["cloud"], version = ">=2.11.0"}
 csvkit = "*"
 dedupe = "==2.0.3" # linking fails on v2.0.4
 gitpython = "*"
@@ -38,4 +38,5 @@ python-dotenv = "*"
 rcssmin = "*"
 requests = "*"
 rjsmin = "*"
+smart-open = {extras = ["all"], version = ">=1.8.1"}
 snaptime = "*"
