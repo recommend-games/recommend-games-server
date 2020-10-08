@@ -4,9 +4,6 @@ services:
     web:
         image: rg-server:latest
         container_name: rg
-        build:
-            context: '.'
-            dockerfile: Dockerfile
         environment:
             - DEBUG=
             - PORT=8080
@@ -16,9 +13,17 @@ services:
         volumes:
             - ./data:/app/data
         restart: always
-        networks:
-            - rg
 
-networks:
-    rg:
-        driver: bridge
+    users:
+        image: registry.gitlab.com/recommend.games/board-game-scraper:2.11.0
+        container_name: rg-users
+        command: ['python', '-m', 'board_game_scraper.pubsub_pull', 'TODO']
+        env_file: .env
+        # environment:
+        #     CLOSESPIDER_TIMEOUT: 36000 # 10 hours
+        #     DONT_RUN_BEFORE_SEC: 21600 # 6 hours
+        volumes:
+            - ./feeds:/app/feeds
+        restart: always
+        stop_grace_period: 15m
+        stop_signal: SIGINT
