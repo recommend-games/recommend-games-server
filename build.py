@@ -177,7 +177,7 @@ def merge(in_paths, out_path, **kwargs):
     from board_game_scraper.merge import merge_files
 
     kwargs.setdefault("log_level", "WARN")
-    out_path = out_path.format(
+    out_path = str(out_path).format(
         date=django.utils.timezone.now().strftime("%Y-%m-%dT%H-%M-%S")
     )
 
