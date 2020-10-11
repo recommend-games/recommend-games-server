@@ -13,6 +13,7 @@ rgApp.controller('ListController', function ListController(
     $routeParams,
     $scope,
     $timeout,
+    $window,
     filterService,
     gamesService,
     personsService,
@@ -146,6 +147,13 @@ rgApp.controller('ListController', function ListController(
                 }
 
                 addSearchGames();
+
+                if (!_.isEmpty(parsed.for) && $window.gtag) {
+                    $window.gtag('event', 'user_recommendation', {
+                        'event_category' : 'recommendations',
+                        'event_label' : _(parsed.for).map(_.trim).map(_.toLower).sort().join()
+                    });
+                }
 
                 return games;
             })
