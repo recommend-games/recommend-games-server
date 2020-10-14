@@ -8,6 +8,7 @@ python_version = "3.7"
 
 [packages]
 board-game-recommender = "*"
+bokeh = "*"
 django = "<3.1.0"
 django-extensions = "*"
 django-filter = "*"
@@ -18,7 +19,6 @@ gunicorn = "*"
 markdown = "*"
 pandas = "*"
 pytility = {extras = ["dates"], version = "*"}
-seaborn = "*"
 tensorflow = "<2.3.0"
 turicreate = "*"
 whitenoise = {extras = ["brotli"], version = "*"}
