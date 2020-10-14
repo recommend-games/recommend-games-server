@@ -1,7 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-""" pynt build file """
+"""
+Pynt build file.
+
+Make sure you installed all the Python dependencies (including dev) from Pipfile.lock:
+
+```bash
+pipenv shell
+pipenv install --dev
+```
+
+Non-Python dependencies:
+
+* Docker
+* Google Cloud SDK: `gcloud components install docker-credential-gcr gsutil`
+* `brew install git sqlite shellcheck hadolint`
+* `npm install --global htmlhint jslint jshint csslint`
+"""
 
 import logging
 import os
@@ -14,6 +30,7 @@ from pathlib import Path
 
 import django
 
+from board_game_recommender import BGARecommender, BGGRecommender
 from dotenv import load_dotenv
 from pynt import task
 from pyntcontrib import execute, safe_cd
@@ -31,12 +48,17 @@ django.setup()
 
 LOGGER = logging.getLogger(__name__)
 SETTINGS = django.conf.settings
+
 DATA_DIR = SETTINGS.DATA_DIR
 SCRAPER_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "board-game-scraper"))
 RECOMMENDER_DIR = os.path.abspath(
     os.path.join(BASE_DIR, "..", "board-game-recommender")
 )
 SCRAPED_DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "board-game-data"))
+
+MIN_VOTES_ANCHOR_DATE = SETTINGS.MIN_VOTES_ANCHOR_DATE
+MIN_VOTES_SECONDS_PER_STEP = SETTINGS.MIN_VOTES_SECONDS_PER_STEP
+
 URL_LIVE = "https://recommend.games/"
 GC_PROJECT = os.getenv("GC_PROJECT") or "recommend-games"
 GC_DATA_BUCKET = os.getenv("GC_DATA_BUCKET") or f"{GC_PROJECT}-data"
@@ -132,7 +154,13 @@ def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
             LOGGER.exception("There was a problem in repo <%s>...", repo)
 
         try:
-            execute("git", "commit", "--message", f"automatic commit by <{name}>")
+            execute(
+                "git",
+                "commit",
+                "--no-gpg-sign",
+                "--message",
+                f"automatic commit by <{name}>",
+            )
             execute("git", "gc", "--prune=now")
         except SystemExit:
             LOGGER.info("Nothing to commit...")
@@ -149,7 +177,7 @@ def merge(in_paths, out_path, **kwargs):
     from board_game_scraper.merge import merge_files
 
     kwargs.setdefault("log_level", "WARN")
-    out_path = out_path.format(
+    out_path = str(out_path).format(
         date=django.utils.timezone.now().strftime("%Y-%m-%dT%H-%M-%S")
     )
 
@@ -166,30 +194,16 @@ def merge(in_paths, out_path, **kwargs):
 def _merge_kwargs(
     site, item="GameItem", in_paths=None, out_path=None, full=False, **kwargs
 ):
-    kwargs["in_paths"] = in_paths or os.path.join(SCRAPER_DIR, "feeds", site, item, "*")
-    kwargs.setdefault("keys", f"{site}_id")
-    kwargs.setdefault("key_types", "int" if site in ("bgg", "luding") else "str")
-    kwargs.setdefault("latest", "scraped_at")
-    kwargs.setdefault("latest_types", "date")
-    kwargs.setdefault("latest_min", django.utils.timezone.now() - timedelta(days=30))
-    kwargs.setdefault("concat_output", True)
+    from board_game_scraper.full_merge import merge_config
 
-    if parse_bool(full):
-        kwargs["out_path"] = out_path or os.path.join(
-            SCRAPER_DIR, "feeds", site, item, "{date}_merged.jl"
-        )
-
-    else:
-        kwargs["out_path"] = out_path or os.path.join(
-            SCRAPED_DATA_DIR, "scraped", f"{site}_{item}.jl"
-        )
-        kwargs.setdefault(
-            "fieldnames_exclude",
-            ("image_file", "rules_file", "published_at", "updated_at", "scraped_at"),
-        )
-        kwargs.setdefault("sort_keys", True)
-
-    return kwargs
+    return merge_config(
+        spider=site,
+        item=item,
+        in_paths=in_paths,
+        out_path=out_path,
+        full=full,
+        **kwargs,
+    )
 
 
 @task()
@@ -253,6 +267,9 @@ def mergebggratings(in_paths=None, out_path=None, full=False):
             full=full,
             keys=("bgg_user_name", "bgg_id"),
             key_types=("istr", "int"),
+            fieldnames_exclude=None
+            if parse_bool(full)
+            else ("published_at", "scraped_at"),
         )
     )
 
@@ -376,6 +393,7 @@ def mergenews(
             latest=("published_at", "scraped_at"),
             latest_types=("date", "date"),
             latest_min=None,
+            latest_required=True,
             fieldnames=(
                 "article_id",
                 "url_canonical",
@@ -510,6 +528,7 @@ def _train(
     out_path=None,
     users=None,
     max_iterations=100,
+    **filters,
 ):
     LOGGER.info(
         "Training %r recommender model with games <%s> and ratings <%s>...",
@@ -523,6 +542,7 @@ def _train(
         similarity_model=True,
         max_iterations=parse_int(max_iterations),
         verbose=True,
+        **filters,
     )
 
     recommendations = recommender.recommend(users=users, num_games=100)
@@ -534,6 +554,43 @@ def _train(
         recommender.save(out_path)
 
 
+def _min_votes_from_date(
+    first_date, second_date, seconds_per_step, max_value, min_value=1
+):
+    first_date = parse_date(first_date, tzinfo=timezone.utc)
+    second_date = (
+        parse_date(second_date, tzinfo=timezone.utc) or django.utils.timezone.now()
+    )
+    seconds_per_step = parse_float(seconds_per_step)
+    max_value = parse_int(max_value)
+    min_value = parse_int(min_value)
+
+    if (
+        not first_date
+        or not second_date
+        or not seconds_per_step
+        or max_value is None
+        or min_value is None
+    ):
+        return None
+
+    LOGGER.info(
+        "Comparing %s and %s to compute required votes", first_date, second_date
+    )
+
+    delta = second_date - first_date
+    seconds = delta.total_seconds()
+    steps = parse_int(seconds / seconds_per_step)
+
+    LOGGER.info(
+        "%.1f seconds have passed between first and second date, i.e., %d steps",
+        seconds,
+        steps,
+    )
+
+    return min(max(max_value - steps, min_value), max_value)
+
+
 @task()
 def trainbgg(
     games_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_GameItem.jl"),
@@ -541,9 +598,26 @@ def trainbgg(
     out_path=os.path.join(RECOMMENDER_DIR, ".bgg"),
     users=None,
     max_iterations=1000,
+    min_votes=None,
+    min_votes_anchor_date=MIN_VOTES_ANCHOR_DATE,
+    min_votes_seconds_per_step=MIN_VOTES_SECONDS_PER_STEP,
+    min_votes_max_value=BGGRecommender.default_filters.get("num_votes__gte"),
 ):
     """ train BoardGameGeek recommender model """
-    from board_game_recommender import BGGRecommender
+
+    filters = {}
+
+    min_votes = parse_int(min_votes) or _min_votes_from_date(
+        first_date=min_votes_anchor_date,
+        second_date=None,
+        seconds_per_step=min_votes_seconds_per_step,
+        max_value=min_votes_max_value,
+        min_value=1,
+    )
+
+    if min_votes is not None:
+        LOGGER.info("Filter out games with less than %d votes", min_votes)
+        filters["num_votes__gte"] = min_votes
 
     _train(
         recommender_cls=BGGRecommender,
@@ -552,6 +626,7 @@ def trainbgg(
         out_path=out_path,
         users=users,
         max_iterations=max_iterations,
+        **filters,
     )
 
 
@@ -564,8 +639,6 @@ def trainbga(
     max_iterations=1000,
 ):
     """ train Board Game Atlas recommender model """
-    from board_game_recommender import BGARecommender
-
     _train(
         recommender_cls=BGARecommender,
         games_file=games_file,

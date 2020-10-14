@@ -23,6 +23,7 @@ rgApp.constant('API_URL', '/api/')
     .constant('GA_TRACKING_ID', 'UA-128891980-1')
     .constant('FAQ_URL', '/assets/faq.json')
     .constant('BGA_CLIENT_ID', '8jfqHypg2l')
+    .constant('BGA_API_URL', 'https://api.boardgameatlas.com/api/')
     .constant('DISQUS_SHORT_NAME', 'recommend-games');
 
 rgApp.config(function (

@@ -13,6 +13,7 @@ rgApp.controller('BgaController', function BgaController(
     $routeParams,
     $scope,
     API_URL,
+    BGA_API_URL,
     BGA_CLIENT_ID,
     filterService,
     gamesService,
@@ -46,7 +47,7 @@ rgApp.controller('BgaController', function BgaController(
             'limit': 1
         };
 
-        return $http.get('https://www.boardgameatlas.com/api/reviews', {'params': params})
+        return $http.get(BGA_API_URL + 'reviews', {'params': params})
             .then(function (response) {
                 var user = _.get(response, 'data.reviews[0].user.id') || null;
                 if (user) {
@@ -108,7 +109,7 @@ rgApp.controller('BgaController', function BgaController(
                     'ids': _.join(ids)
                 };
 
-                return $http.get('https://www.boardgameatlas.com/api/search', {'params': bgaParams});
+                return $http.get(BGA_API_URL + 'search', {'params': bgaParams});
             })
             .then(function (response) {
                 var bgaObj = _(response.data.games)
