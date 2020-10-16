@@ -191,19 +191,34 @@ def merge(in_paths, out_path, **kwargs):
     merge_files(in_paths=in_paths, out_path=out_path, **kwargs)
 
 
+# TODO use merge_config from board-game-scraper (#328)
 def _merge_kwargs(
     site, item="GameItem", in_paths=None, out_path=None, full=False, **kwargs
 ):
-    from board_game_scraper.full_merge import merge_config
+    kwargs["in_paths"] = in_paths or os.path.join(SCRAPER_DIR, "feeds", site, item, "*")
+    kwargs.setdefault("keys", f"{site}_id")
+    kwargs.setdefault("key_types", "int" if site in ("bgg", "luding") else "str")
+    kwargs.setdefault("latest", "scraped_at")
+    kwargs.setdefault("latest_types", "date")
+    kwargs.setdefault("latest_min", django.utils.timezone.now() - timedelta(days=90))
+    kwargs.setdefault("concat_output", True)
 
-    return merge_config(
-        spider=site,
-        item=item,
-        in_paths=in_paths,
-        out_path=out_path,
-        full=full,
-        **kwargs,
-    )
+    if parse_bool(full):
+        kwargs["out_path"] = out_path or os.path.join(
+            SCRAPER_DIR, "feeds", site, item, "{date}_merged.jl"
+        )
+
+    else:
+        kwargs["out_path"] = out_path or os.path.join(
+            SCRAPED_DATA_DIR, "scraped", f"{site}_{item}.jl"
+        )
+        kwargs.setdefault(
+            "fieldnames_exclude",
+            ("image_file", "rules_file", "published_at", "updated_at", "scraped_at"),
+        )
+        kwargs.setdefault("sort_keys", True)
+
+    return kwargs
 
 
 @task()
