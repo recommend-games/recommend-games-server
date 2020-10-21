@@ -347,7 +347,14 @@ def mergebgghotness(in_paths=None, out_path=None, full=False, days=None):
             latest_min=latest_min,
             fieldnames=None
             if full
-            else ("published_at", "rank", "bgg_id", "name", "year", "image_url",),
+            else (
+                "published_at",
+                "rank",
+                "bgg_id",
+                "name",
+                "year",
+                "image_url",
+            ),
             fieldnames_exclude=None,
             sort_keys=False,
             sort_fields=("published_at", "rank"),
@@ -1032,7 +1039,13 @@ def _sync_data(src, dst, retries=0):
     LOGGER.info("Syncing <%s> with <%s>...", src, dst)
     try:
         execute(
-            "gsutil", "-m", "rsync", "-d", "-r", src, dst,
+            "gsutil",
+            "-m",
+            "rsync",
+            "-d",
+            "-r",
+            src,
+            dst,
         )
 
     except SystemExit:
