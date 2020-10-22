@@ -1,23 +1,27 @@
-version: '3.7'
+version: '3.8'
 
 services:
     web:
-        image: rg-server:latest
+        image: gcr.io/recommended-ludoj/rg-server:latest
         container_name: rg
         environment:
             - DEBUG=
             - PORT=8080
             - BOTO_CONFIG=/app/.boto
         ports:
-            - '8080:8080'
+            - 8080:8080
         volumes:
             - ./data:/app/data
         restart: always
 
     users:
-        image: registry.gitlab.com/recommend.games/board-game-scraper:2.11.0
+        image: registry.gitlab.com/recommend.games/board-game-scraper:2.11.3
         container_name: rg-users
-        command: ['python', '-m', 'board_game_scraper.pubsub_pull', '--out-path', 'gs://recommended-ludoj-logs/{time}.{number:04d}.csv', '--sleep', '3600']
+        command: [
+            'python', '-m', 'board_game_scraper.pubsub_pull',
+            '--out-path', 'gs://recommended-ludoj-logs/{year:04d}/{month:02d}/{day:02d}/{datetime}.{number:04d}.csv',
+            '--sleep', '3600',
+        ]
         env_file: .env
         environment:
             GOOGLE_APPLICATION_CREDENTIALS: /app/gs.json
