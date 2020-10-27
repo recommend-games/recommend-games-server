@@ -316,6 +316,8 @@ class GameViewSet(PermissionsModelViewSet):
         params = params or {}
         params.setdefault("exclude_known", True)
 
+        exclude = tuple(_parse_ints(params.get("exclude")))
+
         exclude_known = parse_bool(take_first(params.get("exclude_known")))
         exclude_fields = [
             field
@@ -336,7 +338,7 @@ class GameViewSet(PermissionsModelViewSet):
                 queries.append(Q(play_count__gte=exclude_play_count))
             if queries:
                 query = reduce(or_, queries)
-                return tuple(
+                exclude += tuple(
                     User.objects.get(name=user)
                     .collection_set.order_by()
                     .filter(query)
@@ -346,7 +348,7 @@ class GameViewSet(PermissionsModelViewSet):
         except Exception:
             pass
 
-        return None
+        return exclude
 
     def _recommend_rating(self, user, recommender, params):
         user = user.lower()
