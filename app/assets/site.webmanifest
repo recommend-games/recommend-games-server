@@ -2,7 +2,7 @@
     "name": "Recommend.Games",
     "short_name": "Recommend.Games",
     "description": "Top-rated board games as evaluated by our recommendation engine. Find the best board and card games with personal recommendations for your taste!",
-    "start_url": "/",
+    "start_url": "https://recommend.games/",
     "lang": "en",
     "dir": "ltr",
     "orientation": "portrait",
