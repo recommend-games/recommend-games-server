@@ -312,11 +312,11 @@ class GameViewSet(PermissionsModelViewSet):
         "mechanic": (Mechanic.objects.all(), "games", MechanicSerializer),
     }
 
-    def _excluded_games(self, user, params):
+    def _excluded_games(self, user, params, include=None):
         params = params or {}
         params.setdefault("exclude_known", True)
 
-        exclude = tuple(_parse_ints(params.get("exclude")))
+        exclude = frozenset(_parse_ints(params.get("exclude")))
 
         exclude_known = parse_bool(take_first(params.get("exclude_known")))
         exclude_fields = [
@@ -338,7 +338,7 @@ class GameViewSet(PermissionsModelViewSet):
                 queries.append(Q(play_count__gte=exclude_play_count))
             if queries:
                 query = reduce(or_, queries)
-                exclude += tuple(
+                exclude |= frozenset(
                     User.objects.get(name=user)
                     .collection_set.order_by()
                     .filter(query)
@@ -348,28 +348,27 @@ class GameViewSet(PermissionsModelViewSet):
         except Exception:
             pass
 
-        return exclude
+        return tuple(exclude) if not include else tuple(exclude - include)
 
     def _recommend_rating(self, user, recommender, params):
         user = user.lower()
         if user not in recommender.known_users:
             raise NotFound(f"user <{user}> could not be found")
 
+        params = params or {}
+        include = frozenset(_parse_ints(params.get("include")))
         # we should only need this if params are set, but see #90
-        games = (
-            frozenset(
-                self.filter_queryset(self.get_queryset())
-                .order_by()
-                .values_list("bgg_id", flat=True)
-            )
-            & recommender.rated_games
+        games = include | frozenset(
+            self.filter_queryset(self.get_queryset())
+            .order_by()
+            .values_list("bgg_id", flat=True)
         )
+        games &= recommender.rated_games
 
         if not games:
             return ()
 
-        params = params or {}
-        exclude = self._excluded_games(user, params)
+        exclude = self._excluded_games(user, params, include)
         similarity_model = take_first(params.get("model")) == "similarity"
 
         return recommender.recommend(
