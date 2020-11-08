@@ -214,7 +214,7 @@ def _merge_kwargs(
         )
         kwargs.setdefault(
             "fieldnames_exclude",
-            ("image_file", "rules_file", "published_at", "updated_at", "scraped_at"),
+            ("published_at", "updated_at", "scraped_at"),
         )
         kwargs.setdefault("sort_keys", True)
 

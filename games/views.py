@@ -312,9 +312,13 @@ class GameViewSet(PermissionsModelViewSet):
         "mechanic": (Mechanic.objects.all(), "games", MechanicSerializer),
     }
 
-    def _excluded_games(self, user, params):
+    def _excluded_games(self, user, params, include=None, exclude=None):
         params = params or {}
         params.setdefault("exclude_known", True)
+
+        exclude = frozenset(arg_to_iter(exclude)) | frozenset(
+            _parse_ints(params.get("exclude"))
+        )
 
         exclude_known = parse_bool(take_first(params.get("exclude_known")))
         exclude_fields = [
@@ -336,7 +340,7 @@ class GameViewSet(PermissionsModelViewSet):
                 queries.append(Q(play_count__gte=exclude_play_count))
             if queries:
                 query = reduce(or_, queries)
-                return tuple(
+                exclude |= frozenset(
                     User.objects.get(name=user)
                     .collection_set.order_by()
                     .filter(query)
@@ -346,28 +350,31 @@ class GameViewSet(PermissionsModelViewSet):
         except Exception:
             pass
 
-        return None
+        return tuple(exclude) if not include else tuple(exclude - include)
 
-    def _recommend_rating(self, user, recommender, params):
+    def _recommend_rating(self, user, recommender, params, include=None, exclude=None):
         user = user.lower()
         if user not in recommender.known_users:
             raise NotFound(f"user <{user}> could not be found")
 
-        # we should only need this if params are set, but see #90
-        games = (
-            frozenset(
-                self.filter_queryset(self.get_queryset())
-                .order_by()
-                .values_list("bgg_id", flat=True)
-            )
-            & recommender.rated_games
+        params = params or {}
+        include = (
+            frozenset(_parse_ints(params.get("include")))
+            if include is None
+            else include
         )
+        # we should only need this if params are set, but see #90
+        games = include | frozenset(
+            self.filter_queryset(self.get_queryset())
+            .order_by()
+            .values_list("bgg_id", flat=True)
+        )
+        games &= recommender.rated_games
 
         if not games:
             return ()
 
-        params = params or {}
-        exclude = self._excluded_games(user, params)
+        exclude = self._excluded_games(user, params, include, exclude)
         similarity_model = take_first(params.get("model")) == "similarity"
 
         return recommender.recommend(
@@ -467,14 +474,25 @@ class GameViewSet(PermissionsModelViewSet):
         if recommender is None:
             return self.list(request)
 
+        include = frozenset(_extract_params(request, "include", parse_int))
+        exclude = frozenset(_extract_params(request, "exclude", parse_int))
+
         recommendation = (
-            self._recommend_rating(users[0], recommender, dict(request.query_params))
+            self._recommend_rating(
+                user=users[0],
+                recommender=recommender,
+                params=dict(request.query_params),
+                include=include,
+                exclude=exclude,
+            )
             if len(users) == 1
             else self._recommend_group_rating(
-                users, recommender, dict(request.query_params)
+                users=users,
+                recommender=recommender,
+                params=dict(request.query_params),
             )
             if users
-            else self._recommend_similar(like, recommender)
+            else self._recommend_similar(like=like, recommender=recommender)
         )
 
         del like, path, recommender
@@ -489,14 +507,17 @@ class GameViewSet(PermissionsModelViewSet):
         del page
 
         recommendation = {game["bgg_id"]: game for game in recommendation}
-        games = self.filter_queryset(self.get_queryset()).filter(
-            bgg_id__in=recommendation
-        )
+        queryset = self.filter_queryset(self.get_queryset())
+        if include:
+            queryset |= self.get_queryset().filter(bgg_id__in=include)
+        games = queryset.filter(bgg_id__in=recommendation)
+
         for game in games:
             rec = recommendation[game.bgg_id]
             game.rec_rank = rec["rank"]
             game.rec_rating = rec["score"] if users else None
             game.rec_stars = rec.get("stars") if users else None
+
         del recommendation
 
         serializer = self.get_serializer(
