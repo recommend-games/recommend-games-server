@@ -363,6 +363,310 @@ def mergebgghotness(in_paths=None, out_path=None, full=False, days=None):
 
 
 @task()
+def mergebggabstract(in_paths=None, out_path=None, full=False, days=None):
+    """ merge BoardGameGeek abstract ranking data """
+
+    full = parse_bool(full)
+    days = parse_int(days)
+    days = 7 if not days and not full else days
+    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
+
+    merge(
+        **_merge_kwargs(
+            site="bgg_rankings_abstract",
+            item="GameItem",
+            in_paths=in_paths,
+            out_path=out_path,
+            full=full,
+            keys=("published_at", "bgg_id"),
+            key_types=("date", "int"),
+            latest_min=latest_min,
+            fieldnames=None
+            if full
+            else (
+                "published_at",
+                "bgg_id",
+                "rank",
+                "name",
+                "year",
+                "num_votes",
+                "bayes_rating",
+                "avg_rating",
+            ),
+            fieldnames_exclude=None,
+            sort_keys=False,
+            sort_fields=("published_at", "rank"),
+        )
+    )
+
+
+@task()
+def mergebggchildren(in_paths=None, out_path=None, full=False, days=None):
+    """ merge BoardGameGeek children ranking data """
+
+    full = parse_bool(full)
+    days = parse_int(days)
+    days = 7 if not days and not full else days
+    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
+
+    merge(
+        **_merge_kwargs(
+            site="bgg_rankings_children",
+            item="GameItem",
+            in_paths=in_paths,
+            out_path=out_path,
+            full=full,
+            keys=("published_at", "bgg_id"),
+            key_types=("date", "int"),
+            latest_min=latest_min,
+            fieldnames=None
+            if full
+            else (
+                "published_at",
+                "bgg_id",
+                "rank",
+                "name",
+                "year",
+                "num_votes",
+                "bayes_rating",
+                "avg_rating",
+            ),
+            fieldnames_exclude=None,
+            sort_keys=False,
+            sort_fields=("published_at", "rank"),
+        )
+    )
+
+
+@task()
+def mergebggcustomizable(in_paths=None, out_path=None, full=False, days=None):
+    """ merge BoardGameGeek customizable ranking data """
+
+    full = parse_bool(full)
+    days = parse_int(days)
+    days = 7 if not days and not full else days
+    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
+
+    merge(
+        **_merge_kwargs(
+            site="bgg_rankings_customizable",
+            item="GameItem",
+            in_paths=in_paths,
+            out_path=out_path,
+            full=full,
+            keys=("published_at", "bgg_id"),
+            key_types=("date", "int"),
+            latest_min=latest_min,
+            fieldnames=None
+            if full
+            else (
+                "published_at",
+                "bgg_id",
+                "rank",
+                "name",
+                "year",
+                "num_votes",
+                "bayes_rating",
+                "avg_rating",
+            ),
+            fieldnames_exclude=None,
+            sort_keys=False,
+            sort_fields=("published_at", "rank"),
+        )
+    )
+
+
+@task()
+def mergebggfamily(in_paths=None, out_path=None, full=False, days=None):
+    """ merge BoardGameGeek family ranking data """
+
+    full = parse_bool(full)
+    days = parse_int(days)
+    days = 7 if not days and not full else days
+    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
+
+    merge(
+        **_merge_kwargs(
+            site="bgg_rankings_family",
+            item="GameItem",
+            in_paths=in_paths,
+            out_path=out_path,
+            full=full,
+            keys=("published_at", "bgg_id"),
+            key_types=("date", "int"),
+            latest_min=latest_min,
+            fieldnames=None
+            if full
+            else (
+                "published_at",
+                "bgg_id",
+                "rank",
+                "name",
+                "year",
+                "num_votes",
+                "bayes_rating",
+                "avg_rating",
+            ),
+            fieldnames_exclude=None,
+            sort_keys=False,
+            sort_fields=("published_at", "rank"),
+        )
+    )
+
+
+@task()
+def mergebggparty(in_paths=None, out_path=None, full=False, days=None):
+    """ merge BoardGameGeek party ranking data """
+
+    full = parse_bool(full)
+    days = parse_int(days)
+    days = 7 if not days and not full else days
+    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
+
+    merge(
+        **_merge_kwargs(
+            site="bgg_rankings_party",
+            item="GameItem",
+            in_paths=in_paths,
+            out_path=out_path,
+            full=full,
+            keys=("published_at", "bgg_id"),
+            key_types=("date", "int"),
+            latest_min=latest_min,
+            fieldnames=None
+            if full
+            else (
+                "published_at",
+                "bgg_id",
+                "rank",
+                "name",
+                "year",
+                "num_votes",
+                "bayes_rating",
+                "avg_rating",
+            ),
+            fieldnames_exclude=None,
+            sort_keys=False,
+            sort_fields=("published_at", "rank"),
+        )
+    )
+
+
+@task()
+def mergebggstrategy(in_paths=None, out_path=None, full=False, days=None):
+    """ merge BoardGameGeek strategy ranking data """
+
+    full = parse_bool(full)
+    days = parse_int(days)
+    days = 7 if not days and not full else days
+    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
+
+    merge(
+        **_merge_kwargs(
+            site="bgg_rankings_strategy",
+            item="GameItem",
+            in_paths=in_paths,
+            out_path=out_path,
+            full=full,
+            keys=("published_at", "bgg_id"),
+            key_types=("date", "int"),
+            latest_min=latest_min,
+            fieldnames=None
+            if full
+            else (
+                "published_at",
+                "bgg_id",
+                "rank",
+                "name",
+                "year",
+                "num_votes",
+                "bayes_rating",
+                "avg_rating",
+            ),
+            fieldnames_exclude=None,
+            sort_keys=False,
+            sort_fields=("published_at", "rank"),
+        )
+    )
+
+
+@task()
+def mergebggthematic(in_paths=None, out_path=None, full=False, days=None):
+    """ merge BoardGameGeek thematic ranking data """
+
+    full = parse_bool(full)
+    days = parse_int(days)
+    days = 7 if not days and not full else days
+    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
+
+    merge(
+        **_merge_kwargs(
+            site="bgg_rankings_thematic",
+            item="GameItem",
+            in_paths=in_paths,
+            out_path=out_path,
+            full=full,
+            keys=("published_at", "bgg_id"),
+            key_types=("date", "int"),
+            latest_min=latest_min,
+            fieldnames=None
+            if full
+            else (
+                "published_at",
+                "bgg_id",
+                "rank",
+                "name",
+                "year",
+                "num_votes",
+                "bayes_rating",
+                "avg_rating",
+            ),
+            fieldnames_exclude=None,
+            sort_keys=False,
+            sort_fields=("published_at", "rank"),
+        )
+    )
+
+
+@task()
+def mergebggwar(in_paths=None, out_path=None, full=False, days=None):
+    """ merge BoardGameGeek war ranking data """
+
+    full = parse_bool(full)
+    days = parse_int(days)
+    days = 7 if not days and not full else days
+    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
+
+    merge(
+        **_merge_kwargs(
+            site="bgg_rankings_war",
+            item="GameItem",
+            in_paths=in_paths,
+            out_path=out_path,
+            full=full,
+            keys=("published_at", "bgg_id"),
+            key_types=("date", "int"),
+            latest_min=latest_min,
+            fieldnames=None
+            if full
+            else (
+                "published_at",
+                "bgg_id",
+                "rank",
+                "name",
+                "year",
+                "num_votes",
+                "bayes_rating",
+                "avg_rating",
+            ),
+            fieldnames_exclude=None,
+            sort_keys=False,
+            sort_fields=("published_at", "rank"),
+        )
+    )
+
+
+@task()
 def mergedbpedia(in_paths=None, out_path=None, full=False):
     """ merge DBpedia game data """
     merge(
@@ -456,6 +760,14 @@ def mergenews(
     mergebggratings,
     mergebggrankings,
     mergebgghotness,
+    mergebggabstract,
+    mergebggchildren,
+    mergebggcustomizable,
+    mergebggfamily,
+    mergebggparty,
+    mergebggstrategy,
+    mergebggthematic,
+    mergebggwar,
 )
 def mergeall():
     """ merge all sites and items """
@@ -880,6 +1192,160 @@ def splithotness(
 
 
 @task()
+def splitabstract(
+    src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_abstract_GameItem.jl"),
+    dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_abstract"),
+    dst_file="%Y%m%d-%H%M%S.csv",
+    overwrite=False,
+):
+    """Split the abstract rankings data as one CSV file per date."""
+    django.core.management.call_command(
+        "splitrankings",
+        src,
+        out_dir=dst_dir,
+        out_file=dst_file,
+        overwrite=parse_bool(overwrite),
+    )
+
+
+@task()
+def splitchildren(
+    src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_children_GameItem.jl"),
+    dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_children"),
+    dst_file="%Y%m%d-%H%M%S.csv",
+    overwrite=False,
+):
+    """Split the children rankings data as one CSV file per date."""
+    django.core.management.call_command(
+        "splitrankings",
+        src,
+        out_dir=dst_dir,
+        out_file=dst_file,
+        overwrite=parse_bool(overwrite),
+    )
+
+
+@task()
+def splitcustomizable(
+    src=os.path.join(
+        SCRAPED_DATA_DIR, "scraped", "bgg_rankings_customizable_GameItem.jl"
+    ),
+    dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_customizable"),
+    dst_file="%Y%m%d-%H%M%S.csv",
+    overwrite=False,
+):
+    """Split the customizable rankings data as one CSV file per date."""
+    django.core.management.call_command(
+        "splitrankings",
+        src,
+        out_dir=dst_dir,
+        out_file=dst_file,
+        overwrite=parse_bool(overwrite),
+    )
+
+
+@task()
+def splitfamily(
+    src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_family_GameItem.jl"),
+    dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_family"),
+    dst_file="%Y%m%d-%H%M%S.csv",
+    overwrite=False,
+):
+    """Split the family rankings data as one CSV file per date."""
+    django.core.management.call_command(
+        "splitrankings",
+        src,
+        out_dir=dst_dir,
+        out_file=dst_file,
+        overwrite=parse_bool(overwrite),
+    )
+
+
+@task()
+def splitparty(
+    src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_party_GameItem.jl"),
+    dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_party"),
+    dst_file="%Y%m%d-%H%M%S.csv",
+    overwrite=False,
+):
+    """Split the party rankings data as one CSV file per date."""
+    django.core.management.call_command(
+        "splitrankings",
+        src,
+        out_dir=dst_dir,
+        out_file=dst_file,
+        overwrite=parse_bool(overwrite),
+    )
+
+
+@task()
+def splitstrategy(
+    src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_strategy_GameItem.jl"),
+    dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_strategy"),
+    dst_file="%Y%m%d-%H%M%S.csv",
+    overwrite=False,
+):
+    """Split the strategy rankings data as one CSV file per date."""
+    django.core.management.call_command(
+        "splitrankings",
+        src,
+        out_dir=dst_dir,
+        out_file=dst_file,
+        overwrite=parse_bool(overwrite),
+    )
+
+
+@task()
+def splitthematic(
+    src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_thematic_GameItem.jl"),
+    dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_thematic"),
+    dst_file="%Y%m%d-%H%M%S.csv",
+    overwrite=False,
+):
+    """Split the thematic rankings data as one CSV file per date."""
+    django.core.management.call_command(
+        "splitrankings",
+        src,
+        out_dir=dst_dir,
+        out_file=dst_file,
+        overwrite=parse_bool(overwrite),
+    )
+
+
+@task()
+def splitwar(
+    src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_war_GameItem.jl"),
+    dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_war"),
+    dst_file="%Y%m%d-%H%M%S.csv",
+    overwrite=False,
+):
+    """Split the war rankings data as one CSV file per date."""
+    django.core.management.call_command(
+        "splitrankings",
+        src,
+        out_dir=dst_dir,
+        out_file=dst_file,
+        overwrite=parse_bool(overwrite),
+    )
+
+
+@task(
+    splitrankings,
+    splithotness,
+    splitabstract,
+    splitchildren,
+    splitcustomizable,
+    splitfamily,
+    splitparty,
+    splitstrategy,
+    splitthematic,
+    splitwar,
+)
+def splitall():
+    """Split all rankings data."""
+
+
+@task()
 def historicalbggrankings(
     repo=os.path.abspath(os.path.join(BASE_DIR, "..", "bgg-ranking-historicals")),
     dst=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg", "%Y%m%d-%H%M%S.csv"),
@@ -1007,8 +1473,7 @@ def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_00
     cleandata,
     filldb,
     dateflag,
-    splitrankings,
-    splithotness,
+    splitall,
     historicalbggrankings,
     fillrankingdb,
     compressdb,
