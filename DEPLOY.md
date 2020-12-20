@@ -56,6 +56,14 @@ actions, and download the key in JSON format. Move that file to the root of this
 project as `gs.json`. **This is a private key, do not check it into version
 control!**
 
+Make sure `gcloud` uses these credentials by editing the following lines in
+your local `~/.boto`:
+
+```
+# Google OAuth2 service account credentials (for "gs://" URIs):
+gs_service_key_file = /path/to/gs.json
+```
+
 Now you should be able to log in to [Container Registry](https://console.cloud.google.com/gcr):
 
 ```bash
