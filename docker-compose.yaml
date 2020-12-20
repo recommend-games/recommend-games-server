@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
     web:
-        image: gcr.io/recommended-ludoj/rg-server:latest
+        image: 'gcr.io/${GC_PROJECT}/rg-server:latest'
         container_name: rg
         environment:
             - DEBUG=
@@ -19,7 +19,7 @@ services:
         container_name: rg-users
         command: [
             'python', '-m', 'board_game_scraper.pubsub_pull',
-            '--out-path', 'gs://recommended-ludoj-logs/{year:04d}/{month:02d}/{day:02d}/{datetime}.{number:04d}.csv',
+            '--out-path', 'gs://${GC_PROJECT}-logs/{year:04d}/{month:02d}/{day:02d}/{datetime}.{number:04d}.csv',
             '--sleep', '3600',
         ]
         env_file: .env

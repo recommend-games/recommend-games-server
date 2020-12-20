@@ -23,18 +23,29 @@ create a new app in the region of your choice with the flexible environment.
 ## Create Storage buckets
 
 Open the [Storage dashboard](https://console.cloud.google.com/storage) and
-create the bucket `$PROJECT-data` in the same region as the App Engine app
-above. Leave the default options otherwise.
+create the buckets `$PROJECT-data` and `$PROJECT-logs` in the same region as the
+App Engine app above. Leave the default options otherwise.
 
 ## Create PubSub topic and subscription
 
 Open the [PubSub dashboard](https://console.cloud.google.com/cloudpubsub) and
-create the topic `users`, then a subscription `crawl` attached to that topic.
-Set this subscription to "Pull" delivery type, "Never expire", 600 seconds
-acknowledgement deadline, and 1 day retention duration.
+create the topic `users`, then two subscriptions attached to that topic:
 
-Also make sure to update the PubSub project, topic, and subscription in the
-[scraper](https://gitlab.com/recommend.games/board-game-scraper/blob/master/.env.example).
+* `crawl` with "Pull" delivery type, "Never expire", 600 seconds acknowledgement
+deadline, and 1 day retention duration,
+* `logs` with "Pull" delivery type, "Never expire", 600 seconds acknowledgement
+deadline, and 7 day retention duration.
+
+Also make sure to update the PubSub project, topic, and subscription:
+
+* `crawl` in the [scraper](https://gitlab.com/recommend.games/board-game-scraper/blob/master/.env.example),
+* `logs` in [`.env`](.env.example) and [`docker-compose.yaml`](docker-compose.yaml).
+
+## Enable Google Container Registry API
+
+Go to the [APIs & Services dashboard](https://console.cloud.google.com/apis/dashboard),
+find the [Google Container Registry API](https://console.cloud.google.com/apis/library/containerregistry.googleapis.com),
+and enable it.
 
 ## Create credentials for default service account
 
@@ -44,6 +55,14 @@ and find the App Engine default service account. Select "Create key" from the
 actions, and download the key in JSON format. Move that file to the root of this
 project as `gs.json`. **This is a private key, do not check it into version
 control!**
+
+Make sure `gcloud` uses these credentials by editing the following lines in
+your local `~/.boto`:
+
+```
+# Google OAuth2 service account credentials (for "gs://" URIs):
+gs_service_key_file = /path/to/gs.json
+```
 
 Now you should be able to log in to [Container Registry](https://console.cloud.google.com/gcr):
 
