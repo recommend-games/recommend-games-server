@@ -29,12 +29,17 @@ App Engine app above. Leave the default options otherwise.
 ## Create PubSub topic and subscription
 
 Open the [PubSub dashboard](https://console.cloud.google.com/cloudpubsub) and
-create the topic `users`, then a subscription `crawl` attached to that topic.
-Set this subscription to "Pull" delivery type, "Never expire", 600 seconds
-acknowledgement deadline, and 1 day retention duration.
+create the topic `users`, then two subscriptions attached to that topic:
 
-Also make sure to update the PubSub project, topic, and subscription in the
-[scraper](https://gitlab.com/recommend.games/board-game-scraper/blob/master/.env.example).
+* `crawl` with "Pull" delivery type, "Never expire", 600 seconds acknowledgement
+deadline, and 1 day retention duration,
+* `logs` with "Pull" delivery type, "Never expire", 600 seconds acknowledgement
+deadline, and 7 day retention duration.
+
+Also make sure to update the PubSub project, topic, and subscription:
+
+* `crawl` in the [scraper](https://gitlab.com/recommend.games/board-game-scraper/blob/master/.env.example),
+* `logs` in [`.env`](.env.example) and [`docker-compose.yaml`](docker-compose.yaml).
 
 ## Create credentials for default service account
 
