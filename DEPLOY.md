@@ -41,6 +41,12 @@ Also make sure to update the PubSub project, topic, and subscription:
 * `crawl` in the [scraper](https://gitlab.com/recommend.games/board-game-scraper/blob/master/.env.example),
 * `logs` in [`.env`](.env.example) and [`docker-compose.yaml`](docker-compose.yaml).
 
+## Enable Google Container Registry API
+
+Go to the [APIs & Services dashboard](https://console.cloud.google.com/apis/dashboard),
+find the [Google Container Registry API](https://console.cloud.google.com/apis/library/containerregistry.googleapis.com),
+and enable it.
+
 ## Create credentials for default service account
 
 Go to the [IAM & admin dashboard](https://console.cloud.google.com/iam-admin),
