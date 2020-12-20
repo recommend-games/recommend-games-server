@@ -23,8 +23,8 @@ create a new app in the region of your choice with the flexible environment.
 ## Create Storage buckets
 
 Open the [Storage dashboard](https://console.cloud.google.com/storage) and
-create the bucket `$PROJECT-data` in the same region as the App Engine app
-above. Leave the default options otherwise.
+create the buckets `$PROJECT-data` and `$PROJECT-logs` in the same region as the
+App Engine app above. Leave the default options otherwise.
 
 ## Create PubSub topic and subscription
 
