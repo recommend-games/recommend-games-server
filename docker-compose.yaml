@@ -12,7 +12,7 @@ services:
             - 8080:8080
         volumes:
             - ./data:/app/data
-        restart: never
+        restart: 'no'
 
     users:
         image: registry.gitlab.com/recommend.games/board-game-scraper:2.13.0
