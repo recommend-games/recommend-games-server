@@ -12,7 +12,7 @@ services:
             - 8080:8080
         volumes:
             - ./data:/app/data
-        restart: always
+        restart: never
 
     users:
         image: registry.gitlab.com/recommend.games/board-game-scraper:2.13.0
@@ -27,6 +27,6 @@ services:
             GOOGLE_APPLICATION_CREDENTIALS: /app/gs.json
         volumes:
             - ./gs.json:/app/gs.json
-        restart: always
+        restart: unless-stopped
         stop_grace_period: 15m
         stop_signal: SIGINT
