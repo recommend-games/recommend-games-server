@@ -222,6 +222,7 @@ class Command(BaseCommand):
             LOGGER.info("Found %d chart entries", len(charts))
 
             if not kwargs["dry_run"]:
+                LOGGER.info("Writing charts to <%s>", out_path)
                 charts[columns].to_csv(out_path, index=False)
 
         LOGGER.info("Done.")
