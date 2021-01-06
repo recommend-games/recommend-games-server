@@ -13,8 +13,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from dateutil.rrule import WEEKLY, rrule
 from django.core.management.base import BaseCommand
 from pytility import arg_to_iter, parse_date
+from snaptime import snap
 
 from ...utils import Timer
 
@@ -110,7 +112,7 @@ def calculate_charts(
                 recent_ratings["bgg_user_rating"]
                 >= recent_ratings["bgg_user_rating"].quantile(pct_upper)
             ]
-            .groupby("bgg_id")["item_id"]
+            .groupby("bgg_id")["bgg_user_rating"]
             .count()
         )
         tmp["negative"] = (
@@ -118,7 +120,7 @@ def calculate_charts(
                 recent_ratings["bgg_user_rating"]
                 <= recent_ratings["bgg_user_rating"].quantile(pct_lower)
             ]
-            .groupby("bgg_id")["item_id"]
+            .groupby("bgg_id")["bgg_user_rating"]
             .count()
         )
         tmp.fillna(0, inplace=True)
@@ -150,7 +152,7 @@ class Command(BaseCommand):
         parser.add_argument("--out-file", "-O", default="%Y%m%d-%H%M%S.csv")
         parser.add_argument("--max-rows", "-m", type=int)
         parser.add_argument(
-            "--columns", "-c", nargs="+", default=("rank", "bgg_id", "bayes_rating")
+            "--columns", "-c", nargs="+", default=("rank", "bgg_id", "score")
         )
         parser.add_argument("--overwrite", "-W", action="store_true")
         parser.add_argument("--dry-run", "-n", action="store_true")
@@ -164,9 +166,12 @@ class Command(BaseCommand):
 
         LOGGER.info(kwargs)
 
-        columns = list(arg_to_iter(kwargs["columns"]))
+        out_dir = Path(kwargs["out_dir"]).resolve()
+        LOGGER.info("Writing charts to <%s>", out_dir)
+        if not kwargs["dry_run"]:
+            out_dir.mkdir(parents=True, exist_ok=True)
 
-        LOGGER.info(columns)
+        columns = list(arg_to_iter(kwargs["columns"]))
 
         with Timer(message="Loading ratings", logger=LOGGER):
             ratings = _ratings_data(path=kwargs["in_file"], max_rows=kwargs["max_rows"])
@@ -175,3 +180,21 @@ class Command(BaseCommand):
         max_date = ratings["updated_at"].max()
 
         LOGGER.info("Earliest date: %s; latest date: %s", min_date, max_date)
+
+        for end_date in rrule(
+            dtstart=snap(min_date, "@w1+7d"), until=max_date, freq=WEEKLY
+        ):
+            LOGGER.info("Calculating charts for %s", end_date.strftime("%Y-%m-%d"))
+            out_path = out_dir / end_date.strftime(kwargs["out_file"])
+
+            if not kwargs["overwrite"] and out_path.exists():
+                LOGGER.info("Output path <%s> exists, skipping...", out_path)
+                continue
+
+            charts = calculate_charts(ratings=ratings, end_date=end_date, days=7)
+            LOGGER.info("Found %d chart entries", len(charts))
+
+            if not kwargs["dry_run"]:
+                charts[columns].to_csv(out_path, index=False)
+
+        LOGGER.info("Done.")
