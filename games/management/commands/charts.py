@@ -13,7 +13,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from dateutil.rrule import WEEKLY, rrule
+from dateutil.rrule import MONTHLY, WEEKLY, YEARLY, rrule
 from django.core.management.base import BaseCommand
 from pytility import arg_to_iter, parse_date
 from snaptime import snap
@@ -148,6 +148,9 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("in_file")
+        parser.add_argument(
+            "--freq", "-f", choices=("week", "month", "year"), default="week"
+        )
         parser.add_argument("--out-dir", "-o", default=".")
         parser.add_argument("--out-file", "-O", default="%Y%m%d-%H%M%S.csv")
         parser.add_argument("--max-rows", "-m", type=int)
@@ -181,10 +184,27 @@ class Command(BaseCommand):
 
         LOGGER.info("Earliest date: %s; latest date: %s", min_date, max_date)
 
+        if kwargs["freq"] == "week":
+            instruction = "@week1+1week"  # following Monday
+            freq = WEEKLY
+            chart_str = "weekly"
+        elif kwargs["freq"] == "month":
+            instruction = "@month+1month"  # following month
+            freq = MONTHLY
+            chart_str = "monthly"
+        elif kwargs["freq"] == "year":
+            instruction = "@year+1year"  # following New Year
+            freq = YEARLY
+            chart_str = "annual"
+
         for end_date in rrule(
-            dtstart=snap(min_date, "@w1+7d"), until=max_date, freq=WEEKLY
+            dtstart=snap(min_date, instruction),
+            until=max_date,
+            freq=freq,
         ):
-            LOGGER.info("Calculating charts for %s", end_date.strftime("%Y-%m-%d"))
+            LOGGER.info(
+                "Calculating %s charts for %s", chart_str, end_date.strftime("%Y-%m-%d")
+            )
             out_path = out_dir / end_date.strftime(kwargs["out_file"])
 
             if not kwargs["overwrite"] and out_path.exists():
