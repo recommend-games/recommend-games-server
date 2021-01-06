@@ -7,6 +7,7 @@ import logging
 import sys
 
 from datetime import datetime, timedelta, timezone
+from itertools import islice
 from pathlib import Path
 
 import numpy as np
@@ -36,11 +37,12 @@ def _process_ratings(lines, keys=("bgg_id", "bgg_user_rating", "updated_at")):
         }
 
 
-def _ratings_data(path):
+def _ratings_data(path, max_rows=None):
     path = Path(path).resolve()
     LOGGER.info("Reading ratings data from <%s>", path)
     with path.open() as file:
-        data = pd.DataFrame.from_records(_process_ratings(file))
+        lines = islice(file, max_rows) if max_rows else file
+        data = pd.DataFrame.from_records(_process_ratings(lines))
     LOGGER.info("Read %d rows", len(data))
     return data
 
@@ -146,6 +148,7 @@ class Command(BaseCommand):
         parser.add_argument("in_file")
         parser.add_argument("--out-dir", "-o", default=".")
         parser.add_argument("--out-file", "-O", default="%Y%m%d-%H%M%S.csv")
+        parser.add_argument("--max-rows", "-m", type=int)
         parser.add_argument(
             "--columns", "-c", nargs="+", default=("rank", "bgg_id", "bayes_rating")
         )
@@ -166,7 +169,7 @@ class Command(BaseCommand):
         LOGGER.info(columns)
 
         with Timer(message="Loading ratings", logger=LOGGER):
-            ratings = _ratings_data(kwargs["in_file"])
+            ratings = _ratings_data(path=kwargs["in_file"], max_rows=kwargs["max_rows"])
 
         min_date = ratings["updated_at"].min()
         max_date = ratings["updated_at"].max()
