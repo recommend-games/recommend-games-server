@@ -188,14 +188,17 @@ class Command(BaseCommand):
             instruction = "@week1+1week"  # following Monday
             freq = WEEKLY
             chart_str = "weekly"
+            days = 7
         elif kwargs["freq"] == "month":
             instruction = "@month+1month"  # following month
             freq = MONTHLY
             chart_str = "monthly"
+            days = 365.25 / 12
         elif kwargs["freq"] == "year":
             instruction = "@year+1year"  # following New Year
             freq = YEARLY
             chart_str = "annual"
+            days = 365.25
 
         for end_date in rrule(
             dtstart=snap(min_date, instruction),
@@ -211,7 +214,11 @@ class Command(BaseCommand):
                 LOGGER.info("Output path <%s> exists, skipping...", out_path)
                 continue
 
-            charts = calculate_charts(ratings=ratings, end_date=end_date, days=7)
+            charts = calculate_charts(
+                ratings=ratings,
+                end_date=end_date,
+                days=days,
+            )
             LOGGER.info("Found %d chart entries", len(charts))
 
             if not kwargs["dry_run"]:
