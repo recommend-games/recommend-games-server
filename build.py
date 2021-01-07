@@ -35,6 +35,7 @@ from dotenv import load_dotenv
 from pynt import task
 from pyntcontrib import execute, safe_cd
 from pytility import arg_to_iter, parse_bool, parse_date, parse_float, parse_int
+from snaptime import snap
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -1055,6 +1056,38 @@ def savebgarankings(
 @task(savebggrankings, savebgarankings)
 def saverankings():
     """Take a snapshot of both BoardGameGeek and Board Game Atlas rankings."""
+
+
+@task()
+def weeklycharts(
+    src_file=Path(SCRAPED_DATA_DIR) / "scraped" / "bgg_RatingItem.jl",
+    dst_dir=Path(SCRAPED_DATA_DIR) / "rankings" / "bgg" / "charts",
+    dst_file="%Y%m%d-%H%M%S.csv",
+    overwrite=False,
+):
+    """Generate charts files."""
+
+    src_file = Path(src_file).resolve()
+    dst_dir = Path(dst_dir).resolve()
+    max_date = snap(django.utils.timezone.now(), "@week5@week1")
+    latest_file = dst_dir / max_date.strftime(dst_file)
+    overwrite = parse_bool(overwrite)
+
+    if not overwrite and latest_file.exists():
+        LOGGER.info(
+            "Latest charts at <%s> already exist, skipping chart generation",
+            latest_file,
+        )
+        return
+
+    django.core.management.call_command(
+        "charts",
+        src_file,
+        max_date=max_date,
+        freq="week",
+        out_dir=dst_dir,
+        overwrite=overwrite,
+    )
 
 
 @task()
