@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""TODO."""
+"""Generate board game charts from ratings data."""
 
 import json
 import logging
@@ -151,9 +151,9 @@ def _pairwise(iterable):
 
 
 class Command(BaseCommand):
-    """TODO."""
+    """Generate board game charts from ratings data."""
 
-    help = "TODO."
+    help = "Generate board game charts from ratings data."
 
     def add_arguments(self, parser):
         parser.add_argument("in_file")
