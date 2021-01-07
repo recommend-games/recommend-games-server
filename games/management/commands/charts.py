@@ -28,7 +28,6 @@ def _process_ratings(lines, keys=("bgg_id", "bgg_user_rating", "updated_at")):
         item = json.loads(line)
 
         if not item or any(not item.get(key) for key in keys):
-            LOGGER.debug("Invalid data: %s", line[:100])
             continue
 
         yield {
