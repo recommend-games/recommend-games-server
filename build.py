@@ -936,6 +936,7 @@ def trainbgg(
     min_votes=None,
     min_votes_anchor_date=MIN_VOTES_ANCHOR_DATE,
     min_votes_seconds_per_step=MIN_VOTES_SECONDS_PER_STEP,
+    # pylint: disable=no-member
     min_votes_max_value=BGGRecommender.default_filters.get("num_votes__gte"),
 ):
     """ train BoardGameGeek recommender model """
@@ -1526,6 +1527,7 @@ def builddb():
     train,
     saverankings,
     builddb,
+    weeklycharts,
     updatecount,
     gitupdate,
 )
