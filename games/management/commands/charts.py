@@ -7,7 +7,7 @@ import logging
 import sys
 
 from datetime import datetime, timedelta, timezone
-from itertools import islice
+from itertools import islice, tee
 from pathlib import Path
 
 import numpy as np
@@ -63,6 +63,7 @@ def exp_decay(
 def calculate_charts(
     ratings,
     end_date=None,
+    start_date=None,
     days=30,
     percentiles=(0.25, 0.75),
     decay=False,
@@ -75,6 +76,9 @@ def calculate_charts(
 
     if decay:
         halflife = 60 * 60 * 24 * days  # convert to seconds
+        LOGGER.debug(
+            "Using exponential decay with a halflife of %.1f seconds", halflife
+        )
         weights = exp_decay(
             dates=ratings["updated_at"], anchor=end_date, halflife=halflife
         )
@@ -102,8 +106,8 @@ def calculate_charts(
         del grouped, tmp, weights
 
     else:
-        window = timedelta(days=days)
-        start_date = end_date - window
+        start_date = start_date or end_date - timedelta(days=days)
+        LOGGER.debug("Considering ratings between %s and %s", start_date, end_date)
         recent_ratings = ratings[ratings["updated_at"] >= start_date]
 
         tmp = pd.DataFrame()
@@ -141,6 +145,12 @@ def calculate_charts(
     return ranking.sort_values("rank").reset_index()
 
 
+def _pairwise(iterable):
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
+
+
 class Command(BaseCommand):
     """TODO."""
 
@@ -148,6 +158,8 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("in_file")
+        parser.add_argument("--min-date", "-d")
+        parser.add_argument("--max-date", "-D")
         parser.add_argument(
             "--freq", "-f", choices=("week", "month", "year"), default="week"
         )
@@ -179,31 +191,38 @@ class Command(BaseCommand):
         with Timer(message="Loading ratings", logger=LOGGER):
             ratings = _ratings_data(path=kwargs["in_file"], max_rows=kwargs["max_rows"])
 
-        min_date = ratings["updated_at"].min()
-        max_date = ratings["updated_at"].max()
+        min_date_args = parse_date(kwargs["min_date"], tzinfo=timezone.utc)
+        min_date_ratings = ratings["updated_at"].min()
+        min_date = (
+            max(min_date_args, min_date_ratings) if min_date_args else min_date_ratings
+        )
+        max_date_args = parse_date(kwargs["max_date"], tzinfo=timezone.utc)
+        max_date_ratings = ratings["updated_at"].max()
+        max_date = (
+            min(max_date_args, max_date_ratings) if max_date_args else max_date_ratings
+        )
 
         LOGGER.info("Earliest date: %s; latest date: %s", min_date, max_date)
 
         if kwargs["freq"] == "week":
-            instruction = "@week1+1week"  # following Monday
+            instruction = "@week1"  # previous Monday
             freq = WEEKLY
             chart_str = "weekly"
-            days = 7
         elif kwargs["freq"] == "month":
-            instruction = "@month+1month"  # following month
+            instruction = "@month"  # beginning of the month
             freq = MONTHLY
             chart_str = "monthly"
-            days = 365.25 / 12
         elif kwargs["freq"] == "year":
-            instruction = "@year+1year"  # following New Year
+            instruction = "@year"  # beginning of the year
             freq = YEARLY
             chart_str = "annual"
-            days = 365.25
 
-        for end_date in rrule(
-            dtstart=snap(min_date, instruction),
-            until=max_date,
-            freq=freq,
+        for start_date, end_date in _pairwise(
+            rrule(
+                dtstart=snap(min_date, instruction),
+                until=max_date,
+                freq=freq,
+            )
         ):
             LOGGER.info(
                 "Calculating %s charts for %s", chart_str, end_date.strftime("%Y-%m-%d")
@@ -216,8 +235,8 @@ class Command(BaseCommand):
 
             charts = calculate_charts(
                 ratings=ratings,
+                start_date=start_date,
                 end_date=end_date,
-                days=days,
             )
             LOGGER.info("Found %d chart entries", len(charts))
 
