@@ -32,6 +32,7 @@ Current item count as of **{date}**:
   * {fc_bgg_factor:,d} rankings
   * {fc_bgg_similarity:,d} similarity rankings
   * {fc_bgg_hotness:,d} hotness
+  * {fc_bgg_charts:,d} charts
 
 ## News
 
