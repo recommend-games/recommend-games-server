@@ -17,6 +17,7 @@ from dateutil.rrule import MONTHLY, WEEKLY, YEARLY, rrule
 from django.core.management.base import BaseCommand
 from pytility import arg_to_iter, parse_date
 from snaptime import snap
+from tqdm import tqdm
 
 from ...utils import Timer
 
@@ -24,7 +25,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def _process_ratings(lines, keys=("bgg_id", "bgg_user_rating", "updated_at")):
-    for line in lines:
+    for line in tqdm(lines):
         item = json.loads(line)
 
         if not item or any(not item.get(key) for key in keys):
