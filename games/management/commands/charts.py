@@ -66,6 +66,7 @@ def calculate_charts(
     start_date=None,
     days=30,
     percentiles=(0.25, 0.75),
+    min_raw_score=None,
     decay=False,
 ):
     """Calculate charts for the given timeframe."""
@@ -130,6 +131,9 @@ def calculate_charts(
         tmp.fillna(0, inplace=True)
         raw_scores = tmp["positive"] - tmp["negative"]
         del recent_ratings, tmp
+
+    if min_raw_score is not None:
+        raw_scores = raw_scores[raw_scores >= min_raw_score]
 
     games = ratings.groupby("bgg_id")["bgg_user_rating"].count()
     scores = raw_scores * games.rank(pct=True, ascending=False)
@@ -208,14 +212,17 @@ class Command(BaseCommand):
             instruction = "@week1"  # previous Monday
             freq = WEEKLY
             chart_str = "weekly"
+            min_raw_score = 10
         elif kwargs["freq"] == "month":
             instruction = "@month"  # beginning of the month
             freq = MONTHLY
             chart_str = "monthly"
+            min_raw_score = 25
         elif kwargs["freq"] == "year":
             instruction = "@year"  # beginning of the year
             freq = YEARLY
             chart_str = "annual"
+            min_raw_score = 100
 
         for start_date, end_date in _pairwise(
             rrule(
@@ -237,10 +244,11 @@ class Command(BaseCommand):
                 ratings=ratings,
                 start_date=start_date,
                 end_date=end_date,
+                min_raw_score=min_raw_score,
             )
             LOGGER.info("Found %d chart entries", len(charts))
 
-            if not kwargs["dry_run"]:
+            if not kwargs["dry_run"] and not charts.empty:
                 LOGGER.info("Writing charts to <%s>", out_path)
                 charts[columns].to_csv(out_path, index=False)
 
