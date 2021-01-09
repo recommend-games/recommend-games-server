@@ -28,7 +28,13 @@ class Ranking(Model):
     BGG = "bgg"
     FACTOR = "fac"
     SIMILARITY = "sim"
-    TYPES = ((BGG, "BoardGameGeek"), (FACTOR, "Factor"), (SIMILARITY, "Similarity"))
+    CHARTS = "cha"
+    TYPES = (
+        (BGG, "BoardGameGeek"),
+        (FACTOR, "Factor"),
+        (SIMILARITY, "Similarity"),
+        (CHARTS, "Charts"),
+    )
 
     game = ForeignKey("Game", on_delete=CASCADE)
     ranking_type = CharField(max_length=3, choices=TYPES, default=BGG, db_index=True)
