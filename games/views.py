@@ -922,6 +922,14 @@ class CollectionViewSet(ModelViewSet):
         return (cls(),)
 
 
+class RankingViewSet(PermissionsModelViewSet):
+    """Ranking view set."""
+
+    # pylint: disable=no-member
+    queryset = Ranking.objects.all()
+    serializer_class = RankingSerializer
+
+
 def redirect_view(request):
     """Redirect to a given path."""
     path = request.GET.get("to") or "/"

@@ -13,6 +13,7 @@ from .views import (
     GameViewSet,
     MechanicViewSet,
     PersonViewSet,
+    RankingViewSet,
     UserViewSet,
     redirect_view,
 )
@@ -21,9 +22,10 @@ ROUTER = DefaultRouter()
 ROUTER.register("categories", CategoryViewSet)
 ROUTER.register("collections", CollectionViewSet)
 ROUTER.register("games", GameViewSet)
-ROUTER.register("types", GameTypeViewSet)
 ROUTER.register("mechanics", MechanicViewSet)
 ROUTER.register("persons", PersonViewSet)
+ROUTER.register("rankings", RankingViewSet)
+ROUTER.register("types", GameTypeViewSet)
 ROUTER.register("users", UserViewSet)
 
 # pylint: disable=invalid-name
