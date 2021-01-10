@@ -31,7 +31,7 @@ class RankingSerializer(ModelSerializer):
         """Meta."""
 
         model = Ranking
-        exclude = ("id", "game")
+        exclude = ("id",)
 
 
 class GameSerializer(ModelSerializer):

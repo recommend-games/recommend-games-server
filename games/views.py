@@ -922,12 +922,48 @@ class CollectionViewSet(ModelViewSet):
         return (cls(),)
 
 
+class RankingFilter(FilterSet):
+    """Ranking filter."""
+
+    class Meta:
+        """Meta."""
+
+        model = Ranking
+        fields = {
+            "game": ["exact"],
+            "game__name": ["exact", "iexact"],
+            "ranking_type": ["exact", "iexact"],
+            "rank": ["exact", "gt", "gte", "lt", "lte"],
+            "date": ["exact", "gt", "gte", "lt", "lte"],
+        }
+
+
+class RankingPagination(PageNumberPagination):
+    """Ranking pagination."""
+
+    page_size = 100
+    page_size_query_param = "page_size"
+    max_page_size = 1000
+
+
 class RankingViewSet(PermissionsModelViewSet):
     """Ranking view set."""
 
     # pylint: disable=no-member
     queryset = Ranking.objects.all()
+    ordering = ("ranking_type", "date", "rank")
     serializer_class = RankingSerializer
+    pagination_class = RankingPagination
+
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filterset_class = RankingFilter
+
+    ordering_fields = (
+        "game",
+        "ranking_type",
+        "rank",
+        "date",
+    )
 
     @action(detail=False)
     def dates(self, request):
