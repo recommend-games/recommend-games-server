@@ -58,6 +58,7 @@ from .serializers import (
     MechanicSerializer,
     PersonSerializer,
     RankingSerializer,
+    RankingFatSerializer,
     UserSerializer,
 )
 from .utils import (
@@ -976,6 +977,21 @@ class RankingViewSet(PermissionsModelViewSet):
             query_set = query_set.filter(ranking_type__in=ranking_types)
 
         return Response(query_set.values("ranking_type", "date").distinct())
+
+    # pylint: disable=unused-argument
+    @action(detail=False)
+    def games(self, request):
+        """Similar to self.list(), but with full game details."""
+
+        query_set = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(query_set)
+        if page is not None:
+            serializer = RankingFatSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = RankingFatSerializer(query_set, many=True)
+        return Response(serializer.data)
 
 
 def redirect_view(request):
