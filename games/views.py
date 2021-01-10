@@ -16,7 +16,15 @@ from django.db.models import Count, Q, Min
 from django.shortcuts import redirect
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
-from pytility import arg_to_iter, parse_bool, parse_date, parse_int, take_first, to_str
+from pytility import (
+    arg_to_iter,
+    clear_list,
+    parse_bool,
+    parse_date,
+    parse_int,
+    take_first,
+    to_str,
+)
 from rest_framework.decorators import action
 from rest_framework.exceptions import (
     NotAuthenticated,
@@ -673,7 +681,7 @@ class GameViewSet(PermissionsModelViewSet):
 
         filters = {
             "game": pk,
-            "ranking_type": request.query_params.get("ranking_type"),
+            "ranking_type__in": clear_list(_extract_params(request, "ranking_type")),
             "date__gte": parse_date(
                 request.query_params.get("date__gte"), tzinfo=timezone.utc
             ),
