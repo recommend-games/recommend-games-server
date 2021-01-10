@@ -929,6 +929,18 @@ class RankingViewSet(PermissionsModelViewSet):
     queryset = Ranking.objects.all()
     serializer_class = RankingSerializer
 
+    @action(detail=False)
+    def dates(self, request):
+        """Find all available dates with rankings."""
+
+        query_set = self.get_queryset().order_by("ranking_type", "date")
+
+        ranking_types = clear_list(_extract_params(request, "ranking_type"))
+        if ranking_types:
+            query_set = query_set.filter(ranking_type__in=ranking_types)
+
+        return Response(query_set.values("ranking_type", "date").distinct())
+
 
 def redirect_view(request):
     """Redirect to a given path."""
