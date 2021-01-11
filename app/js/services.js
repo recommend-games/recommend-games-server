@@ -498,15 +498,15 @@ rgApp.factory('gamesService', function gamesService(
 
         return $http.get(API_URL + 'rankings/games/', {'params': params, 'noblock': !!noblock})
             .then(function (response) {
-                var rankings = _.get(response, 'data.results');
+                var rankings = _.get(response, 'data.results'),
+                    games = _.map(rankings, function (ranking) {
+                        var game = processGame(ranking.game);
+                        game.rec_rank = ranking.rank;
+                        // ranking.date = moment(date);
+                        return game;
+                    });
 
-                rankings = _.map(rankings, function (ranking) {
-                    ranking.game = processGame(ranking.game);
-                    ranking.date = moment(date);
-                    return ranking;
-                });
-
-                return rankings;
+                return games;
             })
             .catch(function (reason) {
                 $log.error('There has been an error', reason);

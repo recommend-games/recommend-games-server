@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<section xmlns="http://www.w3.org/1999/xhtml"
+		id="rg-charts">
+	<h1>Board game charts</h1>
+
+	<div class="row">
+		<a ng-repeat="game in games"
+			game-square=""
+			game="game"
+			show-ranking="true"
+			hide-score="true"
+			ng-href="/#/game/{{ game.bgg_id }}"
+			class="col-lg-3 col-md-4 col-sm-6"></a>
+	</div>
+
+	<disqus ng-if="disqusId &amp;&amp; disqusUrl"
+		identifier="disqusId"
+		url="disqusUrl"></disqus>
+</section>
