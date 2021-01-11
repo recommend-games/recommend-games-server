@@ -481,6 +481,41 @@ rgApp.factory('gamesService', function gamesService(
             });
     };
 
+    service.getCharts = function getCharts(rankingType, date, noblock) {
+        date = moment(date);
+
+        var params = {
+            'ranking_type': rankingType,
+            'rank__lte': 100,
+            'page_size': 100
+        };
+
+        if (date.isValid()) {
+            params.date = date.format('YYYY-MM-DD');
+        } else {
+            params.ordering = '-date,rank';
+        }
+
+        return $http.get(API_URL + 'rankings/games/', {'params': params, 'noblock': !!noblock})
+            .then(function (response) {
+                var rankings = _.get(response, 'data.results');
+
+                rankings = _.map(rankings, function (ranking) {
+                    ranking.game = processGame(ranking.game);
+                    ranking.date = moment(date);
+                    return ranking;
+                });
+
+                return rankings;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to load charts.';
+                return $q.reject(response);
+            });
+    };
+
     service.jsonLD = function jsonLD(game) {
         if (_.isArray(game)) {
             return {
