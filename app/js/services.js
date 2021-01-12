@@ -482,31 +482,48 @@ rgApp.factory('gamesService', function gamesService(
     };
 
     service.getCharts = function getCharts(rankingType, date, noblock) {
+        var dateStr = date,
+            params = {
+                'ranking_type': rankingType,
+                'ordering': '-date,rank',
+                'rank__lte': 100,
+                'page_size': 100
+            };
+
         date = moment(date);
 
-        var params = {
-            'ranking_type': rankingType,
-            'rank__lte': 100,
-            'page_size': 100
-        };
-
         if (date.isValid()) {
-            params.date = date.format('YYYY-MM-DD');
-        } else {
-            params.ordering = '-date,rank';
+            params.date__lte = date.format('YYYY-MM-DD');
         }
 
         return $http.get(API_URL + 'rankings/games/', {'params': params, 'noblock': !!noblock})
             .then(function (response) {
                 var rankings = _.get(response, 'data.results'),
-                    games = _.map(rankings, function (ranking) {
+                    chartDate = moment(_.get(rankings, '[0].date')),
+                    games;
+
+                if (_.isEmpty(rankings) || !chartDate.isValid()) {
+                    return $q.reject('Unable to load charts for ' + dateStr + '.');
+                }
+
+                games = _(rankings)
+                    .filter(function (ranking) {
+                        var d = moment(ranking.date);
+                        return d.isValid() && (d.format('YYYY-MM-DD') === chartDate.format('YYYY-MM-DD'));
+                    })
+                    .map(function (ranking) {
                         var game = processGame(ranking.game);
                         game.rec_rank = ranking.rank;
-                        // ranking.date = moment(date);
                         return game;
-                    });
+                    })
+                    .value();
 
-                return games;
+                $log.info('Loaded ' + _.size(games) + ' chart entries for ' + chartDate.format('YYYY-MM-DD'));
+
+                return {
+                    'date': chartDate,
+                    'games': games
+                };
             })
             .catch(function (reason) {
                 $log.error('There has been an error', reason);
