@@ -229,6 +229,29 @@ def _extract_params(request, key, parser=None):
             yield value
 
 
+def _light_games(bgg_ids=None):
+    games = (
+        Game.objects.all()
+        if bgg_ids is None
+        else Game.objects.filter(bgg_id__in=arg_to_iter(bgg_ids))
+    )
+    return games.values("bgg_id", "name", "year", "image_url")
+
+
+def _light_games_dict(bgg_ids=None):
+    games = _light_games(bgg_ids)
+    return {game["bgg_id"]: game for game in games}
+
+
+def _add_games(data, bgg_ids=None, key="game"):
+    games = _light_games_dict(bgg_ids)
+    for item in data:
+        game = games.get(item.get(key))
+        if game:
+            item[key] = game
+    return data
+
+
 class GameFilter(FilterSet):
     """ game filter """
 
@@ -983,15 +1006,27 @@ class RankingViewSet(PermissionsModelViewSet):
     def games(self, request):
         """Similar to self.list(), but with full game details."""
 
+        fat = parse_bool(next(_extract_params(request, "fat"), None))
+
         query_set = self.filter_queryset(self.get_queryset())
-
         page = self.paginate_queryset(query_set)
-        if page is not None:
-            serializer = RankingFatSerializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
 
-        serializer = RankingFatSerializer(query_set, many=True)
-        return Response(serializer.data)
+        if page is not None:
+            if fat:
+                serializer = RankingFatSerializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(page, many=True)
+            data = _add_games(serializer.data, (r.game_id for r in page))
+            return self.get_paginated_response(data)
+
+        if fat:
+            serializer = RankingFatSerializer(query_set, many=True)
+            return Response(serializer.data)
+
+        serializer = self.get_serializer(query_set, many=True)
+        data = _add_games(serializer.data, query_set.values_list("game", flat=True))
+        return Response(data)
 
 
 def redirect_view(request):
