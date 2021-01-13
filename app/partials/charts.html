@@ -3,6 +3,54 @@
 		id="rg-charts">
 	<h1>{{ title }}</h1>
 
+	<nav aria-label="Charts dates">
+		<ul class="pagination justify-content-center">
+			<li ng-if="first"
+					class="page-item">
+				<a class="page-link"
+						ng-href="/#/charts/{{ rankingType }}/{{ first.format('YYYY-MM-DD') }}">
+					{{ first.format('LL') }}
+				</a>
+			</li>
+			<li ng-if="prevEllipsis"
+					class="page-item disabled">
+				<a class="page-link" href="#" tabindex="-1" aria-disabled="true">…</a>
+			</li>
+			<li ng-if="prev"
+					class="page-item">
+				<a class="page-link"
+						ng-href="/#/charts/{{ rankingType }}/{{ prev.format('YYYY-MM-DD') }}">
+					{{ prev.format('LL') }}
+				</a>
+			</li>
+			<li ng-if="date"
+					class="page-item active"
+					aria-current="page">
+				<a class="page-link" ng-href="/#/charts/{{ rankingType }}/{{ date.format('YYYY-MM-DD') }}">
+					{{ date.format('LL') }} <span class="sr-only">(current)</span>
+				</a>
+			</li>
+			<li ng-if="next"
+					class="page-item">
+				<a class="page-link"
+						ng-href="/#/charts/{{ rankingType }}/{{ next.format('YYYY-MM-DD') }}">
+					{{ next.format('LL') }}
+				</a>
+			</li>
+			<li ng-if="nextEllipsis"
+					class="page-item disabled">
+				<a class="page-link" href="#" tabindex="-1" aria-disabled="true">…</a>
+			</li>
+			<li ng-if="last"
+					class="page-item">
+				<a class="page-link"
+						ng-href="/#/charts/{{ rankingType }}/{{ last.format('YYYY-MM-DD') }}">
+					{{ last.format('LL') }}
+				</a>
+			</li>
+		</ul>
+	</nav>
+
 	<div class="row">
 		<a ng-repeat="game in games"
 			game-square=""
@@ -10,7 +58,7 @@
 			show-ranking="true"
 			hide-score="true"
 			ng-href="/#/game/{{ game.bgg_id }}"
-			class="col-lg-3 col-md-4 col-sm-6"></a>
+			class="col-lg-3 col-md-4 col-6"></a>
 	</div>
 
 	<disqus ng-if="disqusId &amp;&amp; disqusUrl"

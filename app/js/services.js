@@ -533,6 +533,55 @@ rgApp.factory('gamesService', function gamesService(
             });
     };
 
+    service.getChartDates = function getChartDates(rankingType, noblock) {
+        rankingType = rankingType || 'cha';
+
+        var params = {'ranking_type': rankingType},
+            parsed;
+
+        if (_.isEmpty($sessionStorage.chart_dates)) {
+            $sessionStorage.chart_dates = {};
+        }
+
+        if (!_.isEmpty(_.get($sessionStorage, 'chart_dates.' + rankingType))) {
+            parsed = _.map($sessionStorage.chart_dates[rankingType], function (date) {
+                return moment(date);
+            });
+            return $q.resolve(parsed);
+        }
+
+        return $http.get(API_URL + 'rankings/dates/', {'params': params, 'noblock': !!noblock})
+            .then(function (response) {
+                var rankings = _.get(response, 'data'),
+                    dates = _(rankings)
+                        .map('date')
+                        .map(function (date) {
+                            return moment(date);
+                        })
+                        .filter(function (date) {
+                            return date.isValid();
+                        })
+                        .value();
+
+                if (_.isEmpty(dates)) {
+                    return $q.reject('Unable to load chart dates for ' + rankingType + '.');
+                }
+
+                $sessionStorage.chart_dates[rankingType] = _.map(dates, function (date) {
+                    return date.format('YYYY-MM-DD');
+                });
+
+                return dates;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to load chart dates for ' + rankingType + '.';
+                return $q.reject(response);
+            });
+
+    };
+
     service.jsonLD = function jsonLD(game) {
         if (_.isArray(game)) {
             return {
