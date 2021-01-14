@@ -16,7 +16,15 @@ from django.db.models import Count, Q, Min
 from django.shortcuts import redirect
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
-from pytility import arg_to_iter, parse_bool, parse_date, parse_int, take_first, to_str
+from pytility import (
+    arg_to_iter,
+    clear_list,
+    parse_bool,
+    parse_date,
+    parse_int,
+    take_first,
+    to_str,
+)
 from rest_framework.decorators import action
 from rest_framework.exceptions import (
     NotAuthenticated,
@@ -50,6 +58,7 @@ from .serializers import (
     MechanicSerializer,
     PersonSerializer,
     RankingSerializer,
+    RankingFatSerializer,
     UserSerializer,
 )
 from .utils import (
@@ -218,6 +227,29 @@ def _extract_params(request, key, parser=None):
     for value in values:
         if value is not None:
             yield value
+
+
+def _light_games(bgg_ids=None):
+    games = (
+        Game.objects.all()
+        if bgg_ids is None
+        else Game.objects.filter(bgg_id__in=arg_to_iter(bgg_ids))
+    )
+    return games.values("bgg_id", "name", "year", "image_url")
+
+
+def _light_games_dict(bgg_ids=None):
+    games = _light_games(bgg_ids)
+    return {game["bgg_id"]: game for game in games}
+
+
+def _add_games(data, bgg_ids=None, key="game"):
+    games = _light_games_dict(bgg_ids)
+    for item in data:
+        game = games.get(item.get(key))
+        if game:
+            item[key] = game
+    return data
 
 
 class GameFilter(FilterSet):
@@ -673,7 +705,7 @@ class GameViewSet(PermissionsModelViewSet):
 
         filters = {
             "game": pk,
-            "ranking_type": request.query_params.get("ranking_type"),
+            "ranking_type__in": clear_list(_extract_params(request, "ranking_type")),
             "date__gte": parse_date(
                 request.query_params.get("date__gte"), tzinfo=timezone.utc
             ),
@@ -912,6 +944,89 @@ class CollectionViewSet(ModelViewSet):
     def get_permissions(self):
         cls = AllowAny if settings.DEBUG else IsAuthenticated
         return (cls(),)
+
+
+class RankingFilter(FilterSet):
+    """Ranking filter."""
+
+    class Meta:
+        """Meta."""
+
+        model = Ranking
+        fields = {
+            "game": ["exact"],
+            "game__name": ["exact", "iexact"],
+            "ranking_type": ["exact", "iexact"],
+            "rank": ["exact", "gt", "gte", "lt", "lte"],
+            "date": ["exact", "gt", "gte", "lt", "lte"],
+        }
+
+
+class RankingPagination(PageNumberPagination):
+    """Ranking pagination."""
+
+    page_size = 100
+    page_size_query_param = "page_size"
+    max_page_size = 1000
+
+
+class RankingViewSet(PermissionsModelViewSet):
+    """Ranking view set."""
+
+    # pylint: disable=no-member
+    queryset = Ranking.objects.all()
+    ordering = ("ranking_type", "date", "rank")
+    serializer_class = RankingSerializer
+    pagination_class = RankingPagination
+
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filterset_class = RankingFilter
+
+    ordering_fields = (
+        "game",
+        "ranking_type",
+        "rank",
+        "date",
+    )
+
+    @action(detail=False)
+    def dates(self, request):
+        """Find all available dates with rankings."""
+
+        query_set = self.get_queryset().order_by("ranking_type", "date")
+
+        ranking_types = clear_list(_extract_params(request, "ranking_type"))
+        if ranking_types:
+            query_set = query_set.filter(ranking_type__in=ranking_types)
+
+        return Response(query_set.values("ranking_type", "date").distinct())
+
+    # pylint: disable=unused-argument
+    @action(detail=False)
+    def games(self, request):
+        """Similar to self.list(), but with full game details."""
+
+        fat = parse_bool(next(_extract_params(request, "fat"), None))
+
+        query_set = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(query_set)
+
+        if page is not None:
+            if fat:
+                serializer = RankingFatSerializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(page, many=True)
+            data = _add_games(serializer.data, (r.game_id for r in page))
+            return self.get_paginated_response(data)
+
+        if fat:
+            serializer = RankingFatSerializer(query_set, many=True)
+            return Response(serializer.data)
+
+        serializer = self.get_serializer(query_set, many=True)
+        data = _add_games(serializer.data, query_set.values_list("game", flat=True))
+        return Response(data)
 
 
 def redirect_view(request):

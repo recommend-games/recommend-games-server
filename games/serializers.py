@@ -24,16 +24,6 @@ from .models import (
 )
 
 
-class RankingSerializer(ModelSerializer):
-    """Ranking serializer."""
-
-    class Meta:
-        """Meta."""
-
-        model = Ranking
-        exclude = ("id", "game")
-
-
 class GameSerializer(ModelSerializer):
     """ game serializer """
 
@@ -63,6 +53,28 @@ class GameSerializer(ModelSerializer):
 
         model = Game
         fields = "__all__"
+
+
+class RankingSerializer(ModelSerializer):
+    """Ranking serializer."""
+
+    class Meta:
+        """Meta."""
+
+        model = Ranking
+        exclude = ("id",)
+
+
+class RankingFatSerializer(ModelSerializer):
+    """Ranking serializer with full game data."""
+
+    game = GameSerializer(read_only=True)
+
+    class Meta:
+        """Meta."""
+
+        model = Ranking
+        exclude = ("id",)
 
 
 class PersonSerializer(ModelSerializer):

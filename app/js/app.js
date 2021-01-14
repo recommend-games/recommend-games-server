@@ -55,6 +55,15 @@ rgApp.config(function (
     }).when('/history', {
         templateUrl: '/partials/history.html',
         controller: 'HistoryController'
+    }).when('/charts/:type/:date', {
+        templateUrl: '/partials/charts.html',
+        controller: 'ChartsController'
+    }).when('/charts/:type', {
+        templateUrl: '/partials/charts.html',
+        controller: 'ChartsController'
+    }).when('/charts', {
+        templateUrl: '/partials/charts.html',
+        controller: 'ChartsController'
     }).when('/stats', {
         templateUrl: '/partials/stats.html',
         controller: 'StatsController'
