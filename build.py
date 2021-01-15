@@ -1520,6 +1520,7 @@ def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_00
     dateflag,
     splitall,
     historicalbggrankings,
+    weeklycharts,
     fillrankingdb,
     compressdb,
     cpdirs,
@@ -1538,7 +1539,6 @@ def builddb():
     train,
     saverankings,
     builddb,
-    weeklycharts,
     updatecount,
     gitupdate,
 )
