@@ -39,6 +39,7 @@ python-dotenv = "*"
 rcssmin = "*"
 requests = "*"
 rjsmin = "*"
+scikit-learn = "*"
 smart-open = {extras = ["all"], version = ">=1.8.1"}
 snaptime = "*"
 tqdm = "*"
