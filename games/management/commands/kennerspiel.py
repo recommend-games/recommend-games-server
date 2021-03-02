@@ -12,6 +12,7 @@ import pandas as pd
 
 from django.core.management.base import BaseCommand
 from pytility import parse_int
+from tqdm import tqdm
 
 from ...models import Game
 
@@ -44,6 +45,13 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("model", help="TODO")
+        parser.add_argument(
+            "--batch",
+            "-b",
+            type=int,
+            default=10_000,
+            help="batch size for DB transactions",
+        )
         parser.add_argument("--dry-run", "-n", action="store_true", help="TODO")
 
     def handle(self, *args, **kwargs):
@@ -63,8 +71,9 @@ class Command(BaseCommand):
 
         LOGGER.info("Loading existing games data from database")
         # pylint: disable=no-member
+        games = Game.objects.order_by("bgg_id")
         data = pd.DataFrame.from_records(
-            Game.objects.order_by("bgg_id").values("bgg_id", *self.features),
+            data=games.values("bgg_id", *self.features),
             index="bgg_id",
         )
         LOGGER.info("Loaded %d rows and %d columns", *data.shape)
@@ -83,6 +92,16 @@ class Command(BaseCommand):
             for bgg_id, score in data["kennerspiel"].items():
                 print(f"{bgg_id}\t{score:.5f}")
         else:
-            pass  # TODO update database
+            LOGGER.info("Writing scores to the database")
+            games = tuple(games)
+            assert len(games) == len(data)
+            for game, (bgg_id, score) in tqdm(
+                zip(games, data["kennerspiel"].items()), total=len(games)
+            ):
+                assert game.bgg_id == bgg_id
+                game.kennerspiel_score = score
+            Game.objects.bulk_update(
+                objs=games, fields=["kennerspiel_score"], batch_size=kwargs["batch"]
+            )
 
         LOGGER.info("Done.")
