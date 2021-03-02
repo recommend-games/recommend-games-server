@@ -109,6 +109,7 @@ class Game(Model):
 
     complexity = FloatField(blank=True, null=True, db_index=True)
     language_dependency = FloatField(blank=True, null=True, db_index=True)
+    kennerspiel_score = FloatField(blank=True, null=True, db_index=True)
 
     freebase_id = JSONField(default=list)
     wikidata_id = JSONField(default=list)
@@ -149,7 +150,7 @@ class Game(Model):
         indexes = (Index(fields=("-rec_rating", "-bayes_rating", "-avg_rating")),)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Person(Model):
@@ -164,7 +165,7 @@ class Person(Model):
         ordering = ("name",)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class GameType(Model):
@@ -179,7 +180,7 @@ class GameType(Model):
         ordering = ("name",)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Category(Model):
@@ -194,7 +195,7 @@ class Category(Model):
         ordering = ("name",)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Mechanic(Model):
@@ -209,7 +210,7 @@ class Mechanic(Model):
         ordering = ("name",)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class User(Model):
@@ -225,7 +226,7 @@ class User(Model):
         ordering = ("name",)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Collection(Model):
