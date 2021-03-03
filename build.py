@@ -51,6 +51,7 @@ LOGGER = logging.getLogger(__name__)
 SETTINGS = django.conf.settings
 
 DATA_DIR = SETTINGS.DATA_DIR
+MODELS_DIR = SETTINGS.MODELS_DIR
 SCRAPER_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "board-game-scraper"))
 RECOMMENDER_DIR = os.path.abspath(
     os.path.join(BASE_DIR, "..", "board-game-recommender")
@@ -800,7 +801,7 @@ def split(
 
 @task()
 def link(
-    gazetteer=os.path.join(BASE_DIR, "cluster", "gazetteer.pickle"),
+    gazetteer=os.path.join(MODELS_DIR, "cluster", "gazetteer.pickle"),
     paths=(
         os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_GameItem.jl"),
         os.path.join(SCRAPED_DATA_DIR, "scraped", "bga_GameItem.jl"),
@@ -808,7 +809,7 @@ def link(
         os.path.join(SCRAPED_DATA_DIR, "scraped", "luding_GameItem.jl"),
         os.path.join(SCRAPED_DATA_DIR, "scraped", "wikidata_GameItem.jl"),
     ),
-    training_file=os.path.join(BASE_DIR, "cluster", "training.json"),
+    training_file=os.path.join(MODELS_DIR, "cluster", "training.json"),
     manual_labelling=False,
     threshold=None,
     output=os.path.join(SCRAPED_DATA_DIR, "links.json"),
@@ -831,7 +832,7 @@ def link(
 
 @task()
 def labellinks(
-    gazetteer=os.path.join(BASE_DIR, "cluster", "gazetteer.pickle"),
+    gazetteer=os.path.join(MODELS_DIR, "cluster", "gazetteer.pickle"),
     paths=(
         os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_GameItem.jl"),
         os.path.join(SCRAPED_DATA_DIR, "scraped", "bga_GameItem.jl"),
@@ -839,7 +840,7 @@ def labellinks(
         os.path.join(SCRAPED_DATA_DIR, "scraped", "luding_GameItem.jl"),
         os.path.join(SCRAPED_DATA_DIR, "scraped", "wikidata_GameItem.jl"),
     ),
-    training_file=os.path.join(BASE_DIR, "cluster", "training.json"),
+    training_file=os.path.join(MODELS_DIR, "cluster", "training.json"),
     threshold=None,
     output=os.path.join(SCRAPED_DATA_DIR, "links.json"),
     pretty_print=True,
