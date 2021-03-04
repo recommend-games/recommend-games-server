@@ -1137,6 +1137,26 @@ def filldb(src_dir=SCRAPED_DATA_DIR, rec_dir=os.path.join(RECOMMENDER_DIR, ".bgg
 
 
 @task()
+def kennerspiel(
+    model_path=Path(MODELS_DIR) / "kennerspiel.joblib", batch_size=10_000, dry_run=False
+):
+    """Calculate Kennerspiel scores and add them to the database."""
+
+    model_path = Path(model_path).resolve()
+    batch_size = parse_int(batch_size)
+    dry_run = parse_bool(dry_run)
+
+    LOGGER.info(
+        "Calculate Kennerspiel scores with model <%s> and write them to the database",
+        model_path,
+    )
+
+    django.core.management.call_command(
+        "kennerspiel", model_path, batch=batch_size, dry_run=dry_run
+    )
+
+
+@task()
 def compressdb(db_file=os.path.join(DATA_DIR, "db.sqlite3")):
     """ compress SQLite database file """
     execute("sqlite3", db_file, "VACUUM;")
@@ -1519,6 +1539,7 @@ def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_00
     cleandata,
     filldb,
     dateflag,
+    kennerspiel,
     splitall,
     historicalbggrankings,
     weeklycharts,
