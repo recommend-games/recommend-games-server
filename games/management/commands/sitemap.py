@@ -6,6 +6,7 @@ import logging
 import sys
 
 from datetime import datetime
+from itertools import islice
 
 from django.core.management.base import BaseCommand
 from lxml import etree, objectify
@@ -29,7 +30,7 @@ def _url_elements(url, ids, lastmod=None):
     yield ELM.url(
         ELM.loc(f"{url}#/"),
         ELM.lastmod(lastmod),
-        ELM.changefreq("weekly"),
+        ELM.changefreq("daily"),
         ELM.priority(1),
     )
 
@@ -58,7 +59,7 @@ def _url_elements(url, ids, lastmod=None):
         yield ELM.url(
             ELM.loc(f"{url}#/game/{id_}"),
             ELM.lastmod(lastmod),
-            ELM.changefreq("weekly"),
+            ELM.changefreq("daily"),
         )
 
 
@@ -68,8 +69,8 @@ def sitemap(url, limit=None):
     limit = limit or 50000
     # pylint: disable=no-member
     ids = Game.objects.values_list("bgg_id", flat=True)
-    ids = ids[: max(limit - 4, 0)]
-    return ELM.urlset(*_url_elements(url, ids))
+    elements = islice(_url_elements(url, ids[:limit]), limit)
+    return ELM.urlset(*elements)
 
 
 class Command(BaseCommand):
