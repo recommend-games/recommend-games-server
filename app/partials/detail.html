@@ -260,6 +260,25 @@
 				<strong>{{ game.complexity | number:2 }} / 5</strong> ({{ game.complexity_string }})
 			</dd>
 
+			<dt ng-if="game.kennerspiel_score"
+					class="col-md-3 col-sm-4 col-12">
+				<i class="fas fa-chess-pawn"></i>
+				Kennerspiel score
+			</dt>
+			<dd ng-if="game.kennerspiel_score"
+					class="col-md-9 col-sm-8 col-12">
+				<strong ng-class="game.kennerspiel_score < 0.5 ? 'sdj-color' : 'kdj-color'">
+					{{ game.kennerspiel_score * 100 | number:0 }}%
+				</strong>
+				<a href="https://blog.recommend.games/posts/what-makes-kennerspiel/"
+						data-toggle="tooltip"
+						data-placement="right"
+						title="Spiel or Kennerspiel? Read more about our Kennerspiel score on the blog!"
+						class="text-muted">
+					<i class="fas fa-info-circle"></i>
+				</a>
+			</dd>
+
 			<dt ng-if="game.language_dependency"
 					class="col-md-3 col-sm-4 col-12">
 				<i class="fas fa-globe"></i>
