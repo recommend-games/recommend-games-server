@@ -230,6 +230,7 @@ def _extract_params(request, key, parser=None):
 
 
 def _light_games(bgg_ids=None):
+    # pylint: disable=no-member
     games = (
         Game.objects.all()
         if bgg_ids is None
@@ -293,6 +294,7 @@ class GameFilter(FilterSet):
             "rec_rating": ["exact", "gt", "gte", "lt", "lte", "isnull"],
             "complexity": ["exact", "gt", "gte", "lt", "lte", "isnull"],
             "language_dependency": ["exact", "gt", "gte", "lt", "lte", "isnull"],
+            "kennerspiel_score": ["exact", "gt", "gte", "lt", "lte", "isnull"],
         }
 
 
@@ -329,6 +331,7 @@ class GameViewSet(PermissionsModelViewSet):
         "rec_rating",
         "complexity",
         "language_dependency",
+        "kennerspiel_score",
     )
     search_fields = ("name",)
 
@@ -815,6 +818,7 @@ class GameViewSet(PermissionsModelViewSet):
                     .filter(top__gt=0)
                     .order_by("-top", "best")[:top_items]
                 )
+                # pylint: disable=not-callable
                 serializer = serializer_class(
                     objs, many=True, context=self.get_serializer_context()
                 )

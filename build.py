@@ -51,6 +51,7 @@ LOGGER = logging.getLogger(__name__)
 SETTINGS = django.conf.settings
 
 DATA_DIR = SETTINGS.DATA_DIR
+MODELS_DIR = SETTINGS.MODELS_DIR
 SCRAPER_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "board-game-scraper"))
 RECOMMENDER_DIR = os.path.abspath(
     os.path.join(BASE_DIR, "..", "board-game-recommender")
@@ -800,7 +801,7 @@ def split(
 
 @task()
 def link(
-    gazetteer=os.path.join(BASE_DIR, "cluster", "gazetteer.pickle"),
+    gazetteer=os.path.join(MODELS_DIR, "cluster", "gazetteer.pickle"),
     paths=(
         os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_GameItem.jl"),
         os.path.join(SCRAPED_DATA_DIR, "scraped", "bga_GameItem.jl"),
@@ -808,7 +809,7 @@ def link(
         os.path.join(SCRAPED_DATA_DIR, "scraped", "luding_GameItem.jl"),
         os.path.join(SCRAPED_DATA_DIR, "scraped", "wikidata_GameItem.jl"),
     ),
-    training_file=os.path.join(BASE_DIR, "cluster", "training.json"),
+    training_file=os.path.join(MODELS_DIR, "cluster", "training.json"),
     manual_labelling=False,
     threshold=None,
     output=os.path.join(SCRAPED_DATA_DIR, "links.json"),
@@ -831,7 +832,7 @@ def link(
 
 @task()
 def labellinks(
-    gazetteer=os.path.join(BASE_DIR, "cluster", "gazetteer.pickle"),
+    gazetteer=os.path.join(MODELS_DIR, "cluster", "gazetteer.pickle"),
     paths=(
         os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_GameItem.jl"),
         os.path.join(SCRAPED_DATA_DIR, "scraped", "bga_GameItem.jl"),
@@ -839,7 +840,7 @@ def labellinks(
         os.path.join(SCRAPED_DATA_DIR, "scraped", "luding_GameItem.jl"),
         os.path.join(SCRAPED_DATA_DIR, "scraped", "wikidata_GameItem.jl"),
     ),
-    training_file=os.path.join(BASE_DIR, "cluster", "training.json"),
+    training_file=os.path.join(MODELS_DIR, "cluster", "training.json"),
     threshold=None,
     output=os.path.join(SCRAPED_DATA_DIR, "links.json"),
     pretty_print=True,
@@ -1132,6 +1133,26 @@ def filldb(src_dir=SCRAPED_DATA_DIR, rec_dir=os.path.join(RECOMMENDER_DIR, ".bgg
         batch=100000,
         recommender=rec_dir,
         links=os.path.join(src_dir, "links.json"),
+    )
+
+
+@task()
+def kennerspiel(
+    model_path=Path(MODELS_DIR) / "kennerspiel.joblib", batch_size=10_000, dry_run=False
+):
+    """Calculate Kennerspiel scores and add them to the database."""
+
+    model_path = Path(model_path).resolve()
+    batch_size = parse_int(batch_size)
+    dry_run = parse_bool(dry_run)
+
+    LOGGER.info(
+        "Calculate Kennerspiel scores with model <%s> and write them to the database",
+        model_path,
+    )
+
+    django.core.management.call_command(
+        "kennerspiel", model_path, batch=batch_size, dry_run=dry_run
     )
 
 
@@ -1518,6 +1539,7 @@ def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_00
     cleandata,
     filldb,
     dateflag,
+    kennerspiel,
     splitall,
     historicalbggrankings,
     weeklycharts,
