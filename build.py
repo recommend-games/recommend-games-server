@@ -816,18 +816,23 @@ def link(
     pretty_print=True,
 ):
     """ link items """
-    from board_game_scraper.cluster import link_games
 
-    LOGGER.info("Using model %r to link files %r...", gazetteer, paths)
-    link_games(
-        gazetteer=gazetteer,
-        paths=paths,
-        training_file=training_file if manual_labelling else None,
-        manual_labelling=parse_bool(manual_labelling),
-        threshold=parse_float(threshold),
-        output=output,
-        pretty_print=parse_bool(pretty_print),
-    )
+    try:
+        from board_game_scraper.cluster import link_games
+
+        LOGGER.info("Using model %r to link files %r...", gazetteer, paths)
+
+        link_games(
+            gazetteer=gazetteer,
+            paths=paths,
+            training_file=training_file if manual_labelling else None,
+            manual_labelling=parse_bool(manual_labelling),
+            threshold=parse_float(threshold),
+            output=output,
+            pretty_print=parse_bool(pretty_print),
+        )
+    except Exception:
+        LOGGER.exception("Linking failed…")
 
 
 @task()
