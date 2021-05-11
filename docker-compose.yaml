@@ -15,7 +15,7 @@ services:
         restart: 'no'
 
     users:
-        image: registry.gitlab.com/recommend.games/board-game-scraper:2.13.0
+        image: registry.gitlab.com/recommend.games/board-game-scraper:2.14.0
         container_name: rg-users
         command: [
             'python', '-m', 'board_game_scraper.pubsub_pull',
