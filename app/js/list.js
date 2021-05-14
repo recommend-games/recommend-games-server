@@ -1,10 +1,11 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global angular, rgApp, _ */
+/*global angular, rgApp, _, moment */
 
 'use strict';
 
 rgApp.controller('ListController', function ListController(
+    $http,
     $location,
     $log,
     $filter,
@@ -603,4 +604,20 @@ rgApp.controller('ListController', function ListController(
     canonical = gamesService.urlAndPath($location.path(), undefined, true);
     $scope.disqusId = canonical.path;
     $scope.disqusUrl = canonical.url;
+
+    $http.get('https://blog.recommend.games/index.xml')
+        .then(function (response) {
+            var xml = $.parseXML(response.data),
+                feed = $(xml),
+                item = feed.find('rss > channel > item').first(),
+                title = item.find('title').first().text(),
+                link = item.find('link').first().text(),
+                pubDate = moment(item.find('pubDate').first().text()),
+                displayUntil = pubDate.add(14, 'days');
+
+            if (moment().isBefore(displayUntil)) {
+                $scope.blogTitle = title;
+                $scope.blogLink = link;
+            }
+        });
 });
