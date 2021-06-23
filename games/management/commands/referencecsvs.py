@@ -49,7 +49,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("in_file")
         parser.add_argument("--out-dir", "-o", default=".")
-        parser.add_argument("--out-file", "-O", default="bgg_{entity}.csv")
+        parser.add_argument("--out-file", "-O", default="{entity}.csv")
         parser.add_argument("--dry-run", "-n", action="store_true")
 
     def handle(self, *args, **kwargs):
