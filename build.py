@@ -1539,7 +1539,10 @@ def referencecsvs(
     """Parse a file for foreign references and store those in separate CSVs."""
     LOGGER.info("Parsing <%s> for foreign references", in_file)
     django.core.management.call_command(
-        "referencecsvs", in_file=in_file, out_dir=out_dir, out_file=out_file
+        "referencecsvs",
+        in_file,
+        out_dir=out_dir,
+        out_file=out_file,
     )
 
 
