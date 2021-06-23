@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""TODO."""
+"""Parse a file for foreign references and store those in separate CSVs."""
 
 import csv
 import json
@@ -32,9 +32,9 @@ def _parse_ids(values: Any) -> Generator[Tuple[int, str], None, None]:
 
 
 class Command(BaseCommand):
-    """TODO."""
+    """Parse a file for foreign references and store those in separate CSVs."""
 
-    help = "TODO."
+    help = "Parse a file for foreign references and store those in separate CSVs."
 
     game_fields_foreign = {
         "artist": "Person",
