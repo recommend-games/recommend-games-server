@@ -1531,6 +1531,22 @@ def makecsvs(
 
 
 @task()
+def referencecsvs(
+    in_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_GameItem.jl"),
+    out_dir=os.path.join(SCRAPED_DATA_DIR, "scraped"),
+    out_file="bgg_{entity}.csv",
+):
+    """Parse a file for foreign references and store those in separate CSVs."""
+    LOGGER.info("Parsing <%s> for foreign references", in_file)
+    django.core.management.call_command(
+        "referencecsvs",
+        in_file,
+        out_dir=out_dir,
+        out_file=out_file,
+    )
+
+
+@task()
 def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_000):
     """Generate sitemap.xml."""
     limit = parse_int(limit) or 50_000
@@ -1562,6 +1578,7 @@ def builddb():
     gitprepare,
     mergeall,
     makecsvs,
+    referencecsvs,
     link,
     train,
     saverankings,
