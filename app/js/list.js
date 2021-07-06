@@ -291,6 +291,8 @@ rgApp.controller('ListController', function ListController(
         }
     };
 
+    $scope.includeGames = params.include;
+    $scope.excludeGames = params.exclude;
     $scope.cooperative = params.cooperative;
     $scope.gameType = params.gameType;
     $scope.category = params.category;
@@ -320,6 +322,8 @@ rgApp.controller('ListController', function ListController(
     $scope.clearFilters = function clearFilters() {
         $scope.user = null;
         $scope.likedGames = null;
+        $scope.includeGames = null;
+        $scope.excludeGames = null;
         $scope.search = null;
         $scope.count.enabled = false;
         $scope.time.enabled = false;

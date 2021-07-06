@@ -1072,8 +1072,12 @@ rgApp.factory('filterService', function filterService(
         scope = scope || {};
 
         var userList = parseList(scope.user, true),
+            include = parseIntList(scope.includeGames),
+            exclude = parseIntList(scope.excludeGames),
             result = {
                 'for': _.isEmpty(userList) ? null : userList,
+                'include': _.isEmpty(include) ? null : include,
+                'exclude': _.isEmpty(exclude) ? null : exclude,
                 'search': scope.search,
                 'cooperative': scope.cooperative,
                 'gameType': scope.gameType,
