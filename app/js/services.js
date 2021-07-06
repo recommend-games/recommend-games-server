@@ -939,6 +939,17 @@ rgApp.factory('filterService', function filterService(
         return result.value();
     }
 
+    function parseIntList(input) {
+        return _(input)
+            .split(',')
+            .map(_.trim)
+            .map(_.parseInt)
+            .reject(_.isNaN)
+            .sortBy()
+            .sortedUniq()
+            .value();
+    }
+
     function validateCountType(playerCountType) {
         var playerCountTypes = {'box': true, 'recommended': true, 'best': true};
         return playerCountTypes[playerCountType] ? playerCountType : 'recommended';
@@ -1012,6 +1023,8 @@ rgApp.factory('filterService', function filterService(
             playerCount = _.parseInt(params.playerCount) || null,
             playTime = _.parseInt(params.playTime) || null,
             playerAge = _.parseInt(params.playerAge) || null,
+            include = parseIntList(params.include),
+            exclude = parseIntList(params.exclude),
             excludeRated = booleanDefault(params.excludeRated, true, _.size(user) !== 1),
             excludeOwned = booleanDefault(params.excludeOwned, true, _.size(user) !== 1),
             excludeWishlist = booleanDefault(params.excludeWishlist, false, _.size(user) !== 1),
@@ -1021,16 +1034,12 @@ rgApp.factory('filterService', function filterService(
             yearMin = _.parseInt(params.yearMin),
             yearMax = _.parseInt(params.yearMax),
             ordering = validateOrdering(params.ordering),
-            like = _(params.like)
-                .split(',')
-                .map(_.parseInt)
-                .reject(_.isNaN)
-                .sortBy()
-                .sortedUniq()
-                .value();
+            like = parseIntList(params.like);
 
         return {
             'for': _.isEmpty(user) ? null : user,
+            'include': _.isEmpty(include) ? null : include,
+            'exclude': _.isEmpty(exclude) ? null : exclude,
             'excludeRated': excludeRated === false ? false : null,
             'excludeOwned': excludeOwned === false ? false : null,
             'excludeWishlist': excludeWishlist === true ? true : null,
@@ -1063,8 +1072,12 @@ rgApp.factory('filterService', function filterService(
         scope = scope || {};
 
         var userList = parseList(scope.user, true),
+            include = parseIntList(scope.includeGames),
+            exclude = parseIntList(scope.excludeGames),
             result = {
                 'for': _.isEmpty(userList) ? null : userList,
+                'include': _.isEmpty(include) ? null : include,
+                'exclude': _.isEmpty(exclude) ? null : exclude,
                 'search': scope.search,
                 'cooperative': scope.cooperative,
                 'gameType': scope.gameType,
@@ -1170,6 +1183,14 @@ rgApp.factory('filterService', function filterService(
             if (mainOrdering[0] !== '-') {
                 result[mainOrdering + '__isnull'] = 'False';
             }
+        }
+
+        if (params.include) {
+            result.include = params.include;
+        }
+
+        if (params.exclude) {
+            result.exclude = params.exclude;
         }
 
         if (params.search) {
