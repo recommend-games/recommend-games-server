@@ -389,7 +389,7 @@ def _make_user(name, add_data):
 
 
 class Command(BaseCommand):
-    """ Loads a file to the database """
+    """Loads a file to the database"""
 
     help = "Loads files to the database"
 

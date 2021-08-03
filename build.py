@@ -132,7 +132,7 @@ def _remove(path):
 
 @task()
 def gitprepare(repo=SCRAPED_DATA_DIR):
-    """ check Git repo is clean and up-to-date """
+    """check Git repo is clean and up-to-date"""
     LOGGER.info("Preparing Git repo <%s>...", repo)
     with safe_cd(repo):
         try:
@@ -145,7 +145,7 @@ def gitprepare(repo=SCRAPED_DATA_DIR):
 
 @task()
 def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
-    """ commit and push Git repo """
+    """commit and push Git repo"""
     paths = paths or ("COUNT.md", "rankings", "scraped", "links.json", "prefixes.txt")
     LOGGER.info("Updating paths %r in Git repo <%s>...", paths, repo)
     with safe_cd(repo):
@@ -175,7 +175,7 @@ def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
 
 @task()
 def merge(in_paths, out_path, **kwargs):
-    """ merge scraped files """
+    """merge scraped files"""
     from board_game_scraper.merge import merge_files
 
     kwargs.setdefault("log_level", "WARN")
@@ -225,13 +225,13 @@ def _merge_kwargs(
 
 @task()
 def mergebga(in_paths=None, out_path=None, full=False):
-    """ merge Board Game Atlas game data """
+    """merge Board Game Atlas game data"""
     merge(**_merge_kwargs(site="bga", in_paths=in_paths, out_path=out_path, full=full))
 
 
 @task()
 def mergebgaratings(in_paths=None, out_path=None, full=False):
-    """ merge Board Game Atlas rating data """
+    """merge Board Game Atlas rating data"""
     merge(
         **_merge_kwargs(
             site="bga",
@@ -249,13 +249,13 @@ def mergebgaratings(in_paths=None, out_path=None, full=False):
 
 @task()
 def mergebgg(in_paths=None, out_path=None, full=False):
-    """ merge BoardGameGeek game data """
+    """merge BoardGameGeek game data"""
     merge(**_merge_kwargs(site="bgg", in_paths=in_paths, out_path=out_path, full=full))
 
 
 @task()
 def mergebggusers(in_paths=None, out_path=None, full=False):
-    """ merge BoardGameGeek user data """
+    """merge BoardGameGeek user data"""
     merge(
         **_merge_kwargs(
             site="bgg",
@@ -274,7 +274,7 @@ def mergebggusers(in_paths=None, out_path=None, full=False):
 
 @task()
 def mergebggratings(in_paths=None, out_path=None, full=False):
-    """ merge BoardGameGeek rating data """
+    """merge BoardGameGeek rating data"""
     merge(
         **_merge_kwargs(
             site="bgg",
@@ -293,7 +293,7 @@ def mergebggratings(in_paths=None, out_path=None, full=False):
 
 @task()
 def mergebggrankings(in_paths=None, out_path=None, full=False, days=None):
-    """ merge BoardGameGeek ranking data """
+    """merge BoardGameGeek ranking data"""
 
     full = parse_bool(full)
     days = parse_int(days)
@@ -366,7 +366,7 @@ def mergebgghotness(in_paths=None, out_path=None, full=False, days=None):
 
 @task()
 def mergebggabstract(in_paths=None, out_path=None, full=False, days=None):
-    """ merge BoardGameGeek abstract ranking data """
+    """merge BoardGameGeek abstract ranking data"""
 
     full = parse_bool(full)
     days = parse_int(days)
@@ -404,7 +404,7 @@ def mergebggabstract(in_paths=None, out_path=None, full=False, days=None):
 
 @task()
 def mergebggchildren(in_paths=None, out_path=None, full=False, days=None):
-    """ merge BoardGameGeek children ranking data """
+    """merge BoardGameGeek children ranking data"""
 
     full = parse_bool(full)
     days = parse_int(days)
@@ -442,7 +442,7 @@ def mergebggchildren(in_paths=None, out_path=None, full=False, days=None):
 
 @task()
 def mergebggcustomizable(in_paths=None, out_path=None, full=False, days=None):
-    """ merge BoardGameGeek customizable ranking data """
+    """merge BoardGameGeek customizable ranking data"""
 
     full = parse_bool(full)
     days = parse_int(days)
@@ -480,7 +480,7 @@ def mergebggcustomizable(in_paths=None, out_path=None, full=False, days=None):
 
 @task()
 def mergebggfamily(in_paths=None, out_path=None, full=False, days=None):
-    """ merge BoardGameGeek family ranking data """
+    """merge BoardGameGeek family ranking data"""
 
     full = parse_bool(full)
     days = parse_int(days)
@@ -518,7 +518,7 @@ def mergebggfamily(in_paths=None, out_path=None, full=False, days=None):
 
 @task()
 def mergebggparty(in_paths=None, out_path=None, full=False, days=None):
-    """ merge BoardGameGeek party ranking data """
+    """merge BoardGameGeek party ranking data"""
 
     full = parse_bool(full)
     days = parse_int(days)
@@ -556,7 +556,7 @@ def mergebggparty(in_paths=None, out_path=None, full=False, days=None):
 
 @task()
 def mergebggstrategy(in_paths=None, out_path=None, full=False, days=None):
-    """ merge BoardGameGeek strategy ranking data """
+    """merge BoardGameGeek strategy ranking data"""
 
     full = parse_bool(full)
     days = parse_int(days)
@@ -594,7 +594,7 @@ def mergebggstrategy(in_paths=None, out_path=None, full=False, days=None):
 
 @task()
 def mergebggthematic(in_paths=None, out_path=None, full=False, days=None):
-    """ merge BoardGameGeek thematic ranking data """
+    """merge BoardGameGeek thematic ranking data"""
 
     full = parse_bool(full)
     days = parse_int(days)
@@ -632,7 +632,7 @@ def mergebggthematic(in_paths=None, out_path=None, full=False, days=None):
 
 @task()
 def mergebggwar(in_paths=None, out_path=None, full=False, days=None):
-    """ merge BoardGameGeek war ranking data """
+    """merge BoardGameGeek war ranking data"""
 
     full = parse_bool(full)
     days = parse_int(days)
@@ -670,7 +670,7 @@ def mergebggwar(in_paths=None, out_path=None, full=False, days=None):
 
 @task()
 def mergedbpedia(in_paths=None, out_path=None, full=False):
-    """ merge DBpedia game data """
+    """merge DBpedia game data"""
     merge(
         **_merge_kwargs(site="dbpedia", in_paths=in_paths, out_path=out_path, full=full)
     )
@@ -678,7 +678,7 @@ def mergedbpedia(in_paths=None, out_path=None, full=False):
 
 @task()
 def mergeluding(in_paths=None, out_path=None, full=False):
-    """ merge Luding.org game data """
+    """merge Luding.org game data"""
     merge(
         **_merge_kwargs(site="luding", in_paths=in_paths, out_path=out_path, full=full)
     )
@@ -686,7 +686,7 @@ def mergeluding(in_paths=None, out_path=None, full=False):
 
 @task()
 def mergespielen(in_paths=None, out_path=None, full=False):
-    """ merge Spielen.de game data """
+    """merge Spielen.de game data"""
     merge(
         **_merge_kwargs(site="spielen", in_paths=in_paths, out_path=out_path, full=full)
     )
@@ -694,7 +694,7 @@ def mergespielen(in_paths=None, out_path=None, full=False):
 
 @task()
 def mergewikidata(in_paths=None, out_path=None, full=False):
-    """ merge Wikidata game data """
+    """merge Wikidata game data"""
     merge(
         **_merge_kwargs(
             site="wikidata", in_paths=in_paths, out_path=out_path, full=full
@@ -710,7 +710,7 @@ def mergenews(
     ),
     out_path=None,
 ):
-    """ merge news articles """
+    """merge news articles"""
     merge(
         **_merge_kwargs(
             site="news",
@@ -772,7 +772,7 @@ def mergenews(
     mergebggwar,
 )
 def mergeall():
-    """ merge all sites and items """
+    """merge all sites and items"""
 
 
 @task()
@@ -784,7 +784,7 @@ def split(
     limit=300_000,
     construct=False,
 ):
-    """ split file along prefixes """
+    """split file along prefixes"""
     from board_game_scraper.prefixes import split_file
 
     _remove(out_dir)
@@ -815,7 +815,7 @@ def link(
     output=os.path.join(SCRAPED_DATA_DIR, "links.json"),
     pretty_print=True,
 ):
-    """ link items """
+    """link items"""
 
     try:
         from board_game_scraper.cluster import link_games
@@ -850,7 +850,7 @@ def labellinks(
     output=os.path.join(SCRAPED_DATA_DIR, "links.json"),
     pretty_print=True,
 ):
-    """ label new training examples and link items """
+    """label new training examples and link items"""
     link(
         gazetteer=gazetteer,
         paths=paths,
@@ -945,7 +945,7 @@ def trainbgg(
     # pylint: disable=no-member
     min_votes_max_value=BGGRecommender.default_filters.get("num_votes__gte"),
 ):
-    """ train BoardGameGeek recommender model """
+    """train BoardGameGeek recommender model"""
 
     filters = {}
 
@@ -980,7 +980,7 @@ def trainbga(
     users=None,
     max_iterations=1000,
 ):
-    """ train Board Game Atlas recommender model """
+    """train Board Game Atlas recommender model"""
     _train(
         recommender_cls=BGARecommender,
         games_file=games_file,
@@ -993,7 +993,7 @@ def trainbga(
 
 @task(trainbgg, trainbga)
 def train():
-    """ train BoardGameGeek and Board Game Atlas recommender models """
+    """train BoardGameGeek and Board Game Atlas recommender models"""
 
 
 def _save_ranking(
@@ -1099,7 +1099,7 @@ def weeklycharts(
 
 @task()
 def cleandata(src_dir=DATA_DIR, bk_dir=f"{DATA_DIR}.bk"):
-    """ clean data file """
+    """clean data file"""
     LOGGER.info(
         "Removing old backup dir <%s> (if any), moving current data dir to backup, "
         "and creating fresh data dir <%s>...",
@@ -1115,14 +1115,14 @@ def cleandata(src_dir=DATA_DIR, bk_dir=f"{DATA_DIR}.bk"):
 
 @task()
 def migrate():
-    """ database migration """
+    """database migration"""
     assert not SETTINGS.DEBUG
     django.core.management.call_command("migrate")
 
 
 @task(cleandata, migrate)
 def filldb(src_dir=SCRAPED_DATA_DIR, rec_dir=os.path.join(RECOMMENDER_DIR, ".bgg")):
-    """ fill database """
+    """fill database"""
     LOGGER.info(
         "Uploading games and other data from <%s>, and recommendations from <%s> to database...",
         src_dir,
@@ -1163,7 +1163,7 @@ def kennerspiel(
 
 @task()
 def compressdb(db_file=os.path.join(DATA_DIR, "db.sqlite3")):
-    """ compress SQLite database file """
+    """compress SQLite database file"""
     execute("sqlite3", db_file, "VACUUM;")
 
 
@@ -1173,7 +1173,7 @@ def cpdirs(
     dst_dir=os.path.join(DATA_DIR, "recommender_bgg"),
     sub_dirs=("recommender", "similarity", "clusters", "compilations"),
 ):
-    """ copy recommender files """
+    """copy recommender files"""
     sub_dirs = sub_dirs.split(",") if isinstance(sub_dirs, str) else sub_dirs
     for sub_dir in sub_dirs:
         src_path = os.path.join(src_dir, sub_dir)
@@ -1188,13 +1188,13 @@ def cpdirsbga(
     dst_dir=os.path.join(DATA_DIR, "recommender_bga"),
     sub_dirs=("recommender", "similarity"),
 ):
-    """ copy BGA recommender files """
+    """copy BGA recommender files"""
     cpdirs(src_dir, dst_dir, sub_dirs)
 
 
 @task()
 def dateflag(dst=SETTINGS.MODEL_UPDATED_FILE, date=None):
-    """ write date to file """
+    """write date to file"""
     from games.utils import serialize_date
 
     date = parse_date(date) or django.utils.timezone.now()
@@ -1571,7 +1571,7 @@ def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_00
     sitemap,
 )
 def builddb():
-    """ build a new database """
+    """build a new database"""
 
 
 @task(
@@ -1587,7 +1587,7 @@ def builddb():
     gitupdate,
 )
 def builddbfull():
-    """ merge, link, train, and build, all relevant files """
+    """merge, link, train, and build, all relevant files"""
 
 
 def _sync_data(src, dst, retries=0):
@@ -1615,23 +1615,23 @@ def _sync_data(src, dst, retries=0):
 
 @task()
 def syncdata(src=os.path.join(DATA_DIR, ""), bucket=GC_DATA_BUCKET, retries=3):
-    """ sync data with GCS """
+    """sync data with GCS"""
     _sync_data(src=src, dst=f"gs://{bucket}/", retries=parse_int(retries))
 
 
 @task(builddb, syncdata)
 def releasedb():
-    """ build and release database """
+    """build and release database"""
 
 
 @task(builddbfull, syncdata)
 def releasedbfull():
-    """ merge, link, train, build, and release database """
+    """merge, link, train, build, and release database"""
 
 
 @task()
 def cleanstatic(base_dir=BASE_DIR, sub_dirs=None):
-    """ clean static files """
+    """clean static files"""
     sub_dirs = sub_dirs or (".temp", "static")
     for sub_dir in sub_dirs:
         target = os.path.join(base_dir, sub_dir)
@@ -1641,7 +1641,7 @@ def cleanstatic(base_dir=BASE_DIR, sub_dirs=None):
 
 @task()
 def minify(src=os.path.join(BASE_DIR, "app"), dst=os.path.join(BASE_DIR, ".temp")):
-    """ copy front-end files and minify HTML, JavaScript, and CSS """
+    """copy front-end files and minify HTML, JavaScript, and CSS"""
     LOGGER.info("Copying and minifying files from <%s> to <%s>...", src, dst)
     django.core.management.call_command(
         "minify", src, dst, delete=True, exclude_dot=True
@@ -1668,7 +1668,7 @@ def collectstatic(delete=True):
 
 @task(collectstatic)
 def buildserver(images=None, tags=None):
-    """ build Docker image """
+    """build Docker image"""
 
     images = images or ("rg-server", f"gcr.io/{GC_PROJECT}/rg-server")
     version = _server_version()
@@ -1697,7 +1697,7 @@ def buildserver(images=None, tags=None):
 
 @task()
 def pushserver(image=None, version=None):
-    """ push Docker image to remote repo """
+    """push Docker image to remote repo"""
     image = image or f"gcr.io/{GC_PROJECT}/rg-server"
     version = version or _server_version()
     LOGGER.info("Pushing Docker image <%s:%s> to repo...", image, version)
@@ -1708,7 +1708,7 @@ def pushserver(image=None, version=None):
 def releaseserver(
     app_file=os.path.join(BASE_DIR, "app.yaml"), image=None, version=None
 ):
-    """ build, push, and deploy new server version """
+    """build, push, and deploy new server version"""
     image = image or f"gcr.io/{GC_PROJECT}/rg-server"
     version = version or _server_version()
     date = django.utils.timezone.now().strftime("%Y%m%d-%H%M%S")
@@ -1731,27 +1731,27 @@ def releaseserver(
 
 @task(builddb, buildserver)
 def build():
-    """ build database and server """
+    """build database and server"""
 
 
 @task(builddbfull, buildserver)
 def buildfull():
-    """ merge, link, train, and build database and server """
+    """merge, link, train, and build database and server"""
 
 
 @task(releasedb, releaseserver)
 def release():
-    """ release database and server """
+    """release database and server"""
 
 
 @task(releasedbfull, releaseserver)
 def releasefull():
-    """ merge, link, train, build, and release database and server """
+    """merge, link, train, build, and release database and server"""
 
 
 @task()
 def lintshell(base_dir=BASE_DIR):
-    """ lint Shell scripts """
+    """lint Shell scripts"""
     execute("find", base_dir, "-name", "*.sh", "-ls", "-exec", "shellcheck", "{}", ";")
 
 
@@ -1765,7 +1765,7 @@ def lintdocker(base_dir=BASE_DIR):
 
 @task()
 def lintpy(*modules):
-    """ lint Python files """
+    """lint Python files"""
     modules = modules or ("games", "rg", "build.py", "manage.py")
     with safe_cd(BASE_DIR):
         execute("black", "--diff", "--exclude", "/migrations/", *modules)
@@ -1774,7 +1774,7 @@ def lintpy(*modules):
 
 @task()
 def linthtml():
-    """ lint HTML files """
+    """lint HTML files"""
     with safe_cd(os.path.join(BASE_DIR, "app")):
         execute("htmlhint", "--ignore", "google*.html,yandex*.html")
         # execute('htmllint')
@@ -1782,7 +1782,7 @@ def linthtml():
 
 @task()
 def lintjs():
-    """ lint JavaScript files """
+    """lint JavaScript files"""
     with safe_cd(os.path.join(BASE_DIR, "app")):
         execute("jslint", "js/*.js")
         execute("jshint", "js")
@@ -1790,14 +1790,14 @@ def lintjs():
 
 @task()
 def lintcss():
-    """ lint JavaScript files """
+    """lint JavaScript files"""
     with safe_cd(os.path.join(BASE_DIR, "app")):
         execute("csslint", "app.css")
 
 
 @task(lintshell, lintdocker, lintpy, linthtml, lintjs, lintcss)
 def lint():
-    """ lint everything """
+    """lint everything"""
 
 
 __DEFAULT__ = lint

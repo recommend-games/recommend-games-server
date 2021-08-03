@@ -19,7 +19,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    """ Stress test """
+    """Stress test"""
 
     help = "Stress test"
 

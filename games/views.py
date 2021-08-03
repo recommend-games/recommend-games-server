@@ -73,7 +73,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class PermissionsModelViewSet(ModelViewSet):
-    """ add permissions based on settings """
+    """add permissions based on settings"""
 
     def get_permissions(self):
         for permission in super().get_permissions():
@@ -89,12 +89,12 @@ class PermissionsModelViewSet(ModelViewSet):
 
 
 class GamesActionViewSet(PermissionsModelViewSet):
-    """ add a games action """
+    """add a games action"""
 
     # pylint: disable=unused-argument,invalid-name
     @action(detail=True)
     def games(self, request, pk=None):
-        """ find all games """
+        """find all games"""
 
         obj = self.get_object()
         queryset = self.filter_queryset(obj.games.all())
@@ -254,10 +254,10 @@ def _add_games(data, bgg_ids=None, key="game"):
 
 
 class GameFilter(FilterSet):
-    """ game filter """
+    """game filter"""
 
     class Meta:
-        """ meta """
+        """meta"""
 
         model = Game
         fields = {
@@ -299,7 +299,7 @@ class GameFilter(FilterSet):
 
 
 class GameViewSet(PermissionsModelViewSet):
-    """ game view set """
+    """game view set"""
 
     # pylint: disable=no-member
     queryset = Game.objects.all()
@@ -486,7 +486,7 @@ class GameViewSet(PermissionsModelViewSet):
         pagination_class=BGGParamsPagination,
     )
     def recommend(self, request):
-        """ recommend games """
+        """recommend games"""
 
         site = request.query_params.get("site")
 
@@ -601,7 +601,7 @@ class GameViewSet(PermissionsModelViewSet):
         pagination_class=BGAParamsPagination,
     )
     def recommend_bga(self, request):
-        """ recommend games with Board Game Atlas data """
+        """recommend games with Board Game Atlas data"""
 
         path = getattr(settings, "BGA_RECOMMENDER_PATH", None)
         recommender = load_recommender(path, "bga")
@@ -638,7 +638,7 @@ class GameViewSet(PermissionsModelViewSet):
     # pylint: disable=invalid-name
     @action(detail=True)
     def similar(self, request, pk=None):
-        """ find games similar to this game """
+        """find games similar to this game"""
 
         site = request.query_params.get("site")
 
@@ -683,7 +683,7 @@ class GameViewSet(PermissionsModelViewSet):
     # pylint: disable=unused-argument,invalid-name
     @action(detail=True)
     def similar_bga(self, request, pk=None):
-        """ find games similar to this game with BGA data """
+        """find games similar to this game with BGA data"""
 
         path = getattr(settings, "BGA_RECOMMENDER_PATH", None)
         recommender = load_recommender(path, "bga")
@@ -789,7 +789,7 @@ class GameViewSet(PermissionsModelViewSet):
 
     @action(detail=False)
     def stats(self, request):
-        """ get games stats """
+        """get games stats"""
 
         result = {"updated_at": model_updated_at()}
 
@@ -832,7 +832,7 @@ class GameViewSet(PermissionsModelViewSet):
 
 
 class PersonViewSet(PermissionsModelViewSet):
-    """ person view set """
+    """person view set"""
 
     # pylint: disable=no-member
     queryset = Person.objects.all()
@@ -841,7 +841,7 @@ class PersonViewSet(PermissionsModelViewSet):
     # pylint: disable=unused-argument,invalid-name
     @action(detail=True)
     def games(self, request, pk=None):
-        """ find all games for a person """
+        """find all games for a person"""
 
         person = self.get_object()
         role = request.query_params.get("role")
@@ -864,7 +864,7 @@ class PersonViewSet(PermissionsModelViewSet):
 
 
 class GameTypeViewSet(GamesActionViewSet):
-    """ game type view set """
+    """game type view set"""
 
     # pylint: disable=no-member
     queryset = (
@@ -876,7 +876,7 @@ class GameTypeViewSet(GamesActionViewSet):
 
 
 class CategoryViewSet(GamesActionViewSet):
-    """ category view set """
+    """category view set"""
 
     # pylint: disable=no-member
     queryset = (
@@ -888,7 +888,7 @@ class CategoryViewSet(GamesActionViewSet):
 
 
 class MechanicViewSet(GamesActionViewSet):
-    """ mechanic view set """
+    """mechanic view set"""
 
     # pylint: disable=no-member
     queryset = (
@@ -900,7 +900,7 @@ class MechanicViewSet(GamesActionViewSet):
 
 
 class UserViewSet(PermissionsModelViewSet):
-    """ user view set """
+    """user view set"""
 
     # pylint: disable=no-member
     queryset = User.objects.all()
@@ -912,7 +912,7 @@ class UserViewSet(PermissionsModelViewSet):
     # pylint: disable=unused-argument,invalid-name
     @action(detail=True)
     def stats(self, request, pk=None):
-        """ get user stats """
+        """get user stats"""
         user = self.get_object()
 
         data = {"user": user.name, "updated_at": user.updated_at}
@@ -939,7 +939,7 @@ class UserViewSet(PermissionsModelViewSet):
 
 
 class CollectionViewSet(ModelViewSet):
-    """ user view set """
+    """user view set"""
 
     # pylint: disable=no-member
     queryset = Collection.objects.all()

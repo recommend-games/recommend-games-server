@@ -21,7 +21,7 @@ VERSION_REGEX = re.compile(r"^\D*(.+)$")
 
 
 def format_from_path(path):
-    """ get file extension """
+    """get file extension"""
     try:
         _, ext = os.path.splitext(path)
         return ext.lower()[1:] if ext else None
@@ -38,7 +38,7 @@ def serialize_date(date, tzinfo=None):
 
 @lru_cache(maxsize=8)
 def load_recommender(path, site="bgg"):
-    """ load recommender from given path """
+    """load recommender from given path"""
     if not path:
         return None
     try:
@@ -56,7 +56,7 @@ def load_recommender(path, site="bgg"):
 
 @lru_cache(maxsize=8)
 def pubsub_client():
-    """ Google Cloud PubSub client """
+    """Google Cloud PubSub client"""
     try:
         from google.cloud import pubsub
 
@@ -73,7 +73,7 @@ def pubsub_push(
     encoding="utf-8",
     **kwargs,
 ):
-    """ publish message """
+    """publish message"""
 
     if not project or not topic:
         return None
@@ -101,7 +101,7 @@ def pubsub_push(
 
 @lru_cache(maxsize=8)
 def model_updated_at(file_path=settings.MODEL_UPDATED_FILE):
-    """ latest model update """
+    """latest model update"""
     try:
         with open(file_path) as file_obj:
             updated_at = file_obj.read()
@@ -250,7 +250,7 @@ def jl_to_csv(in_path, out_path, columns=None, joiner=","):
 
 
 class Timer:
-    """ log execution time: with Timer('message'): do_something() """
+    """log execution time: with Timer('message'): do_something()"""
 
     def __init__(self, message, logger=None):
         self.message = f'"{message}" execution time: %.1f ms'

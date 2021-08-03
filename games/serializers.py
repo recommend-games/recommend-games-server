@@ -25,7 +25,7 @@ from .models import (
 
 
 class GameSerializer(ModelSerializer):
-    """ game serializer """
+    """game serializer"""
 
     designer_name = StringRelatedField(source="designer", many=True, read_only=True)
     artist_name = StringRelatedField(source="artist", many=True, read_only=True)
@@ -49,7 +49,7 @@ class GameSerializer(ModelSerializer):
     bga_id = ListField(child=CharField(), required=False)
 
     class Meta:
-        """ meta """
+        """meta"""
 
         model = Game
         fields = "__all__"
@@ -78,70 +78,70 @@ class RankingFatSerializer(ModelSerializer):
 
 
 class PersonSerializer(ModelSerializer):
-    """ person serializer """
+    """person serializer"""
 
     class Meta:
-        """ meta """
+        """meta"""
 
         model = Person
         fields = "__all__"
 
 
 class GameTypeSerializer(ModelSerializer):
-    """ game type serializer """
+    """game type serializer"""
 
     count = IntegerField(read_only=True)
 
     class Meta:
-        """ meta """
+        """meta"""
 
         model = GameType
         fields = "__all__"
 
 
 class CategorySerializer(ModelSerializer):
-    """ category serializer """
+    """category serializer"""
 
     count = IntegerField(read_only=True)
 
     class Meta:
-        """ meta """
+        """meta"""
 
         model = Category
         fields = "__all__"
 
 
 class MechanicSerializer(ModelSerializer):
-    """ mechanic serializer """
+    """mechanic serializer"""
 
     count = IntegerField(read_only=True)
 
     class Meta:
-        """ meta """
+        """meta"""
 
         model = Mechanic
         fields = "__all__"
 
 
 class CollectionSerializer(ModelSerializer):
-    """ collection serializer """
+    """collection serializer"""
 
     game_name = StringRelatedField(source="game", read_only=True)
 
     class Meta:
-        """ meta """
+        """meta"""
 
         model = Collection
         fields = "__all__"
 
 
 class UserSerializer(ModelSerializer):
-    """ user serializer """
+    """user serializer"""
 
     games = CollectionSerializer(source="collection_set", many=True, read_only=True)
 
     class Meta:
-        """ meta """
+        """meta"""
 
         model = User
         fields = "__all__"

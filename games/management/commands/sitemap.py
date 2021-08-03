@@ -64,7 +64,7 @@ def _url_elements(url, ids, lastmod=None):
 
 
 def sitemap(url, limit=None):
-    """ return sitemap XML element """
+    """return sitemap XML element"""
 
     limit = limit or 50000
     # pylint: disable=no-member
@@ -74,7 +74,7 @@ def sitemap(url, limit=None):
 
 
 class Command(BaseCommand):
-    """ Creates a sitemap """
+    """Creates a sitemap"""
 
     help = "Creates a sitemap"
 
