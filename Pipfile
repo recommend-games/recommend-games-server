@@ -13,12 +13,11 @@ django-extensions = "*"
 django-filter = "*"
 django-rest-framework-proxy = {ref = "django3", git = "https://github.com/MarkusShepherd/django-rest-framework-proxy.git"}
 djangorestframework = "*"
-google-cloud-pubsub = "<2.6.0" # grpcio version compatibility with tensorflow
+google-cloud-pubsub = "*"
 gunicorn = "*"
 markdown = "*"
 pandas = "*"
 pytility = {extras = ["dates"], version = "*"}
-tensorflow = "<2.5.0"
 turicreate = "*"
 whitenoise = {extras = ["brotli"], version = "*"}
 
