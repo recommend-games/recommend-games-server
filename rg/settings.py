@@ -4,6 +4,8 @@
 
 import os
 
+from pytility import parse_bool
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
@@ -18,7 +20,7 @@ SECRET_KEY = os.getenv(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.getenv("DEBUG"))
+DEBUG = parse_bool(os.getenv("DEBUG"))
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development" if DEBUG else "production")
 READ_ONLY = ENVIRONMENT == "production"
 
@@ -82,7 +84,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "rg.wsgi.application"
 
-SECURE_SSL_REDIRECT = bool(os.getenv("SECURE_SSL_REDIRECT"))
+SECURE_SSL_REDIRECT = parse_bool(os.getenv("SECURE_SSL_REDIRECT"))
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Database
