@@ -13,16 +13,17 @@ django-extensions = "*"
 django-filter = "*"
 django-rest-framework-proxy = {ref = "django3", git = "https://github.com/MarkusShepherd/django-rest-framework-proxy.git"}
 djangorestframework = "*"
-google-cloud-pubsub = "*"
+google-cloud-pubsub = "<2.6.0" # grpcio version compatibility with tensorflow
 gunicorn = "*"
 markdown = "*"
 pandas = "*"
 pytility = {extras = ["dates"], version = "*"}
+tensorflow = "<2.5.0"
 turicreate = "*"
 whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
-black = "==20.8b1" # no released version, so need to pin exact pre-release version
+black = "==21.7b0" # no released version, so need to pin exact pre-release version
 board-game-scraper = {extras = ["cloud"], version = ">=2.11.3"}
 board-game-utils = "*"
 csvkit = "*"
