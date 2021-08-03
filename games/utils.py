@@ -208,7 +208,9 @@ def _process_value(value, joiner=","):
         return int(value)
     if isinstance(value, (list, tuple)):
         return joiner.join(
-            str(v).split(":")[-1] for v in value if v is not None and v != ""
+            str(v).rsplit(":", maxsplit=1)[-1]
+            for v in value
+            if v is not None and v != ""
         )
     return value
 
