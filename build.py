@@ -226,12 +226,22 @@ def _merge_kwargs(
 @task()
 def mergebga(in_paths=None, out_path=None, full=False):
     """ merge Board Game Atlas game data """
-    merge(**_merge_kwargs(site="bga", in_paths=in_paths, out_path=out_path, full=full))
+    latest_min = None  # django.utils.timezone.now() - timedelta(days=days)
+    merge(
+        **_merge_kwargs(
+            site="bga",
+            in_paths=in_paths,
+            out_path=out_path,
+            full=full,
+            latest_min=latest_min,
+        )
+    )
 
 
 @task()
 def mergebgaratings(in_paths=None, out_path=None, full=False):
     """ merge Board Game Atlas rating data """
+    latest_min = None  # django.utils.timezone.now() - timedelta(days=days)
     merge(
         **_merge_kwargs(
             site="bga",
@@ -239,6 +249,7 @@ def mergebgaratings(in_paths=None, out_path=None, full=False):
             in_paths=in_paths,
             out_path=out_path,
             full=full,
+            latest_min=latest_min,
             keys=("bga_user_id", "bga_id"),
             fieldnames_exclude=("bgg_user_play_count",)
             if parse_bool(full)
