@@ -6,7 +6,7 @@ from rest_framework.permissions import AllowAny, BasePermission, SAFE_METHODS
 
 
 class ReadOnly(BasePermission):
-    """ read-only permission """
+    """read-only permission"""
 
     message = "You cannot write this resource."
 

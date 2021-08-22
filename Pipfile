@@ -22,7 +22,7 @@ turicreate = "*"
 whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
-black = "==20.8b1" # no released version, so need to pin exact pre-release version
+black = "==21.7b0" # no released version, so need to pin exact pre-release version
 board-game-scraper = {extras = ["cloud"], version = ">=2.11.3"}
 board-game-utils = "*"
 csvkit = "*"

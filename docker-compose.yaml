@@ -1,11 +1,11 @@
-version: '3.8'
+version: '3.9'
 
 services:
     web:
         image: 'gcr.io/${GC_PROJECT}/rg-server:latest'
         container_name: rg
         environment:
-            - DEBUG=
+            - DEBUG=0
             - PORT=8080
             - BOTO_CONFIG=/app/.boto
         ports:

@@ -66,7 +66,7 @@ def _walk_files(path, exclude_files=None):
 
 
 def minify(src, dst, exclude_files=None, file_processors=None):
-    """ copy file from src to dst and minify web files along the way """
+    """copy file from src to dst and minify web files along the way"""
 
     LOGGER.info("copying files in <%s> to <%s>", src, dst)
 
@@ -96,7 +96,7 @@ def minify(src, dst, exclude_files=None, file_processors=None):
 
 
 class Command(BaseCommand):
-    """ Minify static files """
+    """Minify static files"""
 
     help = "Minify static files"
 
