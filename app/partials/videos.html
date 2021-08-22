@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<section xmlns="http://www.w3.org/1999/xhtml"
+		id="game-videos">
+	<h1>
+		<span ng-if="game.name_short"
+				data-toggle="tooltip"
+				title="{{ game.name }}">
+			{{ game.name_short }}
+		</span>
+		<span ng-if="!game.name_short">{{ game.name }}</span>
+		<small ng-if="game.year || game.designer_display"
+				class="text-secondary">
+			<span ng-if="game.designer_display">by {{ game.designer_display }}</span>
+			<span ng-if="game.year">({{ game.year }})</span>
+		</small>
+	</h1>
+
+	<iframe ng-repeat="youtubeUrl in youtubeUrls"
+		width="560"
+		height="315"
+		ng-src="{{ youtubeUrl }}"
+		title="YouTube video player"
+		frameborder="0"
+		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+		allowfullscreen="allowfullscreen"></iframe>
+
+	<disqus ng-if="disqusId &amp;&amp; disqusUrl"
+		identifier="disqusId"
+		url="disqusUrl"></disqus>
+</section>
