@@ -8,6 +8,7 @@ python_version = "3.7"
 
 [packages]
 board-game-recommender = "*"
+decorator = "*"
 django = ">=3.1.2"
 django-extensions = "*"
 django-filter = "*"
@@ -17,6 +18,7 @@ google-cloud-pubsub = "*"
 gunicorn = "*"
 markdown = "*"
 pandas = "*"
+prettytable = "*"
 pytility = {extras = ["dates"], version = "*"}
 turicreate = "*"
 whitenoise = {extras = ["brotli"], version = "*"}
