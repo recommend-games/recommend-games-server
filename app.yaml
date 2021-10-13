@@ -15,9 +15,9 @@ env_variables:
     GOOGLE_APPLICATION_CREDENTIALS: /app/gs.json
     SECRET_KEY: aQJ7$HcUEMGz9ZbFYanS23X$FpuReChW97E8Qsx&wfhyJyZtWa
     SECURE_SSL_REDIRECT: ''
-    GC_PROJECT: recommendgames
-    GC_DATA_BUCKET: recommendgames-data
-    PUBSUB_QUEUE_PROJECT: recommendgames
+    GC_PROJECT: recommendedgames
+    GC_DATA_BUCKET: recommendedgames-data
+    PUBSUB_QUEUE_PROJECT: recommendedgames
     PUBSUB_QUEUE_TOPIC: users
 readiness_check:
     app_start_timeout_sec: 1800
