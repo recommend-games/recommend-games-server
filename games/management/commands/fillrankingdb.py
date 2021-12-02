@@ -180,6 +180,7 @@ class Command(BaseCommand):
 
     ranking_types = {
         Ranking.BGG: ("bgg", "last", None),
+        Ranking.RECOMMEND_GAMES: ("r_g", "mean", None),
         Ranking.FACTOR: ("factor", "mean", None),
         Ranking.SIMILARITY: ("similarity", "mean", None),
         Ranking.CHARTS: ("charts", "all", datetime(2016, 1, 1, tzinfo=timezone.utc)),
