@@ -1232,7 +1232,7 @@ def filldb(src_dir=SCRAPED_DATA_DIR, rec_dir=os.path.join(RECOMMENDER_DIR, ".bgg
         collection_paths=[os.path.join(srp_dir, "bgg_RatingItem.jl")],
         user_paths=[os.path.join(srp_dir, "bgg_UserItem.jl")],
         in_format="jl",
-        batch=100000,
+        batch=100_000,
         recommender=rec_dir,
         links=os.path.join(src_dir, "links.json"),
     )

@@ -55,6 +55,7 @@ def _rating_data(
         return {}
 
     count = -1
+    # TODO if after certain date, use R.G ranking instead (#366)
     recommendations = recommender.recommend(
         star_percentiles=getattr(settings, "STAR_PERCENTILES", None)
     )
