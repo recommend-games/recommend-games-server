@@ -195,7 +195,12 @@ def merge(in_paths, out_path, **kwargs):
 
 # TODO use merge_config from board-game-scraper (#328)
 def _merge_kwargs(
-    site, item="GameItem", in_paths=None, out_path=None, full=False, **kwargs
+    site,
+    item="GameItem",
+    in_paths=None,
+    out_path=None,
+    full=False,
+    **kwargs,
 ):
     kwargs["in_paths"] = in_paths or os.path.join(SCRAPER_DIR, "feeds", site, item, "*")
     kwargs.setdefault("keys", f"{site}_id")
@@ -907,7 +912,11 @@ def _train(
 
 
 def _min_votes_from_date(
-    first_date, second_date, seconds_per_step, max_value, min_value=1
+    first_date,
+    second_date,
+    seconds_per_step,
+    max_value,
+    min_value=1,
 ):
     first_date = parse_date(first_date, tzinfo=timezone.utc)
     second_date = (
@@ -1008,7 +1017,10 @@ def train():
 
 
 def _save_ranking(
-    recommender, dst_dir, file_name="%Y%m%d-%H%M%S.csv", similarity_model=False
+    recommender,
+    dst_dir,
+    file_name="%Y%m%d-%H%M%S.csv",
+    similarity_model=False,
 ):
     from games.utils import save_recommender_ranking
 
@@ -1154,7 +1166,9 @@ def filldb(src_dir=SCRAPED_DATA_DIR, rec_dir=os.path.join(RECOMMENDER_DIR, ".bgg
 
 @task()
 def kennerspiel(
-    model_path=Path(MODELS_DIR) / "kennerspiel.joblib", batch_size=10_000, dry_run=False
+    model_path=Path(MODELS_DIR) / "kennerspiel.joblib",
+    batch_size=10_000,
+    dry_run=False,
 ):
     """Calculate Kennerspiel scores and add them to the database."""
 
@@ -1217,7 +1231,7 @@ def dateflag(dst=SETTINGS.MODEL_UPDATED_FILE, date=None):
 
 @task()
 def bggranking(
-    dst=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg", "%Y%m%d-%H%M%S.csv")
+    dst=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg", "%Y%m%d-%H%M%S.csv"),
 ):
     """Saves a snapshot of the BGG rankings."""
     from games.utils import model_updated_at
@@ -1717,7 +1731,9 @@ def pushserver(image=None, version=None):
 
 @task(buildserver, pushserver)
 def releaseserver(
-    app_file=os.path.join(BASE_DIR, "app.yaml"), image=None, version=None
+    app_file=os.path.join(BASE_DIR, "app.yaml"),
+    image=None,
+    version=None,
 ):
     """build, push, and deploy new server version"""
     image = image or f"gcr.io/{GC_PROJECT}/rg-server"
