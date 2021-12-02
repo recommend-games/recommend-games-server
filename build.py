@@ -1040,45 +1040,84 @@ def _save_rg_ranking(
     min_ratings,
     dst_dir,
     file_name="%Y%m%d-%H%M%S.csv",
-    similarity_model=False,
 ):
     from board_game_recommender.rankings import calculate_rankings
 
-    file_name = django.utils.timezone.now().strftime(file_name)
-    dst_path = Path(dst_dir).resolve() / file_name
+    dst_dir = Path(dst_dir).resolve()
+    dst_path = dst_dir / django.utils.timezone.now().strftime(file_name)
+    path_ratings = Path(path_ratings).resolve()
+
+    LOGGER.info(
+        "Calculate R.G rankings from model <%s> and ratings from <%s>",
+        recommender,
+        path_ratings,
+    )
+    LOGGER.info(
+        "Using top %d games and %d min ratings, saving results to <%s>…",
+        top,
+        min_ratings,
+        dst_path,
+    )
 
     rankings = calculate_rankings(
         recommender=recommender,
-        path_ratings=path_ratings,
+        path_ratings=str(path_ratings),
         top=top,
         min_ratings=min_ratings,
     )
+
+    LOGGER.info("Calculated R.G rankings for %d games", len(rankings))
+
+    _remove(dst_path)
+    dst_dir.mkdir(parents=True, exist_ok=True)
+
+    # TODO select required columns in correct order, maybe rename
+    rankings.export_csv(str(dst_path))
 
 
 @task()
 def savebggrankings(
     recommender_path=os.path.join(RECOMMENDER_DIR, ".bgg"),
+    ratings_path=Path(SCRAPED_DATA_DIR).resolve() / "scraped" / "bgg_RatingItem.jl",
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg"),
     file_name="%Y%m%d-%H%M%S.csv",
+    top_k_games=100,
+    min_ratings=10,
 ):
     """Take a snapshot of the BoardGameGeek rankings."""
     from games.utils import load_recommender
 
+    recommender_path = Path(recommender_path).resolve()
+    ratings_path = Path(ratings_path).resolve()
+    dst_dir = Path(dst_dir).resolve()
+    top_k_games = parse_int(top_k_games) or 100
+    min_ratings = parse_int(min_ratings) or 10
+
     LOGGER.info("Loading BoardGameGeek recommender from <%s>...", recommender_path)
     recommender = load_recommender(recommender_path, site="bgg")
+
     _save_ranking(
         recommender=recommender,
-        dst_dir=os.path.join(dst_dir, "factor"),
+        dst_dir=dst_dir / "factor",
         file_name=file_name,
         similarity_model=False,
     )
+
     _save_ranking(
         recommender=recommender,
-        dst_dir=os.path.join(dst_dir, "similarity"),
+        dst_dir=dst_dir / "similarity",
         file_name=file_name,
         similarity_model=True,
     )
-    # path_ratings = Path(SCRAPED_DATA_DIR) / "scraped" / "bgg_RatingItem.jl"
+
+    _save_rg_ranking(
+        recommender=recommender,
+        path_ratings=ratings_path,
+        top=top_k_games,
+        min_ratings=min_ratings,
+        dst_dir=dst_dir / "r_g",
+        file_name=file_name,
+    )
 
 
 @task()
