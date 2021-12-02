@@ -1071,7 +1071,18 @@ def _save_rg_ranking(
     _remove(dst_path)
     dst_dir.mkdir(parents=True, exist_ok=True)
 
-    # TODO select required columns in correct order, maybe rename
+    rankings.rename({"rank": "rank_raw", "score": "score_raw"}, inplace=True)
+    rankings.rename({"rank_weighted": "rank", "score_weighted": "score"}, inplace=True)
+    rankings = rankings[
+        "rank",
+        "bgg_id",
+        "score",
+        "rank_raw",
+        "score_raw",
+        "avg_rating",
+        "num_votes",
+    ]
+
     rankings.export_csv(str(dst_path))
 
 
