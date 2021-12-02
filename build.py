@@ -1082,6 +1082,7 @@ def _save_rg_ranking(
         "avg_rating",
         "num_votes",
     ]
+    rankings = rankings.sort("rank")
 
     rankings.export_csv(str(dst_path))
 
