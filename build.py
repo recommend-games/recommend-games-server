@@ -1033,6 +1033,28 @@ def _save_ranking(
     save_recommender_ranking(recommender, dst_path, similarity_model)
 
 
+def _save_rg_ranking(
+    recommender,
+    path_ratings,
+    top,
+    min_ratings,
+    dst_dir,
+    file_name="%Y%m%d-%H%M%S.csv",
+    similarity_model=False,
+):
+    from board_game_recommender.rankings import calculate_rankings
+
+    file_name = django.utils.timezone.now().strftime(file_name)
+    dst_path = Path(dst_dir).resolve() / file_name
+
+    rankings = calculate_rankings(
+        recommender=recommender,
+        path_ratings=path_ratings,
+        top=top,
+        min_ratings=min_ratings,
+    )
+
+
 @task()
 def savebggrankings(
     recommender_path=os.path.join(RECOMMENDER_DIR, ".bgg"),
@@ -1056,6 +1078,7 @@ def savebggrankings(
         file_name=file_name,
         similarity_model=True,
     )
+    # path_ratings = Path(SCRAPED_DATA_DIR) / "scraped" / "bgg_RatingItem.jl"
 
 
 @task()
