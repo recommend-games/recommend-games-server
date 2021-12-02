@@ -195,7 +195,12 @@ def merge(in_paths, out_path, **kwargs):
 
 # TODO use merge_config from board-game-scraper (#328)
 def _merge_kwargs(
-    site, item="GameItem", in_paths=None, out_path=None, full=False, **kwargs
+    site,
+    item="GameItem",
+    in_paths=None,
+    out_path=None,
+    full=False,
+    **kwargs,
 ):
     kwargs["in_paths"] = in_paths or os.path.join(SCRAPER_DIR, "feeds", site, item, "*")
     kwargs.setdefault("keys", f"{site}_id")
@@ -907,7 +912,11 @@ def _train(
 
 
 def _min_votes_from_date(
-    first_date, second_date, seconds_per_step, max_value, min_value=1
+    first_date,
+    second_date,
+    seconds_per_step,
+    max_value,
+    min_value=1,
 ):
     first_date = parse_date(first_date, tzinfo=timezone.utc)
     second_date = (
@@ -1008,7 +1017,10 @@ def train():
 
 
 def _save_ranking(
-    recommender, dst_dir, file_name="%Y%m%d-%H%M%S.csv", similarity_model=False
+    recommender,
+    dst_dir,
+    file_name="%Y%m%d-%H%M%S.csv",
+    similarity_model=False,
 ):
     from games.utils import save_recommender_ranking
 
@@ -1021,28 +1033,102 @@ def _save_ranking(
     save_recommender_ranking(recommender, dst_path, similarity_model)
 
 
+def _save_rg_ranking(
+    recommender,
+    path_ratings,
+    top,
+    min_ratings,
+    dst_dir,
+    file_name="%Y%m%d-%H%M%S.csv",
+):
+    from board_game_recommender.rankings import calculate_rankings
+
+    dst_dir = Path(dst_dir).resolve()
+    dst_path = dst_dir / django.utils.timezone.now().strftime(file_name)
+    path_ratings = Path(path_ratings).resolve()
+
+    LOGGER.info(
+        "Calculate R.G rankings from model <%s> and ratings from <%s>",
+        recommender,
+        path_ratings,
+    )
+    LOGGER.info(
+        "Using top %d games and %d min ratings, saving results to <%s>…",
+        top,
+        min_ratings,
+        dst_path,
+    )
+
+    rankings = calculate_rankings(
+        recommender=recommender,
+        path_ratings=str(path_ratings),
+        top=top,
+        min_ratings=min_ratings,
+    )
+
+    LOGGER.info("Calculated R.G rankings for %d games", len(rankings))
+
+    _remove(dst_path)
+    dst_dir.mkdir(parents=True, exist_ok=True)
+
+    rankings.rename({"rank": "rank_raw", "score": "score_raw"}, inplace=True)
+    rankings.rename({"rank_weighted": "rank", "score_weighted": "score"}, inplace=True)
+    rankings = rankings[
+        "rank",
+        "bgg_id",
+        "score",
+        "rank_raw",
+        "score_raw",
+        "avg_rating",
+        "num_votes",
+    ]
+    rankings = rankings.sort("rank")
+
+    rankings.export_csv(str(dst_path))
+
+
 @task()
 def savebggrankings(
     recommender_path=os.path.join(RECOMMENDER_DIR, ".bgg"),
+    ratings_path=Path(SCRAPED_DATA_DIR).resolve() / "scraped" / "bgg_RatingItem.jl",
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg"),
     file_name="%Y%m%d-%H%M%S.csv",
+    top_k_games=100,
+    min_ratings=10,
 ):
     """Take a snapshot of the BoardGameGeek rankings."""
     from games.utils import load_recommender
 
+    recommender_path = Path(recommender_path).resolve()
+    ratings_path = Path(ratings_path).resolve()
+    dst_dir = Path(dst_dir).resolve()
+    top_k_games = parse_int(top_k_games) or 100
+    min_ratings = parse_int(min_ratings) or 10
+
     LOGGER.info("Loading BoardGameGeek recommender from <%s>...", recommender_path)
     recommender = load_recommender(recommender_path, site="bgg")
+
     _save_ranking(
         recommender=recommender,
-        dst_dir=os.path.join(dst_dir, "factor"),
+        dst_dir=dst_dir / "factor",
         file_name=file_name,
         similarity_model=False,
     )
+
     _save_ranking(
         recommender=recommender,
-        dst_dir=os.path.join(dst_dir, "similarity"),
+        dst_dir=dst_dir / "similarity",
         file_name=file_name,
         similarity_model=True,
+    )
+
+    _save_rg_ranking(
+        recommender=recommender,
+        path_ratings=ratings_path,
+        top=top_k_games,
+        min_ratings=min_ratings,
+        dst_dir=dst_dir / "r_g",
+        file_name=file_name,
     )
 
 
@@ -1154,7 +1240,9 @@ def filldb(src_dir=SCRAPED_DATA_DIR, rec_dir=os.path.join(RECOMMENDER_DIR, ".bgg
 
 @task()
 def kennerspiel(
-    model_path=Path(MODELS_DIR) / "kennerspiel.joblib", batch_size=10_000, dry_run=False
+    model_path=Path(MODELS_DIR) / "kennerspiel.joblib",
+    batch_size=10_000,
+    dry_run=False,
 ):
     """Calculate Kennerspiel scores and add them to the database."""
 
@@ -1217,7 +1305,7 @@ def dateflag(dst=SETTINGS.MODEL_UPDATED_FILE, date=None):
 
 @task()
 def bggranking(
-    dst=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg", "%Y%m%d-%H%M%S.csv")
+    dst=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg", "%Y%m%d-%H%M%S.csv"),
 ):
     """Saves a snapshot of the BGG rankings."""
     from games.utils import model_updated_at
@@ -1717,7 +1805,9 @@ def pushserver(image=None, version=None):
 
 @task(buildserver, pushserver)
 def releaseserver(
-    app_file=os.path.join(BASE_DIR, "app.yaml"), image=None, version=None
+    app_file=os.path.join(BASE_DIR, "app.yaml"),
+    image=None,
+    version=None,
 ):
     """build, push, and deploy new server version"""
     image = image or f"gcr.io/{GC_PROJECT}/rg-server"
