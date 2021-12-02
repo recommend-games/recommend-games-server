@@ -47,7 +47,8 @@ def _load(*paths, in_format=None):
 
 
 def _rating_data(
-    recommender_path=getattr(settings, "RECOMMENDER_PATH", None), pk_field="bgg_id"
+    recommender_path=getattr(settings, "RECOMMENDER_PATH", None),
+    pk_field="bgg_id",
 ):
     recommender = load_recommender(recommender_path, "bgg")
 
@@ -56,6 +57,8 @@ def _rating_data(
 
     count = -1
     # TODO if after certain date, use R.G ranking instead (#366)
+    # Either calculate with board_game_recommender.rankings.calculate_rankings
+    # Or find latest ranking from file board-game-data/rankings/bgg/r_g/*.csv
     recommendations = recommender.recommend(
         star_percentiles=getattr(settings, "STAR_PERCENTILES", None)
     )
@@ -124,7 +127,12 @@ def _parse_value_id(string, regex=VALUE_ID_REGEX):
 
 
 def _make_instances(
-    model, items, fields=None, fields_mapping=None, item_mapping=None, add_data=None
+    model,
+    items,
+    fields=None,
+    fields_mapping=None,
+    item_mapping=None,
+    add_data=None,
 ):
     add_data = add_data or {}
     pk_field = model._meta.pk.name
@@ -294,7 +302,12 @@ def _make_secondary_instances(model, secondary, items, **kwargs):
 
 
 def _create_secondary_instances(
-    model, secondary, items, models_order=(), batch_size=None, **kwargs
+    model,
+    secondary,
+    items,
+    models_order=(),
+    batch_size=None,
+    **kwargs,
 ):
     instances = _make_secondary_instances(
         model=model, secondary=secondary, items=items, **kwargs
