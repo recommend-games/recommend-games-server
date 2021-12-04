@@ -4,7 +4,9 @@
 
 import os
 
-from pytility import parse_bool
+from datetime import timezone
+
+from pytility import parse_bool, parse_date
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -166,3 +168,7 @@ PROJECT_VERSION_FILE = os.path.join(BASE_DIR, "VERSION")
 
 MIN_VOTES_ANCHOR_DATE = "2020-08-01"
 MIN_VOTES_SECONDS_PER_STEP = 10 * 24 * 60 * 60  # 10 days
+
+R_G_RANKING_EFFECTIVE_DATE = parse_date(
+    os.getenv("R_G_RANKING_EFFECTIVE_DATE"), tzinfo=timezone.utc
+) or parse_date("2022-01-01T00:00Z")
