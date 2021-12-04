@@ -12,9 +12,11 @@ from datetime import timezone
 from functools import partial
 from itertools import groupby
 from pathlib import Path
+from typing import Iterable, Optional
 
 import turicreate as tc
 
+from board_game_recommender.utils import percentile_buckets, star_rating
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.transaction import atomic
@@ -51,15 +53,28 @@ def _load(*paths, in_format=None):
             yield from _load_json(path)
 
 
-def _find_latest_ranking(path_dir: Path, glob: str = "*.csv") -> tc.SFrame:
+def _find_latest_ranking(
+    path_dir: Path,
+    glob: str = "*.csv",
+    star_percentiles=Optional[Iterable[float]],
+) -> tc.SFrame:
     path_dir = path_dir.resolve()
     LOGGER.info("Searching <%s> for latest ranking", path_dir)
     path_file = max(
-        path_dir.glob(glob), key=lambda p: parse_date(p.stem, tzinfo=timezone.utc)
+        path_dir.glob(glob),
+        key=lambda p: parse_date(p.stem, tzinfo=timezone.utc),
     )
+
     LOGGER.info("Loading ranking from <%s>", path_file)
     recommendations = tc.SFrame.read_csv(str(path_file))["rank", "bgg_id", "score"]
-    # TODO add star percentiles
+
+    if star_percentiles:
+        buckets = tuple(percentile_buckets(recommendations["score"], star_percentiles))
+        recommendations["stars"] = [
+            star_rating(score=score, buckets=buckets, low=1.0, high=5.0)
+            for score in recommendations["score"]
+        ]
+
     return recommendations
 
 
@@ -88,7 +103,10 @@ def _rating_data(
             "Using new R.G ranking effective from %s",
             r_g_ranking_effective_date,
         )
-        recommendations = _find_latest_ranking(path_dir=Path(rankings_path))
+        recommendations = _find_latest_ranking(
+            path_dir=Path(rankings_path),
+            star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
+        )
     else:
         recommendations = recommender.recommend(
             star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
