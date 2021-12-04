@@ -8,13 +8,18 @@ import re
 import sys
 
 from collections import defaultdict
+from datetime import timezone
 from functools import partial
 from itertools import groupby
+from pathlib import Path
+
+import turicreate as tc
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.transaction import atomic
-from pytility import arg_to_iter, batchify, parse_int, take_first
+from django.utils.timezone import now
+from pytility import arg_to_iter, batchify, parse_date, parse_int, take_first
 
 from ...models import Category, Collection, Game, GameType, Mechanic, Person, User
 from ...utils import format_from_path, load_recommender
@@ -46,22 +51,52 @@ def _load(*paths, in_format=None):
             yield from _load_json(path)
 
 
+def _find_latest_ranking(path_dir: Path, glob: str = "*.csv") -> tc.SFrame:
+    path_dir = path_dir.resolve()
+    LOGGER.info("Searching <%s> for latest ranking", path_dir)
+    path_file = max(
+        path_dir.glob(glob), key=lambda p: parse_date(p.stem, tzinfo=timezone.utc)
+    )
+    LOGGER.info("Loading ranking from <%s>", path_file)
+    recommendations = tc.SFrame.read_csv(path_file)["rank", "bgg_id", "score"]
+    # TODO add star percentiles
+    return recommendations
+
+
 def _rating_data(
     recommender_path=getattr(settings, "RECOMMENDER_PATH", None),
     pk_field="bgg_id",
+    rankings_path=None,
+    r_g_ranking_effective_date=getattr(settings, "R_G_RANKING_EFFECTIVE_DATE", None),
 ):
     recommender = load_recommender(recommender_path, "bgg")
 
     if not recommender:
         return {}
 
-    count = -1
-    # TODO if after certain date, use R.G ranking instead (#366)
-    # Either calculate with board_game_recommender.rankings.calculate_rankings
-    # Or find latest ranking from file board-game-data/rankings/bgg/r_g/*.csv
-    recommendations = recommender.recommend(
-        star_percentiles=getattr(settings, "STAR_PERCENTILES", None)
+    r_g_ranking_effective_date = parse_date(
+        r_g_ranking_effective_date,
+        tzinfo=timezone.utc,
     )
+
+    if (
+        rankings_path
+        and r_g_ranking_effective_date
+        and now() >= r_g_ranking_effective_date
+    ):
+        LOGGER.info(
+            "Using new R.G ranking effective from %s",
+            r_g_ranking_effective_date,
+        )
+        recommendations = _find_latest_ranking(path_dir=Path(rankings_path))
+    else:
+        recommendations = recommender.recommend(
+            star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
+        )
+
+    LOGGER.info("Loaded recommendations for %d games", len(recommendations))
+
+    count = -1
     result = {}
 
     for count, game in enumerate(recommendations):
@@ -523,6 +558,17 @@ class Command(BaseCommand):
             default=getattr(settings, "RECOMMENDER_PATH", None),
             help="path to recommender model",
         )
+        parser.add_argument(
+            "--rankings",
+            "-R",
+            help="path to recommendation CSVs",
+        )
+        parser.add_argument(
+            "--ranking-date",
+            "-d",
+            default=getattr(settings, "R_G_RANKING_EFFECTIVE_DATE", None),
+            help="effective date for new R.G ranking",
+        )
         parser.add_argument("--links", "-l", help="links JSON file location")
 
     def handle(self, *args, **kwargs):
@@ -537,7 +583,10 @@ class Command(BaseCommand):
         items = tuple(_load(*kwargs["paths"]))
         # pylint: disable=no-member
         add_data = _rating_data(
-            recommender_path=kwargs["recommender"], pk_field=Game._meta.pk.name
+            recommender_path=kwargs["recommender"],
+            pk_field=Game._meta.pk.name,
+            rankings_path=kwargs["rankings"],
+            r_g_ranking_effective_date=kwargs["ranking_date"],
         )
         game_item_mapping = dict(self.game_item_mapping or {})
 
