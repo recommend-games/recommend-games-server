@@ -221,7 +221,10 @@ class Command(BaseCommand):
             help="anchor week day when aggregating weeks",
         )
         parser.add_argument(
-            "--dry-run", "-n", action="store_true", help="don't write to the database"
+            "--dry-run",
+            "-n",
+            action="store_true",
+            help="don't write to the database",
         )
 
     def _create_all_instances(self, path, filter_ids=None, week_day="SUN", types=None):

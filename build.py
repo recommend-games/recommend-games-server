@@ -1218,14 +1218,22 @@ def migrate():
 
 
 @task(cleandata, migrate)
-def filldb(src_dir=SCRAPED_DATA_DIR, rec_dir=os.path.join(RECOMMENDER_DIR, ".bgg")):
+def filldb(
+    src_dir=SCRAPED_DATA_DIR,
+    rec_dir=os.path.join(RECOMMENDER_DIR, ".bgg"),
+    ranking_date=getattr(SETTINGS, "R_G_RANKING_EFFECTIVE_DATE", None),
+    dry_run=False,
+):
     """fill database"""
     LOGGER.info(
         "Uploading games and other data from <%s>, and recommendations from <%s> to database...",
         src_dir,
         rec_dir,
     )
+
     srp_dir = os.path.join(src_dir, "scraped")
+    dry_run = parse_bool(dry_run)
+
     django.core.management.call_command(
         "filldb",
         os.path.join(srp_dir, "bgg_GameItem.jl"),
@@ -1234,7 +1242,10 @@ def filldb(src_dir=SCRAPED_DATA_DIR, rec_dir=os.path.join(RECOMMENDER_DIR, ".bgg
         in_format="jl",
         batch=100_000,
         recommender=rec_dir,
+        rankings=Path(SCRAPED_DATA_DIR) / "rankings" / "bgg" / "r_g",
+        ranking_date=ranking_date,
         links=os.path.join(src_dir, "links.json"),
+        dry_run=dry_run,
     )
 
 

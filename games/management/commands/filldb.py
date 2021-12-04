@@ -58,7 +58,7 @@ def _find_latest_ranking(path_dir: Path, glob: str = "*.csv") -> tc.SFrame:
         path_dir.glob(glob), key=lambda p: parse_date(p.stem, tzinfo=timezone.utc)
     )
     LOGGER.info("Loading ranking from <%s>", path_file)
-    recommendations = tc.SFrame.read_csv(path_file)["rank", "bgg_id", "score"]
+    recommendations = tc.SFrame.read_csv(str(path_file))["rank", "bgg_id", "score"]
     # TODO add star percentiles
     return recommendations
 
@@ -195,6 +195,7 @@ def _create_from_items(
     item_mapping=None,
     add_data=None,
     batch_size=None,
+    dry_run=False,
 ):
     LOGGER.info("creating instances of %r", model)
 
@@ -211,12 +212,20 @@ def _create_from_items(
 
     for count, batch in enumerate(batches):
         LOGGER.info("processing batch #%d...", count + 1)
-        model.objects.bulk_create(batch)
+        if not dry_run:
+            model.objects.bulk_create(batch)
 
     LOGGER.info("done processing")
 
 
-def _create_references(model, items, foreign=None, recursive=None, batch_size=None):
+def _create_references(
+    model,
+    items,
+    foreign=None,
+    recursive=None,
+    batch_size=None,
+    dry_run=False,
+):
     foreign = foreign or {}
     foreign = {k: tuple(arg_to_iter(v)) for k, v in foreign.items()}
     foreign = {k: v for k, v in foreign.items() if len(v) == 2}
@@ -288,29 +297,37 @@ def _create_references(model, items, foreign=None, recursive=None, batch_size=No
             for k, v in foreign_values[fmodel].items()
             if k and v
         )
-        _create_from_items(model=fmodel, items=values, batch_size=batch_size)
+        _create_from_items(
+            model=fmodel,
+            items=values,
+            batch_size=batch_size,
+            dry_run=dry_run,
+        )
 
     del foreign, foreign_values
 
     LOGGER.info("found %d items for model %r to update", len(updates), model)
 
     batches = (
-        batchify(updates.items(), batch_size) if batch_size else (updates.items(),)
+        batchify(updates.items(), batch_size) if batch_size else (updates.items(),),
     )
 
     for count, batch in enumerate(batches):
         LOGGER.info("processing batch #%d...", count + 1)
-        with atomic():
-            for pkey, update in batch:
-                try:
-                    instance = model.objects.get(pk=pkey)
-                    for field, values in update.items():
-                        getattr(instance, field).set(values)
-                    instance.save()
-                except Exception:
-                    LOGGER.exception(
-                        "an error ocurred when updating <%s> with %r", pkey, update
-                    )
+        if not dry_run:
+            with atomic():
+                for pkey, update in batch:
+                    try:
+                        instance = model.objects.get(pk=pkey)
+                        for field, values in update.items():
+                            getattr(instance, field).set(values)
+                        instance.save()
+                    except Exception:
+                        LOGGER.exception(
+                            "an error ocurred when updating <%s> with %r",
+                            pkey,
+                            update,
+                        )
 
     del batches, updates
 
@@ -342,10 +359,14 @@ def _create_secondary_instances(
     items,
     models_order=(),
     batch_size=None,
+    dry_run=False,
     **kwargs,
 ):
     instances = _make_secondary_instances(
-        model=model, secondary=secondary, items=items, **kwargs
+        model=model,
+        secondary=secondary,
+        items=items,
+        **kwargs,
     )
     del items
     batches = batchify(instances, batch_size) if batch_size else (instances,)
@@ -363,13 +384,14 @@ def _create_secondary_instances(
 
         for mdl in order:
             instances = models.pop(mdl, ())
-            if instances:
+            if not dry_run and instances:
                 LOGGER.info("creating %d instances of %r", len(instances), mdl)
                 mdl.objects.bulk_create(instances)
 
         if any(models.values()):
             LOGGER.warning(
-                "some models have not been processed properly: %r", tuple(models.keys())
+                "some models have not been processed properly: %r",
+                tuple(models.keys()),
             )
 
         del models
@@ -540,10 +562,16 @@ class Command(BaseCommand):
             help="collection file(s) to be processed",
         )
         parser.add_argument(
-            "--user-paths", "-u", nargs="+", help="user file(s) to be processed"
+            "--user-paths",
+            "-u",
+            nargs="+",
+            help="user file(s) to be processed",
         )
         parser.add_argument(
-            "--in-format", "-f", choices=("json", "jsonl", "jl"), help="input format"
+            "--in-format",
+            "-f",
+            choices=("json", "jsonl", "jl"),
+            help="input format",
         )
         parser.add_argument(
             "--batch",
@@ -570,6 +598,12 @@ class Command(BaseCommand):
             help="effective date for new R.G ranking",
         )
         parser.add_argument("--links", "-l", help="links JSON file location")
+        parser.add_argument(
+            "--dry-run",
+            "-n",
+            action="store_true",
+            help="don't write to the database",
+        )
 
     def handle(self, *args, **kwargs):
         logging.basicConfig(
@@ -598,7 +632,9 @@ class Command(BaseCommand):
 
             for site in self.linked_sites:
                 game_item_mapping[f"{site}_id"] = partial(
-                    _find_links, site=site, links=links
+                    _find_links,
+                    site=site,
+                    links=links,
                 )
 
         _create_from_items(
@@ -609,6 +645,7 @@ class Command(BaseCommand):
             item_mapping=game_item_mapping,
             add_data=add_data,
             batch_size=kwargs["batch"],
+            dry_run=kwargs["dry_run"],
         )
 
         del add_data
@@ -619,6 +656,7 @@ class Command(BaseCommand):
             foreign=self.game_fields_foreign,
             recursive=self.game_fields_recursive,
             batch_size=kwargs["batch"],
+            dry_run=kwargs["dry_run"],
         )
 
         if kwargs["collection_paths"]:
@@ -643,6 +681,7 @@ class Command(BaseCommand):
                 fields_mapping=self.collection_fields_mapping,
                 item_mapping=self.collection_item_mapping,
                 batch_size=kwargs["batch"],
+                dry_run=kwargs["dry_run"],
             )
 
         del items
