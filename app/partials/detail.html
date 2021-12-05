@@ -320,14 +320,25 @@
 			<form class="form-inline mb-1">
 				<label class="switch mr-1">
 					<input type="checkbox"
-						id="display-rg-factor"
-						name="display-rg-factor"
+						id="display-rg-data"
+						name="display-rg-data"
+						ng-model="display.rg" />
+					<span class="slider {{ display.rg ? 'bg-success' : 'bg-secondary' }}"></span>
+				</label>
+				<label class="{{ display.rg ? 'rg-color' : 'text-muted' }} mr-2"
+						for="display-rg-data">
+					<strong class="recommend-games">Recommend.Games</strong>
+				</label>
+				<label class="switch mr-1">
+					<input type="checkbox"
+						id="display-factor-data"
+						name="display-factor-data"
 						ng-model="display.factor" />
 					<span class="slider {{ display.factor ? 'bg-success' : 'bg-secondary' }}"></span>
 				</label>
 				<label class="{{ display.factor ? 'rg-color' : 'text-muted' }} mr-2"
-						for="display-rg-factor">
-					<strong class="recommend-games">Recommend.Games</strong>
+						for="display-factor-data">
+					<strong>Factor</strong>
 				</label>
 				<label class="switch mr-1">
 					<input type="checkbox"

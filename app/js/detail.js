@@ -42,6 +42,7 @@ rgApp.controller('DetailController', function DetailController(
     $scope.chartVisible = false;
     $scope.rankings = null;
     $scope.display = {
+        rg: true,
         factor: true,
         bgg: true,
         startDate: startDate,
@@ -168,7 +169,8 @@ rgApp.controller('DetailController', function DetailController(
 
     function makeDataSets(data, startDate, endDate) {
         var datasets = [
-                $scope.display.factor ? makeDataSet(data, 'fac', startDate, endDate, 'R.G', 'rgba(0, 0, 0, 1)') : null,
+                $scope.display.rg ? makeDataSet(data, 'r_g', startDate, endDate, 'R.G', 'rgba(0, 0, 0, 1)') : null,
+                $scope.display.factor ? makeDataSet(data, 'fac', startDate, endDate, 'Old', 'rgba(0, 0, 0, 0.5)') : null,
                 $scope.display.bgg ? makeDataSet(data, 'bgg', startDate, endDate, 'BGG', 'rgba(255, 81, 0, 1)') : null
             ];
         return _.filter(datasets);
@@ -319,7 +321,7 @@ rgApp.controller('DetailController', function DetailController(
         .catch($log.error);
 
     $scope.$watchGroup(
-        ['display.factor', 'display.bgg'],
+        ['display.rg', 'display.factor', 'display.bgg'],
         updateChart
     );
 
