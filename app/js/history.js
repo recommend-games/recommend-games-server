@@ -18,7 +18,7 @@ rgApp.controller('HistoryController', function HistoryController(
 ) {
     var $ = angular.element,
         defaultRankingType = moment() >= NEW_RANKING_DATE ? 'r_g' : 'fac',
-        rankingType = $routeParams.type || 'fac',
+        rankingType = $routeParams.type || defaultRankingType,
         defaultStartDate = moment().subtract(1, 'year'),
         startDateParam = moment($routeParams.startDate || null),
         startDate = startDateParam.isValid() ? startDateParam : defaultStartDate,
