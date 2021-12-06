@@ -12,6 +12,7 @@ rgApp.controller('DetailController', function DetailController(
     $routeParams,
     $scope,
     $timeout,
+    NEW_RANKING_DATE,
     gamesService,
     rankingsService
 ) {
@@ -230,7 +231,7 @@ rgApp.controller('DetailController', function DetailController(
             $scope.chartVisible = true;
             $scope.rankings = rankings;
             $scope.bestRankingBGG = bestRanking(rankings, 'bgg');
-            $scope.bestRankingRG = moment() >= moment('2022-01-01') ? bestRanking(rankings, 'r_g') : bestRanking(rankings, 'fac');
+            $scope.bestRankingRG = moment() >= NEW_RANKING_DATE ? bestRanking(rankings, 'r_g') : bestRanking(rankings, 'fac');
 
             return findElement('#ranking-history-container');
         })

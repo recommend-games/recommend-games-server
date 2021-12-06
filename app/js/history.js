@@ -13,9 +13,11 @@ rgApp.controller('HistoryController', function HistoryController(
     $scope,
     $timeout,
     API_URL,
+    NEW_RANKING_DATE,
     gamesService
 ) {
     var $ = angular.element,
+        defaultRankingType = moment() >= NEW_RANKING_DATE ? 'r_g' : 'fac',
         rankingType = $routeParams.type || 'fac',
         defaultStartDate = moment().subtract(1, 'year'),
         startDateParam = moment($routeParams.startDate || null),
@@ -57,7 +59,7 @@ rgApp.controller('HistoryController', function HistoryController(
                 position: 'right'
             }
         },
-        canonicalPath = rankingType === 'fac' ? '/' + _.split($location.path(), '/')[1] : $location.path(),
+        canonicalPath = rankingType === defaultRankingType ? '/' + _.split($location.path(), '/')[1] : $location.path(),
         canonicalParams = {},
         canonical;
 
@@ -133,7 +135,7 @@ rgApp.controller('HistoryController', function HistoryController(
         .then(function (response) {
             $scope.data = response.data;
             $scope.datasets = makeDataSets(response.data, rankingType, startDate, endDate);
-            return findElement('#rg-history');
+            return findElement('#rg-history-container');
         })
         .then(function (container) {
             var rows = _.size($scope.datasets),
