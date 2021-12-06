@@ -170,7 +170,7 @@ rgApp.controller('DetailController', function DetailController(
     function makeDataSets(data, startDate, endDate) {
         var datasets = [
                 $scope.display.rg ? makeDataSet(data, 'r_g', startDate, endDate, 'R.G', 'rgba(0, 0, 0, 1)') : null,
-                $scope.display.factor ? makeDataSet(data, 'fac', startDate, endDate, 'Old', 'rgba(0, 0, 0, 0.5)') : null,
+                $scope.display.factor ? makeDataSet(data, 'fac', startDate, endDate, 'Old', 'rgba(100, 100, 100, 1)') : null,
                 $scope.display.bgg ? makeDataSet(data, 'bgg', startDate, endDate, 'BGG', 'rgba(255, 81, 0, 1)') : null
             ];
         return _.filter(datasets);
@@ -230,6 +230,7 @@ rgApp.controller('DetailController', function DetailController(
             $scope.chartVisible = true;
             $scope.rankings = rankings;
             $scope.bestRankingBGG = bestRanking(rankings, 'bgg');
+            // TODO needs to be r_g after 2022-01-01
             $scope.bestRankingRG = bestRanking(rankings, 'fac');
 
             return findElement('#ranking-history-container');
