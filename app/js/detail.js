@@ -230,8 +230,7 @@ rgApp.controller('DetailController', function DetailController(
             $scope.chartVisible = true;
             $scope.rankings = rankings;
             $scope.bestRankingBGG = bestRanking(rankings, 'bgg');
-            // TODO needs to be r_g after 2022-01-01
-            $scope.bestRankingRG = bestRanking(rankings, 'fac');
+            $scope.bestRankingRG = moment() >= moment('2022-01-01') ? bestRanking(rankings, 'r_g') : bestRanking(rankings, 'fac');
 
             return findElement('#ranking-history-container');
         })
