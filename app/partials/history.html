@@ -4,13 +4,14 @@
 	<h1>Top {{ top }} history</h1>
 	<p class="lead">
 		History of the
-		<span ng-if="type == 'fac'" class="recommend-games">Recommend.Games</span>
-		<span ng-if="type == 'sim'"><span  class="recommend-games">Recommend.Games</span> similarity</span>
+		<span ng-if="type == 'r_g'" class="recommend-games">Recommend.Games</span>
+		<span ng-if="type == 'fac'">old <span class="recommend-games">Recommend.Games</span></span>
+		<span ng-if="type == 'sim'"><span class="recommend-games">Recommend.Games</span> similarity</span>
 		<span ng-if="type == 'bgg'">BoardGameGeek</span>
 		top {{ top }} games between {{ startDate.format('LL') }} and {{ endDate.format('LL') }},
 		inspired by <a href="https://www.peterjezik.com/bgg/" target="_blank">BGG Top 100 History <i class="fas fa-external-link-alt"></i></a>.
 	</p>
-	<!-- <canvas id="history-chart" height="{{ top * 6.5 | number:0 }}"></canvas> -->
+	<div id="rg-history-container"></div>
 
 	<disqus ng-if="disqusId &amp;&amp; disqusUrl"
 		identifier="disqusId"

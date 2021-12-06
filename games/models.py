@@ -26,11 +26,14 @@ class Ranking(Model):
     """Ranking model."""
 
     BGG = "bgg"
+    RECOMMEND_GAMES = "r_g"
     FACTOR = "fac"
     SIMILARITY = "sim"
     CHARTS = "cha"
+
     TYPES = (
         (BGG, "BoardGameGeek"),
+        (RECOMMEND_GAMES, "Recommend.Games"),
         (FACTOR, "Factor"),
         (SIMILARITY, "Similarity"),
         (CHARTS, "Charts"),
