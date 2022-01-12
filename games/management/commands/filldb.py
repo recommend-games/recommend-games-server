@@ -327,7 +327,7 @@ def _create_references(
     LOGGER.info("found %d items for model %r to update", len(updates), model)
 
     batches = (
-        batchify(updates.items(), batch_size) if batch_size else (updates.items(),),
+        batchify(updates.items(), batch_size) if batch_size else (updates.items(),)
     )
 
     for count, batch in enumerate(batches):
