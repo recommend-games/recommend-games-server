@@ -174,5 +174,5 @@ R_G_RANKING_EFFECTIVE_DATE = (
         os.getenv("R_G_RANKING_EFFECTIVE_DATE"),
         tzinfo=timezone.utc,
     )
-    or parse_date("2022-01-01T00:00Z")
+    or parse_date("2022-02-22T00:00Z")
 )

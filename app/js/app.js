@@ -25,7 +25,7 @@ rgApp.constant('API_URL', '/api/')
     .constant('BGA_CLIENT_ID', '8jfqHypg2l')
     .constant('BGA_API_URL', 'https://api.boardgameatlas.com/api/')
     .constant('DISQUS_SHORT_NAME', 'recommend-games')
-    .constant('NEW_RANKING_DATE', moment('2022-01-01'));
+    .constant('NEW_RANKING_DATE', moment('2022-02-22'));
 
 rgApp.config(function (
     $disqusProvider,
