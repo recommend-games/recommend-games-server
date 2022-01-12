@@ -1,4 +1,4 @@
-FROM gcr.io/google-appengine/python:2021-11-12-110736
+FROM gcr.io/google-appengine/python:2022-01-07-133539
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
@@ -9,8 +9,8 @@ RUN mkdir -p /app
 WORKDIR /app
 
 RUN python3.7 -m pip install --no-cache-dir --upgrade \
-        gsutil==5.5 \
-        pipenv==2021.11.23
+        gsutil==5.6 \
+        pipenv==2022.1.8
 COPY Pipfile* ./
 RUN pipenv install --deploy --verbose
 
