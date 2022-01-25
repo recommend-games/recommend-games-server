@@ -77,6 +77,12 @@ rgApp.config(function (
     }).when('/bga', {
         templateUrl: '/partials/bga.html',
         controller: 'BgaController'
+    }).when('/collection/:user', {
+        templateUrl: '/partials/collection.html',
+        controller: 'ListController'
+    }).when('/collection', {
+        templateUrl: '/partials/collection.html',
+        controller: 'ListController'
     }).when('/', {
         templateUrl: '/partials/list.html',
         controller: 'ListController'
