@@ -555,8 +555,12 @@ class GameViewSet(PermissionsModelViewSet):
 
         del recommendation
 
+        if games[0].rec_rank == 1:  # log response for first page requests
+            pass  # TODO
+
         serializer = self.get_serializer(
-            instance=sorted(games, key=lambda game: game.rec_rank), many=True
+            instance=sorted(games, key=lambda game: game.rec_rank),
+            many=True,
         )
         del games
 
