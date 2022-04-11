@@ -24,7 +24,7 @@ turicreate = "*"
 whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
-black = "==21.12b0" # no released version, so need to pin exact pre-release version
+black = "*"
 board-game-recommender = {extras = ["trust"], version = ">=2.3.0"}
 board-game-scraper = {extras = ["cloud"], version = ">=2.11.3"}
 board-game-utils = "*"
