@@ -2,6 +2,7 @@
 
 """ views """
 
+import json
 import logging
 
 from datetime import timezone
@@ -566,8 +567,11 @@ class GameViewSet(PermissionsModelViewSet):
                 "response": [game.bgg_id for game in games[:PAGE_SIZE]],
                 "server_version": server_version(),
             }
-            LOGGER.debug("Pushing message to PubSub: %r", message)
-            # TODO pubsub_push()
+            pubsub_push(
+                message=json.dumps(message),
+                project=settings.PUBSUB_QUEUE_PROJECT,
+                topic=settings.PUBSUB_QUEUE_TOPIC_RESPONSES,
+            )
 
         serializer = self.get_serializer(
             instance=games,
