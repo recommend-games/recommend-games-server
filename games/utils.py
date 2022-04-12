@@ -67,9 +67,10 @@ def pubsub_client():
 
 
 def pubsub_push(
+    *,
     message,
-    project=settings.PUBSUB_QUEUE_PROJECT,
-    topic=settings.PUBSUB_QUEUE_TOPIC,
+    project,
+    topic,
     encoding="utf-8",
     **kwargs,
 ):

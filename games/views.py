@@ -494,9 +494,18 @@ class GameViewSet(PermissionsModelViewSet):
         if not users and not like:
             return self.list(request)
 
-        if settings.PUBSUB_PUSH_ENABLED and users:
+        if (
+            settings.PUBSUB_PUSH_ENABLED
+            and settings.PUBSUB_QUEUE_PROJECT
+            and settings.PUBSUB_QUEUE_TOPIC_USERS
+            and users
+        ):
             for user in users:
-                pubsub_push(user)
+                pubsub_push(
+                    message=user,
+                    project=settings.PUBSUB_QUEUE_PROJECT,
+                    topic=settings.PUBSUB_QUEUE_TOPIC_USERS,
+                )
 
         path = getattr(settings, "RECOMMENDER_PATH", None)
         recommender = load_recommender(path, "bgg")
