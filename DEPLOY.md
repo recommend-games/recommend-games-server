@@ -41,6 +41,8 @@ Also make sure to update the PubSub project, topic, and subscription:
 * `crawl` in the [scraper](https://gitlab.com/recommend.games/board-game-scraper/blob/master/.env.example),
 * `logs` in [`.env`](.env.example) and [`docker-compose.yaml`](docker-compose.yaml).
 
+TODO: create topic `responses`
+
 ## Enable Google Container Registry API
 
 Go to the [APIs & Services dashboard](https://console.cloud.google.com/apis/dashboard),
@@ -87,7 +89,8 @@ env_variables:
     GC_PROJECT: $PROJECT
     GC_DATA_BUCKET: $PROJECT-data
     PUBSUB_QUEUE_PROJECT: $PROJECT
-    PUBSUB_QUEUE_TOPIC: users
+    PUBSUB_QUEUE_TOPIC_USERS: users
+    PUBSUB_QUEUE_TOPIC_RESPONSES: responses
 ```
 
 The App Engine domain should be automatically added to `ALLOWED_HOSTS` in

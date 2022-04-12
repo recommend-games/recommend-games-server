@@ -18,6 +18,7 @@ env_variables:
     GC_PROJECT: recommendedgames
     GC_DATA_BUCKET: recommendedgames-data
     PUBSUB_QUEUE_PROJECT: recommendedgames
-    PUBSUB_QUEUE_TOPIC: users
+    PUBSUB_QUEUE_TOPIC_USERS: users
+    PUBSUB_QUEUE_TOPIC_RESPONSES: responses
 readiness_check:
     app_start_timeout_sec: 1800
