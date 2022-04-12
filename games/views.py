@@ -2,6 +2,7 @@
 
 """ views """
 
+import json
 import logging
 import os
 
@@ -251,6 +252,13 @@ def _add_games(data, bgg_ids=None, key="game"):
         if game:
             item[key] = game
     return data
+
+
+def _server_version():
+    return {
+        "project_version": project_version(),
+        "server_version": parse_version(os.getenv("GAE_VERSION")),
+    }
 
 
 class GameFilter(FilterSet):
@@ -552,14 +560,21 @@ class GameViewSet(PermissionsModelViewSet):
             game.rec_rank = rec["rank"]
             game.rec_rating = rec["score"] if users else None
             game.rec_stars = rec.get("stars") if users else None
-
+        games = sorted(games, key=lambda game: game.rec_rank)
         del recommendation
 
-        if games[0].rec_rank == 1:  # log response for first page requests
-            pass  # TODO
+        if settings.PUBSUB_PUSH_ENABLED and games and games[0].rec_rank == 1:
+            # log response for first page requests
+            message = {
+                "request": dict(request.query_params),
+                "response": [game.bgg_id for game in games[:10]],
+                "server_version": _server_version(),
+            }
+            LOGGER.debug("Pushing message to PubSub: %r", message)
+            # TODO pubsub_push()
 
         serializer = self.get_serializer(
-            instance=sorted(games, key=lambda game: game.rec_rank),
+            instance=games,
             many=True,
         )
         del games
@@ -784,12 +799,7 @@ class GameViewSet(PermissionsModelViewSet):
     @action(detail=False)
     def version(self, request):
         """Get project and server version."""
-        return Response(
-            {
-                "project_version": project_version(),
-                "server_version": parse_version(os.getenv("GAE_VERSION")),
-            }
-        )
+        return Response(_server_version())
 
     @action(detail=False)
     def stats(self, request):
