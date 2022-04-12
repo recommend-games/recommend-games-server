@@ -2,9 +2,7 @@
 
 """ views """
 
-import json
 import logging
-import os
 
 from datetime import timezone
 from functools import reduce
@@ -37,6 +35,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 from rest_framework.utils.urls import remove_query_param, replace_query_param
 from rest_framework.viewsets import ModelViewSet
 
@@ -62,15 +61,10 @@ from .serializers import (
     RankingFatSerializer,
     UserSerializer,
 )
-from .utils import (
-    load_recommender,
-    model_updated_at,
-    parse_version,
-    pubsub_push,
-    server_version,
-)
+from .utils import load_recommender, model_updated_at, pubsub_push, server_version
 
 LOGGER = logging.getLogger(__name__)
+PAGE_SIZE = api_settings.PAGE_SIZE or 25
 
 
 class PermissionsModelViewSet(ModelViewSet):
@@ -535,7 +529,7 @@ class GameViewSet(PermissionsModelViewSet):
 
         page = self.paginate_queryset(recommendation)
         if page is None:
-            recommendation = recommendation[:10]
+            recommendation = recommendation[:PAGE_SIZE]
             paginate = False
         else:
             recommendation = page
@@ -560,7 +554,7 @@ class GameViewSet(PermissionsModelViewSet):
             # log response for first page requests
             message = {
                 "request": dict(request.query_params),
-                "response": [game.bgg_id for game in games[:10]],
+                "response": [game.bgg_id for game in games[:PAGE_SIZE]],
                 "server_version": server_version(),
             }
             LOGGER.debug("Pushing message to PubSub: %r", message)
