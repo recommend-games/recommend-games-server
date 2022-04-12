@@ -66,8 +66,8 @@ from .utils import (
     load_recommender,
     model_updated_at,
     parse_version,
-    project_version,
     pubsub_push,
+    server_version,
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -252,13 +252,6 @@ def _add_games(data, bgg_ids=None, key="game"):
         if game:
             item[key] = game
     return data
-
-
-def _server_version():
-    return {
-        "project_version": project_version(),
-        "server_version": parse_version(os.getenv("GAE_VERSION")),
-    }
 
 
 class GameFilter(FilterSet):
@@ -568,7 +561,7 @@ class GameViewSet(PermissionsModelViewSet):
             message = {
                 "request": dict(request.query_params),
                 "response": [game.bgg_id for game in games[:10]],
-                "server_version": _server_version(),
+                "server_version": server_version(),
             }
             LOGGER.debug("Pushing message to PubSub: %r", message)
             # TODO pubsub_push()
@@ -799,7 +792,7 @@ class GameViewSet(PermissionsModelViewSet):
     @action(detail=False)
     def version(self, request):
         """Get project and server version."""
-        return Response(_server_version())
+        return Response(server_version())
 
     @action(detail=False)
     def stats(self, request):
