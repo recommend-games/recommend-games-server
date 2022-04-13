@@ -560,7 +560,13 @@ class GameViewSet(PermissionsModelViewSet):
         games = sorted(games, key=lambda game: game.rec_rank)
         del recommendation
 
-        if settings.PUBSUB_PUSH_ENABLED and games and games[0].rec_rank == 1:
+        if (
+            settings.PUBSUB_PUSH_ENABLED
+            and settings.PUBSUB_QUEUE_PROJECT
+            and settings.PUBSUB_QUEUE_TOPIC_RESPONSES
+            and games
+            and games[0].rec_rank == 1
+        ):
             # log response for first page requests
             message = {
                 "request": dict(request.query_params),
