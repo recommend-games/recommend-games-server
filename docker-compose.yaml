@@ -15,11 +15,33 @@ services:
         restart: 'no'
 
     users:
-        image: registry.gitlab.com/recommend.games/board-game-scraper:2.14.0
+        image: registry.gitlab.com/recommend.games/board-game-scraper:2.15.1
         container_name: rg-users
         command: [
             'python', '-m', 'board_game_scraper.pubsub_pull',
             '--out-path', 'gs://${GC_PROJECT}-logs/{year:04d}/{month:02d}/{day:02d}/{datetime}.{number:04d}.csv',
+            '--format', 'csv',
+            '--message-col', 'user',
+            '--message-process', 'lower',
+            '--sleep', '3600',
+        ]
+        env_file: .env
+        environment:
+            GOOGLE_APPLICATION_CREDENTIALS: /app/gs.json
+        volumes:
+            - ./gs.json:/app/gs.json
+        restart: unless-stopped
+        stop_grace_period: 15m
+        stop_signal: SIGINT
+
+    responses:
+        image: registry.gitlab.com/recommend.games/board-game-scraper:2.15.1
+        container_name: rg-responses
+        command: [
+            'python', '-m', 'board_game_scraper.pubsub_pull',
+            '--out-path', 'gs://${GC_PROJECT}-responses/{year:04d}/{month:02d}/{day:02d}/{datetime}.{number:04d}.jl',
+            '--format', 'raw',
+            '--message-process', 'normalize',
             '--sleep', '3600',
         ]
         env_file: .env
