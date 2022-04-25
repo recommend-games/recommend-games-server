@@ -19,6 +19,8 @@ services:
         container_name: rg-users
         command: [
             'python', '-m', 'board_game_scraper.pubsub_pull',
+            '--project', '${PULL_QUEUE_PROJECT}',
+            '--subscription', '${PULL_QUEUE_SUBSCRIPTION_LOGS}',
             '--out-path', 'gs://${GC_PROJECT}-logs/{year:04d}/{month:02d}/{day:02d}/{datetime}.{number:04d}.csv',
             '--format', 'csv',
             '--message-col', 'user',
@@ -39,6 +41,8 @@ services:
         container_name: rg-responses
         command: [
             'python', '-m', 'board_game_scraper.pubsub_pull',
+            '--project', '${PULL_QUEUE_PROJECT}',
+            '--subscription', '${PULL_QUEUE_SUBSCRIPTION_RESPONSES}',
             '--out-path', 'gs://${GC_PROJECT}-responses/{year:04d}/{month:02d}/{day:02d}/{datetime}.{number:04d}.jl',
             '--format', 'raw',
             '--message-process', 'normalize',
