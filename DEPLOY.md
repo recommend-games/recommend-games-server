@@ -37,17 +37,16 @@ deadline, and 1 day retention duration,
 * `logs` with "Pull" delivery type, "Never expire", 600 seconds acknowledgement
 deadline, and 7 day retention duration.
 
-Also make sure to update the PubSub project, topic, and subscription:
+Also create another topic `responses` and one subscription attached to that topic:
+
+* `response_logs` with "Pull" delivery type, "Never expire", 600 seconds
+acknowledgement deadline, and 7 day retention duration.
+
+Then make sure to update the PubSub project, topic, and subscription:
 
 * `crawl` in the [scraper](https://gitlab.com/recommend.games/board-game-scraper/blob/master/.env.example),
-* `logs` in [`.env`](.env.example) and [`docker-compose.yaml`](docker-compose.yaml).
-
-Then create another topic `responses` and one subscription attached to that topic:
-
-* `response_logs` with "Pull" delivery type, "Never expire", 600 seconds acknowledgement
-deadline, and 7 day retention duration.
-
-TODO: Use that subscription.
+* `logs` and `response_logs` in [`.env`](.env.example) and
+[`docker-compose.yaml`](docker-compose.yaml).
 
 ## Enable Google Container Registry API
 
