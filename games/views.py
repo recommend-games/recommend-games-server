@@ -14,6 +14,7 @@ from typing import Callable, Iterable, Optional, Union
 from django.conf import settings
 from django.db.models import Count, Q, Min
 from django.shortcuts import redirect
+from django.utils.timezone import now
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from pytility import (
@@ -569,6 +570,7 @@ class GameViewSet(PermissionsModelViewSet):
         ):
             # log response for first page requests
             message = {
+                "timestamp": now().isoformat(),
                 "request": dict(request.query_params),
                 "response": [game.bgg_id for game in games[:PAGE_SIZE]],
                 "server_version": server_version(),
