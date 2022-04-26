@@ -2,8 +2,8 @@
 
 """ views """
 
+import json
 import logging
-import os
 
 from datetime import timezone
 from functools import reduce
@@ -14,6 +14,7 @@ from typing import Callable, Iterable, Optional, Union
 from django.conf import settings
 from django.db.models import Count, Q, Min
 from django.shortcuts import redirect
+from django.utils.timezone import now
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from pytility import (
@@ -36,6 +37,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 from rest_framework.utils.urls import remove_query_param, replace_query_param
 from rest_framework.viewsets import ModelViewSet
 
@@ -61,15 +63,10 @@ from .serializers import (
     RankingFatSerializer,
     UserSerializer,
 )
-from .utils import (
-    load_recommender,
-    model_updated_at,
-    parse_version,
-    project_version,
-    pubsub_push,
-)
+from .utils import load_recommender, model_updated_at, pubsub_push, server_version
 
 LOGGER = logging.getLogger(__name__)
+PAGE_SIZE = api_settings.PAGE_SIZE or 25
 
 
 class PermissionsModelViewSet(ModelViewSet):
@@ -499,9 +496,18 @@ class GameViewSet(PermissionsModelViewSet):
         if not users and not like:
             return self.list(request)
 
-        if settings.PUBSUB_PUSH_ENABLED and users:
+        if (
+            settings.PUBSUB_PUSH_ENABLED
+            and settings.PUBSUB_QUEUE_PROJECT
+            and settings.PUBSUB_QUEUE_TOPIC_USERS
+            and users
+        ):
             for user in users:
-                pubsub_push(user)
+                pubsub_push(
+                    message=user,
+                    project=settings.PUBSUB_QUEUE_PROJECT,
+                    topic=settings.PUBSUB_QUEUE_TOPIC_USERS,
+                )
 
         path = getattr(settings, "RECOMMENDER_PATH", None)
         recommender = load_recommender(path, "bgg")
@@ -534,7 +540,7 @@ class GameViewSet(PermissionsModelViewSet):
 
         page = self.paginate_queryset(recommendation)
         if page is None:
-            recommendation = recommendation[:10]
+            recommendation = recommendation[:PAGE_SIZE]
             paginate = False
         else:
             recommendation = page
@@ -552,11 +558,32 @@ class GameViewSet(PermissionsModelViewSet):
             game.rec_rank = rec["rank"]
             game.rec_rating = rec["score"] if users else None
             game.rec_stars = rec.get("stars") if users else None
-
+        games = sorted(games, key=lambda game: game.rec_rank)
         del recommendation
 
+        if (
+            settings.PUBSUB_PUSH_ENABLED
+            and settings.PUBSUB_QUEUE_PROJECT
+            and settings.PUBSUB_QUEUE_TOPIC_RESPONSES
+            and games
+            and games[0].rec_rank == 1
+        ):
+            # log response for first page requests
+            message = {
+                "timestamp": now().isoformat(),
+                "request": dict(request.query_params),
+                "response": [game.bgg_id for game in games[:PAGE_SIZE]],
+                "server_version": server_version(),
+            }
+            pubsub_push(
+                message=json.dumps(message),
+                project=settings.PUBSUB_QUEUE_PROJECT,
+                topic=settings.PUBSUB_QUEUE_TOPIC_RESPONSES,
+            )
+
         serializer = self.get_serializer(
-            instance=sorted(games, key=lambda game: game.rec_rank), many=True
+            instance=games,
+            many=True,
         )
         del games
 
@@ -780,12 +807,7 @@ class GameViewSet(PermissionsModelViewSet):
     @action(detail=False)
     def version(self, request):
         """Get project and server version."""
-        return Response(
-            {
-                "project_version": project_version(),
-                "server_version": parse_version(os.getenv("GAE_VERSION")),
-            }
-        )
+        return Response(server_version())
 
     @action(detail=False)
     def stats(self, request):

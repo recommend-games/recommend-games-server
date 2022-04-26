@@ -23,8 +23,9 @@ create a new app in the region of your choice with the flexible environment.
 ## Create Storage buckets
 
 Open the [Storage dashboard](https://console.cloud.google.com/storage) and
-create the buckets `$PROJECT-data` and `$PROJECT-logs` in the same region as the
-App Engine app above. Leave the default options otherwise.
+create the buckets `$PROJECT-data`, `$PROJECT-logs` and `$PROJECT-responses` in
+the same region as the App Engine app above. Leave the default options
+otherwise.
 
 ## Create PubSub topic and subscription
 
@@ -36,10 +37,16 @@ deadline, and 1 day retention duration,
 * `logs` with "Pull" delivery type, "Never expire", 600 seconds acknowledgement
 deadline, and 7 day retention duration.
 
-Also make sure to update the PubSub project, topic, and subscription:
+Also create another topic `responses` and one subscription attached to that topic:
+
+* `response_logs` with "Pull" delivery type, "Never expire", 600 seconds
+acknowledgement deadline, and 7 day retention duration.
+
+Then make sure to update the PubSub project, topic, and subscription:
 
 * `crawl` in the [scraper](https://gitlab.com/recommend.games/board-game-scraper/blob/master/.env.example),
-* `logs` in [`.env`](.env.example) and [`docker-compose.yaml`](docker-compose.yaml).
+* `logs` and `response_logs` in [`.env`](.env.example) and
+[`docker-compose.yaml`](docker-compose.yaml).
 
 ## Enable Google Container Registry API
 
@@ -87,7 +94,8 @@ env_variables:
     GC_PROJECT: $PROJECT
     GC_DATA_BUCKET: $PROJECT-data
     PUBSUB_QUEUE_PROJECT: $PROJECT
-    PUBSUB_QUEUE_TOPIC: users
+    PUBSUB_QUEUE_TOPIC_USERS: users
+    PUBSUB_QUEUE_TOPIC_RESPONSES: responses
 ```
 
 The App Engine domain should be automatically added to `ALLOWED_HOSTS` in

@@ -67,9 +67,10 @@ def pubsub_client():
 
 
 def pubsub_push(
+    *,
     message,
-    project=settings.PUBSUB_QUEUE_PROJECT,
-    topic=settings.PUBSUB_QUEUE_TOPIC,
+    project,
+    topic,
     encoding="utf-8",
     **kwargs,
 ):
@@ -131,6 +132,15 @@ def project_version(file_path=settings.PROJECT_VERSION_FILE):
     except Exception:
         pass
     return None
+
+
+@lru_cache(maxsize=8)
+def server_version(file_path=settings.PROJECT_VERSION_FILE) -> dict:
+    """Full server version."""
+    return {
+        "project_version": project_version(file_path=file_path),
+        "server_version": parse_version(os.getenv("GAE_VERSION")),
+    }
 
 
 def save_recommender_ranking(recommender, dst, similarity_model=False):

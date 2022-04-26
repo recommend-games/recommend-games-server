@@ -101,6 +101,7 @@ sitepackages/
 *.bk
 bin/
 data*/
+/data
 include/
 logs/
 share/
