@@ -45,7 +45,8 @@ python-dotenv = "*"
 rcssmin = "*"
 requests = "*"
 rjsmin = "*"
-scikit-learn = "==1.0.1" # should match version used for kennerspiel.joblib
+scikit-learn = "==1.0.2" # should match version used for kennerspiel.joblib
+scipy = "==1.7.3" # should match version used for kennerspiel.joblib
 smart-open = {extras = ["all"], version = ">=1.8.1"}
 snaptime = "*"
 tqdm = "*"
