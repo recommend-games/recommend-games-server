@@ -1706,6 +1706,8 @@ def _sync_data(src, dst, retries=0):
         execute(
             "gsutil",
             "-m",
+            "-o",
+            "GSUtil:parallel_process_count=1",
             "rsync",
             "-d",
             "-r",
