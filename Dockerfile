@@ -9,8 +9,8 @@ RUN mkdir -p /app
 WORKDIR /app
 
 RUN python3.7 -m pip install --no-cache-dir --upgrade \
-        gsutil==5.6 \
-        pipenv==2022.1.8
+        gsutil==5.10 \
+        pipenv==2022.5.2
 COPY Pipfile* ./
 RUN pipenv install --deploy --verbose
 
