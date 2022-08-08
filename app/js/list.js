@@ -15,6 +15,7 @@ rgApp.controller('ListController', function ListController(
     $scope,
     $timeout,
     $window,
+    MAINTENANCE_MODE,
     filterService,
     gamesService,
     personsService,
@@ -291,6 +292,9 @@ rgApp.controller('ListController', function ListController(
         }
     };
 
+    $scope.maintenanceMode = !!MAINTENANCE_MODE;
+    $scope.maintenanceMessage = null;
+
     $scope.includeGames = params.include;
     $scope.excludeGames = params.exclude;
     $scope.cooperative = params.cooperative;
@@ -495,6 +499,11 @@ rgApp.controller('ListController', function ListController(
     $scope.updateStats = updateStats;
     $scope.modelUpdatedAt = null;
     $scope.userUpdatedAt = null;
+
+    if (MAINTENANCE_MODE) {
+        $scope.empty = true;
+        $scope.maintenanceMessage = null; // TODO
+    }
 
     $scope.$watch('count.enabled', renderSlider);
     $scope.$watch('time.enabled', renderSlider);

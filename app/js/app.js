@@ -14,7 +14,8 @@ var rgApp = angular.module('rgApp', [
     'toastr'
 ]);
 
-rgApp.constant('API_URL', '/api/')
+rgApp.constant('MAINTENANCE_MODE', true)
+    .constant('API_URL', '/api/')
     .constant('APP_TITLE', 'Recommend.Games – board game recommendations')
     .constant('CANONICAL_URL', 'https://recommend.games/')
     .constant('DEFAULT_IMAGE', 'assets/android-chrome-512x512.png')
