@@ -12,6 +12,7 @@ rgApp.controller('ListController', function ListController(
     $q,
     $route,
     $routeParams,
+    $sce,
     $scope,
     $timeout,
     $window,
@@ -161,7 +162,7 @@ rgApp.controller('ListController', function ListController(
             })
             .catch(function (response) {
                 $log.error(response);
-                $scope.empty = false;
+                $scope.empty = _.isEmpty($scope.games);
                 $scope.total = null;
                 toastr.error(
                     'Sorry, there was an error. Tap to try again...',
@@ -502,7 +503,7 @@ rgApp.controller('ListController', function ListController(
 
     if (MAINTENANCE_MODE) {
         $scope.empty = true;
-        $scope.maintenanceMessage = null; // TODO
+        $scope.maintenanceMessage = $sce.trustAsHtml('For more details, please read <a href="https://blog.recommend.games/posts/announcement-hiatus/">this blog post</a>.');
     }
 
     $scope.$watch('count.enabled', renderSlider);
