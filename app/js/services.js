@@ -840,14 +840,21 @@ rgApp.factory('newsService', function newsService(
     $log,
     $q,
     $sessionStorage,
-    API_URL
+    API_URL,
+    NEWS_API_FALLBACK_URL
 ) {
     var service = {};
 
     $sessionStorage.news = [];
 
-    function formatUrl(page) {
-        return API_URL + 'news/news_' + _.padStart(page, 5, '0') + '.json';
+    function formatUrl(page, fallback) {
+        var file = 'news_' + _.padStart(page, 5, '0') + '.json';
+
+        if (fallback) {
+            return NEWS_API_FALLBACK_URL + file;
+        }
+
+        return API_URL + 'news_x/' + file;
     }
 
     function processNews(article) {
@@ -856,14 +863,14 @@ rgApp.factory('newsService', function newsService(
         return article;
     }
 
-    service.getNews = function getNews(page, noblock) {
+    function getNews(page, fallback, noblock) {
         page = _.parseInt(page) || 0;
 
         if (!_.isEmpty($sessionStorage.news[page])) {
             return $q.resolve($sessionStorage.news[page]);
         }
 
-        return $http.get(formatUrl(page), {'noblock': !!noblock})
+        return $http.get(formatUrl(page, fallback), {'noblock': !!noblock})
             .then(function (response) {
                 var articles = _.map(_.get(response, 'data.results'), processNews),
                     result = {
@@ -879,6 +886,11 @@ rgApp.factory('newsService', function newsService(
             })
             .catch(function (response) {
                 $log.error(response);
+
+                if (!fallback) {
+                    return getNews(page, true, noblock);
+                }
+
                 return {
                     'page': page,
                     'articles': [],
@@ -886,7 +898,9 @@ rgApp.factory('newsService', function newsService(
                     'total': null
                 };
             });
-    };
+    }
+
+    service.getNews = getNews;
 
     service.setLastVisit = function setLastVisit(date) {
         date = moment(date || undefined);
