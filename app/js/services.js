@@ -854,7 +854,7 @@ rgApp.factory('newsService', function newsService(
             return NEWS_API_FALLBACK_URL + file;
         }
 
-        return API_URL + 'news_x/' + file;
+        return API_URL + 'news/' + file;
     }
 
     function processNews(article) {
