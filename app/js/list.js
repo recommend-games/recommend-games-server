@@ -162,15 +162,21 @@ rgApp.controller('ListController', function ListController(
             })
             .catch(function (response) {
                 $log.error(response);
-                $scope.empty = _.isEmpty($scope.games);
+                $scope.empty = false;
                 $scope.total = null;
-                toastr.error(
-                    'Sorry, there was an error. Tap to try again...',
-                    'Error loading games',
-                    {'onTap': function onTap() {
-                        return fetchGames(page);
-                    }}
-                );
+
+                if (MAINTENANCE_MODE) {
+                    $scope.maintenanceMode = true;
+                    $scope.maintenanceMessage = $sce.trustAsHtml('For more details, please read <a href="https://blog.recommend.games/posts/announcement-hiatus/">this blog post</a>.');
+                } else {
+                    toastr.error(
+                        'Sorry, there was an error. Tap to try again...',
+                        'Error loading games',
+                        {'onTap': function onTap() {
+                            return fetchGames(page);
+                        }}
+                    );
+                }
             })
             .then(function () {
                 $(function () {
@@ -293,7 +299,7 @@ rgApp.controller('ListController', function ListController(
         }
     };
 
-    $scope.maintenanceMode = !!MAINTENANCE_MODE;
+    $scope.maintenanceMode = false;
     $scope.maintenanceMessage = null;
 
     $scope.includeGames = params.include;
@@ -500,11 +506,6 @@ rgApp.controller('ListController', function ListController(
     $scope.updateStats = updateStats;
     $scope.modelUpdatedAt = null;
     $scope.userUpdatedAt = null;
-
-    if (MAINTENANCE_MODE) {
-        $scope.empty = true;
-        $scope.maintenanceMessage = $sce.trustAsHtml('For more details, please read <a href="https://blog.recommend.games/posts/announcement-hiatus/">this blog post</a>.');
-    }
 
     $scope.$watch('count.enabled', renderSlider);
     $scope.$watch('time.enabled', renderSlider);
