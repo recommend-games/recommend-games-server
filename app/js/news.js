@@ -6,6 +6,7 @@
 
 rgApp.controller('NewsController', function NewsController(
     $location,
+    $log,
     $scope,
     gamesService,
     newsService
@@ -15,8 +16,13 @@ rgApp.controller('NewsController', function NewsController(
             .then(function (response) {
                 $scope.articles = response.page === 0 || _.isEmpty($scope.articles) ? response.articles
                     : _.concat($scope.articles, response.articles);
+                $scope.empty = _.isEmpty($scope.articles);
                 $scope.nextPage = response.nextPage;
                 $scope.total = response.total;
+            })
+            .catch(function (response) {
+                $log.error(response);
+                $scope.empty = _.isEmpty($scope.articles);
             });
     }
 
