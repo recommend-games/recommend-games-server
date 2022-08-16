@@ -12,9 +12,11 @@ rgApp.controller('ListController', function ListController(
     $q,
     $route,
     $routeParams,
+    $sce,
     $scope,
     $timeout,
     $window,
+    MAINTENANCE_MODE,
     filterService,
     gamesService,
     personsService,
@@ -162,13 +164,19 @@ rgApp.controller('ListController', function ListController(
                 $log.error(response);
                 $scope.empty = false;
                 $scope.total = null;
-                toastr.error(
-                    'Sorry, there was an error. Tap to try again...',
-                    'Error loading games',
-                    {'onTap': function onTap() {
-                        return fetchGames(page);
-                    }}
-                );
+
+                if (MAINTENANCE_MODE) {
+                    $scope.maintenanceMode = true;
+                    $scope.maintenanceMessage = $sce.trustAsHtml('For more details, please read <a href="https://blog.recommend.games/posts/announcement-hiatus/">this blog post</a>.');
+                } else {
+                    toastr.error(
+                        'Sorry, there was an error. Tap to try again...',
+                        'Error loading games',
+                        {'onTap': function onTap() {
+                            return fetchGames(page);
+                        }}
+                    );
+                }
             })
             .then(function () {
                 $(function () {
@@ -290,6 +298,9 @@ rgApp.controller('ListController', function ListController(
             'draggableRange': true
         }
     };
+
+    $scope.maintenanceMode = false;
+    $scope.maintenanceMessage = null;
 
     $scope.includeGames = params.include;
     $scope.excludeGames = params.exclude;

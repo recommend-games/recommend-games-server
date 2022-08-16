@@ -10,8 +10,10 @@ rgApp.controller('DetailController', function DetailController(
     $log,
     $q,
     $routeParams,
+    $sce,
     $scope,
     $timeout,
+    MAINTENANCE_MODE,
     NEW_RANKING_DATE,
     gamesService,
     rankingsService
@@ -35,6 +37,10 @@ rgApp.controller('DetailController', function DetailController(
             ['10 years', moment().subtract(10, 'years')]
         ],
         canonical;
+
+    $scope.maintenanceMode = false;
+    $scope.maintenanceMessage = null;
+    $scope.errorMessage = null;
 
     $scope.implementations = false;
     $scope.expandable = false;
@@ -139,8 +145,17 @@ rgApp.controller('DetailController', function DetailController(
                 $('.tooltip').remove();
                 $('[data-toggle="tooltip"]').tooltip();
             });
+        })
+        .catch(function (response) {
+            $log.error(response);
+
+            if (MAINTENANCE_MODE) {
+                $scope.maintenanceMode = true;
+                $scope.maintenanceMessage = $sce.trustAsHtml('For more details, please read <a href="https://blog.recommend.games/posts/announcement-hiatus/">this blog post</a>.');
+            } else {
+                $scope.errorMessage = 'Unable to load the game. 😢 Please try again later…';
+            }
         });
-        // TODO catch errors
 
     function makeDataPoints(data, rankingType, startDate, endDate) {
         data = _(data)

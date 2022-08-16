@@ -6,7 +6,17 @@
 		Analyses of the <span class="recommend-games">Recommend.Games</span> and BoardGameGeek top 100 games.
 	</p>
 
-	<div class="card mb-3">
+	<div ng-if="empty"
+			class="alert alert-warning"
+			role="alert">
+		<h4 class="alert-heading">No stats found</h4>
+		<p class="mb-0">
+			Unable to load the stats. 😢 Please try again later…
+		</p>
+	</div>
+
+	<div ng-hide="empty"
+			class="card mb-3">
 		<div class="card-header">
 			<h4>Top Designers</h4>
 			<nav class="nav nav-tabs nav-justified card-header-tabs">
@@ -68,7 +78,8 @@
 		</div>
 	</div>
 
-	<div class="card mb-3">
+	<div ng-hide="empty"
+			class="card mb-3">
 		<div class="card-header">
 			<h4>Top Artists</h4>
 			<nav class="nav nav-tabs nav-justified card-header-tabs">
@@ -130,7 +141,8 @@
 		</div>
 	</div>
 
-	<div class="card mb-3">
+	<div ng-hide="empty"
+			class="card mb-3">
 		<div class="card-header">
 			<h4>Top Game Types</h4>
 			<nav class="nav nav-tabs nav-justified card-header-tabs">
@@ -192,7 +204,8 @@
 		</div>
 	</div>
 
-	<div class="card mb-3">
+	<div ng-hide="empty"
+			class="card mb-3">
 		<div class="card-header">
 			<h4>Top Categories</h4>
 			<nav class="nav nav-tabs nav-justified card-header-tabs">
@@ -254,7 +267,8 @@
 		</div>
 	</div>
 
-	<div class="card mb-3">
+	<div ng-hide="empty"
+			class="card mb-3">
 		<div class="card-header">
 			<h4>Top Mechanics</h4>
 			<nav class="nav nav-tabs nav-justified card-header-tabs">
