@@ -6,7 +6,7 @@
 		Read more <a href="/#/about">about <span class="recommend-games">Recommend.Games</span></a>.
 	</p>
 
-	<div ng-if="maintenanceMode"
+	<div ng-show="maintenanceMode"
 			class="alert alert-danger"
 			role="alert">
 		<h4 class="alert-heading"><span class="recommend-games">Recommend.Games</span> is currently under maintenance</h4>
@@ -24,7 +24,7 @@
 		</button>
 	</div>
 
-	<div ng-if="!maintenanceMode"
+	<div ng-hide="maintenanceMode"
 			class="card">
 		<div class="card-header">
 			<nav class="nav nav-tabs nav-justified card-header-tabs">
@@ -347,7 +347,7 @@
 		</div>
 	</div>
 
-	<form ng-if="!maintenanceMode"
+	<form ng-hide="maintenanceMode"
 			ng-submit="updateParams()"
 			id="search-game-form"
 			name="search-game-form"
@@ -410,7 +410,7 @@
 		</div>
 	</form>
 
-	<form ng-if="!maintenanceMode"
+	<form ng-hide="maintenanceMode"
 			ng-submit="updateParams()"
 			id="filter-game-form"
 			name="filter-game-form"
@@ -800,7 +800,7 @@
 		Recommended games based on your taste
 	</h2>
 
-	<p ng-if="!maintenanceMode">
+	<p ng-hide="maintenanceMode">
 		<span ng-if="designerData">
 			Games designed by
 			<strong>
