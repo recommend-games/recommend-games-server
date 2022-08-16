@@ -14,7 +14,7 @@ var rgApp = angular.module('rgApp', [
     'toastr'
 ]);
 
-rgApp.constant('MAINTENANCE_MODE', false)
+rgApp.constant('MAINTENANCE_MODE', true)
     .constant('API_URL', '/api/')
     .constant('NEWS_API_FALLBACK_URL', 'http://news.recommend.games/')
     .constant('APP_TITLE', 'Recommend.Games – board game recommendations')
