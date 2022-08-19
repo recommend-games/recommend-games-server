@@ -16,7 +16,7 @@ var rgApp = angular.module('rgApp', [
 
 rgApp.constant('MAINTENANCE_MODE', false)
     .constant('API_URL', '/api/')
-    .constant('NEWS_API_FALLBACK_URL', 'http://news.recommend.games/')
+    .constant('NEWS_API_FALLBACK_URL', 'https://news.recommend.games/')
     .constant('APP_TITLE', 'Recommend.Games – board game recommendations')
     .constant('CANONICAL_URL', 'https://recommend.games/')
     .constant('DEFAULT_IMAGE', 'assets/android-chrome-512x512.png')
