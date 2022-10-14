@@ -213,7 +213,7 @@ rgApp.factory('gamesService', function gamesService(
     }
 
     function getGames(page, filters, noblock) {
-        var url = API_URL + 'games/',
+        var url = API_URL + 'games',
             params = _.isEmpty(filters) ? {} : _.cloneDeep(filters);
         page = page || null;
 
@@ -222,12 +222,12 @@ rgApp.factory('gamesService', function gamesService(
         }
 
         if (!_.isEmpty(params.user) || !_.isEmpty(params.like)) {
-            url += 'recommend/';
+            url += '/recommend';
         }
 
         $log.debug('query parameters', params);
 
-        return $http.get(url, {'params': params, 'noblock': !!noblock})
+        return $http.get(url + '.json', {'params': params, 'noblock': !!noblock})
             .then(function (response) {
                 var games = _.get(response, 'data.results');
 
@@ -268,7 +268,7 @@ rgApp.factory('gamesService', function gamesService(
             return $q.resolve(cached);
         }
 
-        return $http.get(API_URL + 'games/' + id + '/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'games/' + id + '.json', {'noblock': !!noblock})
             .then(function (response) {
                 var responseId = _.get(response, 'data.bgg_id'),
                     game;
@@ -330,7 +330,7 @@ rgApp.factory('gamesService', function gamesService(
 
     service.getSimilarGames = function getSimilarGames(gameId, page, noblock) {
         page = page || null;
-        var url = API_URL + 'games/' + gameId + '/similar/',
+        var url = API_URL + 'games/' + gameId + '/similar.json',
             params = page ? {'page': page} : null;
 
         return $http.get(url, {'params': params, 'noblock': !!noblock})
@@ -371,7 +371,7 @@ rgApp.factory('gamesService', function gamesService(
         }
 
         function fetchList(page) {
-            return $http.get(API_URL + model + '/', {'params': {'page': page}, 'noblock': !!noblock})
+            return $http.get(API_URL + model + '.json', {'params': {'page': page}, 'noblock': !!noblock})
                 .then(function (response) {
                     var results = _.get(response, 'data.results', []),
                         next = _.get(response, 'data.next'),
@@ -422,7 +422,7 @@ rgApp.factory('gamesService', function gamesService(
             return $q.resolve($sessionStorage.games_stats.updated_at_str);
         }
 
-        return $http.get(API_URL + 'games/updated_at/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'games/updated_at.json', {'noblock': !!noblock})
             .then(function (response) {
                 var data = processDate(response.data, 'updated_at');
                 if (!data.updated_at_str) {
@@ -463,7 +463,7 @@ rgApp.factory('gamesService', function gamesService(
             return $q.resolve($sessionStorage.games_stats);
         }
 
-        return $http.get(API_URL + 'games/stats/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'games/stats.json', {'noblock': !!noblock})
             .then(function (response) {
                 var stats = response.data;
                 if (_.isEmpty(stats)) {
@@ -496,7 +496,7 @@ rgApp.factory('gamesService', function gamesService(
             params.date__lte = date.format('YYYY-MM-DD');
         }
 
-        return $http.get(API_URL + 'rankings/games/', {'params': params, 'noblock': !!noblock})
+        return $http.get(API_URL + 'rankings/games.json', {'params': params, 'noblock': !!noblock})
             .then(function (response) {
                 var rankings = _.get(response, 'data.results'),
                     chartDate = moment(_.get(rankings, '[0].date')),
@@ -550,7 +550,7 @@ rgApp.factory('gamesService', function gamesService(
             return $q.resolve(parsed);
         }
 
-        return $http.get(API_URL + 'rankings/dates/', {'params': params, 'noblock': !!noblock})
+        return $http.get(API_URL + 'rankings/dates.json', {'params': params, 'noblock': !!noblock})
             .then(function (response) {
                 var rankings = _.get(response, 'data'),
                     dates = _(rankings)
@@ -768,7 +768,7 @@ rgApp.factory('usersService', function usersService(
 
         var userUri = encodeURIComponent(user);
 
-        return $http.get(API_URL + 'users/' + userUri + '/stats/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'users/' + userUri + '/stats.json', {'noblock': !!noblock})
             .then(function (response) {
                 var stats = response.data;
                 if (_.isEmpty(stats)) {
@@ -810,7 +810,7 @@ rgApp.factory('personsService', function personsService(
             return $q.resolve(cached);
         }
 
-        return $http.get(API_URL + 'persons/' + id + '/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'persons/' + id + '.json', {'noblock': !!noblock})
             .then(function (response) {
                 var responseId = _.get(response, 'data.bgg_id'),
                     person;
@@ -1297,7 +1297,7 @@ rgApp.factory('rankingsService', function rankingsService(
             return $q.resolve(cached);
         }
 
-        return $http.get(API_URL + 'games/' + id + '/rankings/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'games/' + id + '/rankings.json', {'noblock': !!noblock})
             .then(function (response) {
                 var rankings = response.data;
 
@@ -1338,7 +1338,7 @@ rgApp.factory('metaService', function metaService(
             return $q.resolve($sessionStorage.version);
         }
 
-        return $http.get(API_URL + 'games/version/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'games/version.json', {'noblock': !!noblock})
             .then(function (response) {
                 var version = response.data;
                 if (_.isEmpty(version) || !_.isPlainObject(version)) {
