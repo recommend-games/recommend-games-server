@@ -5,14 +5,20 @@ import logging
 import sys
 
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional, Union
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from tqdm import tqdm
 
-from ...models import Game
-from ...serializers import GameSerializer, RankingSerializer
+from ...models import Category, Game, GameType, Mechanic
+from ...serializers import (
+    CategorySerializer,
+    GameSerializer,
+    GameTypeSerializer,
+    MechanicSerializer,
+    RankingSerializer,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -22,7 +28,7 @@ class Command(BaseCommand):
 
     help = "TODO."
 
-    def add_arguments(self, parser):
+    def add_arguments(self: "Command", parser) -> None:
         parser.add_argument(
             "--base-dir",
             "-b",
@@ -33,7 +39,15 @@ class Command(BaseCommand):
         )
         parser.add_argument("--max-items", "-m", type=int, help="TODO")
 
-    def process_games(self, base_dir: Path, max_items: Optional[int] = None) -> None:
+    # pylint: disable=no-self-use
+    def process_games(
+        self: "Command",
+        *,
+        base_dir: Path,
+        max_items: Optional[int] = None,
+    ) -> None:
+        """TODO."""
+
         # pylint: disable=no-member
         games = Game.objects.order_by(
             "-num_votes",
@@ -72,7 +86,31 @@ class Command(BaseCommand):
                     sort_keys=True,
                 )
 
-    def handle(self, *args, **kwargs):
+    def process_model(
+        self: "Command",
+        *,
+        query_set: "TODO",
+        serializer_class: "TODO",
+        dest_dir: Union[Path, str],
+    ) -> None:
+        """TODO."""
+
+        dest_dir = Path(dest_dir).resolve()
+        dest_dir.mkdir(parents=True, exist_ok=True)
+
+        for instance in tqdm(query_set):
+            instance_path = dest_dir / f"{instance.pk}.json"
+
+            serializer = serializer_class(instance=instance)
+            with instance_path.open("w", encoding="utf-8") as instance_file:
+                json.dump(
+                    serializer.data,
+                    instance_file,
+                    indent=4,
+                    sort_keys=True,
+                )
+
+    def handle(self: "Command", *args: Any, **kwargs: Any) -> None:
         logging.basicConfig(
             stream=sys.stderr,
             level=logging.DEBUG if kwargs["verbosity"] > 1 else logging.INFO,
@@ -85,4 +123,26 @@ class Command(BaseCommand):
         LOGGER.info("Storing files in dir <%s>", base_dir)
         max_items = kwargs.get("max_items")
 
-        self.process_games(base_dir=base_dir, max_items=max_items)
+        self.process_games(
+            base_dir=base_dir,
+            max_items=max_items,
+        )
+
+        # pylint: disable=no-member
+        self.process_model(
+            query_set=GameType.objects.all(),
+            serializer_class=GameTypeSerializer,
+            dest_dir=base_dir / "types",
+        )
+
+        self.process_model(
+            query_set=Category.objects.all(),
+            serializer_class=CategorySerializer,
+            dest_dir=base_dir / "categories",
+        )
+
+        self.process_model(
+            query_set=Mechanic.objects.all(),
+            serializer_class=MechanicSerializer,
+            dest_dir=base_dir / "mechanics",
+        )
