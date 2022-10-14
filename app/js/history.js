@@ -131,7 +131,7 @@ rgApp.controller('HistoryController', function HistoryController(
         });
     }
 
-    $http.get(API_URL + 'games/history/', {'params': params})
+    $http.get(API_URL + 'games/history.json', {'params': params})
         .then(function (response) {
             $scope.data = response.data;
             $scope.datasets = makeDataSets(response.data, rankingType, startDate, endDate);
