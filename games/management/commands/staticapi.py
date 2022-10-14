@@ -25,16 +25,12 @@ class Command(BaseCommand):
         parser.add_argument(
             "--base-dir",
             "-b",
-            default=Path(settings.BASE_DIR).parent.resolve() / "recommend-games-api",
+            default=Path(settings.BASE_DIR).parent.resolve()
+            / "recommend-games-api"
+            / "public",
             help="TODO",
         )
-        parser.add_argument(
-            "--games-dir",
-            "-g",
-            default=Path("public") / "games",
-            help="TODO",
-        )
-        parser.add_argument("--max-games", "-m", type=int, help="TODO")
+        parser.add_argument("--max-items", "-m", type=int, help="TODO")
 
     def handle(self, *args, **kwargs):
         logging.basicConfig(
@@ -45,9 +41,9 @@ class Command(BaseCommand):
 
         LOGGER.info(kwargs)
 
-        base_dir = (Path(kwargs["base_dir"]) / Path(kwargs["games_dir"])).resolve()
+        base_dir = Path(kwargs["base_dir"]).resolve()
         LOGGER.info("Storing files in dir <%s>", base_dir)
-        base_dir.mkdir(parents=True, exist_ok=True)
+        max_items = kwargs.get("max_items")
 
         # pylint: disable=no-member
         games = Game.objects.order_by(
@@ -56,13 +52,15 @@ class Command(BaseCommand):
             "bgg_rank",
             "-avg_rating",
         )
-        max_games = kwargs.get("max_games")
-        if max_games:
-            games = games[:max_games]
+        if max_items:
+            games = games[:max_items]
+
+        games_dir = base_dir / "games"
+        games_dir.mkdir(parents=True, exist_ok=True)
 
         for game in tqdm(games):
-            game_path = base_dir / f"{game.pk}.json"
-            ranking_path = base_dir / str(game.pk) / "rankings.json"
+            game_path = games_dir / f"{game.pk}.json"
+            ranking_path = games_dir / str(game.pk) / "rankings.json"
 
             game_serializer = GameSerializer(game)
             with game_path.open("w", encoding="utf-8") as game_file:
