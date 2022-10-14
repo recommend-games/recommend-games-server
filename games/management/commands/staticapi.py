@@ -5,6 +5,7 @@ import logging
 import sys
 
 from pathlib import Path
+from typing import Optional
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -32,19 +33,7 @@ class Command(BaseCommand):
         )
         parser.add_argument("--max-items", "-m", type=int, help="TODO")
 
-    def handle(self, *args, **kwargs):
-        logging.basicConfig(
-            stream=sys.stderr,
-            level=logging.DEBUG if kwargs["verbosity"] > 1 else logging.INFO,
-            format="%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s",
-        )
-
-        LOGGER.info(kwargs)
-
-        base_dir = Path(kwargs["base_dir"]).resolve()
-        LOGGER.info("Storing files in dir <%s>", base_dir)
-        max_items = kwargs.get("max_items")
-
+    def process_games(self, base_dir: Path, max_items: Optional[int] = None) -> None:
         # pylint: disable=no-member
         games = Game.objects.order_by(
             "-num_votes",
@@ -62,7 +51,7 @@ class Command(BaseCommand):
             game_path = games_dir / f"{game.pk}.json"
             ranking_path = games_dir / str(game.pk) / "rankings.json"
 
-            game_serializer = GameSerializer(game)
+            game_serializer = GameSerializer(instance=game)
             with game_path.open("w", encoding="utf-8") as game_file:
                 json.dump(
                     game_serializer.data,
@@ -71,7 +60,9 @@ class Command(BaseCommand):
                     sort_keys=True,
                 )
 
-            ranking_serializer = RankingSerializer(game.ranking_set.all(), many=True)
+            ranking_serializer = RankingSerializer(
+                instance=game.ranking_set.all(), many=True
+            )
             ranking_path.parent.mkdir(parents=True, exist_ok=True)
             with ranking_path.open("w", encoding="utf-8") as ranking_file:
                 json.dump(
@@ -80,3 +71,18 @@ class Command(BaseCommand):
                     indent=4,
                     sort_keys=True,
                 )
+
+    def handle(self, *args, **kwargs):
+        logging.basicConfig(
+            stream=sys.stderr,
+            level=logging.DEBUG if kwargs["verbosity"] > 1 else logging.INFO,
+            format="%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s",
+        )
+
+        LOGGER.info(kwargs)
+
+        base_dir = Path(kwargs["base_dir"]).resolve()
+        LOGGER.info("Storing files in dir <%s>", base_dir)
+        max_items = kwargs.get("max_items")
+
+        self.process_games(base_dir=base_dir, max_items=max_items)
