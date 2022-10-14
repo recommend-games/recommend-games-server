@@ -5,7 +5,7 @@ import logging
 import sys
 
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -40,6 +40,15 @@ class Command(BaseCommand):
         parser.add_argument("--max-items", "-m", type=int, help="TODO")
 
     # pylint: disable=no-self-use
+    def paginated_result(self, results: List) -> Dict:
+        """TODO."""
+        return {
+            "count": len(results),
+            "previous": None,
+            "next": None,
+            "results": results,
+        }
+
     def process_games(
         self: "Command",
         *,
@@ -91,15 +100,18 @@ class Command(BaseCommand):
         *,
         query_set: "TODO",
         serializer_class: "TODO",
-        dest_dir: Union[Path, str],
+        base_dir: Union[Path, str],
+        model_name: str,
     ) -> None:
         """TODO."""
 
-        dest_dir = Path(dest_dir).resolve()
-        dest_dir.mkdir(parents=True, exist_ok=True)
+        base_dir = Path(base_dir).resolve()
+        model_path = base_dir / f"{model_name}.json"
+        model_dir = base_dir / model_name
+        model_dir.mkdir(parents=True, exist_ok=True)
 
         for instance in tqdm(query_set):
-            instance_path = dest_dir / f"{instance.pk}.json"
+            instance_path = model_dir / f"{instance.pk}.json"
 
             serializer = serializer_class(instance=instance)
             with instance_path.open("w", encoding="utf-8") as instance_file:
@@ -109,6 +121,15 @@ class Command(BaseCommand):
                     indent=4,
                     sort_keys=True,
                 )
+
+        serializer = serializer_class(instance=query_set, many=True)
+        with model_path.open("w", encoding="utf-8") as model_file:
+            json.dump(
+                self.paginated_result(serializer.data),
+                model_file,
+                indent=4,
+                sort_keys=True,
+            )
 
     def handle(self: "Command", *args: Any, **kwargs: Any) -> None:
         logging.basicConfig(
@@ -132,17 +153,20 @@ class Command(BaseCommand):
         self.process_model(
             query_set=GameType.objects.all(),
             serializer_class=GameTypeSerializer,
-            dest_dir=base_dir / "types",
+            base_dir=base_dir,
+            model_name="types",
         )
 
         self.process_model(
             query_set=Category.objects.all(),
             serializer_class=CategorySerializer,
-            dest_dir=base_dir / "categories",
+            base_dir=base_dir,
+            model_name="categories",
         )
 
         self.process_model(
             query_set=Mechanic.objects.all(),
             serializer_class=MechanicSerializer,
-            dest_dir=base_dir / "mechanics",
+            base_dir=base_dir,
+            model_name="mechanics",
         )
