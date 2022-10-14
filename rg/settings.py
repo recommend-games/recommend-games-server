@@ -154,7 +154,7 @@ REST_FRAMEWORK = {
 }
 
 # REST proxy
-REST_PROXY = {"HOST": "http://news.recommend.games"}
+REST_PROXY = {"HOST": "https://news.recommend.games"}
 
 # Custom
 
