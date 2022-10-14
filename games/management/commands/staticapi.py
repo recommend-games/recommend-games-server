@@ -5,7 +5,7 @@ import logging
 import sys
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -49,42 +49,50 @@ class Command(BaseCommand):
             "results": results,
         }
 
-    def process_games(
-        self: "Command",
+    def save_model_instances(
+        self,
         *,
-        base_dir: Path,
-        max_items: Optional[int] = None,
+        query_set: "TODO",
+        serializer_class: "TODO",
+        model_dir: Path,
     ) -> None:
         """TODO."""
 
-        # pylint: disable=no-member
-        games = Game.objects.order_by(
-            "-num_votes",
-            "rec_rank",
-            "bgg_rank",
-            "-avg_rating",
-        )
-        if max_items:
-            games = games[:max_items]
+        model_dir.mkdir(parents=True, exist_ok=True)
 
-        games_dir = base_dir / "games"
-        games_dir.mkdir(parents=True, exist_ok=True)
+        for instance in tqdm(query_set):
+            instance_path = model_dir / f"{instance.pk}.json"
 
-        for game in tqdm(games):
-            game_path = games_dir / f"{game.pk}.json"
-            ranking_path = games_dir / str(game.pk) / "rankings.json"
-
-            game_serializer = GameSerializer(instance=game)
-            with game_path.open("w", encoding="utf-8") as game_file:
+            serializer = serializer_class(instance=instance)
+            with instance_path.open("w", encoding="utf-8") as instance_file:
                 json.dump(
-                    game_serializer.data,
-                    game_file,
+                    serializer.data,
+                    instance_file,
                     indent=4,
                     sort_keys=True,
                 )
 
+    def process_games(
+        self: "Command",
+        *,
+        query_set: "TODO",
+        base_dir: Path,
+    ) -> None:
+        """TODO."""
+
+        games_dir = base_dir / "games"
+        self.save_model_instances(
+            query_set=query_set,
+            serializer_class=GameSerializer,
+            model_dir=games_dir,
+        )
+
+        for game in tqdm(query_set):
+            ranking_path = games_dir / str(game.pk) / "rankings.json"
+
             ranking_serializer = RankingSerializer(
-                instance=game.ranking_set.all(), many=True
+                instance=game.ranking_set.all(),
+                many=True,
             )
             ranking_path.parent.mkdir(parents=True, exist_ok=True)
             with ranking_path.open("w", encoding="utf-8") as ranking_file:
@@ -108,19 +116,11 @@ class Command(BaseCommand):
         base_dir = Path(base_dir).resolve()
         model_path = base_dir / f"{model_name}.json"
         model_dir = base_dir / model_name
-        model_dir.mkdir(parents=True, exist_ok=True)
-
-        for instance in tqdm(query_set):
-            instance_path = model_dir / f"{instance.pk}.json"
-
-            serializer = serializer_class(instance=instance)
-            with instance_path.open("w", encoding="utf-8") as instance_file:
-                json.dump(
-                    serializer.data,
-                    instance_file,
-                    indent=4,
-                    sort_keys=True,
-                )
+        self.save_model_instances(
+            query_set=query_set,
+            serializer_class=serializer_class,
+            model_dir=model_dir,
+        )
 
         serializer = serializer_class(instance=query_set, many=True)
         with model_path.open("w", encoding="utf-8") as model_file:
@@ -144,12 +144,21 @@ class Command(BaseCommand):
         LOGGER.info("Storing files in dir <%s>", base_dir)
         max_items = kwargs.get("max_items")
 
+        # pylint: disable=no-member
+        games = Game.objects.order_by(
+            "-num_votes",
+            "rec_rank",
+            "bgg_rank",
+            "-avg_rating",
+        )
+        if max_items:
+            games = games[:max_items]
+
         self.process_games(
+            query_set=games,
             base_dir=base_dir,
-            max_items=max_items,
         )
 
-        # pylint: disable=no-member
         self.process_model(
             query_set=GameType.objects.all(),
             serializer_class=GameTypeSerializer,
