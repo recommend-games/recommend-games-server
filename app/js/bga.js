@@ -68,7 +68,7 @@ rgApp.controller('BgaController', function BgaController(
         page = _.parseInt(page) || $scope.page || $scope.nextPage || 1;
 
         var append = page > 1,
-            url = API_URL + 'games/recommend_bga/',
+            url = API_URL + 'games/recommend_bga.json',
             params = {'page': page},
             promise,
             bgaParams,

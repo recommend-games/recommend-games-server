@@ -117,7 +117,7 @@ LOGGER.info("currently in Google Cloud project <%s>", GC_PROJECT)
 
 @lru_cache(maxsize=8)
 def _server_version(path=os.path.join(BASE_DIR, "VERSION")):
-    with open(path) as file:
+    with open(path, encoding="utf-8") as file:
         version = file.read()
     return version.strip()
 
@@ -180,11 +180,14 @@ def merge(in_paths, out_path, **kwargs):
 
     kwargs.setdefault("log_level", "WARN")
     out_path = str(out_path).format(
-        date=django.utils.timezone.now().strftime("%Y-%m-%dT%H-%M-%S")
+        date=django.utils.timezone.now().strftime("%Y-%m-%dT%H-%M-%S"),
     )
 
     LOGGER.info(
-        "Merging files <%s> into <%s> with args %r...", in_paths, out_path, kwargs
+        "Merging files <%s> into <%s> with args %r...",
+        in_paths,
+        out_path,
+        kwargs,
     )
 
     _remove(out_path)
@@ -207,17 +210,22 @@ def _merge_kwargs(
     kwargs.setdefault("key_types", "int" if site in ("bgg", "luding") else "str")
     kwargs.setdefault("latest", "scraped_at")
     kwargs.setdefault("latest_types", "date")
-    kwargs.setdefault("latest_min", django.utils.timezone.now() - timedelta(days=90))
     kwargs.setdefault("concat_output", True)
 
     if parse_bool(full):
         kwargs["out_path"] = out_path or os.path.join(
-            SCRAPER_DIR, "feeds", site, item, "{date}_merged.jl"
+            SCRAPER_DIR,
+            "feeds",
+            site,
+            item,
+            "{date}_merged.jl",
         )
 
     else:
         kwargs["out_path"] = out_path or os.path.join(
-            SCRAPED_DATA_DIR, "scraped", f"{site}_{item}.jl"
+            SCRAPED_DATA_DIR,
+            "scraped",
+            f"{site}_{item}.jl",
         )
         kwargs.setdefault(
             "fieldnames_exclude",
@@ -688,7 +696,12 @@ def mergebggwar(in_paths=None, out_path=None, full=False, days=None):
 def mergedbpedia(in_paths=None, out_path=None, full=False):
     """merge DBpedia game data"""
     merge(
-        **_merge_kwargs(site="dbpedia", in_paths=in_paths, out_path=out_path, full=full)
+        **_merge_kwargs(
+            site="dbpedia",
+            in_paths=in_paths,
+            out_path=out_path,
+            full=full,
+        )
     )
 
 
@@ -696,7 +709,12 @@ def mergedbpedia(in_paths=None, out_path=None, full=False):
 def mergeluding(in_paths=None, out_path=None, full=False):
     """merge Luding.org game data"""
     merge(
-        **_merge_kwargs(site="luding", in_paths=in_paths, out_path=out_path, full=full)
+        **_merge_kwargs(
+            site="luding",
+            in_paths=in_paths,
+            out_path=out_path,
+            full=full,
+        )
     )
 
 
@@ -704,7 +722,12 @@ def mergeluding(in_paths=None, out_path=None, full=False):
 def mergespielen(in_paths=None, out_path=None, full=False):
     """merge Spielen.de game data"""
     merge(
-        **_merge_kwargs(site="spielen", in_paths=in_paths, out_path=out_path, full=full)
+        **_merge_kwargs(
+            site="spielen",
+            in_paths=in_paths,
+            out_path=out_path,
+            full=full,
+        )
     )
 
 
@@ -713,7 +736,10 @@ def mergewikidata(in_paths=None, out_path=None, full=False):
     """merge Wikidata game data"""
     merge(
         **_merge_kwargs(
-            site="wikidata", in_paths=in_paths, out_path=out_path, full=full
+            site="wikidata",
+            in_paths=in_paths,
+            out_path=out_path,
+            full=full,
         )
     )
 
@@ -936,7 +962,9 @@ def _min_votes_from_date(
         return None
 
     LOGGER.info(
-        "Comparing %s and %s to compute required votes", first_date, second_date
+        "Comparing %s and %s to compute required votes",
+        first_date,
+        second_date,
     )
 
     delta = second_date - first_date
@@ -1267,7 +1295,10 @@ def kennerspiel(
     )
 
     django.core.management.call_command(
-        "kennerspiel", model_path, batch=batch_size, dry_run=dry_run
+        "kennerspiel",
+        model_path,
+        batch=batch_size,
+        dry_run=dry_run,
     )
 
 
@@ -1310,7 +1341,7 @@ def dateflag(dst=SETTINGS.MODEL_UPDATED_FILE, date=None):
     date = parse_date(date) or django.utils.timezone.now()
     date_str = serialize_date(date, tzinfo=django.utils.timezone.utc)
     LOGGER.info("Writing date <%s> to <%s>...", date_str, dst)
-    with open(dst, "w") as file:
+    with open(dst, "w", encoding="utf-8") as file:
         file.write(date_str)
 
 
@@ -1556,7 +1587,9 @@ def historicalbggrankings(
                     continue
 
                 LOGGER.info(
-                    "Reading from file <%s> and writing to <%s>...", in_path, dst_path
+                    "Reading from file <%s> and writing to <%s>...",
+                    in_path,
+                    dst_path,
                 )
                 execute("bash", script, in_path, dst_path)
 
@@ -1596,7 +1629,9 @@ def updatecount(
     dst.parent.mkdir(parents=True, exist_ok=True)
     LOGGER.info("Reading template from <%s>, writing result to <%s>...", template, dst)
 
-    with template.open() as template_file, dst.open("w") as dst_file:
+    with template.open(encoding="utf-8") as template_file, dst.open(
+        "w", encoding="utf-8"
+    ) as dst_file:
         template_str = template_file.read()
         count_str = template_str.format(**counts)
         dst_file.write(count_str)
@@ -1636,7 +1671,10 @@ def makecsvs(
         else:
             out_path = os.path.splitext(in_path)[0] + file_ext
             jl_to_csv(
-                in_path=in_path, out_path=out_path, columns=columns, joiner=joiner
+                in_path=in_path,
+                out_path=out_path,
+                columns=columns,
+                joiner=joiner,
             )
 
 
@@ -1661,7 +1699,10 @@ def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_00
     """Generate sitemap.xml."""
     limit = parse_int(limit) or 50_000
     LOGGER.info(
-        "Generating sitemap with URL <%s> to <%s>, limit to %d...", url, dst, limit
+        "Generating sitemap with URL <%s> to <%s>, limit to %d...",
+        url,
+        dst,
+        limit,
     )
     django.core.management.call_command("sitemap", url=url, limit=limit, output=dst)
 
@@ -1756,7 +1797,11 @@ def minify(src=os.path.join(BASE_DIR, "app"), dst=os.path.join(BASE_DIR, ".temp"
     """copy front-end files and minify HTML, JavaScript, and CSS"""
     LOGGER.info("Copying and minifying files from <%s> to <%s>...", src, dst)
     django.core.management.call_command(
-        "minify", src, dst, delete=True, exclude_dot=True
+        "minify",
+        src,
+        dst,
+        delete=True,
+        exclude_dot=True,
     )
 
 
@@ -1873,7 +1918,15 @@ def lintshell(base_dir=BASE_DIR):
 def lintdocker(base_dir=BASE_DIR):
     """Lint Dockerfiles."""
     execute(
-        "find", base_dir, "-name", "Dockerfile*", "-ls", "-exec", "hadolint", "{}", ";"
+        "find",
+        base_dir,
+        "-name",
+        "Dockerfile*",
+        "-ls",
+        "-exec",
+        "hadolint",
+        "{}",
+        ";",
     )
 
 

@@ -88,9 +88,9 @@ class PermissionsModelViewSet(ModelViewSet):
 class GamesActionViewSet(PermissionsModelViewSet):
     """add a games action"""
 
-    # pylint: disable=unused-argument,invalid-name
+    # pylint: disable=invalid-name,redefined-builtin,unused-argument
     @action(detail=True)
-    def games(self, request, pk=None):
+    def games(self, request, pk=None, format=None):
         """find all games"""
 
         obj = self.get_object()
@@ -476,13 +476,14 @@ class GameViewSet(PermissionsModelViewSet):
 
         return recommender.recommend_similar(games=like, items=games)
 
+    # pylint: disable=redefined-builtin,unused-argument
     @action(
         detail=False,
         methods=("GET", "POST"),
         permission_classes=(AlwaysAllowAny,),
         pagination_class=BGGParamsPagination,
     )
-    def recommend(self, request):
+    def recommend(self, request, format=None):
         """recommend games"""
 
         site = request.query_params.get("site")
@@ -627,7 +628,7 @@ class GameViewSet(PermissionsModelViewSet):
         permission_classes=(AlwaysAllowAny,),
         pagination_class=BGAParamsPagination,
     )
-    def recommend_bga(self, request):
+    def recommend_bga(self, request, format=None):
         """recommend games with Board Game Atlas data"""
 
         path = getattr(settings, "BGA_RECOMMENDER_PATH", None)
@@ -664,7 +665,7 @@ class GameViewSet(PermissionsModelViewSet):
 
     # pylint: disable=invalid-name
     @action(detail=True)
-    def similar(self, request, pk=None):
+    def similar(self, request, pk=None, format=None):
         """find games similar to this game"""
 
         site = request.query_params.get("site")
@@ -709,7 +710,7 @@ class GameViewSet(PermissionsModelViewSet):
 
     # pylint: disable=unused-argument,invalid-name
     @action(detail=True)
-    def similar_bga(self, request, pk=None):
+    def similar_bga(self, request, pk=None, format=None):
         """find games similar to this game with BGA data"""
 
         path = getattr(settings, "BGA_RECOMMENDER_PATH", None)
@@ -730,7 +731,7 @@ class GameViewSet(PermissionsModelViewSet):
         )
 
     @action(detail=True)
-    def rankings(self, request, pk=None):
+    def rankings(self, request, pk=None, format=None):
         """Find historical rankings of a game."""
 
         filters = {
@@ -751,7 +752,7 @@ class GameViewSet(PermissionsModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False)
-    def history(self, request):
+    def history(self, request, format=None):
         """History of the top rankings."""
 
         top = parse_int(request.query_params.get("top")) or 100
@@ -797,7 +798,7 @@ class GameViewSet(PermissionsModelViewSet):
 
     # pylint: disable=no-self-use
     @action(detail=False)
-    def updated_at(self, request):
+    def updated_at(self, request, format=None):
         """Get date of last model update."""
         updated_at = model_updated_at()
         if not updated_at:
@@ -805,12 +806,12 @@ class GameViewSet(PermissionsModelViewSet):
         return Response({"updated_at": updated_at})
 
     @action(detail=False)
-    def version(self, request):
+    def version(self, request, format=None):
         """Get project and server version."""
         return Response(server_version())
 
     @action(detail=False)
-    def stats(self, request):
+    def stats(self, request, format=None):
         """get games stats"""
 
         result = {"updated_at": model_updated_at()}
@@ -860,9 +861,9 @@ class PersonViewSet(PermissionsModelViewSet):
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
 
-    # pylint: disable=unused-argument,invalid-name
+    # pylint: disable=invalid-name,redefined-builtin,unused-argument
     @action(detail=True)
-    def games(self, request, pk=None):
+    def games(self, request, pk=None, format=None):
         """find all games for a person"""
 
         person = self.get_object()
@@ -931,9 +932,9 @@ class UserViewSet(PermissionsModelViewSet):
     lookup_url_kwarg = "pk"
     stats_sites = GameViewSet.stats_sites
 
-    # pylint: disable=unused-argument,invalid-name
+    # pylint: disable=invalid-name,redefined-builtin,unused-argument
     @action(detail=True)
-    def stats(self, request, pk=None):
+    def stats(self, request, pk=None, format=None):
         """get user stats"""
         user = self.get_object()
 
@@ -1015,8 +1016,9 @@ class RankingViewSet(PermissionsModelViewSet):
         "date",
     )
 
+    # pylint: disable=redefined-builtin,unused-argument
     @action(detail=False)
-    def dates(self, request):
+    def dates(self, request, format=None):
         """Find all available dates with rankings."""
 
         query_set = self.get_queryset().order_by("ranking_type", "date")
@@ -1027,9 +1029,8 @@ class RankingViewSet(PermissionsModelViewSet):
 
         return Response(query_set.values("ranking_type", "date").distinct())
 
-    # pylint: disable=unused-argument
     @action(detail=False)
-    def games(self, request):
+    def games(self, request, format=None):
         """Similar to self.list(), but with full game details."""
 
         fat = parse_bool(next(_extract_params(request, "fat"), None))
