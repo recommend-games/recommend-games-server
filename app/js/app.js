@@ -23,7 +23,7 @@ rgApp.constant('MAINTENANCE_MODE', false)
     .constant('DEFAULT_IMAGE', 'assets/android-chrome-512x512.png')
     .constant('SITE_DESCRIPTION', 'Top-rated board games as evaluated by our recommendation engine. ' +
         'Find the best board and card games with personal recommendations for your taste!')
-    .constant('GA_TRACKING_ID', 'UA-128891980-1')
+    // .constant('GA_TRACKING_ID', 'UA-128891980-1')
     .constant('FAQ_URL', '/assets/faq.json')
     .constant('BGA_CLIENT_ID', '8jfqHypg2l')
     .constant('BGA_API_URL', 'https://api.boardgameatlas.com/api/')

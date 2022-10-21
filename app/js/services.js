@@ -11,12 +11,12 @@ rgApp.factory('gamesService', function gamesService(
     $http,
     $q,
     $sessionStorage,
-    $window,
+    // $window,
     API_URL,
     APP_TITLE,
     CANONICAL_URL,
     DEFAULT_IMAGE,
-    GA_TRACKING_ID,
+    // GA_TRACKING_ID,
     SITE_DESCRIPTION
 ) {
     var $ = angular.element,
@@ -674,9 +674,9 @@ rgApp.factory('gamesService', function gamesService(
             '<meta property="og:url" content="' + canonical.url + '" />'
         );
 
-        if (GA_TRACKING_ID && $window.gtag) {
-            $window.gtag('config', GA_TRACKING_ID, {'page_path': '/' + canonical.path});
-        }
+        // if (GA_TRACKING_ID && $window.gtag) {
+        //     $window.gtag('config', GA_TRACKING_ID, {'page_path': '/' + canonical.path});
+        // }
 
         return canonical;
     };
