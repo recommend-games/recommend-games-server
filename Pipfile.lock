@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1e51844d870e4ba9ea9b4d1837ef5b98c9a3607e2f93d2261a3c59620bc51d87"
+            "sha256": "d2a596bade58412506eeb589fda28f23f40fbc7d14c0c0c28606de524c5ab371"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -701,12 +701,11 @@
         },
         "prettytable": {
             "hashes": [
-                "sha256:2d5460dc9db74a32bcc8f9f67de68b2c4f4d2f01fa3bd518764c69156d9cacd9",
-                "sha256:853c116513625c738dc3ce1aee148b5b5757a86727e67eff6502c7ca59d43c36",
-                "sha256:a53da3b43d7a5c229b5e3ca2892ef982c46b7923b51e98f0db49956531211c4f"
+                "sha256:0d23ff81e165077d93367e1379d97893c7a51541483d25bad45b9647660ef06f",
+                "sha256:7d7dd84d0b206f2daac4471a72f299d6907f34516064feb2838e333a4e2567bd"
             ],
             "index": "pypi",
-            "version": "==0.7.2"
+            "version": "==3.4.1"
         },
         "proto-plus": {
             "hashes": [
@@ -1003,6 +1002,13 @@
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5' and python_version < '4'",
             "version": "==1.26.12"
+        },
+        "wcwidth": {
+            "hashes": [
+                "sha256:beb4802a9cebb9144e99086eff703a642a13d6a0052920003a230f3294bbe784",
+                "sha256:c4d647b99872929fdb7bdcaa4fbe7f01413ed3d98077df798530e5b04f116c83"
+            ],
+            "version": "==0.2.5"
         },
         "werkzeug": {
             "hashes": [
@@ -3035,12 +3041,11 @@
         },
         "prettytable": {
             "hashes": [
-                "sha256:2d5460dc9db74a32bcc8f9f67de68b2c4f4d2f01fa3bd518764c69156d9cacd9",
-                "sha256:853c116513625c738dc3ce1aee148b5b5757a86727e67eff6502c7ca59d43c36",
-                "sha256:a53da3b43d7a5c229b5e3ca2892ef982c46b7923b51e98f0db49956531211c4f"
+                "sha256:0d23ff81e165077d93367e1379d97893c7a51541483d25bad45b9647660ef06f",
+                "sha256:7d7dd84d0b206f2daac4471a72f299d6907f34516064feb2838e333a4e2567bd"
             ],
             "index": "pypi",
-            "version": "==0.7.2"
+            "version": "==3.4.1"
         },
         "prompt-toolkit": {
             "hashes": [

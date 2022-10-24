@@ -20,7 +20,6 @@ markdown = "*"
 pandas = "*"
 prettytable = "*"
 pytility = {extras = ["dates"], version = "*"}
-turicreate = "*"
 whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
