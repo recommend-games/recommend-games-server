@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "d2a596bade58412506eeb589fda28f23f40fbc7d14c0c0c28606de524c5ab371"
+            "sha256": "a3603424aa14963a26d5e5a62c750ab95e80a76ff330b58589330e8427880412"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -970,22 +970,6 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==2.0.1"
-        },
-        "turicreate": {
-            "hashes": [
-                "sha256:008dc890864867c056785b9404d2f76ba168712748967c181f01c77d68a1ddac",
-                "sha256:1789a0adb0a93fc1e1c284c77b39dffffa3140cd16dad44c60c1f27797a18e3d",
-                "sha256:2e5bf9e8ee41d4812b1b48d8c75432341f9314f6c1ea7133f097d2163006e959",
-                "sha256:3a0664240aec3256557f8e4b55cdb332118d22a24bfca6085857b86ca6ad9de2",
-                "sha256:423a1462c88b1a87d328a9b931f3d4180df1b841191938ed9af1deaad6b36a55",
-                "sha256:526f43ef975afa525072a6d10d9b4a64da036f16d79e3693000c9c7109fcdc22",
-                "sha256:64855b34d02573b1311d6f87f774a67032b20c0c9dbf8878e4d2e04071a25d88",
-                "sha256:6f4fd9227dd5ce3972d87c67abce4e9e74906de0820a63f4ef77c232821e283a",
-                "sha256:956aa0185d69937e11eb8584540fb69987f300c31e73ed65d34cc17405c1c3cc",
-                "sha256:ac52100d0f3563dd78467603bfc038fa15ac2896b3a3edf99b7eff8c6d45aba2"
-            ],
-            "index": "pypi",
-            "version": "==6.4.1"
         },
         "typing-extensions": {
             "hashes": [

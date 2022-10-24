@@ -24,7 +24,6 @@ whitenoise = {version = "*", extras = ["brotli"]}
 
 [dev-packages]
 black = "*"
-board-game-recommender = {version = ">=3.0.0", extras = ["full", "trust"]}
 board-game-scraper = {version = ">=2.11.3", extras = ["cloud"]}
 board-game-utils = "*"
 csvkit = "*"
@@ -49,3 +48,4 @@ scipy = "==1.7.3" # should match version used for kennerspiel.joblib
 smart-open = {version = ">=1.8.1", extras = ["all"]}
 snaptime = "*"
 tqdm = "*"
+turicreate = "*"
