@@ -7,7 +7,7 @@ verify_ssl = true
 python_version = "3.7"
 
 [packages]
-board-game-recommender = {extras = ["light"], version = ">=3.0.0"}
+board-game-recommender = {version = ">=3.0.0", extras = ["light"]}
 decorator = "*"
 django = ">=3.1.2"
 django-extensions = "*"
@@ -19,13 +19,13 @@ gunicorn = "*"
 markdown = "*"
 pandas = "*"
 prettytable = "*"
-pytility = {extras = ["dates"], version = "*"}
-whitenoise = {extras = ["brotli"], version = "*"}
+pytility = {version = "*", extras = ["dates"]}
+whitenoise = {version = "*", extras = ["brotli"]}
 
 [dev-packages]
 black = "*"
-board-game-recommender = {extras = ["full", "trust"], version = ">=3.0.0"}
-board-game-scraper = {extras = ["cloud"], version = ">=2.11.3"}
+board-game-recommender = {version = ">=3.0.0", extras = ["full", "trust"]}
+board-game-scraper = {version = ">=2.11.3", extras = ["cloud"]}
 board-game-utils = "*"
 csvkit = "*"
 dedupe = ">=2.0.6"
@@ -46,6 +46,6 @@ requests = "*"
 rjsmin = "*"
 scikit-learn = "==1.0.2" # should match version used for kennerspiel.joblib
 scipy = "==1.7.3" # should match version used for kennerspiel.joblib
-smart-open = {extras = ["all"], version = ">=1.8.1"}
+smart-open = {version = ">=1.8.1", extras = ["all"]}
 snaptime = "*"
 tqdm = "*"
