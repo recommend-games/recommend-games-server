@@ -168,7 +168,7 @@ def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
             LOGGER.info("Nothing to commit...")
 
         try:
-            execute("git", "push")
+            execute("git", "push", "framagit", "master")
         except SystemExit:
             LOGGER.exception("Unable to push...")
 
