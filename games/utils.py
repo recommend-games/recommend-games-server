@@ -42,15 +42,23 @@ def load_recommender(path, site="bgg"):
     if not path:
         return None
     try:
+        if site == "light":
+            from board_game_recommender import LightGamesRecommender
+
+            return LightGamesRecommender.from_npz(path)
+
         if site == "bga":
             from board_game_recommender import BGARecommender
 
             return BGARecommender.load(path=path)
+
         from board_game_recommender import BGGRecommender
 
         return BGGRecommender.load(path=path)
+
     except Exception:
         LOGGER.exception("unable to load recommender model from <%s>", path)
+
     return None
 
 
