@@ -7,7 +7,7 @@ verify_ssl = true
 python_version = "3.7"
 
 [packages]
-board-game-recommender = {version = ">=3.0.0", extras = ["light"]}
+board-game-recommender = {version = ">=3.1.0", extras = ["light"]}
 decorator = "*"
 django = ">=3.1.2"
 django-extensions = "*"
