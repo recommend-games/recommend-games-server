@@ -39,6 +39,7 @@ def serialize_date(date, tzinfo=None):
 @lru_cache(maxsize=8)
 def load_recommender(path, site="bgg"):
     """load recommender from given path"""
+
     if not path:
         return None
 
@@ -69,12 +70,15 @@ def load_recommender(path, site="bgg"):
 @lru_cache(maxsize=8)
 def pubsub_client():
     """Google Cloud PubSub client"""
+
     try:
         from google.cloud import pubsub
 
         return pubsub.PublisherClient()
+
     except Exception:
         LOGGER.exception("unable to initialise PubSub client")
+
     return None
 
 
@@ -188,7 +192,10 @@ def count_files(path, glob=None) -> int:
 
 
 def count_lines_and_files(
-    paths_lines=None, paths_files=None, line_glob=None, file_glob=None
+    paths_lines=None,
+    paths_files=None,
+    line_glob=None,
+    file_glob=None,
 ) -> dict:
     """Counts lines and files in the given paths."""
 
