@@ -510,8 +510,12 @@ class GameViewSet(PermissionsModelViewSet):
                     topic=settings.PUBSUB_QUEUE_TOPIC_USERS,
                 )
 
-        path = getattr(settings, "RECOMMENDER_PATH", None)
-        recommender = load_recommender(path, "bgg")
+        path_full = getattr(settings, "RECOMMENDER_PATH", None)
+        path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
+        recommender = load_recommender(path=path_full, site="bgg") or load_recommender(
+            path=path_light,
+            site="light",
+        )
 
         if recommender is None:
             return self.list(request)
@@ -537,7 +541,7 @@ class GameViewSet(PermissionsModelViewSet):
             else self._recommend_similar(like=like, recommender=recommender)
         )
 
-        del like, path, recommender
+        del like, path_full, path_light, recommender
 
         page = self.paginate_queryset(recommendation)
         if page is None:
@@ -594,7 +598,6 @@ class GameViewSet(PermissionsModelViewSet):
             else Response(serializer.data)
         )
 
-    # pylint: disable=no-self-use
     def _recommend_group_rating_bga(self, users, recommender, params):
         import turicreate as tc
 
@@ -632,7 +635,10 @@ class GameViewSet(PermissionsModelViewSet):
         """recommend games with Board Game Atlas data"""
 
         path = getattr(settings, "BGA_RECOMMENDER_PATH", None)
-        recommender = load_recommender(path, "bga")
+        recommender = load_recommender(
+            path=path,
+            site="bga",
+        )
 
         if recommender is None:
             return self.list(request)
@@ -673,14 +679,18 @@ class GameViewSet(PermissionsModelViewSet):
         if site == "bga":
             return self.similar_bga(request, pk)
 
-        path = getattr(settings, "RECOMMENDER_PATH", None)
-        recommender = load_recommender(path)
+        path_full = getattr(settings, "RECOMMENDER_PATH", None)
+        path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
+        recommender = load_recommender(path=path_full, site="bgg") or load_recommender(
+            path=path_light,
+            site="light",
+        )
 
         if recommender is None:
             raise NotFound(f"cannot find similar games to <{pk}>")
 
         games = recommender.similar_games(parse_int(pk), num_games=0)
-        del recommender
+        del path_full, path_light, recommender
 
         page = self.paginate_queryset(games)
         if page is None:
@@ -714,7 +724,10 @@ class GameViewSet(PermissionsModelViewSet):
         """find games similar to this game with BGA data"""
 
         path = getattr(settings, "BGA_RECOMMENDER_PATH", None)
-        recommender = load_recommender(path, "bga")
+        recommender = load_recommender(
+            path=path,
+            site="bga",
+        )
 
         if recommender is None:
             raise NotFound(f"cannot find similar games to <{pk}>")
@@ -796,7 +809,6 @@ class GameViewSet(PermissionsModelViewSet):
         ]
         return Response(data)
 
-    # pylint: disable=no-self-use
     @action(detail=False)
     def updated_at(self, request, format=None):
         """Get date of last model update."""

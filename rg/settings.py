@@ -160,6 +160,7 @@ REST_PROXY = {"HOST": "https://news.recommend.games"}
 
 RECOMMENDER_PATH = os.path.join(DATA_DIR, "recommender_bgg")
 BGA_RECOMMENDER_PATH = os.path.join(DATA_DIR, "recommender_bga")
+LIGHT_RECOMMENDER_PATH = os.path.join(DATA_DIR, "recommender_light.npz")
 STAR_PERCENTILES = (0.165, 0.365, 0.615, 0.815, 0.915, 0.965, 0.985, 0.995)
 
 PUBSUB_PUSH_ENABLED = True
