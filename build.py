@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Pynt build file.
@@ -23,13 +22,11 @@ import logging
 import os
 import shutil
 import sys
-
 from datetime import timedelta, timezone
 from functools import lru_cache
 from pathlib import Path
 
 import django
-
 from board_game_recommender import BGARecommender, BGGRecommender, LightGamesRecommender
 from dotenv import load_dotenv
 from pynt import task

@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-
 """ views """
 
 import json
 import logging
-
 from datetime import timezone
 from functools import reduce
 from itertools import chain
@@ -12,7 +9,7 @@ from operator import or_
 from typing import Callable, Iterable, Optional, Union
 
 from django.conf import settings
-from django.db.models import Count, Q, Min
+from django.db.models import Count, Min, Q
 from django.shortcuts import redirect
 from django.utils.timezone import now
 from django_filters import FilterSet
@@ -28,9 +25,9 @@ from pytility import (
 )
 from rest_framework.decorators import action
 from rest_framework.exceptions import (
+    MethodNotAllowed,
     NotAuthenticated,
     NotFound,
-    MethodNotAllowed,
     PermissionDenied,
 )
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -59,8 +56,8 @@ from .serializers import (
     GameTypeSerializer,
     MechanicSerializer,
     PersonSerializer,
-    RankingSerializer,
     RankingFatSerializer,
+    RankingSerializer,
     UserSerializer,
 )
 from .utils import load_recommender, model_updated_at, pubsub_push, server_version
@@ -552,6 +549,7 @@ class GameViewSet(PermissionsModelViewSet):
             paginate = True
         del page
 
+        # TODO different way to iterate over recommendation if pandas
         recommendation = {game["bgg_id"]: game for game in recommendation}
         queryset = self.filter_queryset(self.get_queryset())
         if include:

@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-
 """ generate a sitemap """
 
 import logging
 import sys
-
 from datetime import datetime
 from itertools import islice
 

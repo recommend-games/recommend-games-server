@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-
 """ Minify static files """
 
 import logging
 import os
 import re
 import sys
-
 from functools import partial
 from shutil import copyfileobj, rmtree
 
