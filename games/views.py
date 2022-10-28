@@ -8,6 +8,7 @@ from itertools import chain
 from operator import or_
 from typing import Callable, Iterable, Optional, Union
 
+import pandas as pd
 from django.conf import settings
 from django.db.models import Count, Min, Q
 from django.shortcuts import redirect
@@ -406,7 +407,7 @@ class GameViewSet(PermissionsModelViewSet):
         exclude = self._excluded_games(user, params, include, exclude)
         similarity_model = take_first(params.get("model")) == "similarity"
 
-        return recommender.recommend(
+        recommendations = recommender.recommend(
             users=(user,),
             games=games,
             similarity_model=similarity_model,
@@ -414,6 +415,12 @@ class GameViewSet(PermissionsModelViewSet):
             exclude_known=parse_bool(take_first(params.get("exclude_known"))),
             exclude_clusters=parse_bool(take_first(params.get("exclude_clusters"))),
             star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
+        )
+
+        return (
+            recommendations
+            if isinstance(recommendations, pd.DataFrame)
+            else recommendations.to_dataframe()
         )
 
     def _recommend_group_rating(self, users, recommender, params):
@@ -539,6 +546,9 @@ class GameViewSet(PermissionsModelViewSet):
         )
 
         del like, path_full, path_light, recommender
+
+        # TODO make this into a more standardised Pandas DF
+        recommendation = process_recommendations(recommendation)
 
         page = self.paginate_queryset(recommendation)
         if page is None:
