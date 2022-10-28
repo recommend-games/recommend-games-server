@@ -19,9 +19,7 @@ ELM = objectify.ElementMaker(
 
 
 def _url_elements(url, ids, lastmod=None):
-    lastmod = (
-        "{:s}Z".format(datetime.utcnow().isoformat()) if lastmod is None else lastmod
-    )
+    lastmod = f"{datetime.utcnow().isoformat():s}Z" if lastmod is None else lastmod
 
     # pylint: disable=no-member
     yield ELM.url(
