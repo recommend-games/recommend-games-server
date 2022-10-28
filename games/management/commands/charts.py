@@ -1,18 +1,14 @@
-# -*- coding: utf-8 -*-
-
 """Generate board game charts from ratings data."""
 
 import json
 import logging
 import sys
-
 from datetime import datetime, timedelta, timezone
 from itertools import islice, tee
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-
 from dateutil.rrule import MONTHLY, WEEKLY, YEARLY, rrule
 from django.core.management.base import BaseCommand
 from pytility import arg_to_iter, parse_date

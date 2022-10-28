@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """ utils """
 
 import json
@@ -7,7 +5,6 @@ import logging
 import os.path
 import re
 import timeit
-
 from csv import DictWriter
 from datetime import timezone
 from functools import lru_cache, partial
