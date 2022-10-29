@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-
 """Parse a file for foreign references and store those in separate CSVs."""
 
 import csv
 import json
 import logging
 import sys
-
 from pathlib import Path
 from typing import Any, Generator, Optional, Tuple
 

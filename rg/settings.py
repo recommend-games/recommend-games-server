@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """ settings """
 
 import os
-
 from datetime import timezone
 
 from pytility import parse_bool, parse_date

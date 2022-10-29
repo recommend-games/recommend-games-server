@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-
 """ fill database """
 
 import json
 import logging
 import re
 import sys
-
 from collections import defaultdict
 from datetime import timezone
 from functools import partial
@@ -15,7 +12,6 @@ from pathlib import Path
 from typing import Iterable, Optional
 
 import turicreate as tc
-
 from board_game_recommender.utils import percentile_buckets, star_rating
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -33,13 +29,13 @@ LINK_ID_REGEX = re.compile(r"^([a-z]+):(.+)$")
 
 def _load_json(path):
     LOGGER.info("loading JSON from <%s>...", path)
-    with open(path, "r") as json_file:
+    with open(path) as json_file:
         yield from json.load(json_file)
 
 
 def _load_jl(path):
     LOGGER.info("loading JSON lines from <%s>...", path)
-    with open(path, "r") as json_file:
+    with open(path) as json_file:
         for line in json_file:
             yield json.loads(line)
 
@@ -452,7 +448,7 @@ def _parse_link_ids(data, regex=LINK_ID_REGEX):
 def _parse_link_file(file, regex=LINK_ID_REGEX):
     if isinstance(file, str):
         LOGGER.info("loading links from <%s>", file)
-        with open(file, "r") as file_obj:
+        with open(file) as file_obj:
             return _parse_link_file(file_obj, regex)
     data = json.load(file)
     return _parse_link_ids(data, regex)

@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """ URLs """
 
-from django.urls import path, include, re_path
+from django.urls import include, path, re_path
 from rest_framework.routers import DefaultRouter
 from rest_framework_proxy.views import ProxyView
 

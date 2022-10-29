@@ -1,17 +1,13 @@
-# -*- coding: utf-8 -*-
-
 """Extract rankings from Git repositories."""
 
 import json
 import logging
 import os
 import sys
-
 from datetime import timezone
 from itertools import product
 
 import pandas as pd
-
 from django.core.management.base import BaseCommand
 from git import Repo
 from pytility import arg_to_iter

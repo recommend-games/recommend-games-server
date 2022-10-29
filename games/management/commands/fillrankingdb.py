@@ -1,19 +1,15 @@
-# -*- coding: utf-8 -*-
-
 """Parses the ranking CSVs and writes them to the database."""
 
 import csv
 import logging
 import os
 import sys
-
 from datetime import datetime, timezone
 from functools import lru_cache
 from itertools import groupby
 from pathlib import Path
 
 import pandas as pd
-
 from django.core.management.base import BaseCommand
 from pytility import arg_to_iter, batchify, parse_date
 from snaptime import snap
