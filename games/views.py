@@ -407,7 +407,7 @@ class GameViewSet(PermissionsModelViewSet):
         exclude = self._excluded_games(user, params, include, exclude)
         similarity_model = take_first(params.get("model")) == "similarity"
 
-        recommendations = recommender.recommend(
+        return recommender.recommend(
             users=(user,),
             games=games,
             similarity_model=similarity_model,
@@ -415,12 +415,6 @@ class GameViewSet(PermissionsModelViewSet):
             exclude_known=parse_bool(take_first(params.get("exclude_known"))),
             exclude_clusters=parse_bool(take_first(params.get("exclude_clusters"))),
             star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
-        )
-
-        return (
-            recommendations
-            if isinstance(recommendations, pd.DataFrame)
-            else recommendations.to_dataframe()
         )
 
     def _recommend_group_rating(self, users, recommender, params):
@@ -547,8 +541,13 @@ class GameViewSet(PermissionsModelViewSet):
 
         del like, path_full, path_light, recommender
 
-        # TODO make this into a more standardised Pandas DF
-        recommendation = process_recommendations(recommendation)
+        recommendation = (
+            recommendation
+            if isinstance(recommendation, pd.DataFrame)
+            else recommendation.to_dataframe()
+        )
+        recommendation.sort_values("rank", inplace=True)
+        recommendation = list(recommendation.itertuples(index=False))
 
         page = self.paginate_queryset(recommendation)
         if page is None:
@@ -559,8 +558,7 @@ class GameViewSet(PermissionsModelViewSet):
             paginate = True
         del page
 
-        # TODO different way to iterate over recommendation if pandas
-        recommendation = {game["bgg_id"]: game for game in recommendation}
+        recommendation = {game.bgg_id: game for game in recommendation}
         queryset = self.filter_queryset(self.get_queryset())
         if include:
             queryset |= self.get_queryset().filter(bgg_id__in=include)
@@ -568,9 +566,9 @@ class GameViewSet(PermissionsModelViewSet):
 
         for game in games:
             rec = recommendation[game.bgg_id]
-            game.rec_rank = rec["rank"]
-            game.rec_rating = rec["score"] if users else None
-            game.rec_stars = rec.get("stars") if users else None
+            game.rec_rank = int(rec.rank)
+            game.rec_rating = rec.score if users else None
+            game.rec_stars = rec.stars if users and hasattr(rec, "stars") else None
         games = sorted(games, key=lambda game: game.rec_rank)
         del recommendation
 
