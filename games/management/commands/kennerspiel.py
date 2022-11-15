@@ -1,15 +1,11 @@
-# -*- coding: utf-8 -*-
-
 """Calculate Kennerspiel scores and add them to the database."""
 
 import logging
 import sys
-
 from pathlib import Path
 
 import joblib
 import pandas as pd
-
 from django.core.management.base import BaseCommand
 from pytility import parse_int
 from tqdm import tqdm

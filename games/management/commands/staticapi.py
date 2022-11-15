@@ -3,7 +3,6 @@
 import json
 import logging
 import sys
-
 from pathlib import Path
 from typing import Any, Dict, List, Union
 
