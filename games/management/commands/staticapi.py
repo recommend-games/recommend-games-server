@@ -162,12 +162,12 @@ class Command(BaseCommand):
             base_dir=base_dir,
         )
 
-        self.process_model(
-            query_set=users,
-            serializer_class=UserSerializer,
-            base_dir=base_dir,
-            model_name="users",
-        )
+        # self.process_model(
+        #     query_set=users,
+        #     serializer_class=UserSerializer,
+        #     base_dir=base_dir,
+        #     model_name="users",
+        # )
 
         self.process_model(
             query_set=GameType.objects.all(),
