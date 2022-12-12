@@ -10,14 +10,13 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from tqdm import tqdm
 
-from ...models import Category, Game, GameType, Mechanic, User
+from ...models import Category, Game, GameType, Mechanic
 from ...serializers import (
     CategorySerializer,
     GameSerializer,
     GameTypeSerializer,
     MechanicSerializer,
     RankingSerializer,
-    UserSerializer,
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -151,11 +150,11 @@ class Command(BaseCommand):
             "bgg_rank",
             "-avg_rating",
         )
-        users = User.objects.all()  # TODO order
+        # users = User.objects.all()  # TODO order
 
         if max_items:
             games = games[:max_items]
-            users = users[:max_items]
+            # users = users[:max_items]
 
         self.process_games(
             query_set=games,
