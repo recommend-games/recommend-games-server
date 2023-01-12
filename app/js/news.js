@@ -26,8 +26,6 @@ rgApp.controller('NewsController', function NewsController(
             });
     }
 
-    var canonical;
-
     $scope.fetchNews = fetchNews;
 
     fetchNews(0)
@@ -40,8 +38,4 @@ rgApp.controller('NewsController', function NewsController(
     gamesService.setCanonicalUrl($location.path());
 
     newsService.setLastVisit();
-
-    canonical = gamesService.urlAndPath($location.path(), undefined, true);
-    $scope.disqusId = canonical.path;
-    $scope.disqusUrl = canonical.url;
 });
