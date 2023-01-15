@@ -28,8 +28,7 @@ rgApp.controller('ChartsController', function ChartsController(
     chartsPromise = gamesService.getCharts(rankingType, date)
         .then(function (charts) {
             var title = titles[rankingType] + ' for ' + charts.date.format('LL'),
-                path = '/' + _.split($location.path(), '/')[1] + '/' + rankingType + '/' + charts.date.format('YYYY-MM-DD'),
-                canonical;
+                path = '/' + _.split($location.path(), '/')[1] + '/' + rankingType + '/' + charts.date.format('YYYY-MM-DD');
 
             $scope.date = charts.date;
             $scope.games = charts.games;
@@ -39,10 +38,6 @@ rgApp.controller('ChartsController', function ChartsController(
             gamesService.setDescription(title); // TODO
             gamesService.setCanonicalUrl(path);
             gamesService.setImage(_.get(charts, 'games[0].image_url[0]'));
-
-            canonical = gamesService.urlAndPath(path, undefined, true);
-            $scope.disqusId = canonical.path;
-            $scope.disqusUrl = canonical.url;
 
             return charts.date;
         })

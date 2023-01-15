@@ -7,7 +7,6 @@
 var rgApp = angular.module('rgApp', [
     'blockUI',
     'ngAnimate',
-    'ngDisqus',
     'ngRoute',
     'ngStorage',
     'rzModule',
@@ -26,19 +25,14 @@ rgApp.constant('MAINTENANCE_MODE', false)
     .constant('FAQ_URL', '/assets/faq.json')
     .constant('BGA_CLIENT_ID', '8jfqHypg2l')
     .constant('BGA_API_URL', 'https://api.boardgameatlas.com/api/')
-    .constant('DISQUS_SHORT_NAME', 'recommend-games')
     .constant('NEW_RANKING_DATE', moment('2022-02-22'));
 
 rgApp.config(function (
-    $disqusProvider,
     $locationProvider,
     $routeProvider,
-    DISQUS_SHORT_NAME,
     blockUIConfig,
     toastrConfig
 ) {
-    $disqusProvider.setShortname(DISQUS_SHORT_NAME);
-
     $locationProvider
         .html5Mode({
             enabled: false,
