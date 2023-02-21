@@ -1,6 +1,5 @@
 """ Stress test command """
 
-
 import logging
 import os.path
 import random
