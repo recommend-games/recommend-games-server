@@ -1,4 +1,4 @@
-"""TODO."""
+"""Save API responses as static files."""
 
 import json
 import logging
@@ -23,24 +23,29 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    """TODO."""
+    """Save API responses as static files."""
 
-    help = "TODO."
+    help = "Save API responses as static files."
 
-    def add_arguments(self: "Command", parser) -> None:
+    def add_arguments(self, parser) -> None:
         parser.add_argument(
             "--base-dir",
             "-b",
             default=Path(settings.BASE_DIR).parent.resolve()
             / "recommend-games-api"
             / "public",
-            help="TODO",
+            help="base output dir",
         )
-        parser.add_argument("--max-items", "-m", type=int, help="TODO")
+        parser.add_argument(
+            "--max-items",
+            "-m",
+            type=int,
+            help="maximum number of files to be stored for each model",
+        )
 
     # pylint: disable=no-self-use
     def paginated_result(self, results: List) -> Dict:
-        """TODO."""
+        """Mock a paginated API response."""
         return {
             "count": len(results),
             "previous": None,
@@ -51,11 +56,11 @@ class Command(BaseCommand):
     def save_model_instances(
         self,
         *,
-        query_set: "TODO",
-        serializer_class: "TODO",
+        query_set,
+        serializer_class,
         model_dir: Path,
     ) -> None:
-        """TODO."""
+        """Save the model instances as JSON files to the output dir."""
 
         model_dir.mkdir(parents=True, exist_ok=True)
 
@@ -72,12 +77,12 @@ class Command(BaseCommand):
                 )
 
     def process_games(
-        self: "Command",
+        self,
         *,
-        query_set: "TODO",
+        query_set,
         base_dir: Path,
     ) -> None:
-        """TODO."""
+        """Save games and rankings data to the output dir."""
 
         games_dir = base_dir / "games"
         self.save_model_instances(
@@ -103,14 +108,14 @@ class Command(BaseCommand):
                 )
 
     def process_model(
-        self: "Command",
+        self,
         *,
-        query_set: "TODO",
-        serializer_class: "TODO",
+        query_set,
+        serializer_class,
         base_dir: Union[Path, str],
         model_name: str,
     ) -> None:
-        """TODO."""
+        """Save model data to a give output dir."""
 
         base_dir = Path(base_dir).resolve()
         model_path = base_dir / f"{model_name}.json"
@@ -130,7 +135,7 @@ class Command(BaseCommand):
                 sort_keys=True,
             )
 
-    def handle(self: "Command", *args: Any, **kwargs: Any) -> None:
+    def handle(self, *args: Any, **kwargs: Any) -> None:
         logging.basicConfig(
             stream=sys.stderr,
             level=logging.DEBUG if kwargs["verbosity"] > 1 else logging.INFO,
@@ -150,23 +155,14 @@ class Command(BaseCommand):
             "bgg_rank",
             "-avg_rating",
         )
-        # users = User.objects.all()  # TODO order
 
         if max_items:
             games = games[:max_items]
-            # users = users[:max_items]
 
         self.process_games(
             query_set=games,
             base_dir=base_dir,
         )
-
-        # self.process_model(
-        #     query_set=users,
-        #     serializer_class=UserSerializer,
-        #     base_dir=base_dir,
-        #     model_name="users",
-        # )
 
         self.process_model(
             query_set=GameType.objects.all(),
