@@ -1598,6 +1598,16 @@ def fillrankingdb(path=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg")):
 
 
 @task()
+def deduplicate(rankings_path=os.path.join(SCRAPED_DATA_DIR, "rankings")):
+    """Deduplicate rankings files."""
+    rankings_path = Path(rankings_path).resolve()
+    LOGGER.info("Finding sub dirs in <%s>", rankings_path)
+    sub_dirs = (d for d in rankings_path.iterdir() if d.is_dir())
+    paths = (d2 for d1 in sub_dirs for d2 in d1.iterdir() if d2.is_dir())
+    django.core.management.call_command("deduplicate", *paths)
+
+
+@task()
 def updatecount(
     dst=os.path.join(SCRAPED_DATA_DIR, "COUNT.md"),
     template=os.path.join(BASE_DIR, "templates", "COUNT.md"),
@@ -1731,6 +1741,7 @@ def builddb():
     train,
     saverankings,
     builddb,
+    deduplicate,
     updatecount,
     gitupdate,
 )
