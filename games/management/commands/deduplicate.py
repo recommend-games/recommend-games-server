@@ -35,7 +35,6 @@ class Command(BaseCommand):
             format="%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s",
         )
 
-        LOGGER.info(args)
         LOGGER.info(kwargs)
 
         dry_run = kwargs["dry_run"]
