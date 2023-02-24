@@ -2,6 +2,7 @@
 
 Current item count as of **{date}**:
 
+
 ## Games, ratings, etc
 
 * [Board Game Atlas](https://www.boardgameatlas.com/):
@@ -11,8 +12,6 @@ Current item count as of **{date}**:
   * {lc_bgg_GameItem:,d} games
   * {lc_bgg_UserItem:,d} users
   * {lc_bgg_RatingItem:,d} ratings
-  * {lc_bgg_rankings_GameItem:,d} rankings
-  * {lc_bgg_hotness_GameItem:,d} hotness
 * [DBpedia](https://wiki.dbpedia.org/):
   * {lc_dbpedia_GameItem:,d} games
 * [Luding.org](https://luding.org/):
@@ -21,6 +20,7 @@ Current item count as of **{date}**:
   * {lc_spielen_GameItem:,d} games
 * [Wikidata](https://www.wikidata.org/):
   * {lc_wikidata_GameItem:,d} games
+
 
 ## Rankings
 
@@ -33,6 +33,7 @@ Current item count as of **{date}**:
   * {fc_bgg_similarity:,d} similarity rankings
   * {fc_bgg_hotness:,d} hotness
   * {fc_bgg_charts:,d} charts
+
 
 ## News
 
