@@ -23,7 +23,8 @@ pipenv run ./manage.py staticapi \
 
 cd "${STATIC_DIR}"
 git add "${STATIC_DIR}"
-git commit --message "Update <$(cat "${SERVER_DIR}/data/updated_at")>"
+git commit --no-gpg-sign \
+    --message "Update <$(cat "${SERVER_DIR}/data/updated_at")>"
 git push
 
 cd "${SAVE_DIR}"
