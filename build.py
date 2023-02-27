@@ -1559,8 +1559,14 @@ def historicalbggrankings(
     overwrite = parse_bool(overwrite)
 
     with safe_cd(repo):
-        execute("git", "checkout", "master")
-        execute("git", "pull", "--ff-only")
+        try:
+            execute("git", "checkout", "master")
+            execute("git", "pull")
+        except SystemExit:
+            LOGGER.exception(
+                "There was a problem updating BGG rankings repo <%s>",
+                repo,
+            )
 
         for root, _, files in os.walk("."):
             for file in files:
