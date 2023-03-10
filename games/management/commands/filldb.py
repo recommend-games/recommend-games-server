@@ -11,6 +11,7 @@ from itertools import groupby
 from pathlib import Path
 from typing import Iterable, Optional
 
+import jmespath
 import turicreate as tc
 from board_game_recommender.utils import percentile_buckets, star_rating
 from django.conf import settings
@@ -518,7 +519,10 @@ class Command(BaseCommand):
         }
     )
 
-    game_fields_mapping = {"rank": "bgg_rank"}
+    game_fields_mapping = {
+        "rank": "bgg_rank",
+        "image_blurhash": jmespath.compile("[].blurhash").search,
+    }
 
     game_item_mapping = {}
 

@@ -35,6 +35,7 @@ class GameSerializer(ModelSerializer):
 
     alt_name = ListField(child=CharField(), required=False)
     image_url = ListField(child=URLField(), required=False)
+    image_blurhash = ListField(child=CharField(), required=False)
     video_url = ListField(child=URLField(), required=False)
     external_link = ListField(child=URLField(), required=False)
 
