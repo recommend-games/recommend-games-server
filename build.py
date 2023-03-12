@@ -56,6 +56,7 @@ RECOMMENDER_DIR = os.path.abspath(
 SCRAPED_DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "board-game-data"))
 
 DATE_FORMAT_DASH = "%Y-%m-%dT%H-%M-%S"
+DATE_FORMAT_COMPACT = "%Y%m%d-%H%M%S"
 
 MIN_VOTES_ANCHOR_DATE = SETTINGS.MIN_VOTES_ANCHOR_DATE
 MIN_VOTES_SECONDS_PER_STEP = SETTINGS.MIN_VOTES_SECONDS_PER_STEP
@@ -1046,7 +1047,7 @@ def train():
 def _save_ranking(
     recommender,
     dst_dir,
-    file_name="%Y%m%d-%H%M%S.csv",
+    file_name=f"{DATE_FORMAT_COMPACT}.csv",
     similarity_model=False,
 ):
     from games.utils import save_recommender_ranking
@@ -1066,7 +1067,7 @@ def _save_rg_ranking(
     top,
     min_ratings,
     dst_dir,
-    file_name="%Y%m%d-%H%M%S.csv",
+    file_name=f"{DATE_FORMAT_COMPACT}.csv",
 ):
     from board_game_recommender.rankings import calculate_rankings
 
@@ -1119,7 +1120,7 @@ def savebggrankings(
     recommender_path=os.path.join(RECOMMENDER_DIR, ".bgg"),
     ratings_path=Path(SCRAPED_DATA_DIR).resolve() / "scraped" / "bgg_RatingItem.jl",
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg"),
-    file_name="%Y%m%d-%H%M%S.csv",
+    file_name=f"{DATE_FORMAT_COMPACT}.csv",
     top_k_games=100,
     min_ratings=10,
 ):
@@ -1163,7 +1164,7 @@ def savebggrankings(
 def savebgarankings(
     recommender_path=os.path.join(RECOMMENDER_DIR, ".bga"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bga"),
-    file_name="%Y%m%d-%H%M%S.csv",
+    file_name=f"{DATE_FORMAT_COMPACT}.csv",
 ):
     """Take a snapshot of the Board Game Atlas rankings."""
     from games.utils import load_recommender
@@ -1193,7 +1194,7 @@ def saverankings():
 def weeklycharts(
     src_file=Path(SCRAPED_DATA_DIR) / "scraped" / "bgg_RatingItem.jl",
     dst_dir=Path(SCRAPED_DATA_DIR) / "rankings" / "bgg" / "charts",
-    dst_file="%Y%m%d-%H%M%S.csv",
+    dst_file=f"{DATE_FORMAT_COMPACT}.csv",
     overwrite=False,
 ):
     """Generate charts files."""
@@ -1346,7 +1347,13 @@ def dateflag(dst=SETTINGS.MODEL_UPDATED_FILE, date=None):
 
 @task()
 def bggranking(
-    dst=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg", "%Y%m%d-%H%M%S.csv"),
+    dst=os.path.join(
+        SCRAPED_DATA_DIR,
+        "rankings",
+        "bgg",
+        "bgg",
+        f"{DATE_FORMAT_COMPACT}.csv",
+    ),
 ):
     """Saves a snapshot of the BGG rankings."""
     from games.utils import model_updated_at
@@ -1360,7 +1367,7 @@ def bggranking(
 def splitrankings(
     src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_GameItem.jl"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg"),
-    dst_file="%Y%m%d-%H%M%S.csv",
+    dst_file=f"{DATE_FORMAT_COMPACT}.csv",
     overwrite=False,
 ):
     """Split the rankings data as one CSV file per date."""
@@ -1377,7 +1384,7 @@ def splitrankings(
 def splithotness(
     src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_hotness_GameItem.jl"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "hotness"),
-    dst_file="%Y%m%d-%H%M%S.csv",
+    dst_file=f"{DATE_FORMAT_COMPACT}.csv",
     overwrite=False,
 ):
     """Split the hotness data as one CSV file per date."""
@@ -1395,7 +1402,7 @@ def splithotness(
 def splitabstract(
     src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_abstract_GameItem.jl"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_abstract"),
-    dst_file="%Y%m%d-%H%M%S.csv",
+    dst_file=f"{DATE_FORMAT_COMPACT}.csv",
     overwrite=False,
 ):
     """Split the abstract rankings data as one CSV file per date."""
@@ -1412,7 +1419,7 @@ def splitabstract(
 def splitchildren(
     src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_children_GameItem.jl"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_children"),
-    dst_file="%Y%m%d-%H%M%S.csv",
+    dst_file=f"{DATE_FORMAT_COMPACT}.csv",
     overwrite=False,
 ):
     """Split the children rankings data as one CSV file per date."""
@@ -1431,7 +1438,7 @@ def splitcustomizable(
         SCRAPED_DATA_DIR, "scraped", "bgg_rankings_customizable_GameItem.jl"
     ),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_customizable"),
-    dst_file="%Y%m%d-%H%M%S.csv",
+    dst_file=f"{DATE_FORMAT_COMPACT}.csv",
     overwrite=False,
 ):
     """Split the customizable rankings data as one CSV file per date."""
@@ -1448,7 +1455,7 @@ def splitcustomizable(
 def splitfamily(
     src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_family_GameItem.jl"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_family"),
-    dst_file="%Y%m%d-%H%M%S.csv",
+    dst_file=f"{DATE_FORMAT_COMPACT}.csv",
     overwrite=False,
 ):
     """Split the family rankings data as one CSV file per date."""
@@ -1465,7 +1472,7 @@ def splitfamily(
 def splitparty(
     src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_party_GameItem.jl"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_party"),
-    dst_file="%Y%m%d-%H%M%S.csv",
+    dst_file=f"{DATE_FORMAT_COMPACT}.csv",
     overwrite=False,
 ):
     """Split the party rankings data as one CSV file per date."""
@@ -1482,7 +1489,7 @@ def splitparty(
 def splitstrategy(
     src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_strategy_GameItem.jl"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_strategy"),
-    dst_file="%Y%m%d-%H%M%S.csv",
+    dst_file=f"{DATE_FORMAT_COMPACT}.csv",
     overwrite=False,
 ):
     """Split the strategy rankings data as one CSV file per date."""
@@ -1499,7 +1506,7 @@ def splitstrategy(
 def splitthematic(
     src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_thematic_GameItem.jl"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_thematic"),
-    dst_file="%Y%m%d-%H%M%S.csv",
+    dst_file=f"{DATE_FORMAT_COMPACT}.csv",
     overwrite=False,
 ):
     """Split the thematic rankings data as one CSV file per date."""
@@ -1516,7 +1523,7 @@ def splitthematic(
 def splitwar(
     src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_war_GameItem.jl"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_war"),
-    dst_file="%Y%m%d-%H%M%S.csv",
+    dst_file=f"{DATE_FORMAT_COMPACT}.csv",
     overwrite=False,
 ):
     """Split the war rankings data as one CSV file per date."""
@@ -1548,7 +1555,13 @@ def splitall():
 @task()
 def historicalbggrankings(
     repo=os.path.abspath(os.path.join(BASE_DIR, "..", "bgg-ranking-historicals")),
-    dst=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg", "%Y%m%d-%H%M%S.csv"),
+    dst=os.path.join(
+        SCRAPED_DATA_DIR,
+        "rankings",
+        "bgg",
+        "bgg",
+        f"{DATE_FORMAT_COMPACT}.csv",
+    ),
     script=os.path.join(BASE_DIR, "scripts", "ranking.sh"),
     overwrite=False,
 ):
@@ -1890,7 +1903,7 @@ def releaseserver(
     """build, push, and deploy new server version"""
     image = image or f"gcr.io/{GC_PROJECT}/rg-server"
     version = version or _server_version()
-    date = django.utils.timezone.now().strftime("%Y%m%d-%H%M%S")
+    date = django.utils.timezone.now().strftime(DATE_FORMAT_COMPACT)
     LOGGER.info("Deploying server v%s-%s from file <%s>...", version, date, app_file)
     execute(
         "gcloud",
