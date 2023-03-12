@@ -55,6 +55,8 @@ RECOMMENDER_DIR = os.path.abspath(
 )
 SCRAPED_DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "board-game-data"))
 
+DATE_FORMAT_DASH = "%Y-%m-%dT%H-%M-%S"
+
 MIN_VOTES_ANCHOR_DATE = SETTINGS.MIN_VOTES_ANCHOR_DATE
 MIN_VOTES_SECONDS_PER_STEP = SETTINGS.MIN_VOTES_SECONDS_PER_STEP
 
@@ -177,7 +179,7 @@ def merge(in_paths, out_path, **kwargs):
 
     kwargs.setdefault("log_level", "WARN")
     out_path = str(out_path).format(
-        date=django.utils.timezone.now().strftime("%Y-%m-%dT%H-%M-%S"),
+        date=django.utils.timezone.now().strftime(DATE_FORMAT_DASH),
     )
 
     LOGGER.info(
@@ -1574,7 +1576,11 @@ def historicalbggrankings(
                     continue
 
                 date_str, _ = os.path.splitext(file)
-                date = parse_date(date_str, tzinfo=timezone.utc)
+                date = parse_date(
+                    date_str,
+                    tzinfo=timezone.utc,
+                    format_str=DATE_FORMAT_DASH,
+                )
                 if date is None:
                     continue
 
