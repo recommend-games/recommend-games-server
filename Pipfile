@@ -7,20 +7,20 @@ verify_ssl = true
 python_version = "3.7"
 
 [packages]
-board-game-recommender = {version = ">=3.1.0", extras = ["light"]}
+board-game-recommender = {extras = ["light"], version = ">=3.1.0"}
 decorator = "*"
 django = ">=3.1.2"
 django-extensions = "*"
 django-filter = "*"
-django-rest-framework-proxy = {ref = "django3", git = "https://github.com/MarkusShepherd/django-rest-framework-proxy.git"}
+django-rest-framework-proxy = {git = "https://github.com/MarkusShepherd/django-rest-framework-proxy.git", ref = "django3"}
 djangorestframework = "*"
 google-cloud-pubsub = "*"
 gunicorn = "*"
 markdown = "*"
 pandas = "*"
 prettytable = "*"
-pytility = {version = "*", extras = ["dates"]}
-whitenoise = {version = "*", extras = ["brotli"]}
+pytility = {extras = ["dates"], version = "*"}
+whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
 black = "*"
@@ -47,7 +47,7 @@ requests = "*"
 rjsmin = "*"
 scikit-learn = "==1.0.2" # should match version used for kennerspiel.joblib
 scipy = "==1.7.3" # should match version used for kennerspiel.joblib
-smart-open = {version = ">=1.8.1", extras = ["all"]}
+smart-open = {extras = ["all"], version = ">=1.8.1"}
 snaptime = "*"
 tqdm = "*"
 turicreate = "*"
