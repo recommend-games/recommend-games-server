@@ -151,13 +151,6 @@ class BGGParamsPagination(BodyParamsPagination):
     parsers = (to_str, parse_int)
 
 
-class BGAParamsPagination(BodyParamsPagination):
-    """Pagination for /recommend_bga endpoints."""
-
-    keys = ("user", "like")
-    parsers = (to_str, to_str)
-
-
 def _exclude(user=None, ids=None):
     if ids is None:
         return None
@@ -463,11 +456,6 @@ class GameViewSet(PermissionsModelViewSet):
     def recommend(self, request, format=None):
         """recommend games"""
 
-        site = request.query_params.get("site")
-
-        if site == "bga":
-            return self.recommend_bga(request)
-
         users = list(_extract_params(request, "user", str))
         like = list(_extract_params(request, "like", parse_int))
 
@@ -575,86 +563,10 @@ class GameViewSet(PermissionsModelViewSet):
             else Response(serializer.data)
         )
 
-    def _recommend_group_rating_bga(self, users, recommender, params):
-        import turicreate as tc
-
-        users = [user for user in users if user in recommender.known_users]
-        if not users:
-            raise NotFound("none of the users could be found")
-
-        similarity_model = take_first(params.get("model")) == "similarity"
-
-        recommendations = (
-            recommender.recommend(
-                users=users,
-                games=recommender.rated_games,
-                similarity_model=similarity_model,
-                exclude_known=False,
-            )
-            .groupby(
-                key_column_names="bga_id",
-                operations={"score": tc.aggregate.MEAN("score")},
-            )
-            .sort("score", ascending=False)
-        )
-
-        recommendations["rank"] = range(1, len(recommendations) + 1)
-
-        return recommendations
-
-    @action(
-        detail=False,
-        methods=("GET", "POST"),
-        permission_classes=(AlwaysAllowAny,),
-        pagination_class=BGAParamsPagination,
-    )
-    def recommend_bga(self, request, format=None):
-        """recommend games with Board Game Atlas data"""
-
-        path = getattr(settings, "BGA_RECOMMENDER_PATH", None)
-        recommender = load_recommender(
-            path=path,
-            site="bga",
-        )
-
-        if recommender is None:
-            return self.list(request)
-
-        users = list(_extract_params(request, "user", str))
-        like = list(_extract_params(request, "like", str))
-
-        recommendation = (
-            recommender.recommend_similar(games=like)
-            if like and not users
-            else self._recommend_group_rating_bga(
-                users, recommender, dict(request.query_params)
-            )
-            if len(users) > 1
-            else recommender.recommend(
-                users=(take_first(users),),
-                similarity_model=request.query_params.get("model") == "similarity",
-                star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
-            )
-        )
-
-        del path, recommender, users, like
-
-        page = self.paginate_queryset(recommendation)
-        return (
-            self.get_paginated_response(page)
-            if page is not None
-            else Response(list(recommendation[:10]))
-        )
-
     # pylint: disable=invalid-name
     @action(detail=True)
     def similar(self, request, pk=None, format=None):
         """find games similar to this game"""
-
-        site = request.query_params.get("site")
-
-        if site == "bga":
-            return self.similar_bga(request, pk)
 
         path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
         recommender = load_recommender(path=path_light, site="light")
@@ -690,31 +602,6 @@ class GameViewSet(PermissionsModelViewSet):
             self.get_paginated_response(serializer.data)
             if paginate
             else Response(serializer.data)
-        )
-
-    # pylint: disable=unused-argument,invalid-name
-    @action(detail=True)
-    def similar_bga(self, request, pk=None, format=None):
-        """find games similar to this game with BGA data"""
-
-        path = getattr(settings, "BGA_RECOMMENDER_PATH", None)
-        recommender = load_recommender(
-            path=path,
-            site="bga",
-        )
-
-        if recommender is None:
-            raise NotFound(f"cannot find similar games to <{pk}>")
-
-        games = recommender.similar_games(pk, num_games=0)
-
-        del path, recommender
-
-        page = self.paginate_queryset(games)
-        return (
-            self.get_paginated_response(page)
-            if page is not None
-            else Response(list(games[:10]))
         )
 
     @action(detail=True)
