@@ -27,7 +27,7 @@ from functools import lru_cache
 from pathlib import Path
 
 import django
-from board_game_recommender import BGARecommender, BGGRecommender
+from board_game_recommender import BGARecommender, BGGRecommender, LightGamesRecommender
 from dotenv import load_dotenv
 from pynt import task
 from pyntcontrib import execute, safe_cd
@@ -936,6 +936,8 @@ def _train(
         shutil.rmtree(out_path, ignore_errors=True)
         recommender.save(out_path)
 
+    return recommender
+
 
 def _min_votes_from_date(
     first_date,
@@ -985,6 +987,7 @@ def trainbgg(
     games_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_GameItem.jl"),
     ratings_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem.jl"),
     out_path=os.path.join(RECOMMENDER_DIR, ".bgg"),
+    out_path_light=os.path.join(RECOMMENDER_DIR, ".bgg.light.npz"),
     users=None,
     max_iterations=1000,
     min_votes=None,
@@ -1009,7 +1012,7 @@ def trainbgg(
         LOGGER.info("Filter out games with less than %d votes", min_votes)
         filters["num_votes__gte"] = min_votes
 
-    _train(
+    recommender = _train(
         recommender_cls=BGGRecommender,
         games_file=games_file,
         ratings_file=ratings_file,
@@ -1018,6 +1021,10 @@ def trainbgg(
         max_iterations=max_iterations,
         **filters,
     )
+
+    if out_path_light:
+        light = LightGamesRecommender.from_turi_create(recommender.model)
+        light.to_npz(out_path_light)
 
 
 @task()
@@ -1321,6 +1328,16 @@ def cpdirs(
         dst_path = os.path.join(dst_dir, sub_dir)
         LOGGER.info("Copying <%s> to <%s>...", src_path, dst_path)
         shutil.copytree(src_path, dst_path)
+
+
+@task()
+def cplight(
+    src_path=os.path.join(RECOMMENDER_DIR, ".bgg.light.npz"),
+    dst_path=os.path.join(DATA_DIR, "recommender_light.npz"),
+):
+    """Copy a light recommender file."""
+    LOGGER.info("Copying <%s> to <%s>...", src_path, dst_path)
+    shutil.copy2(src_path, dst_path)
 
 
 @task()
@@ -1750,6 +1767,7 @@ def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_00
     fillrankingdb,
     compressdb,
     cpdirs,
+    cplight,
     cpdirsbga,
     sitemap,
 )

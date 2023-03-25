@@ -8,6 +8,7 @@ from itertools import chain
 from operator import or_
 from typing import Callable, Iterable, Optional, Union
 
+import pandas as pd
 from django.conf import settings
 from django.db.models import Count, Min, Q
 from django.shortcuts import redirect
@@ -416,47 +417,26 @@ class GameViewSet(PermissionsModelViewSet):
             star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
         )
 
-    def _recommend_group_rating(self, users, recommender, params):
-        import turicreate as tc
-
+    def _recommend_group_rating(self, users, recommender):
         users = (user.lower() for user in users if user)
         users = [user for user in users if user in recommender.known_users]
         if not users:
             raise NotFound("none of the users could be found")
 
-        games = (
-            frozenset(
-                self.filter_queryset(self.get_queryset())
-                .order_by()
-                .values_list("bgg_id", flat=True)
-            )
-            & recommender.rated_games
-        )
-
-        if not games:
-            return ()
-
-        similarity_model = take_first(params.get("model")) == "similarity"
-
         recommendations = (
-            recommender.recommend(
-                users=users,
-                games=games,
-                similarity_model=similarity_model,
-                # TODO we want to exclude games based on the group's collections, see #228
-                # exclude=(),
-                exclude_known=False,
-            )
-            .groupby(
-                key_column_names="bgg_id",
-                operations={"score": tc.aggregate.MEAN("score")},
-            )
-            .sort("score", ascending=False)
+            recommender.recommend(users=users, exclude_known=False)
+            .xs(axis=1, key="score", level=1)
+            .mean(axis=1)
+            .sort_values(ascending=False)
         )
 
-        recommendations["rank"] = range(1, len(recommendations) + 1)
-
-        return recommendations
+        return pd.DataFrame(
+            index=recommendations.index,
+            data={
+                ("_all", "score"): recommendations,
+                ("_all", "rank"): range(1, len(recommendations) + 1),
+            },
+        )
 
     def _recommend_similar(self, like, recommender):
         games = (
@@ -507,8 +487,8 @@ class GameViewSet(PermissionsModelViewSet):
                     topic=settings.PUBSUB_QUEUE_TOPIC_USERS,
                 )
 
-        path = getattr(settings, "RECOMMENDER_PATH", None)
-        recommender = load_recommender(path, "bgg")
+        path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
+        recommender = load_recommender(path=path_light, site="light")
 
         if recommender is None:
             return self.list(request)
@@ -525,16 +505,20 @@ class GameViewSet(PermissionsModelViewSet):
                 exclude=exclude,
             )
             if len(users) == 1
-            else self._recommend_group_rating(
-                users=users,
-                recommender=recommender,
-                params=dict(request.query_params),
-            )
+            else self._recommend_group_rating(users=users, recommender=recommender)
             if users
-            else self._recommend_similar(like=like, recommender=recommender)
+            else None
         )
 
-        del like, path, recommender
+        del like, path_light, recommender
+
+        if recommendation is None:
+            return self.list(request)
+
+        key = users[0].lower() if len(users) == 1 else "_all"
+        recommendation = recommendation.xs(axis=1, key=key)
+        recommendation.sort_values("rank", inplace=True)
+        recommendation = list(recommendation.itertuples(index=True))
 
         page = self.paginate_queryset(recommendation)
         if page is None:
@@ -545,7 +529,7 @@ class GameViewSet(PermissionsModelViewSet):
             paginate = True
         del page
 
-        recommendation = {game["bgg_id"]: game for game in recommendation}
+        recommendation = {game.Index: game for game in recommendation}
         queryset = self.filter_queryset(self.get_queryset())
         if include:
             queryset |= self.get_queryset().filter(bgg_id__in=include)
@@ -553,9 +537,9 @@ class GameViewSet(PermissionsModelViewSet):
 
         for game in games:
             rec = recommendation[game.bgg_id]
-            game.rec_rank = rec["rank"]
-            game.rec_rating = rec["score"] if users else None
-            game.rec_stars = rec.get("stars") if users else None
+            game.rec_rank = int(rec.rank)
+            game.rec_rating = rec.score if users else None
+            game.rec_stars = rec.stars if users and hasattr(rec, "stars") else None
         games = sorted(games, key=lambda game: game.rec_rank)
         del recommendation
 
@@ -591,7 +575,6 @@ class GameViewSet(PermissionsModelViewSet):
             else Response(serializer.data)
         )
 
-    # pylint: disable=no-self-use
     def _recommend_group_rating_bga(self, users, recommender, params):
         import turicreate as tc
 
@@ -629,7 +612,10 @@ class GameViewSet(PermissionsModelViewSet):
         """recommend games with Board Game Atlas data"""
 
         path = getattr(settings, "BGA_RECOMMENDER_PATH", None)
-        recommender = load_recommender(path, "bga")
+        recommender = load_recommender(
+            path=path,
+            site="bga",
+        )
 
         if recommender is None:
             return self.list(request)
@@ -670,14 +656,14 @@ class GameViewSet(PermissionsModelViewSet):
         if site == "bga":
             return self.similar_bga(request, pk)
 
-        path = getattr(settings, "RECOMMENDER_PATH", None)
-        recommender = load_recommender(path)
+        path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
+        recommender = load_recommender(path=path_light, site="light")
 
         if recommender is None:
             raise NotFound(f"cannot find similar games to <{pk}>")
 
         games = recommender.similar_games(parse_int(pk), num_games=0)
-        del recommender
+        del path_light, recommender
 
         page = self.paginate_queryset(games)
         if page is None:
@@ -695,7 +681,8 @@ class GameViewSet(PermissionsModelViewSet):
         del games
 
         serializer = self.get_serializer(
-            instance=sorted(results, key=lambda game: game.sort_rank), many=True
+            instance=sorted(results, key=lambda game: game.sort_rank),
+            many=True,
         )
         del results
 
@@ -711,7 +698,10 @@ class GameViewSet(PermissionsModelViewSet):
         """find games similar to this game with BGA data"""
 
         path = getattr(settings, "BGA_RECOMMENDER_PATH", None)
-        recommender = load_recommender(path, "bga")
+        recommender = load_recommender(
+            path=path,
+            site="bga",
+        )
 
         if recommender is None:
             raise NotFound(f"cannot find similar games to <{pk}>")
@@ -793,7 +783,6 @@ class GameViewSet(PermissionsModelViewSet):
         ]
         return Response(data)
 
-    # pylint: disable=no-self-use
     @action(detail=False)
     def updated_at(self, request, format=None):
         """Get date of last model update."""

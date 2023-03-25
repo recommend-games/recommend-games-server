@@ -36,30 +36,46 @@ def serialize_date(date, tzinfo=None):
 @lru_cache(maxsize=8)
 def load_recommender(path, site="bgg"):
     """load recommender from given path"""
+
     if not path:
         return None
+
     try:
+        if site == "light":
+            from board_game_recommender import LightGamesRecommender
+
+            LOGGER.info("Trying to load <LightGamesRecommender> from <%s>", path)
+            return LightGamesRecommender.from_npz(path)
+
         if site == "bga":
             from board_game_recommender import BGARecommender
 
+            LOGGER.info("Trying to load <BGARecommender> from <%s>", path)
             return BGARecommender.load(path=path)
+
         from board_game_recommender import BGGRecommender
 
+        LOGGER.info("Trying to load <BGGRecommender> from <%s>", path)
         return BGGRecommender.load(path=path)
+
     except Exception:
         LOGGER.exception("unable to load recommender model from <%s>", path)
+
     return None
 
 
 @lru_cache(maxsize=8)
 def pubsub_client():
     """Google Cloud PubSub client"""
+
     try:
         from google.cloud import pubsub
 
         return pubsub.PublisherClient()
+
     except Exception:
         LOGGER.exception("unable to initialise PubSub client")
+
     return None
 
 
@@ -101,7 +117,7 @@ def pubsub_push(
 def model_updated_at(file_path=settings.MODEL_UPDATED_FILE):
     """latest model update"""
     try:
-        with open(file_path) as file_obj:
+        with open(file_path, encoding="utf-8") as file_obj:
             updated_at = file_obj.read()
         updated_at = normalize_space(updated_at)
         return parse_date(updated_at, tzinfo=timezone.utc)
@@ -123,7 +139,7 @@ def parse_version(version):
 def project_version(file_path=settings.PROJECT_VERSION_FILE):
     """Project version."""
     try:
-        with open(file_path) as file_obj:
+        with open(file_path, encoding="utf-8") as file_obj:
             version = file_obj.read()
         return parse_version(version)
     except Exception:
@@ -161,7 +177,7 @@ def save_recommender_ranking(recommender, dst, similarity_model=False):
 
 def count_lines(path) -> int:
     """Return the line count of a given path."""
-    with open(path) as file:
+    with open(path, encoding="utf-8") as file:
         return sum(1 for _ in file)
 
 
@@ -173,7 +189,10 @@ def count_files(path, glob=None) -> int:
 
 
 def count_lines_and_files(
-    paths_lines=None, paths_files=None, line_glob=None, file_glob=None
+    paths_lines=None,
+    paths_files=None,
+    line_glob=None,
+    file_glob=None,
 ) -> dict:
     """Counts lines and files in the given paths."""
 
@@ -241,7 +260,11 @@ def jl_to_csv(in_path, out_path, columns=None, joiner=","):
         "Reading JSON lines from <%s> and writing CSV to <%s>...", in_path, out_path
     )
 
-    with open(in_path) as in_file, open(out_path, "w") as out_file:
+    with open(in_path, encoding="utf-8") as in_file, open(
+        out_path,
+        "w",
+        encoding="utf-8",
+    ) as out_file:
         if not columns:
             row = next(in_file, None)
             row = _process_row(row, joiner=joiner) if row else {}
