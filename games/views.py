@@ -398,12 +398,10 @@ class GameViewSet(PermissionsModelViewSet):
             return ()
 
         exclude = self._excluded_games(user, params, include, exclude)
-        similarity_model = take_first(params.get("model")) == "similarity"
 
         return recommender.recommend(
             users=(user,),
             games=games,
-            similarity_model=similarity_model,
             exclude=_exclude(user, ids=exclude),
             exclude_known=parse_bool(take_first(params.get("exclude_known"))),
             exclude_clusters=parse_bool(take_first(params.get("exclude_clusters"))),
@@ -430,21 +428,6 @@ class GameViewSet(PermissionsModelViewSet):
                 ("_all", "rank"): range(1, len(recommendations) + 1),
             },
         )
-
-    def _recommend_similar(self, like, recommender):
-        games = (
-            frozenset(
-                self.filter_queryset(self.get_queryset())
-                .order_by()
-                .values_list("bgg_id", flat=True)
-            )
-            & recommender.rated_games
-        )
-
-        if not games:
-            return ()
-
-        return recommender.recommend_similar(games=like, items=games)
 
     # pylint: disable=redefined-builtin,unused-argument
     @action(
@@ -556,47 +539,6 @@ class GameViewSet(PermissionsModelViewSet):
             many=True,
         )
         del games
-
-        return (
-            self.get_paginated_response(serializer.data)
-            if paginate
-            else Response(serializer.data)
-        )
-
-    # pylint: disable=invalid-name
-    @action(detail=True)
-    def similar(self, request, pk=None, format=None):
-        """find games similar to this game"""
-
-        path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
-        recommender = load_recommender(path=path_light, site="light")
-
-        if recommender is None:
-            raise NotFound(f"cannot find similar games to <{pk}>")
-
-        games = recommender.similar_games(parse_int(pk), num_games=0)
-        del path_light, recommender
-
-        page = self.paginate_queryset(games)
-        if page is None:
-            games = games[:10]
-            paginate = False
-        else:
-            games = page
-            paginate = True
-        del page
-
-        games = {game["similar"]: game for game in games}
-        results = self.get_queryset().filter(bgg_id__in=games)
-        for game in results:
-            game.sort_rank = games[game.bgg_id]["rank"]
-        del games
-
-        serializer = self.get_serializer(
-            instance=sorted(results, key=lambda game: game.sort_rank),
-            many=True,
-        )
-        del results
 
         return (
             self.get_paginated_response(serializer.data)
