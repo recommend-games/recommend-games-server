@@ -508,12 +508,8 @@ class GameViewSet(PermissionsModelViewSet):
                     topic=settings.PUBSUB_QUEUE_TOPIC_USERS,
                 )
 
-        path_full = getattr(settings, "RECOMMENDER_PATH", None)
         path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
-        recommender = load_recommender(path=path_full, site="bgg") or load_recommender(
-            path=path_light,
-            site="light",
-        )
+        recommender = load_recommender(path=path_light, site="light")
 
         if recommender is None:
             return self.list(request)
@@ -530,24 +526,17 @@ class GameViewSet(PermissionsModelViewSet):
                 exclude=exclude,
             )
             if len(users) == 1
-            else self._recommend_group_rating(
-                users=users,
-                recommender=recommender,
-                params=dict(request.query_params),
-            )
-            if users
-            else self._recommend_similar(like=like, recommender=recommender)
+            else None
         )
 
-        del like, path_full, path_light, recommender
+        del like, path_light, recommender
 
-        recommendation = (
-            recommendation
-            if isinstance(recommendation, pd.DataFrame)
-            else recommendation.to_dataframe()
-        )
+        if recommendation is None:
+            return self.list(request)
+
+        recommendation = recommendation.xs(axis=1, key=users[0].lower())
         recommendation.sort_values("rank", inplace=True)
-        recommendation = list(recommendation.itertuples(index=False))
+        recommendation = list(recommendation.itertuples(index=True))
 
         page = self.paginate_queryset(recommendation)
         if page is None:
@@ -558,7 +547,7 @@ class GameViewSet(PermissionsModelViewSet):
             paginate = True
         del page
 
-        recommendation = {game.bgg_id: game for game in recommendation}
+        recommendation = {game.Index: game for game in recommendation}
         queryset = self.filter_queryset(self.get_queryset())
         if include:
             queryset |= self.get_queryset().filter(bgg_id__in=include)
