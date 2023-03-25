@@ -417,47 +417,26 @@ class GameViewSet(PermissionsModelViewSet):
             star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
         )
 
-    def _recommend_group_rating(self, users, recommender, params):
-        import turicreate as tc
-
+    def _recommend_group_rating(self, users, recommender):
         users = (user.lower() for user in users if user)
         users = [user for user in users if user in recommender.known_users]
         if not users:
             raise NotFound("none of the users could be found")
 
-        games = (
-            frozenset(
-                self.filter_queryset(self.get_queryset())
-                .order_by()
-                .values_list("bgg_id", flat=True)
-            )
-            & recommender.rated_games
-        )
-
-        if not games:
-            return ()
-
-        similarity_model = take_first(params.get("model")) == "similarity"
-
         recommendations = (
-            recommender.recommend(
-                users=users,
-                games=games,
-                similarity_model=similarity_model,
-                # TODO we want to exclude games based on the group's collections, see #228
-                # exclude=(),
-                exclude_known=False,
-            )
-            .groupby(
-                key_column_names="bgg_id",
-                operations={"score": tc.aggregate.MEAN("score")},
-            )
-            .sort("score", ascending=False)
+            recommender.recommend(users=users, exclude_known=False)
+            .xs(axis=1, key="score", level=1)
+            .mean(axis=1)
+            .sort_values(ascending=False)
         )
 
-        recommendations["rank"] = range(1, len(recommendations) + 1)
-
-        return recommendations
+        return pd.DataFrame(
+            index=recommendations.index,
+            data={
+                ("_all", "score"): recommendations,
+                ("_all", "rank"): range(1, len(recommendations) + 1),
+            },
+        )
 
     def _recommend_similar(self, like, recommender):
         games = (
@@ -526,6 +505,8 @@ class GameViewSet(PermissionsModelViewSet):
                 exclude=exclude,
             )
             if len(users) == 1
+            else self._recommend_group_rating(users=users, recommender=recommender)
+            if users
             else None
         )
 
@@ -534,7 +515,8 @@ class GameViewSet(PermissionsModelViewSet):
         if recommendation is None:
             return self.list(request)
 
-        recommendation = recommendation.xs(axis=1, key=users[0].lower())
+        key = users[0].lower() if len(users) == 1 else "_all"
+        recommendation = recommendation.xs(axis=1, key=key)
         recommendation.sort_values("rank", inplace=True)
         recommendation = list(recommendation.itertuples(index=True))
 
