@@ -66,6 +66,7 @@ class Game(Model):
 
     url = URLField(blank=True, null=True)
     image_url = JSONField(default=list)
+    image_blurhash = JSONField(default=list)
     video_url = JSONField(default=list)
     external_link = JSONField(default=list)
     # list_price = CharField(max_length=100, blank=True, null=True)
