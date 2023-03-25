@@ -674,18 +674,14 @@ class GameViewSet(PermissionsModelViewSet):
         if site == "bga":
             return self.similar_bga(request, pk)
 
-        path_full = getattr(settings, "RECOMMENDER_PATH", None)
         path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
-        recommender = load_recommender(path=path_full, site="bgg") or load_recommender(
-            path=path_light,
-            site="light",
-        )
+        recommender = load_recommender(path=path_light, site="light")
 
         if recommender is None:
             raise NotFound(f"cannot find similar games to <{pk}>")
 
         games = recommender.similar_games(parse_int(pk), num_games=0)
-        del path_full, path_light, recommender
+        del path_light, recommender
 
         page = self.paginate_queryset(games)
         if page is None:
@@ -703,7 +699,8 @@ class GameViewSet(PermissionsModelViewSet):
         del games
 
         serializer = self.get_serializer(
-            instance=sorted(results, key=lambda game: game.sort_rank), many=True
+            instance=sorted(results, key=lambda game: game.sort_rank),
+            many=True,
         )
         del results
 
