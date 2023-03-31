@@ -7,7 +7,7 @@ import sys
 from collections import defaultdict
 from datetime import timezone
 from functools import partial
-from itertools import groupby
+from itertools import combinations, groupby
 from pathlib import Path
 from typing import Iterable, Optional
 
@@ -347,6 +347,61 @@ def _create_references(
     del batches, updates
 
     LOGGER.info("done updating")
+
+
+def _generate_cluster_pairs(model, recommender):
+    for cluster in recommender.clusters:
+        for pk_1, pk_2 in combinations(cluster, 2):
+            instance_1 = model.objects.filter(pk=pk_1).first()
+            instance_2 = model.objects.filter(pk=pk_2).first()
+            if instance_1 and instance_2:
+                yield instance_1, instance_2
+
+
+def _create_clusters(
+    model,
+    recommender_path=getattr(settings, "RECOMMENDER_PATH", None),
+    batch_size=None,
+    dry_run=False,
+):
+    recommender = load_recommender(recommender_path, "bgg")
+
+    if not recommender:
+        return
+
+    LOGGER.info(
+        "Loaded a total of %d clusters from recommender %r",
+        len(recommender.clusters),
+        recommender,
+    )
+
+    cluster_pairs = _generate_cluster_pairs(model, recommender)
+
+    batches = (
+        batchify(
+            cluster_pairs,
+            batch_size,
+        )
+        if batch_size
+        else (cluster_pairs,)
+    )
+
+    for count, batch in enumerate(batches):
+        LOGGER.info("Processing batch #%d...", count + 1)
+        if not dry_run:
+            with atomic():
+                for instance_1, instance_2 in batch:
+                    try:
+                        instance_1.cluster.add(instance_2)
+                        instance_1.save()
+                    except Exception:
+                        LOGGER.exception(
+                            "an error ocurred when updating %r and %r",
+                            instance_1,
+                            instance_2,
+                        )
+
+    LOGGER.info("Done updating clusters")
 
 
 def _make_secondary_instances(model, secondary, items, **kwargs):
