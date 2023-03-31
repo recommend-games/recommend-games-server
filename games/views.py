@@ -353,6 +353,14 @@ class GameViewSet(PermissionsModelViewSet):
         exclude_play_count = parse_int(take_first(params.get("exclude_play_count")))
         exclude_clusters = parse_bool(take_first(params.get("exclude_clusters")))
 
+        if exclude_clusters:
+            exclude |= frozenset(
+                self.get_queryset()
+                .order_by()
+                .filter(cluster__in=exclude)
+                .values_list("bgg_id", flat=True)
+            )
+
         try:
             queries = [Q(**{field: True}) for field in exclude_fields]
             if exclude_known and exclude_clusters:
