@@ -732,6 +732,13 @@ class Command(BaseCommand):
             dry_run=kwargs["dry_run"],
         )
 
+        _create_clusters(
+            model=Game,
+            recommender_path=kwargs["recommender"],
+            batch_size=kwargs["batch"],
+            dry_run=kwargs["dry_run"],
+        )
+
         if kwargs["collection_paths"]:
             game_pks = frozenset(item.get("bgg_id") for item in items)
             items = _load(*kwargs["collection_paths"], in_format=kwargs["in_format"])
