@@ -326,7 +326,12 @@ class GameViewSet(PermissionsModelViewSet):
         return exclude_ids - include_ids
 
     def _included_games(
-        self, *, recommender, include_ids=None, exclude_ids=None, exclude_clusters=False
+        self,
+        *,
+        recommender,
+        include_ids=None,
+        exclude_ids=None,
+        exclude_clusters=False,
     ):
         include_ids = frozenset(arg_to_iter(include_ids))
         exclude_ids = self._excluded_games(
