@@ -458,7 +458,9 @@ class GameViewSet(PermissionsModelViewSet):
                 recommender=recommender,
                 include_ids=include,
                 exclude_ids=exclude,
-                exclude_clusters=parse_bool(take_first(params.get("exclude_clusters"))),
+                exclude_clusters=parse_bool(
+                    request.query_params.get("exclude_clusters")
+                ),
             )
             if len(users) == 1
             else self._recommend_group_rating(users=users, recommender=recommender)
