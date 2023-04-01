@@ -360,8 +360,10 @@ class GameViewSet(PermissionsModelViewSet):
             return ()
 
         recommendations = recommender.recommend(users=(user,))
-
-        # FIXME Only return recommended games
+        recommendations = recommendations[
+            recommendations.index.isin(include_ids)
+        ].copy()
+        recommendations[(user, "rank")] = range(1, len(recommendations) + 1)
 
         return recommendations
 
