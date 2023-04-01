@@ -1272,7 +1272,7 @@ def filldb(
     django.core.management.call_command(
         "filldb",
         os.path.join(srp_dir, "bgg_GameItem.jl"),
-        collection_paths=[os.path.join(srp_dir, "bgg_RatingItem.jl")],
+        # collection_paths=[os.path.join(srp_dir, "bgg_RatingItem.jl")],
         user_paths=[os.path.join(srp_dir, "bgg_UserItem.jl")],
         in_format="jl",
         batch=100_000,
