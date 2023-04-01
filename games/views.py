@@ -377,17 +377,31 @@ class GameViewSet(PermissionsModelViewSet):
 
         return recommendations
 
-    def _recommend_group_rating(self, users, recommender):
+    def _recommend_group_rating(
+        self,
+        *,
+        users,
+        recommender,
+        include_ids=None,
+        exclude_ids=None,
+        exclude_clusters=False,
+    ):
         users = (user.lower() for user in users if user)
         users = [user for user in users if user in recommender.known_users]
         if not users:
             raise NotFound("none of the users could be found")
 
-        # TODO Include & exclude IDs
+        include_ids = self._included_games(
+            recommender=recommender,
+            include_ids=include_ids,
+            exclude_ids=exclude_ids,
+            exclude_clusters=exclude_clusters,
+        )
 
+        recommendations = recommender.recommend(users=users)
+        recommendations = recommendations[recommendations.index.isin(include_ids)]
         recommendations = (
-            recommender.recommend(users=users)
-            .xs(axis=1, key="score", level=1)
+            recommendations.xs(axis=1, key="score", level=1)
             .mean(axis=1)
             .sort_values(ascending=False)
         )
