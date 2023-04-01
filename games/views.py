@@ -456,6 +456,7 @@ class GameViewSet(PermissionsModelViewSet):
 
         include = frozenset(_extract_params(request, "include", parse_int))
         exclude = frozenset(_extract_params(request, "exclude", parse_int))
+        exclude_clusters = parse_bool(request.query_params.get("exclude_clusters"))
 
         recommendation = (
             self._recommend_rating(
@@ -463,14 +464,18 @@ class GameViewSet(PermissionsModelViewSet):
                 recommender=recommender,
                 include_ids=include,
                 exclude_ids=exclude,
-                exclude_clusters=parse_bool(
-                    request.query_params.get("exclude_clusters")
-                ),
+                exclude_clusters=exclude_clusters,
             )
             if len(users) == 1
-            else self._recommend_group_rating(users=users, recommender=recommender)
+            else self._recommend_group_rating(
+                users=users,
+                recommender=recommender,
+                include_ids=include,
+                exclude_ids=exclude,
+                exclude_clusters=exclude_clusters,
+            )
             if users
-            else None
+            else None  # TODO support <like>
         )
 
         del like, path_light, recommender
@@ -526,10 +531,7 @@ class GameViewSet(PermissionsModelViewSet):
                 topic=settings.PUBSUB_QUEUE_TOPIC_RESPONSES,
             )
 
-        serializer = self.get_serializer(
-            instance=games,
-            many=True,
-        )
+        serializer = self.get_serializer(instance=games, many=True)
         del games
 
         return (
