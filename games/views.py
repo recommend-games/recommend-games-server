@@ -325,19 +325,9 @@ class GameViewSet(PermissionsModelViewSet):
 
         return exclude_ids - include_ids
 
-    def _recommend_rating(
-        self,
-        *,
-        user,
-        recommender,
-        include_ids=None,
-        exclude_ids=None,
-        exclude_clusters=False,
+    def _included_games(
+        self, *, recommender, include_ids=None, exclude_ids=None, exclude_clusters=False
     ):
-        user = user.lower()
-        if user not in recommender.known_users:
-            raise NotFound(f"user <{user}> could not be found")
-
         include_ids = frozenset(arg_to_iter(include_ids))
         exclude_ids = self._excluded_games(
             include_ids=include_ids,
@@ -354,7 +344,27 @@ class GameViewSet(PermissionsModelViewSet):
         # We can only recommend games known to the recommender
         include_ids &= recommender.rated_games
         # Remove all excluded games
-        include_ids -= exclude_ids
+        return include_ids - exclude_ids
+
+    def _recommend_rating(
+        self,
+        *,
+        user,
+        recommender,
+        include_ids=None,
+        exclude_ids=None,
+        exclude_clusters=False,
+    ):
+        user = user.lower()
+        if user not in recommender.known_users:
+            raise NotFound(f"user <{user}> could not be found")
+
+        include_ids = self._included_games(
+            recommender=recommender,
+            include_ids=include_ids,
+            exclude_ids=exclude_ids,
+            exclude_clusters=exclude_clusters,
+        )
 
         if not include_ids:
             return ()
