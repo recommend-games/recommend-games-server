@@ -3,9 +3,7 @@
 import json
 import logging
 from datetime import timezone
-from functools import reduce
 from itertools import chain
-from operator import or_
 from typing import Callable, Iterable, Optional, Union
 
 import pandas as pd
@@ -149,34 +147,6 @@ class BGGParamsPagination(BodyParamsPagination):
 
     keys = ("user", "like")
     parsers = (to_str, parse_int)
-
-
-def _exclude(user=None, ids=None):
-    if ids is None:
-        return None
-
-    try:
-        import turicreate as tc
-    except ImportError:
-        LOGGER.exception("unable to import <turicreate>")
-        return None
-
-    ids = (
-        ids
-        if isinstance(ids, tc.SArray)
-        else tc.SArray(tuple(arg_to_iter(ids)), dtype=int)
-    )
-
-    # pylint: disable=len-as-condition
-    if ids is None or not len(ids):
-        return None
-
-    sframe = tc.SFrame({"bgg_id": ids})
-    sframe["bgg_user_name"] = user
-
-    del tc, ids
-
-    return sframe
 
 
 def _parse_parts(args):
@@ -335,86 +305,65 @@ class GameViewSet(PermissionsModelViewSet):
         "mechanic": (Mechanic.objects.all(), "games", MechanicSerializer),
     }
 
-    def _excluded_games(self, user, params, include=None, exclude=None):
-        params = params or {}
-        params.setdefault("exclude_known", True)
+    def _excluded_games(
+        self,
+        *,
+        include_ids=None,
+        exclude_ids=None,
+        exclude_clusters=False,
+    ):
+        include_ids = frozenset(arg_to_iter(include_ids))
+        exclude_ids = frozenset(arg_to_iter(exclude_ids))
 
-        exclude = frozenset(arg_to_iter(exclude)) | frozenset(
-            _parse_ints(params.get("exclude"))
-        )
-
-        exclude_known = parse_bool(take_first(params.get("exclude_known")))
-        exclude_fields = [
-            field
-            for field in self.collection_fields
-            if parse_bool(take_first(params.get(f"exclude_{field}")))
-        ]
-        exclude_wishlist = parse_int(take_first(params.get("exclude_wishlist")))
-        exclude_play_count = parse_int(take_first(params.get("exclude_play_count")))
-        exclude_clusters = parse_bool(take_first(params.get("exclude_clusters")))
-
-        if exclude_clusters:
-            exclude |= frozenset(
+        if exclude_clusters and exclude_ids:
+            exclude_ids |= frozenset(
                 self.get_queryset()
                 .order_by()
-                .filter(cluster__in=exclude)
+                .filter(cluster__in=exclude_ids)
                 .values_list("bgg_id", flat=True)
             )
 
-        try:
-            queries = [Q(**{field: True}) for field in exclude_fields]
-            if exclude_known and exclude_clusters:
-                queries.append(Q(rating__isnull=False))
-            if exclude_wishlist:
-                queries.append(Q(wishlist__lte=exclude_wishlist))
-            if exclude_play_count:
-                queries.append(Q(play_count__gte=exclude_play_count))
-            if queries:
-                query = reduce(or_, queries)
-                exclude |= frozenset(
-                    User.objects.get(name=user)
-                    .collection_set.order_by()
-                    .filter(query)
-                    .values_list("game_id", flat=True)
-                )
+        return exclude_ids - include_ids
 
-        except Exception:
-            pass
-
-        return tuple(exclude) if not include else tuple(exclude - include)
-
-    def _recommend_rating(self, user, recommender, params, include=None, exclude=None):
+    def _recommend_rating(
+        self,
+        *,
+        user,
+        recommender,
+        include_ids=None,
+        exclude_ids=None,
+        exclude_clusters=False,
+    ):
         user = user.lower()
         if user not in recommender.known_users:
             raise NotFound(f"user <{user}> could not be found")
 
-        params = params or {}
-        include = (
-            frozenset(_parse_ints(params.get("include")))
-            if include is None
-            else include
+        include_ids = frozenset(arg_to_iter(include_ids))
+        exclude_ids = self._excluded_games(
+            include_ids=include_ids,
+            exclude_ids=exclude_ids,
+            exclude_clusters=exclude_clusters,
         )
-        # we should only need this if params are set, but see #90
-        games = include | frozenset(
+
+        # Add all potential games not filtered out by query
+        include_ids |= frozenset(
             self.filter_queryset(self.get_queryset())
             .order_by()
             .values_list("bgg_id", flat=True)
         )
-        games &= recommender.rated_games
+        # We can only recommend games known to the recommender
+        include_ids &= recommender.rated_games
+        # Remove all excluded games
+        include_ids -= exclude_ids
 
-        if not games:
+        if not include_ids:
             return ()
 
-        exclude = self._excluded_games(user, params, include, exclude)
+        recommendations = recommender.recommend(users=(user,))
 
-        return recommender.recommend(
-            users=(user,),
-            games=games,
-            exclude=_exclude(user, ids=exclude),
-            exclude_known=parse_bool(take_first(params.get("exclude_known"))),
-            exclude_clusters=parse_bool(take_first(params.get("exclude_clusters"))),
-            star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
-        )
+        # FIXME Only return recommended games
+
+        return recommendations
 
     def _recommend_group_rating(self, users, recommender):
         users = (user.lower() for user in users if user)
@@ -422,8 +371,10 @@ class GameViewSet(PermissionsModelViewSet):
         if not users:
             raise NotFound("none of the users could be found")
 
+        # TODO Include & exclude IDs
+
         recommendations = (
-            recommender.recommend(users=users, exclude_known=False)
+            recommender.recommend(users=users)
             .xs(axis=1, key="score", level=1)
             .mean(axis=1)
             .sort_values(ascending=False)
@@ -479,9 +430,9 @@ class GameViewSet(PermissionsModelViewSet):
             self._recommend_rating(
                 user=users[0],
                 recommender=recommender,
-                params=dict(request.query_params),
-                include=include,
-                exclude=exclude,
+                include_ids=include,
+                exclude_ids=exclude,
+                exclude_clusters=parse_bool(take_first(params.get("exclude_clusters"))),
             )
             if len(users) == 1
             else self._recommend_group_rating(users=users, recommender=recommender)
