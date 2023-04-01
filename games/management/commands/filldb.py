@@ -606,14 +606,20 @@ class Command(BaseCommand):
     }
 
     collection_item_mapping = {
-        "user_id": lambda item: (
-            item["bgg_user_name"].lower() if item.get("bgg_user_name") else None
-        ),
+        "user_id": lambda item: item.get("bgg_user_name", "").lower() or None,
         "owned": lambda item: bool(
             item.get("bgg_user_owned")
             or item.get("bgg_user_prev_owned")
             or item.get("bgg_user_preordered")
         ),
+    }
+
+    user_fields = ()
+
+    user_fields_mapping = {"updated_at": parse_date}
+
+    user_item_mapping = {
+        "name": lambda item: item.get("bgg_user_name", "").lower() or None,
     }
 
     linked_sites = (
@@ -760,6 +766,18 @@ class Command(BaseCommand):
                 fields=self.collection_fields,
                 fields_mapping=self.collection_fields_mapping,
                 item_mapping=self.collection_item_mapping,
+                batch_size=kwargs["batch"],
+                dry_run=kwargs["dry_run"],
+            )
+
+        elif kwargs["user_paths"]:
+            items = _load(*kwargs["user_paths"], in_format=kwargs["in_format"])
+            _create_from_items(
+                model=User,
+                items=items,
+                fields=self.user_fields,
+                fields_mapping=self.user_fields_mapping,
+                item_mapping=self.user_item_mapping,
                 batch_size=kwargs["batch"],
                 dry_run=kwargs["dry_run"],
             )
