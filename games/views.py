@@ -305,9 +305,10 @@ class GameViewSet(PermissionsModelViewSet):
         "mechanic": (Mechanic.objects.all(), "games", MechanicSerializer),
     }
 
-    def _excluded_games(
+    def _included_games(
         self,
         *,
+        recommender,
         include_ids=None,
         exclude_ids=None,
         exclude_clusters=False,
@@ -323,22 +324,7 @@ class GameViewSet(PermissionsModelViewSet):
                 .values_list("bgg_id", flat=True)
             )
 
-        return exclude_ids - include_ids
-
-    def _included_games(
-        self,
-        *,
-        recommender,
-        include_ids=None,
-        exclude_ids=None,
-        exclude_clusters=False,
-    ):
-        include_ids = frozenset(arg_to_iter(include_ids))
-        exclude_ids = self._excluded_games(
-            include_ids=include_ids,
-            exclude_ids=exclude_ids,
-            exclude_clusters=exclude_clusters,
-        )
+        exclude_ids -= include_ids
 
         # Add all potential games not filtered out by query
         include_ids |= frozenset(
