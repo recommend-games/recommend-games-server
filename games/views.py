@@ -305,16 +305,19 @@ class GameViewSet(PermissionsModelViewSet):
         "mechanic": (Mechanic.objects.all(), "games", MechanicSerializer),
     }
 
-    def _excluded_games(
+    def _included_games(
         self,
         *,
+        recommender,
         include_ids=None,
         exclude_ids=None,
         exclude_clusters=False,
+        exclude_compilations=True,
     ):
         include_ids = frozenset(arg_to_iter(include_ids))
         exclude_ids = frozenset(arg_to_iter(exclude_ids))
 
+        # TODO Those two queries should be combined
         if exclude_clusters and exclude_ids:
             exclude_ids |= frozenset(
                 self.get_queryset()
@@ -323,22 +326,15 @@ class GameViewSet(PermissionsModelViewSet):
                 .values_list("bgg_id", flat=True)
             )
 
-        return exclude_ids - include_ids
+        if exclude_compilations:
+            exclude_ids |= frozenset(
+                self.get_queryset()
+                .order_by()
+                .filter(compilation=True)
+                .values_list("bgg_id", flat=True)
+            )
 
-    def _included_games(
-        self,
-        *,
-        recommender,
-        include_ids=None,
-        exclude_ids=None,
-        exclude_clusters=False,
-    ):
-        include_ids = frozenset(arg_to_iter(include_ids))
-        exclude_ids = self._excluded_games(
-            include_ids=include_ids,
-            exclude_ids=exclude_ids,
-            exclude_clusters=exclude_clusters,
-        )
+        exclude_ids -= include_ids
 
         # Add all potential games not filtered out by query
         include_ids |= frozenset(
@@ -359,6 +355,7 @@ class GameViewSet(PermissionsModelViewSet):
         include_ids=None,
         exclude_ids=None,
         exclude_clusters=False,
+        exclude_compilations=True,
     ):
         user = user.lower()
         if user not in recommender.known_users:
@@ -369,6 +366,7 @@ class GameViewSet(PermissionsModelViewSet):
             include_ids=include_ids,
             exclude_ids=exclude_ids,
             exclude_clusters=exclude_clusters,
+            exclude_compilations=exclude_compilations,
         )
 
         if not include_ids:
@@ -390,6 +388,7 @@ class GameViewSet(PermissionsModelViewSet):
         include_ids=None,
         exclude_ids=None,
         exclude_clusters=False,
+        exclude_compilations=True,
     ):
         users = (user.lower() for user in users if user)
         users = [user for user in users if user in recommender.known_users]
@@ -401,6 +400,7 @@ class GameViewSet(PermissionsModelViewSet):
             include_ids=include_ids,
             exclude_ids=exclude_ids,
             exclude_clusters=exclude_clusters,
+            exclude_compilations=exclude_compilations,
         )
 
         recommendations = recommender.recommend(users=users)
@@ -457,6 +457,9 @@ class GameViewSet(PermissionsModelViewSet):
         include = frozenset(_extract_params(request, "include", parse_int))
         exclude = frozenset(_extract_params(request, "exclude", parse_int))
         exclude_clusters = parse_bool(request.query_params.get("exclude_clusters"))
+        exclude_compilations = parse_bool(
+            request.query_params.get("exclude_compilations", True)
+        )
 
         recommendation = (
             self._recommend_rating(
@@ -465,6 +468,7 @@ class GameViewSet(PermissionsModelViewSet):
                 include_ids=include,
                 exclude_ids=exclude,
                 exclude_clusters=exclude_clusters,
+                exclude_compilations=exclude_compilations,
             )
             if len(users) == 1
             else self._recommend_group_rating(
@@ -473,6 +477,7 @@ class GameViewSet(PermissionsModelViewSet):
                 include_ids=include,
                 exclude_ids=exclude,
                 exclude_clusters=exclude_clusters,
+                exclude_compilations=exclude_compilations,
             )
             if users
             else None  # TODO support <like>
