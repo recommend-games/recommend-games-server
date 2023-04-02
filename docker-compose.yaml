@@ -2,7 +2,9 @@ version: '3.9'
 
 services:
     web:
-        image: 'gcr.io/${GC_PROJECT}/rg-server:latest'
+        image: 'registry.heroku.com/recommend-games/web:latest'
+        build:
+            dockerfile: Dockerfile.web
         container_name: rg
         environment:
             - DEBUG=0
