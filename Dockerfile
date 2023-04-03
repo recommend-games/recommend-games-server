@@ -1,6 +1,6 @@
-FROM gcr.io/google-appengine/python:2022-01-07-133539
+FROM python:3.7.16
+# TODO get rid of Git dependency and use alpine
 
-ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
 ENV MAILTO=''
 ENV PYTHONPATH=.
@@ -9,15 +9,20 @@ RUN mkdir -p /app
 WORKDIR /app
 
 RUN python3.7 -m pip install --no-cache-dir --upgrade \
-        gsutil==5.21 \
-        pipenv==2023.3.20
+    pipenv==2023.3.20
 COPY Pipfile* ./
-RUN pipenv install --deploy --verbose
+RUN pipenv install --system --deploy --verbose
 
-COPY VERSION .boto gs.json startup.sh ./
 COPY rg rg
 COPY games games
 COPY static static
+COPY data data
 
-ENTRYPOINT ["pipenv", "run", "/bin/bash", "startup.sh"]
-CMD ["gunicorn", "--bind", ":8080", "--workers", "1", "--threads", "16", "rg.wsgi:application"]
+RUN useradd -m gamer
+USER gamer
+
+CMD gunicorn \
+    --bind 0.0.0.0:$PORT \
+    --workers 1 \
+    --threads 16 \
+    rg.wsgi:application

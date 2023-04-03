@@ -4,7 +4,7 @@ services:
     web:
         image: registry.heroku.com/recommend-games/web:latest
         build:
-            dockerfile: Dockerfile.web
+            dockerfile: Dockerfile
         container_name: rg
         environment:
             - DEBUG=0
