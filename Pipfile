@@ -10,9 +10,9 @@ python_version = "3.7"
 board-game-recommender = {extras = ["light"], version = ">=3.1.0"}
 decorator = "*"
 django = ">=3.1.2"
+django-api-proxy = "*"
 django-extensions = "*"
 django-filter = "*"
-django-rest-framework-proxy = {git = "https://github.com/MarkusShepherd/django-rest-framework-proxy.git", ref = "django3"}
 djangorestframework = "*"
 google-cloud-pubsub = "*"
 gunicorn = "*"

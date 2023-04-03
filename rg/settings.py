@@ -151,8 +151,8 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
 }
 
-# REST proxy
-REST_PROXY = {"HOST": "https://news.recommend.games"}
+# API proxy
+API_PROXY = {"HOST": "https://news.recommend.games"}
 
 # Custom
 
