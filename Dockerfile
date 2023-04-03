@@ -18,7 +18,7 @@ COPY games games
 COPY static static
 COPY data data
 
-RUN adduser -D myuser
+RUN adduser -D gamer
 USER gamer
 
 CMD gunicorn \
