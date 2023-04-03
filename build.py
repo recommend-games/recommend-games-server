@@ -1331,16 +1331,6 @@ def cpdirs(
 
 
 @task()
-def cplight(
-    src_path=os.path.join(RECOMMENDER_DIR, ".bgg.light.npz"),
-    dst_path=os.path.join(DATA_DIR, "recommender_light.npz"),
-):
-    """Copy a light recommender file."""
-    LOGGER.info("Copying <%s> to <%s>...", src_path, dst_path)
-    shutil.copy2(src_path, dst_path)
-
-
-@task()
 def cpdirsbga(
     src_dir=os.path.join(RECOMMENDER_DIR, ".bga"),
     dst_dir=os.path.join(DATA_DIR, "recommender_bga"),
@@ -1348,6 +1338,16 @@ def cpdirsbga(
 ):
     """copy BGA recommender files"""
     cpdirs(src_dir, dst_dir, sub_dirs)
+
+
+@task()
+def cplight(
+    src_path=os.path.join(RECOMMENDER_DIR, ".bgg.light.npz"),
+    dst_path=os.path.join(DATA_DIR, "recommender_light.npz"),
+):
+    """Copy a light recommender file."""
+    LOGGER.info("Copying <%s> to <%s>...", src_path, dst_path)
+    shutil.copy2(src_path, dst_path)
 
 
 @task()
@@ -1764,11 +1764,11 @@ def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_00
     splitall,
     historicalbggrankings,
     weeklycharts,
-    fillrankingdb,
+    # fillrankingdb,
     compressdb,
-    cpdirs,
+    # cpdirs,
+    # cpdirsbga,
     cplight,
-    cpdirsbga,
     sitemap,
 )
 def builddb():

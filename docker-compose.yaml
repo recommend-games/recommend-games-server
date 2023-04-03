@@ -2,16 +2,15 @@ version: '3.9'
 
 services:
     web:
-        image: 'gcr.io/${GC_PROJECT}/rg-server:latest'
+        image: registry.heroku.com/recommend-games/web:latest
+        build:
+            dockerfile: Dockerfile
         container_name: rg
         environment:
             - DEBUG=0
             - PORT=8080
-            - BOTO_CONFIG=/app/.boto
         ports:
             - 8080:8080
-        volumes:
-            - ./data:/app/data
         restart: 'no'
 
     users:

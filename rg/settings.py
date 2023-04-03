@@ -30,6 +30,7 @@ ALLOWED_HOSTS = [
     "localhost",
     ".recommend.games",
     ".recommended.games",
+    ".herokuapp.com",
 ]
 
 if os.getenv("GC_PROJECT"):
