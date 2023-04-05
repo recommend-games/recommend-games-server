@@ -13,8 +13,9 @@ pipenv install --dev
 Non-Python dependencies:
 
 * Docker
-* Google Cloud SDK: `gcloud components install docker-credential-gcr gsutil`
 * `brew install git sqlite shellcheck hadolint`
+* `brew tap heroku/brew && brew install heroku`
+* `heroku login`
 * `npm install --global htmlhint jslint jshint csslint`
 """
 
@@ -62,8 +63,7 @@ MIN_VOTES_ANCHOR_DATE = SETTINGS.MIN_VOTES_ANCHOR_DATE
 MIN_VOTES_SECONDS_PER_STEP = SETTINGS.MIN_VOTES_SECONDS_PER_STEP
 
 URL_LIVE = "https://recommend.games/"
-GC_PROJECT = os.getenv("GC_PROJECT") or "recommend-games"
-GC_DATA_BUCKET = os.getenv("GC_DATA_BUCKET") or f"{GC_PROJECT}-data"
+HEROKU_APP = os.getenv("HEROKU_APP") or "recommend-games"
 
 GAMES_CSV_COLUMNS = (
     "bgg_id",
@@ -111,8 +111,6 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s",
 )
-
-LOGGER.info("currently in Google Cloud project <%s>", GC_PROJECT)
 
 
 @lru_cache(maxsize=8)
@@ -1241,8 +1239,6 @@ def cleandata(src_dir=DATA_DIR, bk_dir=f"{DATA_DIR}.bk"):
     shutil.rmtree(bk_dir, ignore_errors=True)
     if os.path.exists(src_dir):
         os.rename(src_dir, bk_dir)
-    os.makedirs(os.path.join(src_dir, "recommender_bgg"))
-    os.makedirs(os.path.join(src_dir, "recommender_bga"))
 
 
 @task()
@@ -1593,7 +1589,7 @@ def historicalbggrankings(
     with safe_cd(repo):
         try:
             execute("git", "checkout", "master")
-            execute("git", "pull")
+            execute("git", "pull", "--ff-only")
         except SystemExit:
             LOGGER.exception(
                 "There was a problem updating BGG rankings repo <%s>",
@@ -1764,10 +1760,7 @@ def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_00
     splitall,
     historicalbggrankings,
     weeklycharts,
-    # fillrankingdb,
     compressdb,
-    # cpdirs,
-    # cpdirsbga,
     cplight,
     sitemap,
 )
@@ -1790,47 +1783,6 @@ def builddb():
 )
 def builddbfull():
     """merge, link, train, and build, all relevant files"""
-
-
-def _sync_data(src, dst, retries=0):
-    LOGGER.info("Syncing <%s> with <%s>...", src, dst)
-    try:
-        execute(
-            "gsutil",
-            "-m",
-            "-o",
-            "GSUtil:parallel_process_count=1",
-            "rsync",
-            "-d",
-            "-r",
-            src,
-            dst,
-        )
-
-    except SystemExit:
-        LOGGER.exception("An error occurred when syncing <%s> with <%s>", src, dst)
-
-        if retries <= 0:
-            raise
-
-        LOGGER.info("%d retries left...", retries)
-        _sync_data(src, dst, retries - 1)
-
-
-@task()
-def syncdata(src=os.path.join(DATA_DIR, ""), bucket=GC_DATA_BUCKET, retries=3):
-    """sync data with GCS"""
-    _sync_data(src=src, dst=f"gs://{bucket}/", retries=parse_int(retries))
-
-
-@task(builddb, syncdata)
-def releasedb():
-    """build and release database"""
-
-
-@task(builddbfull, syncdata)
-def releasedbfull():
-    """merge, link, train, build, and release database"""
 
 
 @task()
@@ -1878,9 +1830,10 @@ def collectstatic(delete=True):
 def buildserver(images=None, tags=None):
     """build Docker image"""
 
-    images = images or ("rg-server", f"gcr.io/{GC_PROJECT}/rg-server")
+    images = images or (f"registry.heroku.com/{HEROKU_APP}/web",)
     version = _server_version()
-    tags = tags or ("latest", version)
+    date = django.utils.timezone.now().strftime(DATE_FORMAT_COMPACT)
+    tags = tags or (f"{version}.{date}", "latest")
     all_tags = [f"{i}:{t}" for i in images if i for t in tags if t]
 
     LOGGER.info("Building Docker image with tags %s...", all_tags)
@@ -1904,39 +1857,19 @@ def buildserver(images=None, tags=None):
 
 
 @task()
-def pushserver(image=None, version=None):
+def pushserver(image=None):
     """push Docker image to remote repo"""
-    image = image or f"gcr.io/{GC_PROJECT}/rg-server"
-    version = version or _server_version()
-    LOGGER.info("Pushing Docker image <%s:%s> to repo...", image, version)
-    execute("docker", "push", f"{image}:{version}")
+    image = image or f"registry.heroku.com/{HEROKU_APP}/web"
+    LOGGER.info("Pushing Docker image <%s> to repo…", image)
+    execute("heroku", "container:login")
+    execute("docker", "push", image)
 
 
 @task(buildserver, pushserver)
-def releaseserver(
-    app_file=os.path.join(BASE_DIR, "app.yaml"),
-    image=None,
-    version=None,
-):
+def releaseserver(heroku_app=HEROKU_APP):
     """build, push, and deploy new server version"""
-    image = image or f"gcr.io/{GC_PROJECT}/rg-server"
-    version = version or _server_version()
-    date = django.utils.timezone.now().strftime(DATE_FORMAT_COMPACT)
-    LOGGER.info("Deploying server v%s-%s from file <%s>...", version, date, app_file)
-    execute(
-        "gcloud",
-        "app",
-        "deploy",
-        app_file,
-        "--project",
-        GC_PROJECT,
-        "--image-url",
-        f"{image}:{version}",
-        "--version",
-        f"{version}-{date}",
-        "--promote",
-        "--quiet",
-    )
+    LOGGER.info("Releasing new version of Heroku app <%s>…", heroku_app)
+    execute("heroku", "container:release", f"--app={heroku_app}", "--verbose", "web")
 
 
 @task(builddb, buildserver)
@@ -1949,12 +1882,12 @@ def buildfull():
     """merge, link, train, and build database and server"""
 
 
-@task(releasedb, releaseserver)
+@task(builddb, releaseserver)
 def release():
     """release database and server"""
 
 
-@task(releasedbfull, releaseserver)
+@task(builddbfull, releaseserver)
 def releasefull():
     """merge, link, train, build, and release database and server"""
 
