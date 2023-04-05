@@ -1239,6 +1239,7 @@ def cleandata(src_dir=DATA_DIR, bk_dir=f"{DATA_DIR}.bk"):
     shutil.rmtree(bk_dir, ignore_errors=True)
     if os.path.exists(src_dir):
         os.rename(src_dir, bk_dir)
+    os.makedirs(src_dir)
 
 
 @task()
