@@ -13,6 +13,7 @@ RUN apk add --no-cache g++=12.2.1_git20220924-r4 \
 COPY Pipfile* ./
 RUN pipenv install --system --deploy --verbose
 
+COPY VERSION VERSION
 COPY rg rg
 COPY games games
 COPY static static
