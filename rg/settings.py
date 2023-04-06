@@ -33,9 +33,6 @@ ALLOWED_HOSTS = [
     ".herokuapp.com",
 ]
 
-if os.getenv("GC_PROJECT"):
-    ALLOWED_HOSTS += [f".{os.getenv('GC_PROJECT')}.appspot.com"]
-
 if os.getenv("ADD_LOCAL_HOST"):
     ALLOWED_HOSTS += os.getenv("ADD_LOCAL_HOST").split(",")
 
@@ -160,11 +157,6 @@ RECOMMENDER_PATH = os.path.join(DATA_DIR, "recommender_bgg")
 BGA_RECOMMENDER_PATH = os.path.join(DATA_DIR, "recommender_bga")
 LIGHT_RECOMMENDER_PATH = os.path.join(DATA_DIR, "recommender_light.npz")
 STAR_PERCENTILES = (0.165, 0.365, 0.615, 0.815, 0.915, 0.965, 0.985, 0.995)
-
-PUBSUB_PUSH_ENABLED = True
-PUBSUB_QUEUE_PROJECT = os.getenv("PUBSUB_QUEUE_PROJECT") or os.getenv("GC_PROJECT")
-PUBSUB_QUEUE_TOPIC_USERS = os.getenv("PUBSUB_QUEUE_TOPIC_USERS")
-PUBSUB_QUEUE_TOPIC_RESPONSES = os.getenv("PUBSUB_QUEUE_TOPIC_RESPONSES")
 
 MODEL_UPDATED_FILE = os.path.join(DATA_DIR, "updated_at")
 PROJECT_VERSION_FILE = os.path.join(BASE_DIR, "VERSION")

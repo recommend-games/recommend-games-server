@@ -8,17 +8,13 @@ python_version = "3.7"
 
 [packages]
 board-game-recommender = {extras = ["light"], version = ">=3.1.0"}
-decorator = "*"
 django = ">=3.1.2"
 django-api-proxy = "*"
 django-extensions = "*"
 django-filter = "*"
 djangorestframework = "*"
-google-cloud-pubsub = "*"
 gunicorn = "*"
-markdown = "*"
 pandas = "*"
-prettytable = "*"
 pytility = {extras = ["dates"], version = "*"}
 whitenoise = {extras = ["brotli"], version = "*"}
 
@@ -28,13 +24,16 @@ board-game-recommender = {extras = ["full", "light", "trust"], version = ">=3.1.
 board-game-scraper = {extras = ["cloud"], version = ">=2.11.3"}
 board-game-utils = "*"
 csvkit = "*"
+decorator = "*"
 dedupe = ">=2.0.6"
 gitpython = "*"
 ipython = "*"
 jmespath = "*"
 lxml = "*"
+markdown = "*"
 mypy = "*"
 pre-commit = "*"
+prettytable = "*"
 psutil = "*"
 pylint = "*"
 pynt = "*"
