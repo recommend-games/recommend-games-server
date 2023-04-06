@@ -1,6 +1,5 @@
 """ views """
 
-import json
 import logging
 from datetime import timezone
 from itertools import chain
@@ -59,7 +58,7 @@ from .serializers import (
     RankingSerializer,
     UserSerializer,
 )
-from .utils import load_recommender, model_updated_at, pubsub_push, server_version
+from .utils import load_recommender, model_updated_at, server_version
 
 LOGGER = logging.getLogger(__name__)
 PAGE_SIZE = api_settings.PAGE_SIZE or 25
@@ -435,19 +434,6 @@ class GameViewSet(PermissionsModelViewSet):
         if not users and not like:
             return self.list(request)
 
-        if (
-            settings.PUBSUB_PUSH_ENABLED
-            and settings.PUBSUB_QUEUE_PROJECT
-            and settings.PUBSUB_QUEUE_TOPIC_USERS
-            and users
-        ):
-            for user in users:
-                pubsub_push(
-                    message=user,
-                    project=settings.PUBSUB_QUEUE_PROJECT,
-                    topic=settings.PUBSUB_QUEUE_TOPIC_USERS,
-                )
-
         path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
         recommender = load_recommender(path=path_light, site="light")
 
@@ -515,26 +501,6 @@ class GameViewSet(PermissionsModelViewSet):
             game.rec_stars = rec.stars if users and hasattr(rec, "stars") else None
         games = sorted(games, key=lambda game: game.rec_rank)
         del recommendation
-
-        if (
-            settings.PUBSUB_PUSH_ENABLED
-            and settings.PUBSUB_QUEUE_PROJECT
-            and settings.PUBSUB_QUEUE_TOPIC_RESPONSES
-            and games
-            and games[0].rec_rank == 1
-        ):
-            # log response for first page requests
-            message = {
-                "timestamp": now().isoformat(),
-                "request": dict(request.query_params),
-                "response": [game.bgg_id for game in games[:PAGE_SIZE]],
-                "server_version": server_version(),
-            }
-            pubsub_push(
-                message=json.dumps(message),
-                project=settings.PUBSUB_QUEUE_PROJECT,
-                topic=settings.PUBSUB_QUEUE_TOPIC_RESPONSES,
-            )
 
         serializer = self.get_serializer(instance=games, many=True)
         del games

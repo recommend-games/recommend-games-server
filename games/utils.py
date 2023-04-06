@@ -65,55 +65,6 @@ def load_recommender(path, site="bgg"):
 
 
 @lru_cache(maxsize=8)
-def pubsub_client():
-    """Google Cloud PubSub client"""
-
-    try:
-        from google.cloud import pubsub
-
-        return pubsub.PublisherClient()
-
-    except Exception:
-        LOGGER.exception("unable to initialise PubSub client")
-
-    return None
-
-
-def pubsub_push(
-    *,
-    message,
-    project,
-    topic,
-    encoding="utf-8",
-    **kwargs,
-):
-    """publish message"""
-
-    if not project or not topic:
-        return None
-
-    client = pubsub_client()
-
-    if client is None:
-        return None
-
-    if isinstance(message, str):
-        message = message.encode(encoding)
-    assert isinstance(message, bytes)
-
-    # pylint: disable=no-member
-    path = client.topic_path(project, topic)
-
-    LOGGER.debug("pushing message %r to <%s>", message, path)
-
-    try:
-        return client.publish(topic=path, data=message, **kwargs)
-    except Exception:
-        LOGGER.exception("unable to send message %r", message)
-    return None
-
-
-@lru_cache(maxsize=8)
 def model_updated_at(file_path=settings.MODEL_UPDATED_FILE):
     """latest model update"""
     try:
