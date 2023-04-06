@@ -24,7 +24,6 @@ rgApp.controller('DetailController', function DetailController(
         implementationOf = [],
         implementedBy = [],
         integratesWith = [],
-        similarPromise = gamesService.getSimilarGames($routeParams.id, 1, true),
         startDate = moment().subtract(1, 'year'),
         endDate = moment().isoWeekday(7),
         allRanges = [
@@ -64,8 +63,7 @@ rgApp.controller('DetailController', function DetailController(
             !_.isEmpty($scope.containedIn) ||
             !_.isEmpty($scope.implementationOf) ||
             !_.isEmpty($scope.implementedBy) ||
-            !_.isEmpty($scope.integratesWith) ||
-            !_.isEmpty($scope.similarGames);
+            !_.isEmpty($scope.integratesWith);
         $scope.expandable = !!$scope.implementations;
     }
 
@@ -100,17 +98,6 @@ rgApp.controller('DetailController', function DetailController(
                 return gamesService.getGame(id, false, true)
                     .catch(_.constant());
             });
-
-            similarPromise
-                .then(function (response) {
-                    $scope.similarGames = _(response.results)
-                        .filter(function (game) {
-                            return !_.includes(ids, game.bgg_id);
-                        })
-                        .take(12)
-                        .value();
-                })
-                .then(updateImplementations);
 
             return $q.all(promises);
         })

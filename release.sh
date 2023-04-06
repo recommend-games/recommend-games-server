@@ -10,8 +10,7 @@ export LC_ALL=en_US.utf-8
 export LANG=en_US.utf-8
 
 cd "${SERVER_DIR}"
-# docker login -u _json_key --password-stdin 'https://gcr.io' < 'gs.json'
-pipenv run pynt builddbfull
+pipenv run pynt releasefull
 
 cd "${STATIC_DIR}"
 git rm -rf "${STATIC_DIR}"

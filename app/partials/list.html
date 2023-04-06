@@ -34,16 +34,15 @@
 						role="tab"
 						aria-controls="fetch-game-form"
 						aria-selected="{{ !activePane || activePane == 'bgg' }}"
-						class="nav-item nav-link {{ !activePane || activePane == 'bgg' ? 'active' : '' }}">
+						class="nav-item nav-link active">
 					<abbr title="BoardGameGeek">BGG</abbr> account
 				</a>
 				<a id="select-games-tab"
-						ng-click="showPane('select'); toggleSelection(true)"
 						href=""
 						role="tab"
 						aria-controls="select-games"
 						aria-selected="{{ activePane == 'select' }}"
-						class="nav-item nav-link {{ activePane == 'select' ? 'active' : '' }}">
+						class="nav-item nav-link disabled">
 					<span ng-hide="isEmpty(likedGames)"
 							class="badge badge-primary">
 						{{ likedGames.length }}
@@ -310,7 +309,7 @@
 									id="recommender-similarity"
 									name="recommender-similarity"
 									ng-model="similarity"
-									ng-disabled="!user" />
+									ng-disabled="true" />
 								<span class="slider bg-secondary"></span>
 							</label>
 							<label class="form-check-label form-label-exclude {{ user &amp;&amp; similarity ? 'text-success' : 'text-muted' }} ml-1"
