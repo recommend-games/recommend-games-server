@@ -1756,11 +1756,12 @@ def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_00
 @task(
     cleandata,
     filldb,
-    dateflag,
     kennerspiel,
-    splitall,
-    historicalbggrankings,
-    weeklycharts,
+    dateflag,
+    # TODO Those three steps don't really belong to builddb
+    # splitall,
+    # historicalbggrankings,
+    # weeklycharts,
     compressdb,
     cplight,
     sitemap,
@@ -1834,7 +1835,7 @@ def buildserver(images=None, tags=None):
     images = images or (f"registry.heroku.com/{HEROKU_APP}/web",)
     version = _server_version()
     date = django.utils.timezone.now().strftime(DATE_FORMAT_COMPACT)
-    tags = tags or (f"{version}.{date}", "latest")
+    tags = tags or (f"{version}-{date}", "latest")
     all_tags = [f"{i}:{t}" for i in images if i for t in tags if t]
 
     LOGGER.info("Building Docker image with tags %s...", all_tags)
