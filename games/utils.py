@@ -150,9 +150,12 @@ def project_version(file_path=settings.PROJECT_VERSION_FILE):
 @lru_cache(maxsize=8)
 def server_version(file_path=settings.PROJECT_VERSION_FILE) -> dict:
     """Full server version."""
+    release_version = project_version(file_path=file_path)
+    heroku_version = parse_version(os.getenv("HEROKU_RELEASE_VERSION"))
+    server_version = "-".join(filter(None, (release_version, heroku_version)))
     return {
-        "project_version": project_version(file_path=file_path),
-        "server_version": parse_version(os.getenv("GAE_VERSION")),
+        "project_version": release_version,
+        "server_version": server_version or None,
     }
 
 
