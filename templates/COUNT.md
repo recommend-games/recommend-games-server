@@ -2,7 +2,6 @@
 
 Current item count as of **{date}**:
 
-
 ## Games, ratings, etc
 
 * [Board Game Atlas](https://www.boardgameatlas.com/):
@@ -21,7 +20,6 @@ Current item count as of **{date}**:
 * [Wikidata](https://www.wikidata.org/):
   * {lc_wikidata_GameItem:,d} games
 
-
 ## Rankings
 
 * [Board Game Atlas](https://www.boardgameatlas.com/):
@@ -33,7 +31,6 @@ Current item count as of **{date}**:
   * {fc_bgg_similarity:,d} similarity rankings
   * {fc_bgg_hotness:,d} hotness
   * {fc_bgg_charts:,d} charts
-
 
 ## News
 

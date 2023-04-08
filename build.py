@@ -13,10 +13,11 @@ pipenv install --dev
 Non-Python dependencies:
 
 * Docker
-* `brew install git sqlite shellcheck hadolint`
+* `brew install git sqlite shellcheck hadolint markdownlint-cli`
+* `npm install --global htmlhint jslint jshint csslint`
+* `gem install mdl`
 * `brew tap heroku/brew && brew install heroku`
 * `heroku login`
-* `npm install --global htmlhint jslint jshint csslint`
 """
 
 import logging
@@ -1897,7 +1898,7 @@ def releasefull():
 @task()
 def lintshell(base_dir=BASE_DIR):
     """lint Shell scripts"""
-    execute("find", base_dir, "-name", "*.sh", "-ls", "-exec", "shellcheck", "{}", ";")
+    execute("find", base_dir, "-iname", "*.sh", "-ls", "-exec", "shellcheck", "{}", ";")
 
 
 @task()
@@ -1906,7 +1907,7 @@ def lintdocker(base_dir=BASE_DIR):
     execute(
         "find",
         base_dir,
-        "-name",
+        "-iname",
         "Dockerfile*",
         "-ls",
         "-exec",
@@ -1914,6 +1915,23 @@ def lintdocker(base_dir=BASE_DIR):
         "{}",
         ";",
     )
+
+
+@task()
+def lintmarkdown(base_dir=BASE_DIR):
+    """Lint Markdown documents."""
+    execute(
+        "find",
+        base_dir,
+        "-iname",
+        "*.md",
+        "-ls",
+        "-exec",
+        "markdownlint",
+        "{}",
+        ";",
+    )
+    execute("find", base_dir, "-iname", "*.md", "-ls", "-exec", "mdl", "{}", ";")
 
 
 @task()
@@ -1948,7 +1966,7 @@ def lintcss():
         execute("csslint", "app.css")
 
 
-@task(lintshell, lintdocker, lintpy, linthtml, lintjs, lintcss)
+@task(lintshell, lintdocker, lintmarkdown, lintpy, linthtml, lintjs, lintcss)
 def lint():
     """lint everything"""
 
