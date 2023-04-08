@@ -13,15 +13,17 @@ var rgApp = angular.module('rgApp', [
     'toastr'
 ]);
 
-rgApp.constant('API_URL', '/api/')
+rgApp.constant('MAINTENANCE_MODE', false)
+    .constant('API_URL', '/api/')
+    // .constant('API_URL', 'https://api.recommended.games/')
+    .constant('NEWS_API_FALLBACK_URL', 'https://news.recommend.games/')
     .constant('APP_TITLE', 'Recommend.Games – board game recommendations')
     .constant('CANONICAL_URL', 'https://recommend.games/')
     .constant('DEFAULT_IMAGE', 'assets/android-chrome-512x512.png')
     .constant('SITE_DESCRIPTION', 'Top-rated board games as evaluated by our recommendation engine. ' +
         'Find the best board and card games with personal recommendations for your taste!')
-    .constant('GA_TRACKING_ID', 'UA-128891980-1')
     .constant('FAQ_URL', '/assets/faq.json')
-    .constant('BGA_CLIENT_ID', '8jfqHypg2l');
+    .constant('NEW_RANKING_DATE', moment('2022-02-22'));
 
 rgApp.config(function (
     $locationProvider,
@@ -48,6 +50,15 @@ rgApp.config(function (
     }).when('/history', {
         templateUrl: '/partials/history.html',
         controller: 'HistoryController'
+    }).when('/charts/:type/:date', {
+        templateUrl: '/partials/charts.html',
+        controller: 'ChartsController'
+    }).when('/charts/:type', {
+        templateUrl: '/partials/charts.html',
+        controller: 'ChartsController'
+    }).when('/charts', {
+        templateUrl: '/partials/charts.html',
+        controller: 'ChartsController'
     }).when('/stats', {
         templateUrl: '/partials/stats.html',
         controller: 'StatsController'
@@ -57,9 +68,6 @@ rgApp.config(function (
     }).when('/faq', {
         templateUrl: '/partials/faq.html',
         controller: 'FaqController'
-    }).when('/bga', {
-        templateUrl: '/partials/bga.html',
-        controller: 'BgaController'
     }).when('/', {
         templateUrl: '/partials/list.html',
         controller: 'ListController'

@@ -1,4 +1,4 @@
-# recommend-games-server
+# 🎲 Recommend.Games Server 🚀
 
 Board game recommendation service. Live demo at
 [Recommend.Games](https://recommend.games/)

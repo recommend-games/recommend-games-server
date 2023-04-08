@@ -1,21 +1,17 @@
-# -*- coding: utf-8 -*-
-
 """Parses the ranking CSVs and writes them to the database."""
 
 import csv
 import logging
 import os
 import sys
-
-from datetime import timezone
+from datetime import datetime, timezone
 from functools import lru_cache
 from itertools import groupby
 from pathlib import Path
 
 import pandas as pd
-
 from django.core.management.base import BaseCommand
-from pytility import batchify, parse_date
+from pytility import arg_to_iter, batchify, parse_date
 from snaptime import snap
 
 from ...models import Game, Ranking
@@ -69,16 +65,34 @@ def parse_ranking_csv(path_file, date=None, tzinfo=timezone.utc):
     return ranking
 
 
-def parse_ranking_csvs(path_dir, week_day="SUN", tzinfo=timezone.utc):
+def parse_ranking_csvs(
+    path_dir,
+    week_day="SUN",
+    tzinfo=timezone.utc,
+    min_date=None,
+    max_date=None,
+):
     """Parses all ranking CSV files in a directory."""
 
-    path_dir = Path(path_dir)
+    path_dir = Path(path_dir).resolve()
     LOGGER.info("Iterating through all CSV files in <%s>...", path_dir)
 
     files = (file for file in path_dir.iterdir() if format_from_path(file) == "csv")
     files = (
         (_extract_date(path_file=file, tzinfo=tzinfo), file) for file in sorted(files)
     )
+    if min_date:
+        LOGGER.info("Filter out files before %s", min_date)
+        files = ((date, file) for date, file in files if date >= min_date)
+    if max_date:
+        LOGGER.info("Filter out files after %s", max_date)
+        files = ((date, file) for date, file in files if date <= max_date)
+
+    if not week_day:
+        for date, file in files:
+            LOGGER.info("Processing rankings from %s...", date)
+            yield date, parse_ranking_csv(path_file=file, date=date)
+        return
 
     for group_date, group in groupby(
         files,
@@ -114,7 +128,14 @@ def _avg_ranking(data, date=None):
 
 
 def _create_instances(
-    path_dir, ranking_type=Ranking.BGG, filter_ids=None, method="last", week_day="SUN"
+    path_dir,
+    ranking_type=Ranking.BGG,
+    filter_ids=None,
+    method="last",  # TODO this should really be an enum
+    week_day="SUN",
+    min_date=None,
+    max_date=None,
+    min_score=None,
 ):
     LOGGER.info(
         "Finding all rankings of type <%s> in <%s>, aggregating <%s>...",
@@ -123,12 +144,27 @@ def _create_instances(
         method,
     )
 
-    for date, week in parse_ranking_csvs(path_dir, week_day=week_day):
+    for date, data in parse_ranking_csvs(
+        path_dir=path_dir,
+        week_day=None if method == "all" else week_day,
+        min_date=min_date,
+        max_date=max_date,
+    ):
         rankings = (
-            _avg_ranking(week, date=date)
+            _avg_ranking(data=data, date=date)
             if method == "mean"
-            else _last_ranking(week, date=date)
+            else _last_ranking(data=data, date=date)
+            if method == "last"
+            else data
+            if method == "all"
+            else None
         )
+
+        assert rankings is not None, f"illegal method <{method}>"
+
+        if min_score is not None and "score" in rankings:
+            rankings = rankings[rankings["score"] > min_score]
+
         for item in rankings.itertuples(index=False):
             if filter_ids is None or item.bgg_id in filter_ids:
                 yield Ranking(
@@ -145,9 +181,16 @@ class Command(BaseCommand):
     help = "Parses the ranking CSVs and writes them to the database."
 
     ranking_types = {
-        Ranking.BGG: ("bgg", "last"),
-        Ranking.FACTOR: ("factor", "mean"),
-        Ranking.SIMILARITY: ("similarity", "mean"),
+        Ranking.BGG: ("bgg", "last", None, None),
+        Ranking.RECOMMEND_GAMES: ("r_g", "mean", None, 0),
+        Ranking.FACTOR: ("factor", "mean", None, None),
+        Ranking.SIMILARITY: ("similarity", "mean", None, None),
+        Ranking.CHARTS: (
+            "charts",
+            "all",
+            datetime(2016, 1, 1, tzinfo=timezone.utc),
+            None,
+        ),
     }
 
     def add_arguments(self, parser):
@@ -160,6 +203,13 @@ class Command(BaseCommand):
             help="batch size for DB transactions",
         )
         parser.add_argument(
+            "--types",
+            "-t",
+            choices=self.ranking_types.keys(),
+            nargs="+",
+            help="only create rankings of these particular types",
+        )
+        parser.add_argument(
             "--week-day",
             "-w",
             default="SUN",
@@ -167,18 +217,30 @@ class Command(BaseCommand):
             help="anchor week day when aggregating weeks",
         )
         parser.add_argument(
-            "--dry-run", "-n", action="store_true", help="don't write to the database"
+            "--dry-run",
+            "-n",
+            action="store_true",
+            help="don't write to the database",
         )
 
-    def _create_all_instances(self, path, filter_ids=None, week_day="SUN"):
-        for ranking_type, (sub_dir, method) in self.ranking_types.items():
-            yield from _create_instances(
-                path_dir=os.path.join(path, sub_dir),
-                ranking_type=ranking_type,
-                filter_ids=filter_ids,
-                method=method,
-                week_day=week_day,
-            )
+    def _create_all_instances(self, path, filter_ids=None, week_day="SUN", types=None):
+        types = frozenset(arg_to_iter(types))
+        for ranking_type, (
+            sub_dir,
+            method,
+            min_date,
+            min_score,
+        ) in self.ranking_types.items():
+            if not types or ranking_type in types:
+                yield from _create_instances(
+                    path_dir=os.path.join(path, sub_dir),
+                    ranking_type=ranking_type,
+                    filter_ids=filter_ids,
+                    method=method,
+                    week_day=week_day,
+                    min_date=min_date,
+                    min_score=min_score,
+                )
 
     def handle(self, *args, **kwargs):
         logging.basicConfig(
@@ -192,7 +254,10 @@ class Command(BaseCommand):
         # pylint: disable=no-member
         game_ids = frozenset(Game.objects.order_by().values_list("bgg_id", flat=True))
         instances = self._create_all_instances(
-            kwargs["path"], filter_ids=game_ids, week_day=kwargs["week_day"]
+            path=kwargs["path"],
+            filter_ids=game_ids,
+            week_day=kwargs["week_day"],
+            types=kwargs["types"],
         )
         batches = (
             batchify(instances, kwargs["batch"]) if kwargs["batch"] else (instances,)

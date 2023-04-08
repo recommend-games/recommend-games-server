@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-
 """ generate a sitemap """
 
 import logging
 import sys
-
 from datetime import datetime
+from itertools import islice
 
 from django.core.management.base import BaseCommand
 from lxml import etree, objectify
@@ -21,15 +19,13 @@ ELM = objectify.ElementMaker(
 
 
 def _url_elements(url, ids, lastmod=None):
-    lastmod = (
-        "{:s}Z".format(datetime.utcnow().isoformat()) if lastmod is None else lastmod
-    )
+    lastmod = f"{datetime.utcnow().isoformat():s}Z" if lastmod is None else lastmod
 
     # pylint: disable=no-member
     yield ELM.url(
         ELM.loc(f"{url}#/"),
         ELM.lastmod(lastmod),
-        ELM.changefreq("weekly"),
+        ELM.changefreq("daily"),
         ELM.priority(1),
     )
 
@@ -58,22 +54,22 @@ def _url_elements(url, ids, lastmod=None):
         yield ELM.url(
             ELM.loc(f"{url}#/game/{id_}"),
             ELM.lastmod(lastmod),
-            ELM.changefreq("weekly"),
+            ELM.changefreq("daily"),
         )
 
 
 def sitemap(url, limit=None):
-    """ return sitemap XML element """
+    """return sitemap XML element"""
 
     limit = limit or 50000
     # pylint: disable=no-member
     ids = Game.objects.values_list("bgg_id", flat=True)
-    ids = ids[: max(limit - 4, 0)]
-    return ELM.urlset(*_url_elements(url, ids))
+    elements = islice(_url_elements(url, ids[:limit]), limit)
+    return ELM.urlset(*elements)
 
 
 class Command(BaseCommand):
-    """ Creates a sitemap """
+    """Creates a sitemap"""
 
     help = "Creates a sitemap"
 

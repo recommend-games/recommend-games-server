@@ -1,12 +1,14 @@
-# -*- coding: utf-8 -*-
-
 """ settings """
 
 import os
+from datetime import timezone
+
+from pytility import parse_bool, parse_date
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
+MODELS_DIR = os.path.join(BASE_DIR, "models")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
@@ -17,7 +19,7 @@ SECRET_KEY = os.getenv(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.getenv("DEBUG"))
+DEBUG = parse_bool(os.getenv("DEBUG"))
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development" if DEBUG else "production")
 READ_ONLY = ENVIRONMENT == "production"
 
@@ -28,10 +30,11 @@ ALLOWED_HOSTS = [
     "localhost",
     ".recommend.games",
     ".recommended.games",
+    ".herokuapp.com",
 ]
 
-if os.getenv("GC_PROJECT"):
-    ALLOWED_HOSTS += [f".{os.getenv('GC_PROJECT')}.appspot.com"]
+if os.getenv("ADD_LOCAL_HOST"):
+    ALLOWED_HOSTS += os.getenv("ADD_LOCAL_HOST").split(",")
 
 # Application definition
 
@@ -81,7 +84,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "rg.wsgi.application"
 
-SECURE_SSL_REDIRECT = bool(os.getenv("SECURE_SSL_REDIRECT"))
+SECURE_SSL_REDIRECT = parse_bool(os.getenv("SECURE_SSL_REDIRECT"))
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Database
@@ -131,6 +134,8 @@ STATICFILES_STORAGE = (
     else "whitenoise.storage.CompressedManifestStaticFilesStorage"
 )
 
+MEDIA_URL = "media/"
+
 # WhiteNoise
 
 WHITENOISE_INDEX_FILE = True
@@ -143,18 +148,23 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
 }
 
-# REST proxy
-REST_PROXY = {"HOST": "http://news.recommend.games"}
+# API proxy
+API_PROXY = {"HOST": "https://news.recommend.games"}
 
 # Custom
 
 RECOMMENDER_PATH = os.path.join(DATA_DIR, "recommender_bgg")
 BGA_RECOMMENDER_PATH = os.path.join(DATA_DIR, "recommender_bga")
+LIGHT_RECOMMENDER_PATH = os.path.join(DATA_DIR, "recommender_light.npz")
 STAR_PERCENTILES = (0.165, 0.365, 0.615, 0.815, 0.915, 0.965, 0.985, 0.995)
-
-PUBSUB_PUSH_ENABLED = True
-PUBSUB_QUEUE_PROJECT = os.getenv("PUBSUB_QUEUE_PROJECT") or os.getenv("GC_PROJECT")
-PUBSUB_QUEUE_TOPIC = os.getenv("PUBSUB_QUEUE_TOPIC")
 
 MODEL_UPDATED_FILE = os.path.join(DATA_DIR, "updated_at")
 PROJECT_VERSION_FILE = os.path.join(BASE_DIR, "VERSION")
+
+MIN_VOTES_ANCHOR_DATE = "2020-08-01"
+MIN_VOTES_SECONDS_PER_STEP = 10 * 24 * 60 * 60  # 10 days
+
+R_G_RANKING_EFFECTIVE_DATE = parse_date(
+    os.getenv("R_G_RANKING_EFFECTIVE_DATE"),
+    tzinfo=timezone.utc,
+) or parse_date("2022-02-22T00:00Z")

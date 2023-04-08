@@ -422,6 +422,14 @@ input:checked + .slider:before {
     visibility: visible;
 }
 
+.sdj-color {
+    color: #E30613;
+}
+
+.kdj-color {
+    color: #193F4A;
+}
+
 .rg-color {
     color: black;
 }

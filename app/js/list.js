@@ -1,18 +1,22 @@
 /*jslint browser: true, nomen: true, stupid: true, todo: true */
 /*jshint -W097 */
-/*global angular, rgApp, _ */
+/*global angular, rgApp, _, moment */
 
 'use strict';
 
 rgApp.controller('ListController', function ListController(
+    $http,
     $location,
     $log,
     $filter,
     $q,
     $route,
     $routeParams,
+    $sce,
     $scope,
     $timeout,
+    $window,
+    MAINTENANCE_MODE,
     filterService,
     gamesService,
     personsService,
@@ -146,19 +150,32 @@ rgApp.controller('ListController', function ListController(
 
                 addSearchGames();
 
+                if (!_.isEmpty(parsed.for) && $window.gtag) {
+                    $window.gtag('event', 'user_recommendation', {
+                        'event_category' : 'recommendations',
+                        'event_label' : _(parsed.for).map(_.trim).map(_.toLower).sort().join()
+                    });
+                }
+
                 return games;
             })
             .catch(function (response) {
                 $log.error(response);
                 $scope.empty = false;
                 $scope.total = null;
-                toastr.error(
-                    'Sorry, there was an error. Tap to try again...',
-                    'Error loading games',
-                    {'onTap': function onTap() {
-                        return fetchGames(page);
-                    }}
-                );
+
+                if (MAINTENANCE_MODE) {
+                    $scope.maintenanceMode = true;
+                    $scope.maintenanceMessage = $sce.trustAsHtml('For more details, please read <a href="https://blog.recommend.games/posts/announcement-hiatus/">this blog post</a>.');
+                } else {
+                    toastr.error(
+                        'Sorry, there was an error. Tap to try again...',
+                        'Error loading games',
+                        {'onTap': function onTap() {
+                            return fetchGames(page);
+                        }}
+                    );
+                }
             })
             .then(function () {
                 $(function () {
@@ -281,6 +298,11 @@ rgApp.controller('ListController', function ListController(
         }
     };
 
+    $scope.maintenanceMode = false;
+    $scope.maintenanceMessage = null;
+
+    $scope.includeGames = params.include;
+    $scope.excludeGames = params.exclude;
     $scope.cooperative = params.cooperative;
     $scope.gameType = params.gameType;
     $scope.category = params.category;
@@ -310,6 +332,8 @@ rgApp.controller('ListController', function ListController(
     $scope.clearFilters = function clearFilters() {
         $scope.user = null;
         $scope.likedGames = null;
+        $scope.includeGames = null;
+        $scope.excludeGames = null;
         $scope.search = null;
         $scope.count.enabled = false;
         $scope.time.enabled = false;
@@ -590,4 +614,20 @@ rgApp.controller('ListController', function ListController(
     gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
     gamesService.setImage();
     gamesService.setDescription();
+
+    $http.get('https://blog.recommend.games/index.xml')
+        .then(function (response) {
+            var xml = $.parseXML(response.data),
+                feed = $(xml),
+                item = feed.find('rss > channel > item').first(),
+                title = item.find('title').first().text(),
+                link = item.find('link').first().text(),
+                pubDate = moment(item.find('pubDate').first().text()),
+                displayUntil = pubDate.add(14, 'days');
+
+            if (moment().isBefore(displayUntil)) {
+                $scope.blogTitle = title;
+                $scope.blogLink = link;
+            }
+        });
 });

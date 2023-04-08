@@ -48,8 +48,8 @@
 	<link rel="stylesheet" href="/app.css" />
 
 	<!-- jQuery -->
-	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-		integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+		integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
 		crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"
 		integrity="sha256-x3YZWtRjM8bJqf48dFAv/qmgL68SI4jqNWeSLMZaMGA="
@@ -104,11 +104,11 @@
 	<script src="/js/list.js"></script>
 	<script src="/js/detail.js"></script>
 	<script src="/js/history.js"></script>
+	<script src="/js/charts.js"></script>
 	<script src="/js/stats.js"></script>
 	<script src="/js/news.js"></script>
 	<script src="/js/about.js"></script>
 	<script src="/js/faq.js"></script>
-	<script src="/js/bga.js"></script>
 
 	<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
 	<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png" />
@@ -116,6 +116,7 @@
 	<link rel="manifest" href="/assets/site.webmanifest" />
 	<link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5" />
 	<meta name="msapplication-TileColor" content="#da532c" />
+	<meta name="msapplication-TileImage" content="/assets/mstile-144x144.png" />
 	<meta name="theme-color" content="#ffffff" />
 
 	<meta name="description"
@@ -163,6 +164,12 @@
 		<div class="container">
 			<a href="/#/"
 					class="navbar-brand text-nowrap">
+				<img src="/assets/icon_white.svg"
+					width="30"
+					height="30"
+					class="d-inline-block align-top"
+					alt="Recommend.Games"
+					loading="lazy" />
 				<span class="recommend-games">Recommend.Games</span>
 			</a>
 			<button type="button"
@@ -180,6 +187,12 @@
 						<a href="/#/?filters"
 								class="nav-link">
 							Recommendations
+						</a>
+					</li>
+					<li class="nav-item text-nowrap">
+						<a href="https://blog.recommend.games/"
+								class="nav-link">
+							Blog
 						</a>
 					</li>
 					<li class="nav-item {{ path === '/news' ? 'active' : '' }} text-nowrap">
@@ -211,7 +224,7 @@
 						</a>
 					</li>
 					<li class="nav-item text-nowrap">
-						<a href="https://gitlab.com/recommend.games/recommend-games-server"
+						<a href="https://gitlab.com/recommend.games"
 								target="_blank"
 								class="nav-link">
 							GitLab <i class="fas fa-external-link-alt"></i>
@@ -272,6 +285,14 @@
 				</li>
 				<li class="nav-item">
 					<a class="nav-link"
+							href="https://tabletop.social/@markus"
+							rel="me"
+							target="_blank">
+						<i class="fab fa-mastodon"></i>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link"
 							href="https://gitlab.com/recommend.games"
 							target="_blank">
 						<i class="fab fa-gitlab"></i>
@@ -284,10 +305,17 @@
 						<i class="fab fa-github"></i>
 					</a>
 				</li>
-				<li class="nav-item mr-3">
+				<li class="nav-item">
 					<a class="nav-link"
 							href="mailto:contact@recommend.games">
 						<i class="fas fa-at"></i>
+					</a>
+				</li>
+				<li class="nav-item mr-3">
+					<a class="nav-link"
+							href="https://paypal.me/mschepke"
+							target="_blank">
+						<i class="fab fa-paypal"></i>
 					</a>
 				</li>
 				<li ng-if="version" class="nav-item">
@@ -317,6 +345,7 @@
 					"email": "markus@recommend.games",
 					"sameAs": [
 						"https://boardgamegeek.com/user/Markus%20Shepherd",
+						"https://tabletop.social/@markus",
 						"https://twitter.com/MarkusRShepherd",
 						"https://github.com/MarkusShepherd",
 						"https://gitlab.com/mshepherd",
@@ -326,6 +355,7 @@
 				},
 				"sameAs": [
 					"https://boardgamegeek.com/guild/3611",
+					"https://botsin.space/@recommend_games",
 					"https://twitter.com/recommend_games",
 					"https://gitlab.com/recommend.games",
 					"https://github.com/recommend-games"
@@ -333,25 +363,6 @@
 			}
 		</script>
 	</footer>
-
-	<script async="async"
-		src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5bfa99b66f363320"
-		type="text/javascript"></script>
-
-	<!-- Global site tag (gtag.js) - Google Analytics -->
-	<script async="async"
-		src="https://www.googletagmanager.com/gtag/js?id=UA-128891980-1"
-		type="text/javascript"></script>
-	<script>
-		window.dataLayer = window.dataLayer || [];
-
-		function gtag() {
-			dataLayer.push(arguments);
-		}
-
-		gtag('js', new Date());
-		gtag('config', 'UA-128891980-1');
-	</script>
 </body>
 
 </html>

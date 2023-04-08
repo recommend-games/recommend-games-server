@@ -6,7 +6,26 @@
 		Read more <a href="/#/about">about <span class="recommend-games">Recommend.Games</span></a>.
 	</p>
 
-	<div class="card">
+	<div ng-if="maintenanceMode"
+			class="alert alert-danger"
+			role="alert">
+		<h4 class="alert-heading"><span class="recommend-games">Recommend.Games</span> is currently under maintenance</h4>
+		<p ng-if="maintenanceMessage"
+				ng-bind-html="maintenanceMessage"
+				class="mb-0"></p>
+	</div>
+
+	<div ng-if="blogTitle &amp;&amp; blogLink"
+			class="alert alert-primary alert-dismissible fade show"
+			role="alert">
+		Latest blog post: <a ng-href="{{ blogLink }}" class="alert-link">{{ blogTitle}}</a>
+		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+
+	<div ng-hide="maintenanceMode"
+			class="card">
 		<div class="card-header">
 			<nav class="nav nav-tabs nav-justified card-header-tabs">
 				<a id="bgg-tab"
@@ -15,16 +34,15 @@
 						role="tab"
 						aria-controls="fetch-game-form"
 						aria-selected="{{ !activePane || activePane == 'bgg' }}"
-						class="nav-item nav-link {{ !activePane || activePane == 'bgg' ? 'active' : '' }}">
+						class="nav-item nav-link active">
 					<abbr title="BoardGameGeek">BGG</abbr> account
 				</a>
 				<a id="select-games-tab"
-						ng-click="showPane('select'); toggleSelection(true)"
 						href=""
 						role="tab"
 						aria-controls="select-games"
 						aria-selected="{{ activePane == 'select' }}"
-						class="nav-item nav-link {{ activePane == 'select' ? 'active' : '' }}">
+						class="nav-item nav-link disabled">
 					<span ng-hide="isEmpty(likedGames)"
 							class="badge badge-primary">
 						{{ likedGames.length }}
@@ -291,7 +309,7 @@
 									id="recommender-similarity"
 									name="recommender-similarity"
 									ng-model="similarity"
-									ng-disabled="!user" />
+									ng-disabled="true" />
 								<span class="slider bg-secondary"></span>
 							</label>
 							<label class="form-check-label form-label-exclude {{ user &amp;&amp; similarity ? 'text-success' : 'text-muted' }} ml-1"
@@ -328,7 +346,8 @@
 		</div>
 	</div>
 
-	<form ng-submit="updateParams()"
+	<form ng-hide="maintenanceMode"
+			ng-submit="updateParams()"
 			id="search-game-form"
 			name="search-game-form"
 			novalidate="novalidate"
@@ -390,7 +409,8 @@
 		</div>
 	</form>
 
-	<form ng-submit="updateParams()"
+	<form ng-hide="maintenanceMode"
+			ng-submit="updateParams()"
 			id="filter-game-form"
 			name="filter-game-form"
 			novalidate="novalidate"
@@ -779,7 +799,7 @@
 		Recommended games based on your taste
 	</h2>
 
-	<p>
+	<p ng-hide="maintenanceMode">
 		<span ng-if="designerData">
 			Games designed by
 			<strong>

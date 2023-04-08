@@ -1,24 +1,14 @@
-version: '3'
+version: '3.9'
 
 services:
     web:
-        image: rg-server:latest
-        container_name: rg
+        image: registry.heroku.com/recommend-games/web:latest
         build:
-            context: '.'
             dockerfile: Dockerfile
+        container_name: rg
         environment:
-            - DEBUG=
+            - DEBUG=0
             - PORT=8080
-            - BOTO_CONFIG=/app/.boto
         ports:
-            - '8080:8080'
-        volumes:
-            - ./data:/app/data
-        restart: always
-        networks:
-            - rg
-
-networks:
-    rg:
-        driver: bridge
+            - 8080:8080
+        restart: 'no'

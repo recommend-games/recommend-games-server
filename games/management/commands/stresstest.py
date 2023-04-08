@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-
 """ Stress test command """
-
 
 import logging
 import os.path
@@ -10,7 +7,6 @@ import sys
 import timeit
 
 import requests
-
 from django.core.management.base import BaseCommand
 
 from ...models import User
@@ -19,7 +15,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    """ Stress test """
+    """Stress test"""
 
     help = "Stress test"
 
