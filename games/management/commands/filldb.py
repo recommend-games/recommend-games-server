@@ -106,6 +106,7 @@ def _rating_data(
         )
     else:
         recommendations = recommender.recommend(
+            users=(),
             star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
         )
 

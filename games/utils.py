@@ -119,7 +119,7 @@ def save_recommender_ranking(recommender, dst, similarity_model=False):
         dst,
     )
 
-    recommendations = recommender.recommend(similarity_model=similarity_model)
+    recommendations = recommender.recommend(users=(), similarity_model=similarity_model)
     if "name" in recommendations.column_names():
         recommendations.remove_column("name", inplace=True)
 
