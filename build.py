@@ -13,10 +13,11 @@ pipenv install --dev
 Non-Python dependencies:
 
 * Docker
-* `brew install git sqlite shellcheck hadolint`
+* `brew install git sqlite shellcheck hadolint markdownlint-cli`
+* `npm install --global htmlhint jslint jshint csslint`
+* `gem install mdl`
 * `brew tap heroku/brew && brew install heroku`
 * `heroku login`
-* `npm install --global htmlhint jslint jshint csslint`
 """
 
 import logging
