@@ -13,6 +13,7 @@ from typing import Iterable, Optional
 
 import jmespath
 import turicreate as tc
+import yaml
 from board_game_recommender.utils import percentile_buckets, star_rating
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -26,6 +27,12 @@ from ...utils import format_from_path, load_recommender
 LOGGER = logging.getLogger(__name__)
 VALUE_ID_REGEX = re.compile(r"^(.*?)(:(\d+))?$")
 LINK_ID_REGEX = re.compile(r"^([a-z]+):(.+)$")
+
+
+def _load_yaml(path):
+    LOGGER.info("Loading YAML from <%s>…", path)
+    with open(path) as yaml_file:
+        yield from yaml.safe_load(yaml_file)
 
 
 def _load_json(path):
@@ -44,7 +51,9 @@ def _load_jl(path):
 def _load(*paths, in_format=None):
     for path in paths:
         file_format = in_format or format_from_path(path)
-        if file_format in ("jl", "jsonl"):
+        if file_format in ("yaml", "yml"):
+            yield from _load_yaml(path)
+        elif file_format in ("jl", "jsonl"):
             yield from _load_jl(path)
         else:
             yield from _load_json(path)
