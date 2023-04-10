@@ -685,7 +685,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--premium-user-paths",
-            "-u",
+            "-p",
             nargs="+",
             help="premium user file(s) to be processed",
         )
