@@ -534,6 +534,24 @@ def _load_add_data(files, id_field, *fields, in_format=None):
     return result
 
 
+def _load_premium_users(files, compare_date=None, in_format=None):
+    rows = _load(*arg_to_iter(files), in_format=in_format)
+    compare_date = parse_date(compare_date or datetime.utcnow(), tzinfo=timezone.utc)
+    LOGGER.info("Comparing premium expiration dates against <%s>", compare_date)
+    for row in rows:
+        for username, expiry_date in row.items():
+            username = username.lower()
+            expiry_date = parse_date(expiry_date, tzinfo=timezone.utc)
+            if expiry_date < compare_date:
+                LOGGER.info(
+                    "Premium for user <%s> ended on <%s>",
+                    username,
+                    expiry_date,
+                )
+            else:
+                yield username
+
+
 def _make_user(name, add_data):
     if not name:
         return None
