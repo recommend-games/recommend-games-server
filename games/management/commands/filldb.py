@@ -761,11 +761,17 @@ class Command(BaseCommand):
                 "updated_at",
                 in_format=kwargs["in_format"],
             )
-            user_function = partial(_make_user, add_data=add_data) if add_data else User
+            secondary = {
+                "model": partial(_make_user, add_data=add_data) if add_data else User,
+                "from": "user_id",
+                "to": "name",
+                "include_pks": None,  # FIXME load list of premium user names to include
+            }
+            del add_data
 
             _create_secondary_instances(
                 model=Collection,
-                secondary={"model": user_function, "from": "user_id", "to": "name"},
+                secondary=secondary,
                 items=items,
                 models_order=(User, Collection),
                 fields=self.collection_fields,
