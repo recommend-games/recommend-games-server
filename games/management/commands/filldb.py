@@ -405,7 +405,7 @@ def _create_clusters(
     LOGGER.info("Done updating clusters")
 
 
-def _make_secondary_instances(model, secondary, items, **kwargs):
+def _make_secondary_instances(*, model, secondary, items, **kwargs):
     instances = _make_instances(model=model, items=items, **kwargs)
 
     if not secondary.get("model") or not secondary.get("from"):
@@ -416,12 +416,16 @@ def _make_secondary_instances(model, secondary, items, **kwargs):
     if not secondary.get("to"):
         secondary["to"] = secondary["model"]._meta.pk.name
 
+    include_pks = frozenset(arg_to_iter(secondary.get("include_pks")))
+
     for value, group in groupby(
-        instances, key=lambda instance: getattr(instance, secondary["from"], None)
+        iterable=instances,
+        key=lambda instance: getattr(instance, secondary["from"], None),
     ):
         if value:
             yield secondary["model"](**{secondary["to"]: value})
-        yield from group
+        if not include_pks or value in include_pks:
+            yield from group
 
 
 def _create_secondary_instances(
