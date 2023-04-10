@@ -5,7 +5,7 @@ import logging
 import re
 import sys
 from collections import defaultdict
-from datetime import timezone
+from datetime import datetime, timezone
 from functools import partial
 from itertools import combinations, groupby
 from pathlib import Path
