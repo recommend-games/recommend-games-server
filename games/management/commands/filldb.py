@@ -428,7 +428,7 @@ def _make_secondary_instances(*, model, secondary, items, **kwargs):
     include_pks = frozenset(arg_to_iter(secondary.get("include_pks")))
     if include_pks:
         LOGGER.info(
-            "Including collection info only for %d premium users",
+            "Including collection info only for %d premium user(s)",
             len(include_pks),
         )
 
@@ -799,7 +799,7 @@ class Command(BaseCommand):
                 "updated_at",
                 in_format=kwargs["in_format"],
             )
-            premium_users = _load_premium_users(files=kwargs.get("premium_users_paths"))
+            premium_users = _load_premium_users(files=kwargs.get("premium_user_paths"))
             secondary = {
                 "model": partial(_make_user, add_data=add_data) if add_data else User,
                 "from": "user_id",

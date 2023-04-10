@@ -1270,8 +1270,9 @@ def filldb(
     django.core.management.call_command(
         "filldb",
         os.path.join(srp_dir, "bgg_GameItem.jl"),
-        # collection_paths=[os.path.join(srp_dir, "bgg_RatingItem.jl")],
+        collection_paths=[os.path.join(srp_dir, "bgg_RatingItem.jl")],
         user_paths=[os.path.join(srp_dir, "bgg_UserItem.jl")],
+        premium_user_paths=[os.path.join(BASE_DIR, "config", "premium.yaml")],
         in_format="jl",
         batch=100_000,
         recommender=rec_dir,
