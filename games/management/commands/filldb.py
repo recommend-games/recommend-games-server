@@ -426,6 +426,11 @@ def _make_secondary_instances(*, model, secondary, items, **kwargs):
         secondary["to"] = secondary["model"]._meta.pk.name
 
     include_pks = frozenset(arg_to_iter(secondary.get("include_pks")))
+    if include_pks:
+        LOGGER.info(
+            "Including collection info only for %d premium users",
+            len(include_pks),
+        )
 
     for value, group in groupby(
         iterable=instances,
@@ -679,9 +684,15 @@ class Command(BaseCommand):
             help="user file(s) to be processed",
         )
         parser.add_argument(
+            "--premium-user-paths",
+            "-u",
+            nargs="+",
+            help="premium user file(s) to be processed",
+        )
+        parser.add_argument(
             "--in-format",
             "-f",
-            choices=("json", "jsonl", "jl"),
+            choices=("json", "jsonl", "jl", "yaml", "yml"),
             help="input format",
         )
         parser.add_argument(
@@ -788,13 +799,14 @@ class Command(BaseCommand):
                 "updated_at",
                 in_format=kwargs["in_format"],
             )
+            premium_users = _load_premium_users(files=kwargs.get("premium_users_paths"))
             secondary = {
                 "model": partial(_make_user, add_data=add_data) if add_data else User,
                 "from": "user_id",
                 "to": "name",
-                "include_pks": None,  # FIXME load list of premium user names to include
+                "include_pks": premium_users,
             }
-            del add_data
+            del add_data, premium_users
 
             _create_secondary_instances(
                 model=Collection,
