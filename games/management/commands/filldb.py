@@ -380,7 +380,7 @@ def _create_clusters(
         return
 
     LOGGER.info(
-        "Loaded a total of %d clusters from recommender %r",
+        "Loaded a total of %d clusters from recommender %s",
         len(recommender.clusters),
         recommender,
     )
