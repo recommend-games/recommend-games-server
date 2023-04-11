@@ -352,8 +352,8 @@ class GameViewSet(PermissionsModelViewSet):
         if exclude_clusters and exclude_ids:
             exclude_ids |= frozenset(
                 self.get_queryset()
-                .order_by()
                 .filter(cluster__in=exclude_ids)
+                .order_by()
                 .values_list("bgg_id", flat=True)
             )
 
