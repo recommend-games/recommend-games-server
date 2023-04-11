@@ -1,8 +1,9 @@
 """ views """
-
 import logging
 from datetime import timezone
+from functools import lru_cache, reduce
 from itertools import chain
+from operator import or_
 from typing import Callable, Iterable, Optional, Union
 
 import pandas as pd
@@ -210,6 +211,15 @@ def _add_games(data, bgg_ids=None, key="game"):
     return data
 
 
+@lru_cache(maxsize=8)
+def _get_compilations():
+    return frozenset(
+        Game.objects.filter(compilation=True)
+        .order_by()
+        .values_list("bgg_id", flat=True)
+    )
+
+
 class GameFilter(FilterSet):
     """game filter"""
 
@@ -304,35 +314,80 @@ class GameViewSet(PermissionsModelViewSet):
         "mechanic": (Mechanic.objects.all(), "games", MechanicSerializer),
     }
 
-    def _included_games(
+    def _excluded_games(
         self,
         *,
-        recommender,
-        include_ids=None,
+        user=None,
         exclude_ids=None,
-        exclude_clusters=False,
         exclude_compilations=True,
+        exclude_known=True,
+        exclude_owned=True,
+        exclude_wishlist=None,
+        exclude_play_count=None,
+        exclude_clusters=False,
     ):
-        include_ids = frozenset(arg_to_iter(include_ids))
         exclude_ids = frozenset(arg_to_iter(exclude_ids))
 
-        # TODO Those two queries should be combined
+        if user:
+            queries = []
+
+            if exclude_known:
+                queries.append(Q(rating__isnull=False))
+            if exclude_owned:
+                queries.append(Q(owned=True))
+            if exclude_wishlist:
+                queries.append(Q(wishlist__lte=exclude_wishlist))
+            if exclude_play_count:
+                queries.append(Q(play_count__gte=exclude_play_count))
+
+            if queries:
+                query = reduce(or_, queries)
+                exclude_ids |= frozenset(
+                    Collection.objects.filter(user=user)
+                    .filter(query)
+                    .order_by()
+                    .values_list("game_id", flat=True)
+                )
+
         if exclude_clusters and exclude_ids:
             exclude_ids |= frozenset(
                 self.get_queryset()
-                .order_by()
                 .filter(cluster__in=exclude_ids)
+                .order_by()
                 .values_list("bgg_id", flat=True)
             )
 
         if exclude_compilations:
-            exclude_ids |= frozenset(
-                self.get_queryset()
-                .order_by()
-                .filter(compilation=True)
-                .values_list("bgg_id", flat=True)
-            )
+            exclude_ids |= _get_compilations()
 
+        return exclude_ids
+
+    def _included_games(
+        self,
+        *,
+        recommender,
+        user=None,
+        include_ids=None,
+        exclude_ids=None,
+        exclude_compilations=True,
+        exclude_known=True,
+        exclude_owned=True,
+        exclude_wishlist=None,
+        exclude_play_count=None,
+        exclude_clusters=False,
+    ):
+        include_ids = frozenset(arg_to_iter(include_ids))
+        exclude_ids = self._excluded_games(
+            user=user,
+            exclude_ids=exclude_ids,
+            exclude_compilations=exclude_compilations,
+            exclude_known=exclude_known,
+            exclude_owned=exclude_owned,
+            exclude_wishlist=exclude_wishlist,
+            exclude_play_count=exclude_play_count,
+            exclude_clusters=exclude_clusters,
+        )
+        # If explicitly included, we don't exclude them here
         exclude_ids -= include_ids
 
         # Add all potential games not filtered out by query
@@ -353,19 +408,28 @@ class GameViewSet(PermissionsModelViewSet):
         recommender,
         include_ids=None,
         exclude_ids=None,
-        exclude_clusters=False,
         exclude_compilations=True,
+        exclude_known=True,
+        exclude_owned=True,
+        exclude_wishlist=None,
+        exclude_play_count=None,
+        exclude_clusters=False,
     ):
         user = user.lower()
         if user not in recommender.known_users:
             raise NotFound(f"user <{user}> could not be found")
 
         include_ids = self._included_games(
+            user=user,
             recommender=recommender,
             include_ids=include_ids,
             exclude_ids=exclude_ids,
-            exclude_clusters=exclude_clusters,
             exclude_compilations=exclude_compilations,
+            exclude_known=exclude_known,
+            exclude_owned=exclude_owned,
+            exclude_wishlist=exclude_wishlist,
+            exclude_play_count=exclude_play_count,
+            exclude_clusters=exclude_clusters,
         )
 
         if not include_ids:
@@ -394,6 +458,7 @@ class GameViewSet(PermissionsModelViewSet):
         if not users:
             raise NotFound("none of the users could be found")
 
+        # TODO include / exclude games based on users' collections (#228)
         include_ids = self._included_games(
             recommender=recommender,
             include_ids=include_ids,
@@ -442,10 +507,14 @@ class GameViewSet(PermissionsModelViewSet):
 
         include = frozenset(_extract_params(request, "include", parse_int))
         exclude = frozenset(_extract_params(request, "exclude", parse_int))
-        exclude_clusters = parse_bool(request.query_params.get("exclude_clusters"))
         exclude_compilations = parse_bool(
             request.query_params.get("exclude_compilations", True)
         )
+        exclude_known = parse_bool(request.query_params.get("exclude_known"))
+        exclude_owned = parse_bool(request.query_params.get("exclude_owned"))
+        exclude_wishlist = parse_int(request.query_params.get("exclude_wishlist"))
+        exclude_play_count = parse_int(request.query_params.get("exclude_play_count"))
+        exclude_clusters = parse_bool(request.query_params.get("exclude_clusters"))
 
         recommendation = (
             self._recommend_rating(
@@ -453,8 +522,12 @@ class GameViewSet(PermissionsModelViewSet):
                 recommender=recommender,
                 include_ids=include,
                 exclude_ids=exclude,
-                exclude_clusters=exclude_clusters,
                 exclude_compilations=exclude_compilations,
+                exclude_known=exclude_known,
+                exclude_owned=exclude_owned,
+                exclude_wishlist=exclude_wishlist,
+                exclude_play_count=exclude_play_count,
+                exclude_clusters=exclude_clusters,
             )
             if len(users) == 1
             else self._recommend_group_rating(

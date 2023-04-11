@@ -5,7 +5,7 @@ import logging
 import re
 import sys
 from collections import defaultdict
-from datetime import timezone
+from datetime import datetime, timezone
 from functools import partial
 from itertools import combinations, groupby
 from pathlib import Path
@@ -13,6 +13,7 @@ from typing import Iterable, Optional
 
 import jmespath
 import turicreate as tc
+import yaml
 from board_game_recommender.utils import percentile_buckets, star_rating
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -26,6 +27,12 @@ from ...utils import format_from_path, load_recommender
 LOGGER = logging.getLogger(__name__)
 VALUE_ID_REGEX = re.compile(r"^(.*?)(:(\d+))?$")
 LINK_ID_REGEX = re.compile(r"^([a-z]+):(.+)$")
+
+
+def _load_yaml(path):
+    LOGGER.info("Loading YAML from <%s>…", path)
+    with open(path) as yaml_file:
+        yield from yaml.safe_load(yaml_file)
 
 
 def _load_json(path):
@@ -44,7 +51,9 @@ def _load_jl(path):
 def _load(*paths, in_format=None):
     for path in paths:
         file_format = in_format or format_from_path(path)
-        if file_format in ("jl", "jsonl"):
+        if file_format in ("yaml", "yml"):
+            yield from _load_yaml(path)
+        elif file_format in ("jl", "jsonl"):
             yield from _load_jl(path)
         else:
             yield from _load_json(path)
@@ -371,7 +380,7 @@ def _create_clusters(
         return
 
     LOGGER.info(
-        "Loaded a total of %d clusters from recommender %r",
+        "Loaded a total of %d clusters from recommender %s",
         len(recommender.clusters),
         recommender,
     )
@@ -405,7 +414,7 @@ def _create_clusters(
     LOGGER.info("Done updating clusters")
 
 
-def _make_secondary_instances(model, secondary, items, **kwargs):
+def _make_secondary_instances(*, model, secondary, items, **kwargs):
     instances = _make_instances(model=model, items=items, **kwargs)
 
     if not secondary.get("model") or not secondary.get("from"):
@@ -416,12 +425,21 @@ def _make_secondary_instances(model, secondary, items, **kwargs):
     if not secondary.get("to"):
         secondary["to"] = secondary["model"]._meta.pk.name
 
+    include_pks = frozenset(arg_to_iter(secondary.get("include_pks")))
+    if include_pks:
+        LOGGER.info(
+            "Including collection info only for %d premium user(s)",
+            len(include_pks),
+        )
+
     for value, group in groupby(
-        instances, key=lambda instance: getattr(instance, secondary["from"], None)
+        iterable=instances,
+        key=lambda instance: getattr(instance, secondary["from"], None),
     ):
         if value:
             yield secondary["model"](**{secondary["to"]: value})
-        yield from group
+        if not include_pks or value in include_pks:
+            yield from group
 
 
 def _create_secondary_instances(
@@ -519,6 +537,24 @@ def _load_add_data(files, id_field, *fields, in_format=None):
     }
     LOGGER.info("loaded %d data items", len(result))
     return result
+
+
+def _load_premium_users(files, compare_date=None, in_format=None):
+    rows = _load(*arg_to_iter(files), in_format=in_format)
+    compare_date = parse_date(compare_date or datetime.utcnow(), tzinfo=timezone.utc)
+    LOGGER.info("Comparing premium expiration dates against <%s>", compare_date)
+    for row in rows:
+        for username, expiry_date in row.items():
+            username = username.lower()
+            expiry_date = parse_date(expiry_date, tzinfo=timezone.utc)
+            if expiry_date < compare_date:
+                LOGGER.info(
+                    "Premium for user <%s> ended on <%s>",
+                    username,
+                    expiry_date,
+                )
+            else:
+                yield username
 
 
 def _make_user(name, add_data):
@@ -648,9 +684,15 @@ class Command(BaseCommand):
             help="user file(s) to be processed",
         )
         parser.add_argument(
+            "--premium-user-paths",
+            "-p",
+            nargs="+",
+            help="premium user file(s) to be processed",
+        )
+        parser.add_argument(
             "--in-format",
             "-f",
-            choices=("json", "jsonl", "jl"),
+            choices=("json", "jsonl", "jl", "yaml", "yml"),
             help="input format",
         )
         parser.add_argument(
@@ -757,11 +799,18 @@ class Command(BaseCommand):
                 "updated_at",
                 in_format=kwargs["in_format"],
             )
-            user_function = partial(_make_user, add_data=add_data) if add_data else User
+            premium_users = _load_premium_users(files=kwargs.get("premium_user_paths"))
+            secondary = {
+                "model": partial(_make_user, add_data=add_data) if add_data else User,
+                "from": "user_id",
+                "to": "name",
+                "include_pks": premium_users,
+            }
+            del add_data, premium_users
 
             _create_secondary_instances(
                 model=Collection,
-                secondary={"model": user_function, "from": "user_id", "to": "name"},
+                secondary=secondary,
                 items=items,
                 models_order=(User, Collection),
                 fields=self.collection_fields,
