@@ -408,19 +408,28 @@ class GameViewSet(PermissionsModelViewSet):
         recommender,
         include_ids=None,
         exclude_ids=None,
-        exclude_clusters=False,
         exclude_compilations=True,
+        exclude_known=True,
+        exclude_owned=True,
+        exclude_wishlist=None,
+        exclude_play_count=None,
+        exclude_clusters=False,
     ):
         user = user.lower()
         if user not in recommender.known_users:
             raise NotFound(f"user <{user}> could not be found")
 
         include_ids = self._included_games(
+            user=user,
             recommender=recommender,
             include_ids=include_ids,
             exclude_ids=exclude_ids,
-            exclude_clusters=exclude_clusters,
             exclude_compilations=exclude_compilations,
+            exclude_known=exclude_known,
+            exclude_owned=exclude_owned,
+            exclude_wishlist=exclude_wishlist,
+            exclude_play_count=exclude_play_count,
+            exclude_clusters=exclude_clusters,
         )
 
         if not include_ids:
@@ -449,6 +458,7 @@ class GameViewSet(PermissionsModelViewSet):
         if not users:
             raise NotFound("none of the users could be found")
 
+        # TODO include / exclude games based on users' collections (#228)
         include_ids = self._included_games(
             recommender=recommender,
             include_ids=include_ids,
@@ -508,8 +518,12 @@ class GameViewSet(PermissionsModelViewSet):
                 recommender=recommender,
                 include_ids=include,
                 exclude_ids=exclude,
-                exclude_clusters=exclude_clusters,
                 exclude_compilations=exclude_compilations,
+                # exclude_known=TODO,
+                # exclude_owned=TODO,
+                # exclude_wishlist=TODO,
+                # exclude_play_count=TODO,
+                exclude_clusters=exclude_clusters,
             )
             if len(users) == 1
             else self._recommend_group_rating(
