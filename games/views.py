@@ -1,7 +1,7 @@
 """ views """
 import logging
 from datetime import timezone
-from functools import reduce
+from functools import lru_cache, reduce
 from itertools import chain
 from operator import or_
 from typing import Callable, Iterable, Optional, Union
@@ -211,6 +211,15 @@ def _add_games(data, bgg_ids=None, key="game"):
     return data
 
 
+@lru_cache(maxsize=8)
+def _get_compilations():
+    return frozenset(
+        Game.objects.filter(compilation=True)
+        .order_by()
+        .values_list("bgg_id", flat=True)
+    )
+
+
 class GameFilter(FilterSet):
     """game filter"""
 
@@ -305,20 +314,6 @@ class GameViewSet(PermissionsModelViewSet):
         "mechanic": (Mechanic.objects.all(), "games", MechanicSerializer),
     }
 
-    _compilations = None
-
-    @property
-    def compilations(self):
-        if self._compilations is not None:
-            return self._compilations
-        self._compilations = frozenset(
-            self.get_queryset()
-            .order_by()
-            .filter(compilation=True)
-            .values_list("bgg_id", flat=True)
-        )
-        return self._compilations
-
     def _excluded_games(
         self,
         *,
@@ -363,7 +358,7 @@ class GameViewSet(PermissionsModelViewSet):
             )
 
         if exclude_compilations:
-            exclude_ids |= self.compilations
+            exclude_ids |= _get_compilations()
 
         return exclude_ids
 
