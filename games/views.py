@@ -507,10 +507,14 @@ class GameViewSet(PermissionsModelViewSet):
 
         include = frozenset(_extract_params(request, "include", parse_int))
         exclude = frozenset(_extract_params(request, "exclude", parse_int))
-        exclude_clusters = parse_bool(request.query_params.get("exclude_clusters"))
         exclude_compilations = parse_bool(
             request.query_params.get("exclude_compilations", True)
         )
+        exclude_known = parse_bool(request.query_params.get("exclude_known"))
+        exclude_owned = parse_bool(request.query_params.get("exclude_owned"))
+        exclude_wishlist = parse_int(request.query_params.get("exclude_wishlist"))
+        exclude_play_count = parse_int(request.query_params.get("exclude_play_count"))
+        exclude_clusters = parse_bool(request.query_params.get("exclude_clusters"))
 
         recommendation = (
             self._recommend_rating(
@@ -519,10 +523,10 @@ class GameViewSet(PermissionsModelViewSet):
                 include_ids=include,
                 exclude_ids=exclude,
                 exclude_compilations=exclude_compilations,
-                # exclude_known=TODO,
-                # exclude_owned=TODO,
-                # exclude_wishlist=TODO,
-                # exclude_play_count=TODO,
+                exclude_known=exclude_known,
+                exclude_owned=exclude_owned,
+                exclude_wishlist=exclude_wishlist,
+                exclude_play_count=exclude_play_count,
                 exclude_clusters=exclude_clusters,
             )
             if len(users) == 1
