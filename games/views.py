@@ -1,8 +1,9 @@
 """ views """
-
 import logging
 from datetime import timezone
+from functools import reduce
 from itertools import chain
+from operator import or_
 from typing import Callable, Iterable, Optional, Union
 
 import pandas as pd
@@ -304,19 +305,55 @@ class GameViewSet(PermissionsModelViewSet):
         "mechanic": (Mechanic.objects.all(), "games", MechanicSerializer),
     }
 
-    def _included_games(
+    _compilations = None
+
+    @property
+    def compilations(self):
+        if self._compilations is not None:
+            return self._compilations
+        self._compilations = frozenset(
+            self.get_queryset()
+            .order_by()
+            .filter(compilation=True)
+            .values_list("bgg_id", flat=True)
+        )
+        return self._compilations
+
+    def _excluded_games(
         self,
         *,
-        recommender,
-        include_ids=None,
+        user=None,
         exclude_ids=None,
-        exclude_clusters=False,
         exclude_compilations=True,
+        exclude_known=True,
+        exclude_owned=True,
+        exclude_wishlist=None,
+        exclude_play_count=None,
+        exclude_clusters=False,
     ):
-        include_ids = frozenset(arg_to_iter(include_ids))
         exclude_ids = frozenset(arg_to_iter(exclude_ids))
 
-        # TODO Those two queries should be combined
+        if user:
+            queries = []
+
+            if exclude_known:
+                queries.append(Q(rating__isnull=False))
+            if exclude_owned:
+                queries.append(Q(owned=True))
+            if exclude_wishlist:
+                queries.append(Q(wishlist__lte=exclude_wishlist))
+            if exclude_play_count:
+                queries.append(Q(play_count__gte=exclude_play_count))
+
+            if queries:
+                query = reduce(or_, queries)
+                exclude_ids |= frozenset(
+                    Collection.objects.filter(user=user)
+                    .filter(query)
+                    .order_by()
+                    .values_list("game_id", flat=True)
+                )
+
         if exclude_clusters and exclude_ids:
             exclude_ids |= frozenset(
                 self.get_queryset()
@@ -326,13 +363,36 @@ class GameViewSet(PermissionsModelViewSet):
             )
 
         if exclude_compilations:
-            exclude_ids |= frozenset(
-                self.get_queryset()
-                .order_by()
-                .filter(compilation=True)
-                .values_list("bgg_id", flat=True)
-            )
+            exclude_ids |= self.compilations
 
+        return exclude_ids
+
+    def _included_games(
+        self,
+        *,
+        recommender,
+        user=None,
+        include_ids=None,
+        exclude_ids=None,
+        exclude_compilations=True,
+        exclude_known=True,
+        exclude_owned=True,
+        exclude_wishlist=None,
+        exclude_play_count=None,
+        exclude_clusters=False,
+    ):
+        include_ids = frozenset(arg_to_iter(include_ids))
+        exclude_ids = self._excluded_games(
+            user=user,
+            exclude_ids=exclude_ids,
+            exclude_compilations=exclude_compilations,
+            exclude_known=exclude_known,
+            exclude_owned=exclude_owned,
+            exclude_wishlist=exclude_wishlist,
+            exclude_play_count=exclude_play_count,
+            exclude_clusters=exclude_clusters,
+        )
+        # If explicitly included, we don't exclude them here
         exclude_ids -= include_ids
 
         # Add all potential games not filtered out by query
