@@ -13,9 +13,11 @@ pipenv install --dev
 Non-Python dependencies:
 
 * Docker
-* Google Cloud SDK: `gcloud components install docker-credential-gcr gsutil`
-* `brew install git sqlite shellcheck hadolint`
+* `brew install git sqlite shellcheck hadolint markdownlint-cli`
 * `npm install --global htmlhint jslint jshint csslint`
+* `gem install mdl`
+* `brew tap heroku/brew && brew install heroku`
+* `heroku login`
 """
 
 import logging
@@ -27,7 +29,7 @@ from functools import lru_cache
 from pathlib import Path
 
 import django
-from board_game_recommender import BGARecommender, BGGRecommender
+from board_game_recommender import BGARecommender, BGGRecommender, LightGamesRecommender
 from dotenv import load_dotenv
 from pynt import task
 from pyntcontrib import execute, safe_cd
@@ -62,8 +64,7 @@ MIN_VOTES_ANCHOR_DATE = SETTINGS.MIN_VOTES_ANCHOR_DATE
 MIN_VOTES_SECONDS_PER_STEP = SETTINGS.MIN_VOTES_SECONDS_PER_STEP
 
 URL_LIVE = "https://recommend.games/"
-GC_PROJECT = os.getenv("GC_PROJECT") or "recommend-games"
-GC_DATA_BUCKET = os.getenv("GC_DATA_BUCKET") or f"{GC_PROJECT}-data"
+HEROKU_APP = os.getenv("HEROKU_APP") or "recommend-games"
 
 GAMES_CSV_COLUMNS = (
     "bgg_id",
@@ -111,8 +112,6 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)-8.8s [%(name)s:%(lineno)s] %(message)s",
 )
-
-LOGGER.info("currently in Google Cloud project <%s>", GC_PROJECT)
 
 
 @lru_cache(maxsize=8)
@@ -936,6 +935,8 @@ def _train(
         shutil.rmtree(out_path, ignore_errors=True)
         recommender.save(out_path)
 
+    return recommender
+
 
 def _min_votes_from_date(
     first_date,
@@ -985,6 +986,7 @@ def trainbgg(
     games_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_GameItem.jl"),
     ratings_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem.jl"),
     out_path=os.path.join(RECOMMENDER_DIR, ".bgg"),
+    out_path_light=os.path.join(RECOMMENDER_DIR, ".bgg.light.npz"),
     users=None,
     max_iterations=1000,
     min_votes=None,
@@ -1009,7 +1011,7 @@ def trainbgg(
         LOGGER.info("Filter out games with less than %d votes", min_votes)
         filters["num_votes__gte"] = min_votes
 
-    _train(
+    recommender = _train(
         recommender_cls=BGGRecommender,
         games_file=games_file,
         ratings_file=ratings_file,
@@ -1018,6 +1020,10 @@ def trainbgg(
         max_iterations=max_iterations,
         **filters,
     )
+
+    if out_path_light:
+        light = LightGamesRecommender.from_turi_create(recommender.model)
+        light.to_npz(out_path_light)
 
 
 @task()
@@ -1234,8 +1240,7 @@ def cleandata(src_dir=DATA_DIR, bk_dir=f"{DATA_DIR}.bk"):
     shutil.rmtree(bk_dir, ignore_errors=True)
     if os.path.exists(src_dir):
         os.rename(src_dir, bk_dir)
-    os.makedirs(os.path.join(src_dir, "recommender_bgg"))
-    os.makedirs(os.path.join(src_dir, "recommender_bga"))
+    os.makedirs(src_dir)
 
 
 @task()
@@ -1265,7 +1270,7 @@ def filldb(
     django.core.management.call_command(
         "filldb",
         os.path.join(srp_dir, "bgg_GameItem.jl"),
-        collection_paths=[os.path.join(srp_dir, "bgg_RatingItem.jl")],
+        # collection_paths=[os.path.join(srp_dir, "bgg_RatingItem.jl")],
         user_paths=[os.path.join(srp_dir, "bgg_UserItem.jl")],
         in_format="jl",
         batch=100_000,
@@ -1331,6 +1336,16 @@ def cpdirsbga(
 ):
     """copy BGA recommender files"""
     cpdirs(src_dir, dst_dir, sub_dirs)
+
+
+@task()
+def cplight(
+    src_path=os.path.join(RECOMMENDER_DIR, ".bgg.light.npz"),
+    dst_path=os.path.join(DATA_DIR, "recommender_light.npz"),
+):
+    """Copy a light recommender file."""
+    LOGGER.info("Copying <%s> to <%s>...", src_path, dst_path)
+    shutil.copy2(src_path, dst_path)
 
 
 @task()
@@ -1576,7 +1591,7 @@ def historicalbggrankings(
     with safe_cd(repo):
         try:
             execute("git", "checkout", "master")
-            execute("git", "pull")
+            execute("git", "pull", "--ff-only")
         except SystemExit:
             LOGGER.exception(
                 "There was a problem updating BGG rankings repo <%s>",
@@ -1742,15 +1757,14 @@ def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_00
 @task(
     cleandata,
     filldb,
-    dateflag,
     kennerspiel,
-    splitall,
-    historicalbggrankings,
-    weeklycharts,
-    fillrankingdb,
+    dateflag,
+    # TODO Those three steps don't really belong to builddb
+    # splitall,
+    # historicalbggrankings,
+    # weeklycharts,
     compressdb,
-    cpdirs,
-    cpdirsbga,
+    cplight,
     sitemap,
 )
 def builddb():
@@ -1772,47 +1786,6 @@ def builddb():
 )
 def builddbfull():
     """merge, link, train, and build, all relevant files"""
-
-
-def _sync_data(src, dst, retries=0):
-    LOGGER.info("Syncing <%s> with <%s>...", src, dst)
-    try:
-        execute(
-            "gsutil",
-            "-m",
-            "-o",
-            "GSUtil:parallel_process_count=1",
-            "rsync",
-            "-d",
-            "-r",
-            src,
-            dst,
-        )
-
-    except SystemExit:
-        LOGGER.exception("An error occurred when syncing <%s> with <%s>", src, dst)
-
-        if retries <= 0:
-            raise
-
-        LOGGER.info("%d retries left...", retries)
-        _sync_data(src, dst, retries - 1)
-
-
-@task()
-def syncdata(src=os.path.join(DATA_DIR, ""), bucket=GC_DATA_BUCKET, retries=3):
-    """sync data with GCS"""
-    _sync_data(src=src, dst=f"gs://{bucket}/", retries=parse_int(retries))
-
-
-@task(builddb, syncdata)
-def releasedb():
-    """build and release database"""
-
-
-@task(builddbfull, syncdata)
-def releasedbfull():
-    """merge, link, train, build, and release database"""
 
 
 @task()
@@ -1860,9 +1833,10 @@ def collectstatic(delete=True):
 def buildserver(images=None, tags=None):
     """build Docker image"""
 
-    images = images or ("rg-server", f"gcr.io/{GC_PROJECT}/rg-server")
+    images = images or (f"registry.heroku.com/{HEROKU_APP}/web",)
     version = _server_version()
-    tags = tags or ("latest", version)
+    date = django.utils.timezone.now().strftime(DATE_FORMAT_COMPACT)
+    tags = tags or (f"{version}-{date}", "latest")
     all_tags = [f"{i}:{t}" for i in images if i for t in tags if t]
 
     LOGGER.info("Building Docker image with tags %s...", all_tags)
@@ -1886,39 +1860,19 @@ def buildserver(images=None, tags=None):
 
 
 @task()
-def pushserver(image=None, version=None):
+def pushserver(image=None):
     """push Docker image to remote repo"""
-    image = image or f"gcr.io/{GC_PROJECT}/rg-server"
-    version = version or _server_version()
-    LOGGER.info("Pushing Docker image <%s:%s> to repo...", image, version)
-    execute("docker", "push", f"{image}:{version}")
+    image = image or f"registry.heroku.com/{HEROKU_APP}/web"
+    LOGGER.info("Pushing Docker image <%s> to repo…", image)
+    execute("heroku", "container:login")
+    execute("docker", "push", image)
 
 
 @task(buildserver, pushserver)
-def releaseserver(
-    app_file=os.path.join(BASE_DIR, "app.yaml"),
-    image=None,
-    version=None,
-):
+def releaseserver(heroku_app=HEROKU_APP):
     """build, push, and deploy new server version"""
-    image = image or f"gcr.io/{GC_PROJECT}/rg-server"
-    version = version or _server_version()
-    date = django.utils.timezone.now().strftime(DATE_FORMAT_COMPACT)
-    LOGGER.info("Deploying server v%s-%s from file <%s>...", version, date, app_file)
-    execute(
-        "gcloud",
-        "app",
-        "deploy",
-        app_file,
-        "--project",
-        GC_PROJECT,
-        "--image-url",
-        f"{image}:{version}",
-        "--version",
-        f"{version}-{date}",
-        "--promote",
-        "--quiet",
-    )
+    LOGGER.info("Releasing new version of Heroku app <%s>…", heroku_app)
+    execute("heroku", "container:release", f"--app={heroku_app}", "--verbose", "web")
 
 
 @task(builddb, buildserver)
@@ -1931,12 +1885,12 @@ def buildfull():
     """merge, link, train, and build database and server"""
 
 
-@task(releasedb, releaseserver)
+@task(builddb, releaseserver)
 def release():
     """release database and server"""
 
 
-@task(releasedbfull, releaseserver)
+@task(builddbfull, releaseserver)
 def releasefull():
     """merge, link, train, build, and release database and server"""
 
@@ -1944,7 +1898,7 @@ def releasefull():
 @task()
 def lintshell(base_dir=BASE_DIR):
     """lint Shell scripts"""
-    execute("find", base_dir, "-name", "*.sh", "-ls", "-exec", "shellcheck", "{}", ";")
+    execute("find", base_dir, "-iname", "*.sh", "-ls", "-exec", "shellcheck", "{}", ";")
 
 
 @task()
@@ -1953,7 +1907,7 @@ def lintdocker(base_dir=BASE_DIR):
     execute(
         "find",
         base_dir,
-        "-name",
+        "-iname",
         "Dockerfile*",
         "-ls",
         "-exec",
@@ -1961,6 +1915,23 @@ def lintdocker(base_dir=BASE_DIR):
         "{}",
         ";",
     )
+
+
+@task()
+def lintmarkdown(base_dir=BASE_DIR):
+    """Lint Markdown documents."""
+    execute(
+        "find",
+        base_dir,
+        "-iname",
+        "*.md",
+        "-ls",
+        "-exec",
+        "markdownlint",
+        "{}",
+        ";",
+    )
+    execute("find", base_dir, "-iname", "*.md", "-ls", "-exec", "mdl", "{}", ";")
 
 
 @task()
@@ -1995,7 +1966,7 @@ def lintcss():
         execute("csslint", "app.css")
 
 
-@task(lintshell, lintdocker, lintpy, linthtml, lintjs, lintcss)
+@task(lintshell, lintdocker, lintmarkdown, lintpy, linthtml, lintjs, lintcss)
 def lint():
     """lint everything"""
 

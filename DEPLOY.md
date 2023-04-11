@@ -1,5 +1,9 @@
 # Deployment to Google Cloud
 
+This document describes the deployment process to a new Google Cloud environment.
+If you just want to learn how to get started or what tools you need to install,
+read the [contribution guidelines](CONTRIBUTING.md).
+
 ## Create Google Cloud project
 
 Log in to [Google Cloud console](https://console.cloud.google.com) and create a
@@ -33,20 +37,20 @@ Open the [PubSub dashboard](https://console.cloud.google.com/cloudpubsub) and
 create the topic `users`, then two subscriptions attached to that topic:
 
 * `crawl` with "Pull" delivery type, "Never expire", 600 seconds acknowledgement
-deadline, and 1 day retention duration,
+  deadline, and 1 day retention duration,
 * `logs` with "Pull" delivery type, "Never expire", 600 seconds acknowledgement
-deadline, and 7 day retention duration.
+  deadline, and 7 day retention duration.
 
 Also create another topic `responses` and one subscription attached to that topic:
 
 * `response_logs` with "Pull" delivery type, "Never expire", 600 seconds
-acknowledgement deadline, and 7 day retention duration.
+  acknowledgement deadline, and 7 day retention duration.
 
 Then make sure to update the PubSub project, topic, and subscription:
 
 * `crawl` in the [scraper](https://gitlab.com/recommend.games/board-game-scraper/blob/master/.env.example),
 * `logs` and `response_logs` in [`.env`](.env.example) and
-[`docker-compose.yaml`](docker-compose.yaml).
+  [`docker-compose.yaml`](docker-compose.yaml).
 
 ## Enable Google Container Registry API
 
@@ -114,7 +118,7 @@ You should now be able to deploy the service. For a full release, simply run
 If you don't need to build a new recommender and datebase version, it should
 suffice to run
 
-```
+```bash
 pipenv run pynt syncdata releaseserver
 ```
 

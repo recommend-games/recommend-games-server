@@ -7,35 +7,33 @@ verify_ssl = true
 python_version = "3.7"
 
 [packages]
-board-game-recommender = ">=2.3.0,<3.0.0"
-decorator = "*"
+board-game-recommender = {extras = ["light"], version = ">=3.1.0"}
 django = ">=3.1.2"
+django-api-proxy = "*"
 django-extensions = "*"
 django-filter = "*"
-django-rest-framework-proxy = {ref = "django3", git = "https://github.com/MarkusShepherd/django-rest-framework-proxy.git"}
 djangorestframework = "*"
-google-cloud-pubsub = "*"
 gunicorn = "*"
-markdown = "*"
 pandas = "*"
-prettytable = "*"
 pytility = {extras = ["dates"], version = "*"}
-turicreate = "*"
 whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
 black = "*"
-board-game-recommender = {extras = ["trust"], version = ">=2.3.0,<3.0.0"}
+board-game-recommender = {extras = ["full", "light", "trust"], version = ">=3.1.0"}
 board-game-scraper = {extras = ["cloud"], version = ">=2.11.3"}
 board-game-utils = "*"
 csvkit = "*"
+decorator = "*"
 dedupe = ">=2.0.6"
 gitpython = "*"
 ipython = "*"
 jmespath = "*"
 lxml = "*"
+markdown = "*"
 mypy = "*"
 pre-commit = "*"
+prettytable = "*"
 psutil = "*"
 pylint = "*"
 pynt = "*"
@@ -51,3 +49,4 @@ scipy = "==1.7.3" # should match version used for kennerspiel.joblib
 smart-open = {extras = ["all"], version = ">=1.8.1"}
 snaptime = "*"
 tqdm = "*"
+turicreate = "*"

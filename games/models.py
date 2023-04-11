@@ -98,6 +98,7 @@ class Game(Model):
         "self", symmetrical=False, blank=True, related_name="implemented_by"
     )
     integrates_with = ManyToManyField("self", symmetrical=True, blank=True)
+    cluster = ManyToManyField("self", symmetrical=True, blank=True)
 
     bgg_rank = PositiveIntegerField(blank=True, null=True, db_index=True)
     num_votes = PositiveIntegerField(default=0, db_index=True)
