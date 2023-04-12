@@ -10,8 +10,11 @@ rgApp.controller('DetailController', function DetailController(
     $log,
     $q,
     $routeParams,
+    $sce,
     $scope,
     $timeout,
+    MAINTENANCE_MODE,
+    NEW_RANKING_DATE,
     gamesService,
     rankingsService
 ) {
@@ -21,7 +24,6 @@ rgApp.controller('DetailController', function DetailController(
         implementationOf = [],
         implementedBy = [],
         integratesWith = [],
-        similarPromise = gamesService.getSimilarGames($routeParams.id, 1, true),
         startDate = moment().subtract(1, 'year'),
         endDate = moment().isoWeekday(7),
         allRanges = [
@@ -32,8 +34,11 @@ rgApp.controller('DetailController', function DetailController(
             ['3 years', moment().subtract(3, 'years')],
             ['5 years', moment().subtract(5, 'years')],
             ['10 years', moment().subtract(10, 'years')]
-        ],
-        canonical;
+        ];
+
+    $scope.maintenanceMode = false;
+    $scope.maintenanceMessage = null;
+    $scope.errorMessage = null;
 
     $scope.implementations = false;
     $scope.expandable = false;
@@ -42,6 +47,7 @@ rgApp.controller('DetailController', function DetailController(
     $scope.chartVisible = false;
     $scope.rankings = null;
     $scope.display = {
+        rg: true,
         factor: true,
         bgg: true,
         startDate: startDate,
@@ -57,8 +63,7 @@ rgApp.controller('DetailController', function DetailController(
             !_.isEmpty($scope.containedIn) ||
             !_.isEmpty($scope.implementationOf) ||
             !_.isEmpty($scope.implementedBy) ||
-            !_.isEmpty($scope.integratesWith) ||
-            !_.isEmpty($scope.similarGames);
+            !_.isEmpty($scope.integratesWith);
         $scope.expandable = !!$scope.implementations;
     }
 
@@ -94,17 +99,6 @@ rgApp.controller('DetailController', function DetailController(
                     .catch(_.constant());
             });
 
-            similarPromise
-                .then(function (response) {
-                    $scope.similarGames = _(response.results)
-                        .filter(function (game) {
-                            return !_.includes(ids, game.bgg_id);
-                        })
-                        .take(12)
-                        .value();
-                })
-                .then(updateImplementations);
-
             return $q.all(promises);
         })
         .then(function (implementations) {
@@ -137,8 +131,17 @@ rgApp.controller('DetailController', function DetailController(
                 $('.tooltip').remove();
                 $('[data-toggle="tooltip"]').tooltip();
             });
+        })
+        .catch(function (response) {
+            $log.error(response);
+
+            if (MAINTENANCE_MODE) {
+                $scope.maintenanceMode = true;
+                $scope.maintenanceMessage = $sce.trustAsHtml('For more details, please read <a href="https://blog.recommend.games/posts/announcement-hiatus/">this blog post</a>.');
+            } else {
+                $scope.errorMessage = 'Unable to load the game. 😢 Please try again later…';
+            }
         });
-        // TODO catch errors
 
     function makeDataPoints(data, rankingType, startDate, endDate) {
         data = _(data)
@@ -168,7 +171,8 @@ rgApp.controller('DetailController', function DetailController(
 
     function makeDataSets(data, startDate, endDate) {
         var datasets = [
-                $scope.display.factor ? makeDataSet(data, 'fac', startDate, endDate, 'R.G', 'rgba(0, 0, 0, 1)') : null,
+                $scope.display.rg ? makeDataSet(data, 'r_g', startDate, endDate, 'R.G', 'rgba(0, 0, 0, 1)') : null,
+                $scope.display.factor ? makeDataSet(data, 'fac', startDate, endDate, 'Old', 'rgba(100, 100, 100, 1)') : null,
                 $scope.display.bgg ? makeDataSet(data, 'bgg', startDate, endDate, 'BGG', 'rgba(255, 81, 0, 1)') : null
             ];
         return _.filter(datasets);
@@ -228,7 +232,7 @@ rgApp.controller('DetailController', function DetailController(
             $scope.chartVisible = true;
             $scope.rankings = rankings;
             $scope.bestRankingBGG = bestRanking(rankings, 'bgg');
-            $scope.bestRankingRG = bestRanking(rankings, 'fac');
+            $scope.bestRankingRG = moment() >= NEW_RANKING_DATE ? bestRanking(rankings, 'r_g') : bestRanking(rankings, 'fac');
 
             return findElement('#ranking-history-container');
         })
@@ -319,13 +323,9 @@ rgApp.controller('DetailController', function DetailController(
         .catch($log.error);
 
     $scope.$watchGroup(
-        ['display.factor', 'display.bgg'],
+        ['display.rg', 'display.factor', 'display.bgg'],
         updateChart
     );
 
     gamesService.setCanonicalUrl($location.path());
-
-    canonical = gamesService.urlAndPath($location.path(), undefined, true);
-    $scope.disqusId = canonical.path;
-    $scope.disqusUrl = canonical.url;
 });

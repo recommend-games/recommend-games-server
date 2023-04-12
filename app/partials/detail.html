@@ -14,6 +14,25 @@
 			<span ng-if="game.year">({{ game.year }})</span>
 		</small>
 	</h1>
+
+	<div ng-show="maintenanceMode"
+			class="alert alert-danger"
+			role="alert">
+		<h4 class="alert-heading"><span class="recommend-games">Recommend.Games</span> is currently under maintenance</h4>
+		<p ng-if="maintenanceMessage"
+				ng-bind-html="maintenanceMessage"
+				class="mb-0"></p>
+	</div>
+
+	<div ng-if="errorMessage"
+			class="alert alert-warning"
+			role="alert">
+		<h4 class="alert-heading">No game found</h4>
+		<p class="mb-0">
+			{{ errorMessage }}
+		</p>
+	</div>
+
 	<!--<p>
 		View on <a ng-href="{{ game.url }}" target="_blank">BoardGameGeek <i class="fas fa-external-link-alt"></i></a>.
 		Buy from
@@ -42,6 +61,7 @@
 			title="Buy from Amazon.es"
 			class="product-link product-link-flag">🇪🇸</a>
 	</p>-->
+
 	<div class="game-description {{ expandable ? 'expandable' : '' }} {{ expandDescription ? 'expanded' : '' }} clearfix">
 		<img ng-if="game.image_url &amp;&amp; game.image_url.length"
 			ng-src="{{ game.image_url[0] }}"
@@ -110,6 +130,7 @@
 			</span>
 		</div>
 	</div>
+
 	<section ng-if="implementations">
 		<h2>
 			Related games
@@ -155,16 +176,9 @@
 					ng-href="/#/game/{{ game.bgg_id }}"
 					class="game-small"></a>
 			</div>
-			<div ng-repeat="game in similarGames" class="col-xl-2 col-md-3 col-sm-4 col-6">
-				<strong ng-if="$first">You might also like:</strong>
-				<a game-square=""
-					game="game"
-					show-ranking="true"
-					ng-href="/#/game/{{ game.bgg_id }}"
-					class="game-small"></a>
-			</div>
 		</div>
 	</section>
+
 	<!-- TODO super uply – this should be done in controller -->
 	<section ng-if="(game.alt_name &amp;&amp; game.alt_name.length) || game.bgg_rank || game.bayes_rating || game.avg_rating || game.rec_rank || bestRankingBGG || bestRankingRG || game.designer_data || game.artist_data || game.complexity || game.language_dependency || (game.external_links &amp;&amp; game.external_links.length)">
 		<h2>Statistics</h2>
@@ -320,14 +334,25 @@
 			<form class="form-inline mb-1">
 				<label class="switch mr-1">
 					<input type="checkbox"
-						id="display-rg-factor"
-						name="display-rg-factor"
+						id="display-rg-data"
+						name="display-rg-data"
+						ng-model="display.rg" />
+					<span class="slider {{ display.rg ? 'bg-success' : 'bg-secondary' }}"></span>
+				</label>
+				<label class="{{ display.rg ? 'rg-color' : 'text-muted' }} mr-2"
+						for="display-rg-data">
+					<strong class="recommend-games">Recommend.Games</strong>
+				</label>
+				<label class="switch mr-1">
+					<input type="checkbox"
+						id="display-factor-data"
+						name="display-factor-data"
 						ng-model="display.factor" />
 					<span class="slider {{ display.factor ? 'bg-success' : 'bg-secondary' }}"></span>
 				</label>
-				<label class="{{ display.factor ? 'rg-color' : 'text-muted' }} mr-2"
-						for="display-rg-factor">
-					<strong class="recommend-games">Recommend.Games</strong>
+				<label class="{{ display.factor ? 'rg-color-light' : 'text-muted' }} mr-2"
+						for="display-factor-data">
+					<strong>Old <span class="recommend-games">R.G</span></strong>
 				</label>
 				<label class="switch mr-1">
 					<input type="checkbox"
@@ -345,8 +370,4 @@
 			<div id="ranking-history-container"></div>
 		</section>
 	</section>
-
-	<disqus ng-if="disqusId &amp;&amp; disqusUrl"
-		identifier="disqusId"
-		url="disqusUrl"></disqus>
 </section>

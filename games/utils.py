@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """ utils """
 
 import json
@@ -7,7 +5,6 @@ import logging
 import os.path
 import re
 import timeit
-
 from csv import DictWriter
 from datetime import timezone
 from functools import lru_cache, partial
@@ -21,7 +18,7 @@ VERSION_REGEX = re.compile(r"^\D*(.+)$")
 
 
 def format_from_path(path):
-    """ get file extension """
+    """get file extension"""
     try:
         _, ext = os.path.splitext(path)
         return ext.lower()[1:] if ext else None
@@ -38,72 +35,40 @@ def serialize_date(date, tzinfo=None):
 
 @lru_cache(maxsize=8)
 def load_recommender(path, site="bgg"):
-    """ load recommender from given path """
+    """load recommender from given path"""
+
     if not path:
         return None
+
     try:
+        if site == "light":
+            from board_game_recommender import LightGamesRecommender
+
+            LOGGER.info("Trying to load <LightGamesRecommender> from <%s>", path)
+            return LightGamesRecommender.from_npz(path)
+
         if site == "bga":
             from board_game_recommender import BGARecommender
 
+            LOGGER.info("Trying to load <BGARecommender> from <%s>", path)
             return BGARecommender.load(path=path)
+
         from board_game_recommender import BGGRecommender
 
+        LOGGER.info("Trying to load <BGGRecommender> from <%s>", path)
         return BGGRecommender.load(path=path)
+
     except Exception:
         LOGGER.exception("unable to load recommender model from <%s>", path)
-    return None
 
-
-@lru_cache(maxsize=8)
-def pubsub_client():
-    """ Google Cloud PubSub client """
-    try:
-        from google.cloud import pubsub
-
-        return pubsub.PublisherClient()
-    except Exception:
-        LOGGER.exception("unable to initialise PubSub client")
-    return None
-
-
-def pubsub_push(
-    message,
-    project=settings.PUBSUB_QUEUE_PROJECT,
-    topic=settings.PUBSUB_QUEUE_TOPIC,
-    encoding="utf-8",
-    **kwargs,
-):
-    """ publish message """
-
-    if not project or not topic:
-        return None
-
-    client = pubsub_client()
-
-    if client is None:
-        return None
-
-    if isinstance(message, str):
-        message = message.encode(encoding)
-    assert isinstance(message, bytes)
-
-    # pylint: disable=no-member
-    path = client.topic_path(project, topic)
-
-    LOGGER.debug("pushing message %r to <%s>", message, path)
-
-    try:
-        return client.publish(topic=path, data=message, **kwargs)
-    except Exception:
-        LOGGER.exception("unable to send message %r", message)
     return None
 
 
 @lru_cache(maxsize=8)
 def model_updated_at(file_path=settings.MODEL_UPDATED_FILE):
-    """ latest model update """
+    """latest model update"""
     try:
-        with open(file_path) as file_obj:
+        with open(file_path, encoding="utf-8") as file_obj:
             updated_at = file_obj.read()
         updated_at = normalize_space(updated_at)
         return parse_date(updated_at, tzinfo=timezone.utc)
@@ -125,12 +90,24 @@ def parse_version(version):
 def project_version(file_path=settings.PROJECT_VERSION_FILE):
     """Project version."""
     try:
-        with open(file_path) as file_obj:
+        with open(file_path, encoding="utf-8") as file_obj:
             version = file_obj.read()
         return parse_version(version)
     except Exception:
         pass
     return None
+
+
+@lru_cache(maxsize=8)
+def server_version(file_path=settings.PROJECT_VERSION_FILE) -> dict:
+    """Full server version."""
+    release_version = project_version(file_path=file_path)
+    heroku_version = parse_version(os.getenv("HEROKU_RELEASE_VERSION"))
+    server_version = "-".join(filter(None, (release_version, heroku_version)))
+    return {
+        "project_version": release_version,
+        "server_version": server_version or None,
+    }
 
 
 def save_recommender_ranking(recommender, dst, similarity_model=False):
@@ -142,7 +119,7 @@ def save_recommender_ranking(recommender, dst, similarity_model=False):
         dst,
     )
 
-    recommendations = recommender.recommend(similarity_model=similarity_model)
+    recommendations = recommender.recommend(users=(), similarity_model=similarity_model)
     if "name" in recommendations.column_names():
         recommendations.remove_column("name", inplace=True)
 
@@ -154,7 +131,7 @@ def save_recommender_ranking(recommender, dst, similarity_model=False):
 
 def count_lines(path) -> int:
     """Return the line count of a given path."""
-    with open(path) as file:
+    with open(path, encoding="utf-8") as file:
         return sum(1 for _ in file)
 
 
@@ -166,7 +143,10 @@ def count_files(path, glob=None) -> int:
 
 
 def count_lines_and_files(
-    paths_lines=None, paths_files=None, line_glob=None, file_glob=None
+    paths_lines=None,
+    paths_files=None,
+    line_glob=None,
+    file_glob=None,
 ) -> dict:
     """Counts lines and files in the given paths."""
 
@@ -208,7 +188,9 @@ def _process_value(value, joiner=","):
         return int(value)
     if isinstance(value, (list, tuple)):
         return joiner.join(
-            str(v).split(":")[-1] for v in value if v is not None and v != ""
+            str(v).rsplit(":", maxsplit=1)[-1]
+            for v in value
+            if v is not None and v != ""
         )
     return value
 
@@ -232,7 +214,11 @@ def jl_to_csv(in_path, out_path, columns=None, joiner=","):
         "Reading JSON lines from <%s> and writing CSV to <%s>...", in_path, out_path
     )
 
-    with open(in_path) as in_file, open(out_path, "w") as out_file:
+    with open(in_path, encoding="utf-8") as in_file, open(
+        out_path,
+        "w",
+        encoding="utf-8",
+    ) as out_file:
         if not columns:
             row = next(in_file, None)
             row = _process_row(row, joiner=joiner) if row else {}
@@ -250,7 +236,7 @@ def jl_to_csv(in_path, out_path, columns=None, joiner=","):
 
 
 class Timer:
-    """ log execution time: with Timer('message'): do_something() """
+    """log execution time: with Timer('message'): do_something()"""
 
     def __init__(self, message, logger=None):
         self.message = f'"{message}" execution time: %.1f ms'

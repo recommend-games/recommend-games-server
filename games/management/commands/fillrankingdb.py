@@ -1,19 +1,15 @@
-# -*- coding: utf-8 -*-
-
 """Parses the ranking CSVs and writes them to the database."""
 
 import csv
 import logging
 import os
 import sys
-
 from datetime import datetime, timezone
 from functools import lru_cache
 from itertools import groupby
 from pathlib import Path
 
 import pandas as pd
-
 from django.core.management.base import BaseCommand
 from pytility import arg_to_iter, batchify, parse_date
 from snaptime import snap
@@ -139,6 +135,7 @@ def _create_instances(
     week_day="SUN",
     min_date=None,
     max_date=None,
+    min_score=None,
 ):
     LOGGER.info(
         "Finding all rankings of type <%s> in <%s>, aggregating <%s>...",
@@ -162,7 +159,12 @@ def _create_instances(
             if method == "all"
             else None
         )
+
         assert rankings is not None, f"illegal method <{method}>"
+
+        if min_score is not None and "score" in rankings:
+            rankings = rankings[rankings["score"] > min_score]
+
         for item in rankings.itertuples(index=False):
             if filter_ids is None or item.bgg_id in filter_ids:
                 yield Ranking(
@@ -179,10 +181,16 @@ class Command(BaseCommand):
     help = "Parses the ranking CSVs and writes them to the database."
 
     ranking_types = {
-        Ranking.BGG: ("bgg", "last", None),
-        Ranking.FACTOR: ("factor", "mean", None),
-        Ranking.SIMILARITY: ("similarity", "mean", None),
-        Ranking.CHARTS: ("charts", "all", datetime(2016, 1, 1, tzinfo=timezone.utc)),
+        Ranking.BGG: ("bgg", "last", None, None),
+        Ranking.RECOMMEND_GAMES: ("r_g", "mean", None, 0),
+        Ranking.FACTOR: ("factor", "mean", None, None),
+        Ranking.SIMILARITY: ("similarity", "mean", None, None),
+        Ranking.CHARTS: (
+            "charts",
+            "all",
+            datetime(2016, 1, 1, tzinfo=timezone.utc),
+            None,
+        ),
     }
 
     def add_arguments(self, parser):
@@ -209,12 +217,20 @@ class Command(BaseCommand):
             help="anchor week day when aggregating weeks",
         )
         parser.add_argument(
-            "--dry-run", "-n", action="store_true", help="don't write to the database"
+            "--dry-run",
+            "-n",
+            action="store_true",
+            help="don't write to the database",
         )
 
     def _create_all_instances(self, path, filter_ids=None, week_day="SUN", types=None):
         types = frozenset(arg_to_iter(types))
-        for ranking_type, (sub_dir, method, min_date) in self.ranking_types.items():
+        for ranking_type, (
+            sub_dir,
+            method,
+            min_date,
+            min_score,
+        ) in self.ranking_types.items():
             if not types or ranking_type in types:
                 yield from _create_instances(
                     path_dir=os.path.join(path, sub_dir),
@@ -223,6 +239,7 @@ class Command(BaseCommand):
                     method=method,
                     week_day=week_day,
                     min_date=min_date,
+                    min_score=min_score,
                 )
 
     def handle(self, *args, **kwargs):

@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
-
 """ permissions """
 
-from rest_framework.permissions import AllowAny, BasePermission, SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS, AllowAny, BasePermission
 
 
 class ReadOnly(BasePermission):
-    """ read-only permission """
+    """read-only permission"""
 
     message = "You cannot write this resource."
 

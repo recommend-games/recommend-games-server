@@ -1,18 +1,14 @@
-# -*- coding: utf-8 -*-
-
 """Generate board game charts from ratings data."""
 
 import json
 import logging
 import sys
-
 from datetime import datetime, timedelta, timezone
 from itertools import islice, tee
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-
 from dateutil.rrule import MONTHLY, WEEKLY, YEARLY, rrule
 from django.core.management.base import BaseCommand
 from pytility import arg_to_iter, parse_date
@@ -68,7 +64,7 @@ def calculate_charts(
     percentiles=(0.25, 0.75),
     min_raw_score=None,
     decay=False,
-):
+) -> pd.DataFrame:
     """Calculate charts for the given timeframe."""
 
     end_date = end_date or datetime.utcnow().replace(tzinfo=timezone.utc)
@@ -150,9 +146,9 @@ def calculate_charts(
 
 
 def _pairwise(iterable):
-    a, b = tee(iterable)
-    next(b, None)
-    return zip(a, b)
+    it1, it2 = tee(iterable)
+    next(it2, None)
+    return zip(it1, it2)
 
 
 class Command(BaseCommand):
@@ -250,6 +246,7 @@ class Command(BaseCommand):
 
             if not kwargs["dry_run"] and not charts.empty:
                 LOGGER.info("Writing charts to <%s>", out_path)
+                # pylint: disable=unsubscriptable-object
                 charts[columns].to_csv(out_path, index=False)
 
         LOGGER.info("Done.")

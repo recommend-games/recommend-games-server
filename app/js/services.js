@@ -11,12 +11,10 @@ rgApp.factory('gamesService', function gamesService(
     $http,
     $q,
     $sessionStorage,
-    $window,
     API_URL,
     APP_TITLE,
     CANONICAL_URL,
     DEFAULT_IMAGE,
-    GA_TRACKING_ID,
     SITE_DESCRIPTION
 ) {
     var $ = angular.element,
@@ -213,7 +211,7 @@ rgApp.factory('gamesService', function gamesService(
     }
 
     function getGames(page, filters, noblock) {
-        var url = API_URL + 'games/',
+        var url = API_URL + 'games',
             params = _.isEmpty(filters) ? {} : _.cloneDeep(filters);
         page = page || null;
 
@@ -222,12 +220,12 @@ rgApp.factory('gamesService', function gamesService(
         }
 
         if (!_.isEmpty(params.user) || !_.isEmpty(params.like)) {
-            url += 'recommend/';
+            url += '/recommend';
         }
 
         $log.debug('query parameters', params);
 
-        return $http.get(url, {'params': params, 'noblock': !!noblock})
+        return $http.get(url + '.json', {'params': params, 'noblock': !!noblock})
             .then(function (response) {
                 var games = _.get(response, 'data.results');
 
@@ -268,7 +266,7 @@ rgApp.factory('gamesService', function gamesService(
             return $q.resolve(cached);
         }
 
-        return $http.get(API_URL + 'games/' + id + '/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'games/' + id + '.json', {'noblock': !!noblock})
             .then(function (response) {
                 var responseId = _.get(response, 'data.bgg_id'),
                     game;
@@ -328,40 +326,6 @@ rgApp.factory('gamesService', function gamesService(
         return fetchGames($sessionStorage.popularGamesPage || 1);
     };
 
-    service.getSimilarGames = function getSimilarGames(gameId, page, noblock) {
-        page = page || null;
-        var url = API_URL + 'games/' + gameId + '/similar/',
-            params = page ? {'page': page} : null;
-
-        return $http.get(url, {'params': params, 'noblock': !!noblock})
-            .then(function (response) {
-                var games = _.get(response, 'data.results');
-
-                if (!games) {
-                    return $q.reject('Unable to load games.');
-                }
-
-                games = _.map(games, processGame);
-                response.data.results = games;
-                response.data.page = page;
-
-                _.forEach(games, function (game) {
-                    putCache(game);
-                });
-
-                return response.data;
-            })
-            .catch(function (reason) {
-                $log.error('There has been an error', reason);
-                var response = _.get(reason, 'data.detail') || reason;
-                response = _.isString(response) ? response : 'Unable to load games.';
-                return $q.reject({
-                    'reason': response,
-                    'status': _.get(reason, 'status')
-                });
-            });
-    };
-
     service.getList = function getList(model, noblock, start, end) {
         start = _.isNumber(start) ? start : 0;
         end = _.isNumber(end) ? end : 25;
@@ -371,7 +335,7 @@ rgApp.factory('gamesService', function gamesService(
         }
 
         function fetchList(page) {
-            return $http.get(API_URL + model + '/', {'params': {'page': page}, 'noblock': !!noblock})
+            return $http.get(API_URL + model + '.json', {'params': {'page': page}, 'noblock': !!noblock})
                 .then(function (response) {
                     var results = _.get(response, 'data.results', []),
                         next = _.get(response, 'data.next'),
@@ -422,7 +386,7 @@ rgApp.factory('gamesService', function gamesService(
             return $q.resolve($sessionStorage.games_stats.updated_at_str);
         }
 
-        return $http.get(API_URL + 'games/updated_at/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'games/updated_at.json', {'noblock': !!noblock})
             .then(function (response) {
                 var data = processDate(response.data, 'updated_at');
                 if (!data.updated_at_str) {
@@ -463,7 +427,7 @@ rgApp.factory('gamesService', function gamesService(
             return $q.resolve($sessionStorage.games_stats);
         }
 
-        return $http.get(API_URL + 'games/stats/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'games/stats.json', {'noblock': !!noblock})
             .then(function (response) {
                 var stats = response.data;
                 if (_.isEmpty(stats)) {
@@ -496,7 +460,7 @@ rgApp.factory('gamesService', function gamesService(
             params.date__lte = date.format('YYYY-MM-DD');
         }
 
-        return $http.get(API_URL + 'rankings/games/', {'params': params, 'noblock': !!noblock})
+        return $http.get(API_URL + 'rankings/games.json', {'params': params, 'noblock': !!noblock})
             .then(function (response) {
                 var rankings = _.get(response, 'data.results'),
                     chartDate = moment(_.get(rankings, '[0].date')),
@@ -550,7 +514,7 @@ rgApp.factory('gamesService', function gamesService(
             return $q.resolve(parsed);
         }
 
-        return $http.get(API_URL + 'rankings/dates/', {'params': params, 'noblock': !!noblock})
+        return $http.get(API_URL + 'rankings/dates.json', {'params': params, 'noblock': !!noblock})
             .then(function (response) {
                 var rankings = _.get(response, 'data'),
                     dates = _(rankings)
@@ -674,10 +638,6 @@ rgApp.factory('gamesService', function gamesService(
             '<meta property="og:url" content="' + canonical.url + '" />'
         );
 
-        if (GA_TRACKING_ID && $window.gtag) {
-            $window.gtag('config', GA_TRACKING_ID, {'page_path': '/' + canonical.path});
-        }
-
         return canonical;
     };
 
@@ -768,7 +728,7 @@ rgApp.factory('usersService', function usersService(
 
         var userUri = encodeURIComponent(user);
 
-        return $http.get(API_URL + 'users/' + userUri + '/stats/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'users/' + userUri + '/stats.json', {'noblock': !!noblock})
             .then(function (response) {
                 var stats = response.data;
                 if (_.isEmpty(stats)) {
@@ -810,7 +770,7 @@ rgApp.factory('personsService', function personsService(
             return $q.resolve(cached);
         }
 
-        return $http.get(API_URL + 'persons/' + id + '/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'persons/' + id + '.json', {'noblock': !!noblock})
             .then(function (response) {
                 var responseId = _.get(response, 'data.bgg_id'),
                     person;
@@ -840,14 +800,21 @@ rgApp.factory('newsService', function newsService(
     $log,
     $q,
     $sessionStorage,
-    API_URL
+    API_URL,
+    NEWS_API_FALLBACK_URL
 ) {
     var service = {};
 
     $sessionStorage.news = [];
 
-    function formatUrl(page) {
-        return API_URL + 'news/news_' + _.padStart(page, 5, '0') + '.json';
+    function formatUrl(page, fallback) {
+        var file = 'news_' + _.padStart(page, 5, '0') + '.json';
+
+        if (fallback) {
+            return NEWS_API_FALLBACK_URL + file;
+        }
+
+        return API_URL + 'news/' + file;
     }
 
     function processNews(article) {
@@ -856,14 +823,14 @@ rgApp.factory('newsService', function newsService(
         return article;
     }
 
-    service.getNews = function getNews(page, noblock) {
+    function getNews(page, fallback, noblock) {
         page = _.parseInt(page) || 0;
 
         if (!_.isEmpty($sessionStorage.news[page])) {
             return $q.resolve($sessionStorage.news[page]);
         }
 
-        return $http.get(formatUrl(page), {'noblock': !!noblock})
+        return $http.get(formatUrl(page, fallback), {'noblock': !!noblock})
             .then(function (response) {
                 var articles = _.map(_.get(response, 'data.results'), processNews),
                     result = {
@@ -879,6 +846,11 @@ rgApp.factory('newsService', function newsService(
             })
             .catch(function (response) {
                 $log.error(response);
+
+                if (!fallback) {
+                    return getNews(page, true, noblock);
+                }
+
                 return {
                     'page': page,
                     'articles': [],
@@ -886,7 +858,9 @@ rgApp.factory('newsService', function newsService(
                     'total': null
                 };
             });
-    };
+    }
+
+    service.getNews = getNews;
 
     service.setLastVisit = function setLastVisit(date) {
         date = moment(date || undefined);
@@ -937,6 +911,17 @@ rgApp.factory('filterService', function filterService(
             result = result.sortBy(_.lowerCase);
         }
         return result.value();
+    }
+
+    function parseIntList(input) {
+        return _(input)
+            .split(',')
+            .map(_.trim)
+            .map(_.parseInt)
+            .reject(_.isNaN)
+            .sortBy()
+            .sortedUniq()
+            .value();
     }
 
     function validateCountType(playerCountType) {
@@ -1012,6 +997,8 @@ rgApp.factory('filterService', function filterService(
             playerCount = _.parseInt(params.playerCount) || null,
             playTime = _.parseInt(params.playTime) || null,
             playerAge = _.parseInt(params.playerAge) || null,
+            include = parseIntList(params.include),
+            exclude = parseIntList(params.exclude),
             excludeRated = booleanDefault(params.excludeRated, true, _.size(user) !== 1),
             excludeOwned = booleanDefault(params.excludeOwned, true, _.size(user) !== 1),
             excludeWishlist = booleanDefault(params.excludeWishlist, false, _.size(user) !== 1),
@@ -1021,16 +1008,12 @@ rgApp.factory('filterService', function filterService(
             yearMin = _.parseInt(params.yearMin),
             yearMax = _.parseInt(params.yearMax),
             ordering = validateOrdering(params.ordering),
-            like = _(params.like)
-                .split(',')
-                .map(_.parseInt)
-                .reject(_.isNaN)
-                .sortBy()
-                .sortedUniq()
-                .value();
+            like = parseIntList(params.like);
 
         return {
             'for': _.isEmpty(user) ? null : user,
+            'include': _.isEmpty(include) ? null : include,
+            'exclude': _.isEmpty(exclude) ? null : exclude,
             'excludeRated': excludeRated === false ? false : null,
             'excludeOwned': excludeOwned === false ? false : null,
             'excludeWishlist': excludeWishlist === true ? true : null,
@@ -1063,8 +1046,12 @@ rgApp.factory('filterService', function filterService(
         scope = scope || {};
 
         var userList = parseList(scope.user, true),
+            include = parseIntList(scope.includeGames),
+            exclude = parseIntList(scope.excludeGames),
             result = {
                 'for': _.isEmpty(userList) ? null : userList,
+                'include': _.isEmpty(include) ? null : include,
+                'exclude': _.isEmpty(exclude) ? null : exclude,
                 'search': scope.search,
                 'cooperative': scope.cooperative,
                 'gameType': scope.gameType,
@@ -1172,6 +1159,14 @@ rgApp.factory('filterService', function filterService(
             }
         }
 
+        if (params.include) {
+            result.include = params.include;
+        }
+
+        if (params.exclude) {
+            result.exclude = params.exclude;
+        }
+
         if (params.search) {
             result.search = params.search;
         }
@@ -1262,7 +1257,7 @@ rgApp.factory('rankingsService', function rankingsService(
             return $q.resolve(cached);
         }
 
-        return $http.get(API_URL + 'games/' + id + '/rankings/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'games/' + id + '/rankings.json', {'noblock': !!noblock})
             .then(function (response) {
                 var rankings = response.data;
 
@@ -1303,7 +1298,7 @@ rgApp.factory('metaService', function metaService(
             return $q.resolve($sessionStorage.version);
         }
 
-        return $http.get(API_URL + 'games/version/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'games/version.json', {'noblock': !!noblock})
             .then(function (response) {
                 var version = response.data;
                 if (_.isEmpty(version) || !_.isPlainObject(version)) {

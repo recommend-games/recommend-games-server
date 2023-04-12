@@ -1,17 +1,13 @@
-# -*- coding: utf-8 -*-
-
 """Split rankings from a GameItem file into separate CSVs."""
 
 import json
 import logging
 import os
 import sys
-
-from pathlib import Path
 from itertools import groupby
+from pathlib import Path
 
 import pandas as pd
-
 from django.core.management.base import BaseCommand
 from pytility import arg_to_iter, clear_list, parse_date
 

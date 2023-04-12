@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """ models """
 
 from django.db.models import (
@@ -26,11 +24,14 @@ class Ranking(Model):
     """Ranking model."""
 
     BGG = "bgg"
+    RECOMMEND_GAMES = "r_g"
     FACTOR = "fac"
     SIMILARITY = "sim"
     CHARTS = "cha"
+
     TYPES = (
         (BGG, "BoardGameGeek"),
+        (RECOMMEND_GAMES, "Recommend.Games"),
         (FACTOR, "Factor"),
         (SIMILARITY, "Similarity"),
         (CHARTS, "Charts"),
@@ -51,7 +52,7 @@ class Ranking(Model):
 
 
 class Game(Model):
-    """ game model """
+    """game model"""
 
     bgg_id = PositiveIntegerField(primary_key=True)
     name = CharField(max_length=255, db_index=True)
@@ -65,6 +66,7 @@ class Game(Model):
 
     url = URLField(blank=True, null=True)
     image_url = JSONField(default=list)
+    image_blurhash = JSONField(default=list)
     video_url = JSONField(default=list)
     external_link = JSONField(default=list)
     # list_price = CharField(max_length=100, blank=True, null=True)
@@ -96,6 +98,7 @@ class Game(Model):
         "self", symmetrical=False, blank=True, related_name="implemented_by"
     )
     integrates_with = ManyToManyField("self", symmetrical=True, blank=True)
+    cluster = ManyToManyField("self", symmetrical=True, blank=True)
 
     bgg_rank = PositiveIntegerField(blank=True, null=True, db_index=True)
     num_votes = PositiveIntegerField(default=0, db_index=True)
@@ -144,7 +147,7 @@ class Game(Model):
         return self.highest_ranking(ranking_type=Ranking.SIMILARITY)
 
     class Meta:
-        """ meta """
+        """meta"""
 
         ordering = ("-rec_rating", "-bayes_rating", "-avg_rating")
         indexes = (Index(fields=("-rec_rating", "-bayes_rating", "-avg_rating")),)
@@ -154,13 +157,13 @@ class Game(Model):
 
 
 class Person(Model):
-    """ person model """
+    """person model"""
 
     bgg_id = PositiveIntegerField(primary_key=True)
     name = CharField(max_length=255, db_index=True)
 
     class Meta:
-        """ meta """
+        """meta"""
 
         ordering = ("name",)
 
@@ -169,13 +172,13 @@ class Person(Model):
 
 
 class GameType(Model):
-    """ game type model """
+    """game type model"""
 
     bgg_id = PositiveIntegerField(primary_key=True)
     name = CharField(max_length=255, db_index=True)
 
     class Meta:
-        """ meta """
+        """meta"""
 
         ordering = ("name",)
 
@@ -184,13 +187,13 @@ class GameType(Model):
 
 
 class Category(Model):
-    """ category model """
+    """category model"""
 
     bgg_id = PositiveIntegerField(primary_key=True)
     name = CharField(max_length=255, db_index=True)
 
     class Meta:
-        """ meta """
+        """meta"""
 
         ordering = ("name",)
 
@@ -199,13 +202,13 @@ class Category(Model):
 
 
 class Mechanic(Model):
-    """ mechanic model """
+    """mechanic model"""
 
     bgg_id = PositiveIntegerField(primary_key=True)
     name = CharField(max_length=255, db_index=True)
 
     class Meta:
-        """ meta """
+        """meta"""
 
         ordering = ("name",)
 
@@ -214,14 +217,14 @@ class Mechanic(Model):
 
 
 class User(Model):
-    """ user model """
+    """user model"""
 
     name = CharField(primary_key=True, max_length=255)
     games = ManyToManyField(Game, through="Collection", blank=True)
     updated_at = DateTimeField(blank=True, null=True, db_index=True)
 
     class Meta:
-        """ meta """
+        """meta"""
 
         ordering = ("name",)
 
@@ -230,7 +233,7 @@ class User(Model):
 
 
 class Collection(Model):
-    """ collection model """
+    """collection model"""
 
     game = ForeignKey(Game, on_delete=CASCADE)
     user = ForeignKey(User, on_delete=CASCADE)
@@ -241,7 +244,7 @@ class Collection(Model):
     play_count = PositiveIntegerField(default=0, db_index=True)
 
     class Meta:
-        """ meta """
+        """meta"""
 
         indexes = (Index(fields=("user", "owned")),)
 

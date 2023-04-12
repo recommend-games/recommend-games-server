@@ -1,32 +1,14 @@
-version: '3.8'
+version: '3.9'
 
 services:
     web:
-        image: 'gcr.io/${GC_PROJECT}/rg-server:latest'
+        image: registry.heroku.com/recommend-games/web:latest
+        build:
+            dockerfile: Dockerfile
         container_name: rg
         environment:
-            - DEBUG=
+            - DEBUG=0
             - PORT=8080
-            - BOTO_CONFIG=/app/.boto
         ports:
             - 8080:8080
-        volumes:
-            - ./data:/app/data
         restart: 'no'
-
-    users:
-        image: registry.gitlab.com/recommend.games/board-game-scraper:2.13.0
-        container_name: rg-users
-        command: [
-            'python', '-m', 'board_game_scraper.pubsub_pull',
-            '--out-path', 'gs://${GC_PROJECT}-logs/{year:04d}/{month:02d}/{day:02d}/{datetime}.{number:04d}.csv',
-            '--sleep', '3600',
-        ]
-        env_file: .env
-        environment:
-            GOOGLE_APPLICATION_CREDENTIALS: /app/gs.json
-        volumes:
-            - ./gs.json:/app/gs.json
-        restart: unless-stopped
-        stop_grace_period: 15m
-        stop_signal: SIGINT

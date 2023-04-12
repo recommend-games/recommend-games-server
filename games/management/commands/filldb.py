@@ -1,20 +1,25 @@
-# -*- coding: utf-8 -*-
-
 """ fill database """
 
 import json
 import logging
 import re
 import sys
-
 from collections import defaultdict
+from datetime import datetime, timezone
 from functools import partial
-from itertools import groupby
+from itertools import combinations, groupby
+from pathlib import Path
+from typing import Iterable, Optional
 
+import jmespath
+import turicreate as tc
+import yaml
+from board_game_recommender.utils import percentile_buckets, star_rating
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.transaction import atomic
-from pytility import arg_to_iter, batchify, parse_int, take_first
+from django.utils.timezone import now
+from pytility import arg_to_iter, batchify, parse_date, parse_int, take_first
 
 from ...models import Category, Collection, Game, GameType, Mechanic, Person, User
 from ...utils import format_from_path, load_recommender
@@ -24,15 +29,21 @@ VALUE_ID_REGEX = re.compile(r"^(.*?)(:(\d+))?$")
 LINK_ID_REGEX = re.compile(r"^([a-z]+):(.+)$")
 
 
+def _load_yaml(path):
+    LOGGER.info("Loading YAML from <%s>…", path)
+    with open(path) as yaml_file:
+        yield from yaml.safe_load(yaml_file)
+
+
 def _load_json(path):
     LOGGER.info("loading JSON from <%s>...", path)
-    with open(path, "r") as json_file:
+    with open(path) as json_file:
         yield from json.load(json_file)
 
 
 def _load_jl(path):
     LOGGER.info("loading JSON lines from <%s>...", path)
-    with open(path, "r") as json_file:
+    with open(path) as json_file:
         for line in json_file:
             yield json.loads(line)
 
@@ -40,24 +51,77 @@ def _load_jl(path):
 def _load(*paths, in_format=None):
     for path in paths:
         file_format = in_format or format_from_path(path)
-        if file_format in ("jl", "jsonl"):
+        if file_format in ("yaml", "yml"):
+            yield from _load_yaml(path)
+        elif file_format in ("jl", "jsonl"):
             yield from _load_jl(path)
         else:
             yield from _load_json(path)
 
 
+def _find_latest_ranking(
+    path_dir: Path,
+    glob: str = "*.csv",
+    star_percentiles=Optional[Iterable[float]],
+) -> tc.SFrame:
+    path_dir = path_dir.resolve()
+    LOGGER.info("Searching <%s> for latest ranking", path_dir)
+    path_file = max(
+        path_dir.glob(glob),
+        key=lambda p: parse_date(p.stem, tzinfo=timezone.utc),
+    )
+
+    LOGGER.info("Loading ranking from <%s>", path_file)
+    recommendations = tc.SFrame.read_csv(str(path_file))["rank", "bgg_id", "score"]
+
+    if star_percentiles:
+        buckets = tuple(percentile_buckets(recommendations["score"], star_percentiles))
+        recommendations["stars"] = [
+            star_rating(score=score, buckets=buckets, low=1.0, high=5.0)
+            for score in recommendations["score"]
+        ]
+
+    return recommendations
+
+
 def _rating_data(
-    recommender_path=getattr(settings, "RECOMMENDER_PATH", None), pk_field="bgg_id"
+    recommender_path=getattr(settings, "RECOMMENDER_PATH", None),
+    pk_field="bgg_id",
+    rankings_path=None,
+    r_g_ranking_effective_date=getattr(settings, "R_G_RANKING_EFFECTIVE_DATE", None),
 ):
     recommender = load_recommender(recommender_path, "bgg")
 
     if not recommender:
         return {}
 
-    count = -1
-    recommendations = recommender.recommend(
-        star_percentiles=getattr(settings, "STAR_PERCENTILES", None)
+    r_g_ranking_effective_date = parse_date(
+        r_g_ranking_effective_date,
+        tzinfo=timezone.utc,
     )
+
+    if (
+        rankings_path
+        and r_g_ranking_effective_date
+        and now() >= r_g_ranking_effective_date
+    ):
+        LOGGER.info(
+            "Using new R.G ranking effective from %s",
+            r_g_ranking_effective_date,
+        )
+        recommendations = _find_latest_ranking(
+            path_dir=Path(rankings_path),
+            star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
+        )
+    else:
+        recommendations = recommender.recommend(
+            users=(),
+            star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
+        )
+
+    LOGGER.info("Loaded recommendations for %d games", len(recommendations))
+
+    count = -1
     result = {}
 
     for count, game in enumerate(recommendations):
@@ -123,7 +187,12 @@ def _parse_value_id(string, regex=VALUE_ID_REGEX):
 
 
 def _make_instances(
-    model, items, fields=None, fields_mapping=None, item_mapping=None, add_data=None
+    model,
+    items,
+    fields=None,
+    fields_mapping=None,
+    item_mapping=None,
+    add_data=None,
 ):
     add_data = add_data or {}
     pk_field = model._meta.pk.name
@@ -151,6 +220,7 @@ def _create_from_items(
     item_mapping=None,
     add_data=None,
     batch_size=None,
+    dry_run=False,
 ):
     LOGGER.info("creating instances of %r", model)
 
@@ -167,12 +237,20 @@ def _create_from_items(
 
     for count, batch in enumerate(batches):
         LOGGER.info("processing batch #%d...", count + 1)
-        model.objects.bulk_create(batch)
+        if not dry_run:
+            model.objects.bulk_create(batch)
 
     LOGGER.info("done processing")
 
 
-def _create_references(model, items, foreign=None, recursive=None, batch_size=None):
+def _create_references(
+    model,
+    items,
+    foreign=None,
+    recursive=None,
+    batch_size=None,
+    dry_run=False,
+):
     foreign = foreign or {}
     foreign = {k: tuple(arg_to_iter(v)) for k, v in foreign.items()}
     foreign = {k: v for k, v in foreign.items() if len(v) == 2}
@@ -244,7 +322,12 @@ def _create_references(model, items, foreign=None, recursive=None, batch_size=No
             for k, v in foreign_values[fmodel].items()
             if k and v
         )
-        _create_from_items(model=fmodel, items=values, batch_size=batch_size)
+        _create_from_items(
+            model=fmodel,
+            items=values,
+            batch_size=batch_size,
+            dry_run=dry_run,
+        )
 
     del foreign, foreign_values
 
@@ -256,24 +339,82 @@ def _create_references(model, items, foreign=None, recursive=None, batch_size=No
 
     for count, batch in enumerate(batches):
         LOGGER.info("processing batch #%d...", count + 1)
-        with atomic():
-            for pkey, update in batch:
-                try:
-                    instance = model.objects.get(pk=pkey)
-                    for field, values in update.items():
-                        getattr(instance, field).set(values)
-                    instance.save()
-                except Exception:
-                    LOGGER.exception(
-                        "an error ocurred when updating <%s> with %r", pkey, update
-                    )
+        if not dry_run:
+            with atomic():
+                for pkey, update in batch:
+                    try:
+                        instance = model.objects.get(pk=pkey)
+                        for field, values in update.items():
+                            getattr(instance, field).set(values)
+                        instance.save()
+                    except Exception:
+                        LOGGER.exception(
+                            "an error ocurred when updating <%s> with %r",
+                            pkey,
+                            update,
+                        )
 
     del batches, updates
 
     LOGGER.info("done updating")
 
 
-def _make_secondary_instances(model, secondary, items, **kwargs):
+def _generate_cluster_pairs(model, recommender):
+    for cluster in recommender.clusters:
+        for pk_1, pk_2 in combinations(cluster, 2):
+            instance_1 = model.objects.filter(pk=pk_1).first()
+            instance_2 = model.objects.filter(pk=pk_2).first()
+            if instance_1 and instance_2:
+                yield instance_1, instance_2
+
+
+def _create_clusters(
+    model,
+    recommender_path=getattr(settings, "RECOMMENDER_PATH", None),
+    batch_size=None,
+    dry_run=False,
+):
+    recommender = load_recommender(recommender_path, "bgg")
+
+    if not recommender:
+        return
+
+    LOGGER.info(
+        "Loaded a total of %d clusters from recommender %s",
+        len(recommender.clusters),
+        recommender,
+    )
+
+    cluster_pairs = _generate_cluster_pairs(model, recommender)
+
+    batches = (
+        batchify(
+            cluster_pairs,
+            batch_size,
+        )
+        if batch_size
+        else (cluster_pairs,)
+    )
+
+    for count, batch in enumerate(batches):
+        LOGGER.info("Processing batch #%d...", count + 1)
+        if not dry_run:
+            with atomic():
+                for instance_1, instance_2 in batch:
+                    try:
+                        instance_1.cluster.add(instance_2)
+                        instance_1.save()
+                    except Exception:
+                        LOGGER.exception(
+                            "an error ocurred when updating %r and %r",
+                            instance_1,
+                            instance_2,
+                        )
+
+    LOGGER.info("Done updating clusters")
+
+
+def _make_secondary_instances(*, model, secondary, items, **kwargs):
     instances = _make_instances(model=model, items=items, **kwargs)
 
     if not secondary.get("model") or not secondary.get("from"):
@@ -284,19 +425,37 @@ def _make_secondary_instances(model, secondary, items, **kwargs):
     if not secondary.get("to"):
         secondary["to"] = secondary["model"]._meta.pk.name
 
+    include_pks = frozenset(arg_to_iter(secondary.get("include_pks")))
+    if include_pks:
+        LOGGER.info(
+            "Including collection info only for %d premium user(s)",
+            len(include_pks),
+        )
+
     for value, group in groupby(
-        instances, key=lambda instance: getattr(instance, secondary["from"], None)
+        iterable=instances,
+        key=lambda instance: getattr(instance, secondary["from"], None),
     ):
         if value:
             yield secondary["model"](**{secondary["to"]: value})
-        yield from group
+        if not include_pks or value in include_pks:
+            yield from group
 
 
 def _create_secondary_instances(
-    model, secondary, items, models_order=(), batch_size=None, **kwargs
+    model,
+    secondary,
+    items,
+    models_order=(),
+    batch_size=None,
+    dry_run=False,
+    **kwargs,
 ):
     instances = _make_secondary_instances(
-        model=model, secondary=secondary, items=items, **kwargs
+        model=model,
+        secondary=secondary,
+        items=items,
+        **kwargs,
     )
     del items
     batches = batchify(instances, batch_size) if batch_size else (instances,)
@@ -314,13 +473,14 @@ def _create_secondary_instances(
 
         for mdl in order:
             instances = models.pop(mdl, ())
-            if instances:
+            if not dry_run and instances:
                 LOGGER.info("creating %d instances of %r", len(instances), mdl)
                 mdl.objects.bulk_create(instances)
 
         if any(models.values()):
             LOGGER.warning(
-                "some models have not been processed properly: %r", tuple(models.keys())
+                "some models have not been processed properly: %r",
+                tuple(models.keys()),
             )
 
         del models
@@ -363,7 +523,7 @@ def _parse_link_ids(data, regex=LINK_ID_REGEX):
 def _parse_link_file(file, regex=LINK_ID_REGEX):
     if isinstance(file, str):
         LOGGER.info("loading links from <%s>", file)
-        with open(file, "r") as file_obj:
+        with open(file) as file_obj:
             return _parse_link_file(file_obj, regex)
     data = json.load(file)
     return _parse_link_ids(data, regex)
@@ -379,6 +539,24 @@ def _load_add_data(files, id_field, *fields, in_format=None):
     return result
 
 
+def _load_premium_users(files, compare_date=None, in_format=None):
+    rows = _load(*arg_to_iter(files), in_format=in_format)
+    compare_date = parse_date(compare_date or datetime.utcnow(), tzinfo=timezone.utc)
+    LOGGER.info("Comparing premium expiration dates against <%s>", compare_date)
+    for row in rows:
+        for username, expiry_date in row.items():
+            username = username.lower()
+            expiry_date = parse_date(expiry_date, tzinfo=timezone.utc)
+            if expiry_date < compare_date:
+                LOGGER.info(
+                    "Premium for user <%s> ended on <%s>",
+                    username,
+                    expiry_date,
+                )
+            else:
+                yield username
+
+
 def _make_user(name, add_data):
     if not name:
         return None
@@ -389,7 +567,7 @@ def _make_user(name, add_data):
 
 
 class Command(BaseCommand):
-    """ Loads a file to the database """
+    """Loads a file to the database"""
 
     help = "Loads files to the database"
 
@@ -433,7 +611,10 @@ class Command(BaseCommand):
         }
     )
 
-    game_fields_mapping = {"rank": "bgg_rank"}
+    game_fields_mapping = {
+        "rank": "bgg_rank",
+        "image_blurhash": jmespath.compile("[].blurhash").search,
+    }
 
     game_item_mapping = {}
 
@@ -462,14 +643,20 @@ class Command(BaseCommand):
     }
 
     collection_item_mapping = {
-        "user_id": lambda item: (
-            item["bgg_user_name"].lower() if item.get("bgg_user_name") else None
-        ),
+        "user_id": lambda item: item.get("bgg_user_name", "").lower() or None,
         "owned": lambda item: bool(
             item.get("bgg_user_owned")
             or item.get("bgg_user_prev_owned")
             or item.get("bgg_user_preordered")
         ),
+    }
+
+    user_fields = ()
+
+    user_fields_mapping = {"updated_at": parse_date}
+
+    user_item_mapping = {
+        "name": lambda item: item.get("bgg_user_name", "").lower() or None,
     }
 
     linked_sites = (
@@ -491,10 +678,22 @@ class Command(BaseCommand):
             help="collection file(s) to be processed",
         )
         parser.add_argument(
-            "--user-paths", "-u", nargs="+", help="user file(s) to be processed"
+            "--user-paths",
+            "-u",
+            nargs="+",
+            help="user file(s) to be processed",
         )
         parser.add_argument(
-            "--in-format", "-f", choices=("json", "jsonl", "jl"), help="input format"
+            "--premium-user-paths",
+            "-p",
+            nargs="+",
+            help="premium user file(s) to be processed",
+        )
+        parser.add_argument(
+            "--in-format",
+            "-f",
+            choices=("json", "jsonl", "jl", "yaml", "yml"),
+            help="input format",
         )
         parser.add_argument(
             "--batch",
@@ -509,7 +708,24 @@ class Command(BaseCommand):
             default=getattr(settings, "RECOMMENDER_PATH", None),
             help="path to recommender model",
         )
+        parser.add_argument(
+            "--rankings",
+            "-R",
+            help="path to recommendation CSVs",
+        )
+        parser.add_argument(
+            "--ranking-date",
+            "-d",
+            default=getattr(settings, "R_G_RANKING_EFFECTIVE_DATE", None),
+            help="effective date for new R.G ranking",
+        )
         parser.add_argument("--links", "-l", help="links JSON file location")
+        parser.add_argument(
+            "--dry-run",
+            "-n",
+            action="store_true",
+            help="don't write to the database",
+        )
 
     def handle(self, *args, **kwargs):
         logging.basicConfig(
@@ -523,7 +739,10 @@ class Command(BaseCommand):
         items = tuple(_load(*kwargs["paths"]))
         # pylint: disable=no-member
         add_data = _rating_data(
-            recommender_path=kwargs["recommender"], pk_field=Game._meta.pk.name
+            recommender_path=kwargs["recommender"],
+            pk_field=Game._meta.pk.name,
+            rankings_path=kwargs["rankings"],
+            r_g_ranking_effective_date=kwargs["ranking_date"],
         )
         game_item_mapping = dict(self.game_item_mapping or {})
 
@@ -535,7 +754,9 @@ class Command(BaseCommand):
 
             for site in self.linked_sites:
                 game_item_mapping[f"{site}_id"] = partial(
-                    _find_links, site=site, links=links
+                    _find_links,
+                    site=site,
+                    links=links,
                 )
 
         _create_from_items(
@@ -546,6 +767,7 @@ class Command(BaseCommand):
             item_mapping=game_item_mapping,
             add_data=add_data,
             batch_size=kwargs["batch"],
+            dry_run=kwargs["dry_run"],
         )
 
         del add_data
@@ -556,6 +778,14 @@ class Command(BaseCommand):
             foreign=self.game_fields_foreign,
             recursive=self.game_fields_recursive,
             batch_size=kwargs["batch"],
+            dry_run=kwargs["dry_run"],
+        )
+
+        _create_clusters(
+            model=Game,
+            recommender_path=kwargs["recommender"],
+            batch_size=kwargs["batch"],
+            dry_run=kwargs["dry_run"],
         )
 
         if kwargs["collection_paths"]:
@@ -569,17 +799,37 @@ class Command(BaseCommand):
                 "updated_at",
                 in_format=kwargs["in_format"],
             )
-            user_function = partial(_make_user, add_data=add_data) if add_data else User
+            premium_users = _load_premium_users(files=kwargs.get("premium_user_paths"))
+            secondary = {
+                "model": partial(_make_user, add_data=add_data) if add_data else User,
+                "from": "user_id",
+                "to": "name",
+                "include_pks": premium_users,
+            }
+            del add_data, premium_users
 
             _create_secondary_instances(
                 model=Collection,
-                secondary={"model": user_function, "from": "user_id", "to": "name"},
+                secondary=secondary,
                 items=items,
                 models_order=(User, Collection),
                 fields=self.collection_fields,
                 fields_mapping=self.collection_fields_mapping,
                 item_mapping=self.collection_item_mapping,
                 batch_size=kwargs["batch"],
+                dry_run=kwargs["dry_run"],
+            )
+
+        elif kwargs["user_paths"]:
+            items = _load(*kwargs["user_paths"], in_format=kwargs["in_format"])
+            _create_from_items(
+                model=User,
+                items=items,
+                fields=self.user_fields,
+                fields_mapping=self.user_fields_mapping,
+                item_mapping=self.user_item_mapping,
+                batch_size=kwargs["batch"],
+                dry_run=kwargs["dry_run"],
             )
 
         del items

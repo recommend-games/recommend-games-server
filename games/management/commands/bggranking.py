@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Saves a snapshot of the BGG rankings."""
 
 import csv

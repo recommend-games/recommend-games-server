@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-
 """ generate a sitemap """
 
 import logging
 import sys
-
 from datetime import datetime
 from itertools import islice
 
@@ -22,9 +19,7 @@ ELM = objectify.ElementMaker(
 
 
 def _url_elements(url, ids, lastmod=None):
-    lastmod = (
-        "{:s}Z".format(datetime.utcnow().isoformat()) if lastmod is None else lastmod
-    )
+    lastmod = f"{datetime.utcnow().isoformat():s}Z" if lastmod is None else lastmod
 
     # pylint: disable=no-member
     yield ELM.url(
@@ -64,7 +59,7 @@ def _url_elements(url, ids, lastmod=None):
 
 
 def sitemap(url, limit=None):
-    """ return sitemap XML element """
+    """return sitemap XML element"""
 
     limit = limit or 50000
     # pylint: disable=no-member
@@ -74,7 +69,7 @@ def sitemap(url, limit=None):
 
 
 class Command(BaseCommand):
-    """ Creates a sitemap """
+    """Creates a sitemap"""
 
     help = "Creates a sitemap"
 

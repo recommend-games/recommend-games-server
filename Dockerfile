@@ -1,6 +1,5 @@
-FROM gcr.io/google-appengine/python:2020-09-11-130212
+FROM python:3.7.16-alpine
 
-ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
 ENV MAILTO=''
 ENV PYTHONPATH=.
@@ -8,16 +7,23 @@ ENV PYTHONPATH=.
 RUN mkdir -p /app
 WORKDIR /app
 
-RUN python3.7 -m pip install --upgrade \
-        gsutil==4.59 \
-        pipenv==2020.11.15
+RUN apk add --no-cache g++=12.2.1_git20220924-r4 \
+    && rm -rf /var/cache/apk/* \
+    && python3.7 -m pip install --no-cache-dir --upgrade pipenv==2023.3.20
 COPY Pipfile* ./
-RUN pipenv install --deploy --verbose
+RUN pipenv install --system --deploy --verbose
 
-COPY VERSION .boto gs.json startup.sh ./
+COPY VERSION VERSION
 COPY rg rg
 COPY games games
 COPY static static
+COPY data data
 
-ENTRYPOINT ["pipenv", "run", "/bin/bash", "startup.sh"]
-CMD ["gunicorn", "--bind", ":8080", "--workers", "1", "--threads", "16", "rg.wsgi:application"]
+RUN adduser -D gamer
+USER gamer
+
+CMD gunicorn \
+    --bind 0.0.0.0:$PORT \
+    --workers 1 \
+    --threads 8 \
+    rg.wsgi:application
