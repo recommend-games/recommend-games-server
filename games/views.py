@@ -467,6 +467,9 @@ class GameViewSet(PermissionsModelViewSet):
             exclude_compilations=exclude_compilations,
         )
 
+        if not include_ids:
+            return ()
+
         recommendations = recommender.recommend(users=users)
         recommendations = recommendations[recommendations.index.isin(include_ids)]
         recommendations = (
@@ -480,6 +483,43 @@ class GameViewSet(PermissionsModelViewSet):
             data={
                 ("_all", "score"): recommendations,
                 ("_all", "rank"): range(1, len(recommendations) + 1),
+            },
+        )
+
+    def _recommend_similar(
+        self,
+        *,
+        like,
+        recommender,
+        include_ids=None,
+        exclude_ids=None,
+        exclude_compilations=True,
+        exclude_clusters=False,
+    ):
+        like = frozenset(arg_to_iter(like)) & recommender.rated_games
+        if not like:
+            raise NotFound("Unable to create recommendations without games")
+
+        exclude_ids = frozenset(arg_to_iter(exclude_ids))
+        include_ids = self._included_games(
+            recommender=recommender,
+            include_ids=include_ids,
+            exclude_ids=exclude_ids | like,
+            exclude_compilations=exclude_compilations,
+            exclude_clusters=exclude_clusters,
+        )
+
+        if not include_ids:
+            return ()
+
+        scores = recommender.recommend_similar(games=like)["score"]
+        scores = scores[scores.index.isin(include_ids)].sort_values(ascending=False)
+
+        return pd.DataFrame(
+            index=scores.index,
+            data={
+                ("_all", "score"): scores,
+                ("_all", "rank"): range(1, len(scores) + 1),
             },
         )
 
@@ -539,13 +579,17 @@ class GameViewSet(PermissionsModelViewSet):
                 exclude_compilations=exclude_compilations,
             )
             if users
-            else None  # TODO support <like>
+            else self._recommend_similar(
+                like=like,
+                recommender=recommender,
+                include_ids=include,
+                exclude_ids=exclude,
+                exclude_compilations=exclude_compilations,
+                exclude_clusters=exclude_clusters,
+            )
         )
 
         del like, path_light, recommender
-
-        if recommendation is None:
-            return self.list(request)
 
         key = users[0].lower() if len(users) == 1 else "_all"
         recommendation = recommendation.xs(axis=1, key=key)
@@ -577,6 +621,57 @@ class GameViewSet(PermissionsModelViewSet):
 
         serializer = self.get_serializer(instance=games, many=True)
         del games
+
+        return (
+            self.get_paginated_response(serializer.data)
+            if paginate
+            else Response(serializer.data)
+        )
+
+    @action(detail=True)
+    def similar(self, request, pk=None, format=None):
+        """Find games similar to this game."""
+
+        path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
+        recommender = load_recommender(path=path_light, site="light")
+
+        if recommender is None:
+            raise NotFound(f"cannot find similar games to <{pk}>")
+
+        pk = parse_int(pk)
+        include_ids = self._included_games(
+            recommender=recommender,
+            exclude_ids=pk,
+            exclude_compilations=True,
+            exclude_clusters=True,
+        )
+        games = [
+            game
+            for game in recommender.similar_games([pk]).index
+            if game in include_ids
+        ]
+        del path_light, recommender, include_ids
+
+        page = self.paginate_queryset(games)
+        if page is None:
+            games = games[:10]
+            paginate = False
+        else:
+            games = page
+            paginate = True
+        del page
+
+        games = {game: i + 1 for i, game in enumerate(games)}
+        results = self.get_queryset().filter(bgg_id__in=games)
+        for game in results:
+            game.sort_rank = games[game.bgg_id]
+        del games
+
+        serializer = self.get_serializer(
+            instance=sorted(results, key=lambda game: game.sort_rank),
+            many=True,
+        )
+        del results
 
         return (
             self.get_paginated_response(serializer.data)

@@ -34,15 +34,16 @@
 						role="tab"
 						aria-controls="fetch-game-form"
 						aria-selected="{{ !activePane || activePane == 'bgg' }}"
-						class="nav-item nav-link active">
+						class="nav-item nav-link {{ !activePane || activePane == 'bgg' ? 'active' : '' }}">
 					<abbr title="BoardGameGeek">BGG</abbr> account
 				</a>
 				<a id="select-games-tab"
+						ng-click="showPane('select'); toggleSelection(true)"
 						href=""
 						role="tab"
 						aria-controls="select-games"
 						aria-selected="{{ activePane == 'select' }}"
-						class="nav-item nav-link disabled">
+						class="nav-item nav-link {{ activePane == 'select' ? 'active' : '' }}">
 					<span ng-hide="isEmpty(likedGames)"
 							class="badge badge-primary">
 						{{ likedGames.length }}

@@ -326,6 +326,40 @@ rgApp.factory('gamesService', function gamesService(
         return fetchGames($sessionStorage.popularGamesPage || 1);
     };
 
+    service.getSimilarGames = function getSimilarGames(gameId, page, noblock) {
+        page = page || null;
+        var url = API_URL + 'games/' + gameId + '/similar.json',
+            params = page ? {'page': page} : null;
+
+        return $http.get(url, {'params': params, 'noblock': !!noblock})
+            .then(function (response) {
+                var games = _.get(response, 'data.results');
+
+                if (!games) {
+                    return $q.reject('Unable to load games.');
+                }
+
+                games = _.map(games, processGame);
+                response.data.results = games;
+                response.data.page = page;
+
+                _.forEach(games, function (game) {
+                    putCache(game);
+                });
+
+                return response.data;
+            })
+            .catch(function (reason) {
+                $log.error('There has been an error', reason);
+                var response = _.get(reason, 'data.detail') || reason;
+                response = _.isString(response) ? response : 'Unable to load games.';
+                return $q.reject({
+                    'reason': response,
+                    'status': _.get(reason, 'status')
+                });
+            });
+    };
+
     service.getList = function getList(model, noblock, start, end) {
         start = _.isNumber(start) ? start : 0;
         end = _.isNumber(end) ? end : 25;
@@ -1151,6 +1185,7 @@ rgApp.factory('filterService', function filterService(
             }
         } else if (!_.isEmpty(params.like)) {
             result.like = params.like;
+            result.exclude_clusters = booleanString(booleanDefault(params.excludeClusters, true));
         } else {
             result.ordering = orderingParams(params.ordering);
             mainOrdering = _.split(result.ordering, ',', 1)[0];
