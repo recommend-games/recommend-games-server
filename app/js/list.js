@@ -105,6 +105,9 @@ rgApp.controller('ListController', function ListController(
 
         if (_.isNil(promise)) {
             filters = filterService.filtersFromParams(parsed);
+            if (!_.isEmpty(filters.like)) {
+                filters.num_votes__gte = 30;
+            }
             promise = gamesService.getGames(page, filters);
         }
 

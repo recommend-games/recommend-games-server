@@ -467,6 +467,9 @@ class GameViewSet(PermissionsModelViewSet):
             exclude_compilations=exclude_compilations,
         )
 
+        if not include_ids:
+            return ()
+
         recommendations = recommender.recommend(users=users)
         recommendations = recommendations[recommendations.index.isin(include_ids)]
         recommendations = (
@@ -480,6 +483,45 @@ class GameViewSet(PermissionsModelViewSet):
             data={
                 ("_all", "score"): recommendations,
                 ("_all", "rank"): range(1, len(recommendations) + 1),
+            },
+        )
+
+    def _recommend_similar(
+        self,
+        *,
+        like,
+        recommender,
+        include_ids=None,
+        exclude_ids=None,
+        exclude_compilations=True,
+        exclude_clusters=False,
+    ):
+        like = frozenset(arg_to_iter(like)) & recommender.rated_games
+        if not like:
+            raise NotFound("Unable to create recommendations without games")
+
+        include_ids = (
+            self._included_games(
+                recommender=recommender,
+                include_ids=include_ids,
+                exclude_ids=exclude_ids,
+                exclude_compilations=exclude_compilations,
+                exclude_clusters=exclude_clusters,
+            )
+            - like
+        )
+
+        if not include_ids:
+            return ()
+
+        scores = recommender.recommend_similar(games=like)["score"]
+        scores = scores[scores.index.isin(include_ids)].sort_values(ascending=False)
+
+        return pd.DataFrame(
+            index=scores.index,
+            data={
+                ("_all", "score"): scores,
+                ("_all", "rank"): range(1, len(scores) + 1),
             },
         )
 
@@ -539,13 +581,17 @@ class GameViewSet(PermissionsModelViewSet):
                 exclude_compilations=exclude_compilations,
             )
             if users
-            else None  # TODO support <like>
+            else self._recommend_similar(
+                like=like,
+                recommender=recommender,
+                include_ids=include,
+                exclude_ids=exclude,
+                exclude_compilations=exclude_compilations,
+                exclude_clusters=exclude_clusters,
+            )
         )
 
         del like, path_light, recommender
-
-        if recommendation is None:
-            return self.list(request)
 
         key = users[0].lower() if len(users) == 1 else "_all"
         recommendation = recommendation.xs(axis=1, key=key)
