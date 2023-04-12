@@ -327,9 +327,13 @@ rgApp.factory('gamesService', function gamesService(
     };
 
     service.getSimilarGames = function getSimilarGames(gameId, page, noblock) {
-        page = page || null;
         var url = API_URL + 'games/' + gameId + '/similar.json',
-            params = page ? {'page': page} : null;
+            params = {'num_votes__gte': 30};
+
+        page = page || null;
+        if (page) {
+            params.page = page;
+        }
 
         return $http.get(url, {'params': params, 'noblock': !!noblock})
             .then(function (response) {
