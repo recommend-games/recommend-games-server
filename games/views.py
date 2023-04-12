@@ -629,6 +629,57 @@ class GameViewSet(PermissionsModelViewSet):
         )
 
     @action(detail=True)
+    def similar(self, request, pk=None, format=None):
+        """Find games similar to this game."""
+
+        path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
+        recommender = load_recommender(path=path_light, site="light")
+
+        if recommender is None:
+            raise NotFound(f"cannot find similar games to <{pk}>")
+
+        pk = parse_int(pk)
+        include_ids = self._included_games(
+            recommender=recommender,
+            exclude_ids=pk,
+            exclude_compilations=True,
+            exclude_clusters=True,
+        )
+        games = [
+            game
+            for game in recommender.similar_games([pk]).index
+            if game in include_ids
+        ]
+        del path_light, recommender, include_ids
+
+        page = self.paginate_queryset(games)
+        if page is None:
+            games = games[:10]
+            paginate = False
+        else:
+            games = page
+            paginate = True
+        del page
+
+        games = {game: i + 1 for i, game in enumerate(games)}
+        results = self.get_queryset().filter(bgg_id__in=games)
+        for game in results:
+            game.sort_rank = games[game.bgg_id]
+        del games
+
+        serializer = self.get_serializer(
+            instance=sorted(results, key=lambda game: game.sort_rank),
+            many=True,
+        )
+        del results
+
+        return (
+            self.get_paginated_response(serializer.data)
+            if paginate
+            else Response(serializer.data)
+        )
+
+    @action(detail=True)
     def rankings(self, request, pk=None, format=None):
         """Find historical rankings of a game."""
 
