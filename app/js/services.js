@@ -1185,6 +1185,7 @@ rgApp.factory('filterService', function filterService(
             }
         } else if (!_.isEmpty(params.like)) {
             result.like = params.like;
+            result.exclude_clusters = booleanString(booleanDefault(params.excludeClusters, true));
         } else {
             result.ordering = orderingParams(params.ordering);
             mainOrdering = _.split(result.ordering, ',', 1)[0];

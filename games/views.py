@@ -500,15 +500,13 @@ class GameViewSet(PermissionsModelViewSet):
         if not like:
             raise NotFound("Unable to create recommendations without games")
 
-        include_ids = (
-            self._included_games(
-                recommender=recommender,
-                include_ids=include_ids,
-                exclude_ids=exclude_ids,
-                exclude_compilations=exclude_compilations,
-                exclude_clusters=exclude_clusters,
-            )
-            - like
+        exclude_ids = frozenset(arg_to_iter(exclude_ids))
+        include_ids = self._included_games(
+            recommender=recommender,
+            include_ids=include_ids,
+            exclude_ids=exclude_ids | like,
+            exclude_compilations=exclude_compilations,
+            exclude_clusters=exclude_clusters,
         )
 
         if not include_ids:
