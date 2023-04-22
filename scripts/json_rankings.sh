@@ -3,7 +3,8 @@
 set -euo pipefail
 
 SAVE_DIR="$(pwd)"
-SERVER_DIR="$(dirname "$(readlink --canonicalize "${BASH_SOURCE[0]}")")"
+SCRIPT_DIR="$(dirname "$(readlink --canonicalize "${BASH_SOURCE[0]}")")"
+SERVER_DIR="$(readlink --canonicalize "${SCRIPT_DIR}/../")"
 FEEDS_DIR="$(readlink --canonicalize "${SERVER_DIR}/../board-game-scraper/feeds/")"
 
 export LC_ALL=en_US.utf-8
