@@ -13,6 +13,7 @@ django-api-proxy = "*"
 django-extensions = "*"
 django-filter = "*"
 djangorestframework = "*"
+djangorestframework-csv = "*"
 gunicorn = "*"
 pandas = "*"
 pytility = {extras = ["dates"], version = "*"}
