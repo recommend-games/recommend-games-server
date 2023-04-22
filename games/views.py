@@ -36,6 +36,7 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.utils.urls import remove_query_param, replace_query_param
 from rest_framework.viewsets import ModelViewSet
+from rest_framework_csv.renderers import PaginatedCSVRenderer
 
 from .models import (
     Category,
@@ -147,6 +148,39 @@ class BGGParamsPagination(BodyParamsPagination):
 
     keys = ("user", "like")
     parsers = (to_str, parse_int)
+
+
+class PaginatedCSVGameRenderer(PaginatedCSVRenderer):
+    header = [
+        "bgg_id",
+        "name",
+        "year",
+        "rec_rank",
+        "rec_rating",
+        "bgg_rank",
+        "num_votes",
+        "avg_rating",
+        "bayes_rating",
+        "stddev_rating",
+        "complexity",
+        "language_dependency",
+        "kennerspiel_score",
+        "compilation",
+        "cooperative",
+        "min_age",
+        "min_age_rec",
+        "max_age",
+        "max_age_rec",
+        "min_players",
+        "min_players_rec",
+        "min_players_best",
+        "max_players",
+        "max_players_rec",
+        "max_players_best",
+        "min_time",
+        "max_time",
+        "url",
+    ]
 
 
 def _parse_parts(args):
@@ -529,6 +563,8 @@ class GameViewSet(PermissionsModelViewSet):
         methods=("GET", "POST"),
         permission_classes=(AlwaysAllowAny,),
         pagination_class=BGGParamsPagination,
+        renderer_classes=tuple(api_settings.DEFAULT_RENDERER_CLASSES)
+        + (PaginatedCSVGameRenderer,),
     )
     def recommend(self, request, format=None):
         """recommend games"""
