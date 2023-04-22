@@ -17,6 +17,7 @@ gunicorn = "*"
 pandas = "*"
 pytility = {extras = ["dates"], version = "*"}
 whitenoise = {extras = ["brotli"], version = "*"}
+djangorestframework-csv = "*"
 
 [dev-packages]
 black = "*"
