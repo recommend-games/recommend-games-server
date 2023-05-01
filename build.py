@@ -909,6 +909,7 @@ def _train(
     ratings_file,
     out_path=None,
     users=None,
+    num_factors=16,
     max_iterations=100,
     **filters,
 ):
@@ -922,6 +923,7 @@ def _train(
         games_file=games_file,
         ratings_file=ratings_file,
         similarity_model=True,
+        num_factors=num_factors,
         max_iterations=parse_int(max_iterations),
         verbose=True,
         **filters,
@@ -988,6 +990,7 @@ def trainbgg(
     out_path=os.path.join(RECOMMENDER_DIR, ".bgg"),
     out_path_light=os.path.join(RECOMMENDER_DIR, ".bgg.light.npz"),
     users=None,
+    num_factors=16,
     max_iterations=1000,
     min_votes=None,
     min_votes_anchor_date=MIN_VOTES_ANCHOR_DATE,
@@ -998,6 +1001,8 @@ def trainbgg(
     """train BoardGameGeek recommender model"""
 
     filters = {}
+
+    num_factors = parse_int(num_factors) or 16
 
     min_votes = parse_int(min_votes) or _min_votes_from_date(
         first_date=min_votes_anchor_date,
@@ -1017,6 +1022,7 @@ def trainbgg(
         ratings_file=ratings_file,
         out_path=out_path,
         users=users,
+        num_factors=num_factors,
         max_iterations=max_iterations,
         **filters,
     )
@@ -1032,15 +1038,20 @@ def trainbga(
     ratings_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bga_RatingItem.jl"),
     out_path=os.path.join(RECOMMENDER_DIR, ".bga"),
     users=None,
+    num_factors=16,
     max_iterations=1000,
 ):
     """train Board Game Atlas recommender model"""
+
+    num_factors = parse_int(num_factors) or 16
+
     _train(
         recommender_cls=BGARecommender,
         games_file=games_file,
         ratings_file=ratings_file,
         out_path=out_path,
         users=users,
+        num_factors=num_factors,
         max_iterations=max_iterations,
     )
 
