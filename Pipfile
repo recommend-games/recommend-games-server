@@ -7,7 +7,7 @@ verify_ssl = true
 python_version = "3.7"
 
 [packages]
-board-game-recommender = {extras = ["light"], version = ">=3.2.0,<4.0.0"}
+board-game-recommender = {extras = ["light"], version = ">=3.3.0,<4.0.0"}
 django = ">=3.1.2"
 django-api-proxy = "*"
 django-extensions = "*"
@@ -21,7 +21,7 @@ whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
 black = "*"
-board-game-recommender = {extras = ["full", "light", "trust"], version = ">=3.2.0,<4.0.0"}
+board-game-recommender = {extras = ["full", "light", "trust"], version = ">=3.3.0,<4.0.0"}
 board-game-scraper = {extras = ["cloud"], version = ">=2.11.3"}
 board-game-utils = "*"
 csvkit = "*"
