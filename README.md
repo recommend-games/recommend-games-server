@@ -6,7 +6,7 @@ Board game recommendation service. Live demo at
 ## Quick start
 
 ```bash
-docker-compose up
+docker compose up
 ```
 
 This will build the docker image (only on first start) and run the server.
