@@ -1046,7 +1046,8 @@ rgApp.factory('filterService', function filterService(
             yearMin = _.parseInt(params.yearMin),
             yearMax = _.parseInt(params.yearMax),
             ordering = validateOrdering(params.ordering),
-            like = parseIntList(params.like);
+            like = parseIntList(params.like),
+            bgaAvailable = booleanDefault(params.bgaAvailable, false);
 
         return {
             'for': _.isEmpty(user) ? null : user,
@@ -1071,6 +1072,7 @@ rgApp.factory('filterService', function filterService(
             'yearMin': yearMin && yearMin > yearFloor ? yearMin : null,
             'yearMax': yearMax && yearMax <= yearNow ? yearMax : null,
             'cooperative': validateBoolean(params.cooperative),
+            'bgaAvailable': bgaAvailable || null,
             'gameType': _.parseInt(params.gameType) || null,
             'category': _.parseInt(params.category) || null,
             'mechanic': _.parseInt(params.mechanic) || null,
@@ -1092,6 +1094,7 @@ rgApp.factory('filterService', function filterService(
                 'exclude': _.isEmpty(exclude) ? null : exclude,
                 'search': scope.search,
                 'cooperative': scope.cooperative,
+                'bgaAvailable': parseBoolean(scope.bgaAvailable),
                 'gameType': scope.gameType,
                 'category': scope.category,
                 'mechanic': scope.mechanic,
@@ -1245,6 +1248,10 @@ rgApp.factory('filterService', function filterService(
 
         if (params.cooperative) {
             result.cooperative = params.cooperative;
+        }
+
+        if (params.bgaAvailable) {
+            result.available_on_bga = params.bgaAvailable ? 'True' : null;
         }
 
         if (params.gameType) {
