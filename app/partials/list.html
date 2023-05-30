@@ -620,32 +620,6 @@
 			</div>
 		</div>
 
-		<div class="form-row mb-3"
-				data-toggle="tooltip"
-				title="Include only games that are available on Board Game Arena (BGA)">
-			<div class="col-md-12 input-group">
-				<div class="input-group-prepend">
-					<div class="input-group-text">
-						<label class="switch mb-0">
-							<input type="checkbox"
-								id="filter-bga-available"
-								name="filter-bga-available"
-								ng-model="bgaAvailable.enabled" />
-							<span class="slider {{ bgaAvailable.enabled ? 'bg-success' : 'bg-secondary' }}"></span>
-						</label>
-					</div>
-				</div>
-				<div class="input-group-append">
-					<div class="input-group-text">
-						<label for="filter-bga-available"
-								class="form-check-label form-label-game {{ bgaAvailable.enabled ? 'text-success' : 'text-muted' }}">
-							Available on BGA
-						</label>
-					</div>
-				</div>
-			</div>
-		</div>
-
 		<div class="form-row">
 			<div class="col-md-6 input-group mb-3"
 					data-toggle="tooltip"
@@ -701,7 +675,30 @@
 		</div>
 
 		<div class="form-row">
-			<div class="col-md-6 input-group mb-3"
+			<div class="col-md-4 input-group mb-3"
+					data-toggle="tooltip"
+					title="Include only games that are available on Board Game Arena (BGA)">
+				<div class="input-group-prepend">
+					<div class="input-group-text">
+						<label class="switch mb-0">
+							<input type="checkbox"
+								id="filter-bga-available"
+								name="filter-bga-available"
+								ng-model="bgaAvailable.enabled" />
+							<span class="slider {{ bgaAvailable.enabled ? 'bg-success' : 'bg-secondary' }}"></span>
+						</label>
+					</div>
+				</div>
+				<div class="input-group-append">
+					<div class="input-group-text">
+						<label for="filter-bga-available"
+								class="form-check-label form-label-game {{ bgaAvailable.enabled ? 'text-success' : 'text-muted' }}">
+							Available on BGA
+						</label>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4 input-group mb-3"
 					data-toggle="tooltip"
 					title="Filter by category">
 				<div class="input-group-prepend">
@@ -732,7 +729,7 @@
 					</optgroup>
 				</select>
 			</div>
-			<div class="col-md-6 input-group mb-3"
+			<div class="col-md-4 input-group mb-3"
 					data-toggle="tooltip"
 					title="Filter by mechanic">
 				<div class="input-group-prepend">
