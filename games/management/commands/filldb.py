@@ -617,8 +617,10 @@ class Command(BaseCommand):
     }
 
     game_item_mapping = {
-        "available_on_bga": lambda item: "Digital Implementations: Board Game Arena:70360"
-        in (item.get("family") or ()),  # TODO use _parse_value_id() to extract ID
+        "available_on_bga": lambda item: any(
+            family and family.get("id") == 70360
+            for family in map(_parse_value_id, arg_to_iter(item.get("family")))
+        ),
     }
 
     game_fields_foreign = {
