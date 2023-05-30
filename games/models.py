@@ -122,6 +122,8 @@ class Game(Model):
     spielen_id = JSONField(default=list)
     bga_id = JSONField(default=list)
 
+    available_on_bga = BooleanField(default=False, db_index=True)
+
     def highest_ranking(self, ranking_type=Ranking.BGG):
         """Find the highest ever rank of the given type."""
         return (
