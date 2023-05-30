@@ -27,6 +27,7 @@ from ...utils import format_from_path, load_recommender
 LOGGER = logging.getLogger(__name__)
 VALUE_ID_REGEX = re.compile(r"^(.*?)(:(\d+))?$")
 LINK_ID_REGEX = re.compile(r"^([a-z]+):(.+)$")
+FAMILY_ID_BGA = 70360
 
 
 def _load_yaml(path):
@@ -616,7 +617,12 @@ class Command(BaseCommand):
         "image_blurhash": jmespath.compile("[].blurhash").search,
     }
 
-    game_item_mapping = {}
+    game_item_mapping = {
+        "available_on_bga": lambda item: any(
+            family and family.get("id") == FAMILY_ID_BGA
+            for family in map(_parse_value_id, arg_to_iter(item.get("family")))
+        ),
+    }
 
     game_fields_foreign = {
         "artist": (Person, "name"),

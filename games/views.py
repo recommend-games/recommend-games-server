@@ -176,6 +176,7 @@ class PaginatedCSVGameRenderer(PaginatedCSVRenderer):
         "max_players_best",
         "min_time",
         "max_time",
+        "available_on_bga",
         "url",
     ]
 
@@ -293,6 +294,7 @@ class GameFilter(FilterSet):
             "complexity": ["exact", "gt", "gte", "lt", "lte", "isnull"],
             "language_dependency": ["exact", "gt", "gte", "lt", "lte", "isnull"],
             "kennerspiel_score": ["exact", "gt", "gte", "lt", "lte", "isnull"],
+            "available_on_bga": ["exact"],
         }
 
 

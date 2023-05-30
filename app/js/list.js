@@ -37,6 +37,7 @@ rgApp.controller('ListController', function ListController(
             !!$scope.complexity.enabled,
             !!$scope.year.enabled,
             !!$scope.cooperative,
+            !!$scope.bgaAvailable,
             !!$scope.gameType,
             !!$scope.category,
             !!$scope.mechanic,
@@ -307,6 +308,7 @@ rgApp.controller('ListController', function ListController(
     $scope.includeGames = params.include;
     $scope.excludeGames = params.exclude;
     $scope.cooperative = params.cooperative;
+    $scope.bgaAvailable = params.bgaAvailable;
     $scope.gameType = params.gameType;
     $scope.category = params.category;
     $scope.mechanic = params.mechanic;
@@ -344,6 +346,7 @@ rgApp.controller('ListController', function ListController(
         $scope.complexity.enabled = false;
         $scope.year.enabled = false;
         $scope.cooperative = null;
+        $scope.bgaAvailable = false;
         $scope.gameType = null;
         $scope.category = null;
         $scope.mechanic = null;
