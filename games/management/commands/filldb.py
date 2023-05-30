@@ -616,7 +616,10 @@ class Command(BaseCommand):
         "image_blurhash": jmespath.compile("[].blurhash").search,
     }
 
-    game_item_mapping = {}
+    game_item_mapping = {
+        "available_on_bga": lambda item: "Digital Implementations: Board Game Arena:70360"
+        in (item.get("family") or ()),  # TODO use _parse_value_id() to extract ID
+    }
 
     game_fields_foreign = {
         "artist": (Person, "name"),
