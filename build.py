@@ -192,7 +192,14 @@ def merge(in_paths, out_path, **kwargs):
     _remove(out_path)
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
 
-    merge_files(in_paths=in_paths, out_path=out_path, **kwargs)
+    try:
+        merge_files(in_paths=in_paths, out_path=out_path, **kwargs)
+    except Exception:
+        LOGGER.exception(
+            "Unable to merge files <%s> into <%s>…",
+            in_paths,
+            out_path,
+        )
 
 
 # TODO use merge_config from board-game-scraper (#328)
