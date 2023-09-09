@@ -663,6 +663,47 @@ class GameViewSet(PermissionsModelViewSet):
             else Response(serializer.data)
         )
 
+    @action(detail=False, methods=("GET", "POST"), permission_classes=(AlwaysAllowAny,))
+    def recommend_random(self, request, format=None):
+        """TODO."""
+
+        users = list(_extract_params(request, "user", str))
+
+        # TODO return 4xx error
+        if not users:
+            return self.list(request)
+
+        path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
+        recommender = load_recommender(path=path_light, site="light")
+
+        # TODO return 5xx error
+        if recommender is None:
+            return self.list(request)
+
+        include = frozenset(_extract_params(request, "include", parse_int))
+        exclude = frozenset(_extract_params(request, "exclude", parse_int))
+
+        queryset = self.filter_queryset(self.get_queryset()).order_by()
+        if include:
+            queryset |= self.get_queryset().filter(bgg_id__in=include)
+        if exclude:
+            queryset &= self.get_queryset().exclude(bgg_id__in=exclude)
+        # TODO collection filters
+        bgg_ids = list(queryset.values_list("bgg_id", flat=True))
+
+        # TODO extract num_games and random_seed from query params
+        recommendations = recommender.recommend_random_games_as_numpy(
+            users=users,
+            games=bgg_ids,
+            num_games=1,
+            random_seed=None,
+        )
+        games = queryset.filter(bgg_id__in=recommendations)
+        # TODO sort games by order in `recommendations`
+        serializer = self.get_serializer(instance=games, many=True)
+
+        return Response(serializer.data)
+
     @action(detail=True)
     def similar(self, request, pk=None, format=None):
         """Find games similar to this game."""
