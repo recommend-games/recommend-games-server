@@ -721,6 +721,7 @@ class GameViewSet(PermissionsModelViewSet):
         games = sorted(games, key=lambda game: game.rec_rank)
 
         serializer = self.get_serializer(instance=games, many=True)
+        # TODO should this still paginated?
         return Response(serializer.data)
 
     @action(detail=True)
