@@ -714,13 +714,13 @@ class GameViewSet(PermissionsModelViewSet):
                 range(len(recommendations)),
             )
         )
-        games = sorted(
-            queryset.filter(bgg_id__in=recommendations),
-            key=lambda game: recommendations_order[game.bgg_id],
-        )
-        # TODO populate `rec_rank`
-        serializer = self.get_serializer(instance=games, many=True)
 
+        games = queryset.filter(bgg_id__in=recommendations)
+        for game in games:
+            game.rec_rank = recommendations_order[game.bgg_id] + 1
+        games = sorted(games, key=lambda game: game.rec_rank)
+
+        serializer = self.get_serializer(instance=games, many=True)
         return Response(serializer.data)
 
     @action(detail=True)
