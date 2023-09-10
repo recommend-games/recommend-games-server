@@ -3,7 +3,7 @@ import logging
 from datetime import timezone
 from functools import lru_cache, reduce
 from itertools import chain
-from operator import or_
+from operator import and_, or_
 from typing import Callable, Iterable, Optional, Union
 
 import pandas as pd
@@ -436,6 +436,43 @@ class GameViewSet(PermissionsModelViewSet):
         # Remove all excluded games
         return include_ids - exclude_ids
 
+    def _collection(
+        self,
+        *,
+        users: Iterable[str],
+        owned: Optional[str] = None,
+        # played: Optional[str] = None,
+    ) -> Iterable[str]:
+        """TODO."""
+        users = list(users)
+        if not users or not owned:
+            return self.get_queryset().values_list("game", flat=True)
+
+        user_objs = User.objects.filter(name__in=users)
+        if owned and not owned.startswith("_"):
+            user = user_objs.get(name=owned)
+            return user.collection_set.filter(owned=True).values_list("game", flat=True)
+
+        colls = (
+            user.collection_set.filter(owned=True).values_list("game", flat=True)
+            for user in user_objs
+        )
+
+        if owned == "_all":
+            return reduce(and_, colls)
+
+        if owned == "_any":
+            return reduce(or_, colls)
+
+        if owned == "_none":
+            return (
+                self.get_queryset()
+                .exclude(bgg_id__in=reduce(or_, colls))
+                .values_list("game", flat=True)
+            )
+
+        raise ValueError(f"unknown parameter <owned={owned}>")
+
     def _recommend_rating(
         self,
         *,
@@ -698,7 +735,7 @@ class GameViewSet(PermissionsModelViewSet):
         if include:
             queryset |= self.get_queryset().filter(bgg_id__in=include)
         if exclude:
-            queryset &= self.get_queryset().exclude(bgg_id__in=exclude)
+            queryset = queryset.exclude(bgg_id__in=exclude)
         # TODO collection filters
         bgg_ids = list(queryset.values_list("bgg_id", flat=True))
 
