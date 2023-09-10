@@ -670,6 +670,11 @@ class GameViewSet(PermissionsModelViewSet):
         """TODO."""
 
         users = list(_extract_params(request, "user", str))
+        num_games = min(
+            parse_int(request.query_params.get("num_games")) or 1,
+            PAGE_SIZE,
+        )
+        random_seed = parse_int(request.query_params.get("random_seed"))
 
         if not users:
             return Response(
@@ -697,12 +702,11 @@ class GameViewSet(PermissionsModelViewSet):
         # TODO collection filters
         bgg_ids = list(queryset.values_list("bgg_id", flat=True))
 
-        # TODO extract num_games and random_seed from query params
         recommendations = recommender.recommend_random_games_as_numpy(
             users=users,
             games=bgg_ids,
-            num_games=1,
-            random_seed=None,
+            num_games=num_games,
+            random_seed=random_seed,
         )
         games = queryset.filter(bgg_id__in=recommendations)
         # TODO sort games by order in `recommendations`
