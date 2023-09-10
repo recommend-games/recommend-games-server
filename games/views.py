@@ -27,6 +27,7 @@ from rest_framework.exceptions import (
     MethodNotAllowed,
     NotAuthenticated,
     NotFound,
+    ParseError,
     PermissionDenied,
 )
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -34,6 +35,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_501_NOT_IMPLEMENTED
 from rest_framework.utils.urls import remove_query_param, replace_query_param
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_csv.renderers import PaginatedCSVRenderer
@@ -669,16 +671,20 @@ class GameViewSet(PermissionsModelViewSet):
 
         users = list(_extract_params(request, "user", str))
 
-        # TODO return 4xx error
         if not users:
-            return self.list(request)
+            return Response(
+                {"reason": "<user> cannot be empty"},
+                status=HTTP_400_BAD_REQUEST,
+            )
 
         path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
         recommender = load_recommender(path=path_light, site="light")
 
-        # TODO return 5xx error
         if recommender is None:
-            return self.list(request)
+            return Response(
+                {"reason": "unable to load recommender model"},
+                status=HTTP_501_NOT_IMPLEMENTED,
+            )
 
         include = frozenset(_extract_params(request, "include", parse_int))
         exclude = frozenset(_extract_params(request, "exclude", parse_int))
