@@ -712,7 +712,7 @@ class GameViewSet(PermissionsModelViewSet):
     def recommend_random(self, request, format=None):
         """TODO."""
 
-        users = list(_extract_params(request, "user", str))
+        users = [user.lower() for user in _extract_params(request, "user", str)]
         num_games = min(
             parse_int(request.query_params.get("num_games")) or 1,
             PAGE_SIZE,
@@ -736,13 +736,16 @@ class GameViewSet(PermissionsModelViewSet):
 
         include = frozenset(_extract_params(request, "include", parse_int))
         exclude = frozenset(_extract_params(request, "exclude", parse_int))
+        owned = request.query_params.get("owned")
 
         queryset = self.filter_queryset(self.get_queryset()).order_by()
         if include:
             queryset |= self.get_queryset().filter(bgg_id__in=include)
         if exclude:
             queryset = queryset.exclude(bgg_id__in=exclude)
-        # TODO collection filters
+        if owned:
+            collection_bgg_ids = self._collection(users=users, owned=owned.lower())
+            queryset = queryset.filter(bgg_id__in=collection_bgg_ids)
         bgg_ids = list(queryset.values_list("bgg_id", flat=True))
 
         recommendations = recommender.recommend_random_games_as_numpy(
