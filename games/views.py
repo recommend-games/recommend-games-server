@@ -3,7 +3,7 @@ import logging
 from datetime import timezone
 from functools import lru_cache, reduce
 from itertools import chain
-from operator import and_, or_
+from operator import or_
 from typing import Callable, Iterable, Optional, Union
 
 import pandas as pd
@@ -445,11 +445,14 @@ class GameViewSet(PermissionsModelViewSet):
     ) -> Iterable[str]:
         """TODO."""
         users = list(users)
+        if len(users) == 1 and owned != "_none":
+            owned = users[0]
+
         if not users or not owned:
-            return self.get_queryset().values_list("game", flat=True)
+            return self.get_queryset().values_list("bgg_id", flat=True)
 
         user_objs = User.objects.filter(name__in=users)
-        if owned and not owned.startswith("_"):
+        if not owned.startswith("_"):
             user = user_objs.get(name=owned)
             return user.collection_set.filter(owned=True).values_list("game", flat=True)
 
@@ -459,16 +462,19 @@ class GameViewSet(PermissionsModelViewSet):
         )
 
         if owned == "_all":
-            return reduce(and_, colls)
+            qs = next(colls)
+            return qs.intersection(*colls)
 
+        qs = next(colls)
+        all_owned = qs.union(*colls)
         if owned == "_any":
-            return reduce(or_, colls)
+            return all_owned
 
         if owned == "_none":
             return (
                 self.get_queryset()
-                .exclude(bgg_id__in=reduce(or_, colls))
-                .values_list("game", flat=True)
+                .exclude(bgg_id__in=all_owned)
+                .values_list("bgg_id", flat=True)
             )
 
         raise ValueError(f"unknown parameter <owned={owned}>")
