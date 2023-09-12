@@ -4,7 +4,7 @@ from datetime import timezone
 from functools import lru_cache, reduce
 from itertools import chain
 from operator import or_
-from typing import Callable, Iterable, Optional, Union
+from typing import Any, Callable, Iterable, Optional, Union
 
 import pandas as pd
 from django.conf import settings
@@ -428,22 +428,24 @@ class GameViewSet(PermissionsModelViewSet):
         # Remove all excluded games
         return include_ids - exclude_ids
 
-    def _owned_collection(
+    def _collection(
         self,
+        *,
         users: Iterable[str],
-        owned: str,
+        kind: str,
+        **filters: Any,
     ) -> Iterable[str]:
-        """Return a list of game IDs that are owned in users' collections."""
+        """Return a list of game IDs that are in users' collections."""
         users = list(users)
-        if not users or not owned:
+        if not users or not kind or not filters:
             return self.get_queryset().values_list("bgg_id", flat=True).order_by()
-        if owned == "_all":
-            return all_collection(users, owned=True)
-        if owned == "_any":
-            return any_collection(users, owned=True)
-        if owned == "_none":
-            return none_collection(users, owned=True)
-        return any_collection([owned], owned=True)
+        if kind == "_all":
+            return all_collection(users, **filters)
+        if kind == "_any":
+            return any_collection(users, **filters)
+        if kind == "_none":
+            return none_collection(users, **filters)
+        return any_collection([kind], **filters)
 
     def _recommend_rating(
         self,
@@ -703,6 +705,7 @@ class GameViewSet(PermissionsModelViewSet):
         include = frozenset(_extract_params(request, "include", parse_int))
         exclude = frozenset(_extract_params(request, "exclude", parse_int))
         owned = request.query_params.get("owned")
+        played = request.query_params.get("played")
 
         queryset = self.filter_queryset(self.get_queryset()).order_by()
         if include:
@@ -710,9 +713,17 @@ class GameViewSet(PermissionsModelViewSet):
         if exclude:
             queryset = queryset.exclude(bgg_id__in=exclude)
         if owned:
-            collection_bgg_ids = self._owned_collection(
+            collection_bgg_ids = self._collection(
                 users=users,
-                owned=owned.lower(),
+                kind=owned.lower(),
+                owned=True,
+            )
+            queryset = queryset.filter(bgg_id__in=collection_bgg_ids)
+        if played:
+            collection_bgg_ids = self._collection(
+                users=users,
+                kind=played.lower(),
+                play_count__gt=0,
             )
             queryset = queryset.filter(bgg_id__in=collection_bgg_ids)
         bgg_ids = list(queryset.values_list("bgg_id", flat=True))
