@@ -16,6 +16,7 @@ djangorestframework = "*"
 djangorestframework-csv = "*"
 gunicorn = "*"
 pandas = "*"
+python-gitlab = "*"
 pytility = {extras = ["dates"], version = "*"}
 whitenoise = {extras = ["brotli"], version = "*"}
 
