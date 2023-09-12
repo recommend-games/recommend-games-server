@@ -428,12 +428,11 @@ class GameViewSet(PermissionsModelViewSet):
         # Remove all excluded games
         return include_ids - exclude_ids
 
-    def _collection(
+    def _owned_collection(
         self,
         *,
         users: Iterable[str],
         owned: Optional[str] = None,
-        # played: Optional[str] = None,
     ) -> Iterable[str]:
         """Return a list of game IDs that are in any of the given users' collections."""
         users = list(users)
@@ -712,7 +711,10 @@ class GameViewSet(PermissionsModelViewSet):
         if exclude:
             queryset = queryset.exclude(bgg_id__in=exclude)
         if owned:
-            collection_bgg_ids = self._collection(users=users, owned=owned.lower())
+            collection_bgg_ids = self._owned_collection(
+                users=users,
+                owned=owned.lower(),
+            )
             queryset = queryset.filter(bgg_id__in=collection_bgg_ids)
         bgg_ids = list(queryset.values_list("bgg_id", flat=True))
 
