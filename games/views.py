@@ -13,21 +13,12 @@ from django.shortcuts import redirect
 from django.utils.timezone import now
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
-from pytility import (
-    arg_to_iter,
-    clear_list,
-    parse_bool,
-    parse_date,
-    parse_int,
-    take_first,
-    to_str,
-)
+from pytility import arg_to_iter, clear_list, parse_bool, parse_date, parse_int, to_str
 from rest_framework.decorators import action
 from rest_framework.exceptions import (
     MethodNotAllowed,
     NotAuthenticated,
     NotFound,
-    ParseError,
     PermissionDenied,
 )
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -40,6 +31,7 @@ from rest_framework.utils.urls import remove_query_param, replace_query_param
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_csv.renderers import PaginatedCSVRenderer
 
+from games.collections import all_collection, any_collection, none_collection
 from .models import (
     Category,
     Collection,
@@ -443,41 +435,17 @@ class GameViewSet(PermissionsModelViewSet):
         owned: Optional[str] = None,
         # played: Optional[str] = None,
     ) -> Iterable[str]:
-        """TODO."""
+        """Return a list of game IDs that are in any of the given users' collections."""
         users = list(users)
-        if len(users) == 1 and owned != "_none":
-            owned = users[0]
-
         if not users or not owned:
-            return self.get_queryset().values_list("bgg_id", flat=True)
-
-        user_objs = User.objects.filter(name__in=users)
-        if not owned.startswith("_"):
-            user = user_objs.get(name=owned)
-            return user.collection_set.filter(owned=True).values_list("game", flat=True)
-
-        colls = (
-            user.collection_set.filter(owned=True).values_list("game", flat=True)
-            for user in user_objs
-        )
-
+            return self.get_queryset().values_list("bgg_id", flat=True).order_by()
         if owned == "_all":
-            qs = next(colls)
-            return qs.intersection(*colls)
-
-        qs = next(colls)
-        all_owned = qs.union(*colls)
+            return all_collection(users, owned=True)
         if owned == "_any":
-            return all_owned
-
+            return any_collection(users, owned=True)
         if owned == "_none":
-            return (
-                self.get_queryset()
-                .exclude(bgg_id__in=all_owned)
-                .values_list("bgg_id", flat=True)
-            )
-
-        raise ValueError(f"unknown parameter <owned={owned}>")
+            return none_collection(users, owned=True)
+        return any_collection([owned], owned=True)
 
     def _recommend_rating(
         self,
