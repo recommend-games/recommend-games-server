@@ -430,11 +430,10 @@ class GameViewSet(PermissionsModelViewSet):
 
     def _owned_collection(
         self,
-        *,
         users: Iterable[str],
-        owned: Optional[str] = None,
+        owned: str,
     ) -> Iterable[str]:
-        """Return a list of game IDs that are in any of the given users' collections."""
+        """Return a list of game IDs that are owned in users' collections."""
         users = list(users)
         if not users or not owned:
             return self.get_queryset().values_list("bgg_id", flat=True).order_by()
