@@ -951,7 +951,7 @@ class UserViewSet(PermissionsModelViewSet):
 
     @action(
         detail=True,
-        methods=("POST"),
+        methods=("POST",),
     )
     def premium_user_request(self, request, pk=None, format=None):
         """Send a request to the admin to become a premium user."""
