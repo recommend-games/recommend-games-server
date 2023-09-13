@@ -9,7 +9,7 @@ from csv import DictWriter
 from datetime import datetime, timezone
 from functools import lru_cache, partial
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Union
 import uuid
 
 from django.conf import settings
@@ -351,7 +351,7 @@ def gitlab_merge_request(
 def premium_feature_gitlab_merge_request(
     *,
     users: Iterable[str],
-    access_expiration: datetime,
+    access_expiration: Union[datetime, str],
     gitlab_project_id: int,
     gitlab_access_token: str,
     file_dir: str = "premium",
@@ -367,6 +367,10 @@ def premium_feature_gitlab_merge_request(
     except ImportError:
         LOGGER.exception("Please make sure <pyyaml> is installed")
         raise
+
+    access_expiration = parse_date(access_expiration, tzinfo=timezone.utc)
+    if not access_expiration:
+        raise ValueError("Invalid access expiration")
 
     data = [{user.strip().lower(): access_expiration.replace()} for user in users]
     data_yaml = yaml.safe_dump(data)
