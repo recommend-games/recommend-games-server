@@ -6,10 +6,10 @@ import os.path
 import re
 import timeit
 from csv import DictWriter
-from datetime import timezone
+from datetime import datetime, timezone
 from functools import lru_cache, partial
 from pathlib import Path
-from typing import Optional
+from typing import Iterable, Optional
 import uuid
 
 from django.conf import settings
@@ -346,3 +346,40 @@ def gitlab_merge_request(
         raise
 
     return mr.web_url
+
+
+def premium_feature_gitlab_merge_request(
+    *,
+    users: Iterable[str],
+    access_expiration: datetime,
+    gitlab_project_id: int,
+    gitlab_access_token: str,
+    file_dir: str = "premium",
+    file_stem: Optional[str] = None,
+    gitlab_url: str = "https://gitlab.com",
+    source_branch: Optional[str] = None,
+    target_branch: str = "main",
+) -> str:
+    """Create a merge request to add users to the premium list."""
+
+    try:
+        import yaml
+    except ImportError:
+        LOGGER.exception("Please make sure <pyyaml> is installed")
+        raise
+
+    data = [{user.strip().lower(): access_expiration.replace()} for user in users]
+    data_yaml = yaml.safe_dump(data)
+    now = datetime.utcnow().isoformat(timespec="seconds")
+    file_content = f"# Generated at {now}Z\n{data_yaml}\n"
+    file_path = f"{file_dir}/{file_stem or uuid.uuid4()}.yaml"
+
+    return gitlab_merge_request(
+        file_path=file_path,
+        file_content=file_content,
+        gitlab_project_id=gitlab_project_id,
+        gitlab_access_token=gitlab_access_token,
+        gitlab_url=gitlab_url,
+        source_branch=source_branch,
+        target_branch=target_branch,
+    )
