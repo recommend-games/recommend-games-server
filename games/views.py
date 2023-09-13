@@ -1,6 +1,6 @@
 """ views """
 import logging
-from datetime import timezone
+from datetime import timedelta, timezone
 from functools import lru_cache, reduce
 from itertools import chain
 from operator import or_
@@ -34,6 +34,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
+from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_202_ACCEPTED
 from rest_framework.utils.urls import remove_query_param, replace_query_param
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_csv.renderers import PaginatedCSVRenderer
@@ -60,7 +61,12 @@ from .serializers import (
     RankingSerializer,
     UserSerializer,
 )
-from .utils import load_recommender, model_updated_at, server_version
+from .utils import (
+    load_recommender,
+    model_updated_at,
+    premium_feature_gitlab_merge_request,
+    server_version,
+)
 
 LOGGER = logging.getLogger(__name__)
 PAGE_SIZE = api_settings.PAGE_SIZE or 25
@@ -942,6 +948,37 @@ class UserViewSet(PermissionsModelViewSet):
             data[key] = result
 
         return Response(data)
+
+    @action(
+        detail=True,
+        methods=("POST"),
+    )
+    def premium_user_request(self, request, pk=None, format=None):
+        """Send a request to the admin to become a premium user."""
+        user = self.get_object()
+
+        try:
+            mr_url = premium_feature_gitlab_merge_request(
+                users=[user.name],
+                access_expiration=now() + timedelta(days=365),
+                gitlab_project_id=settings.GITLAB_PROJECT_ID,
+                gitlab_access_token=settings.GITLAB_CONFIG_TOKEN,
+                gitlab_url=settings.GITLAB_URL,
+            )
+            if not mr_url:
+                raise ValueError("Unable to create merge request")
+            LOGGER.info("Created merge request at <%s>", mr_url)
+
+        except Exception as exc:
+            return Response(
+                {"reason": f"Unable to create merge request:\n\n{exc}"},
+                status=HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(
+            {"status": "ok"},
+            status=HTTP_202_ACCEPTED,
+        )
 
 
 class CollectionViewSet(ModelViewSet):
