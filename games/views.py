@@ -971,12 +971,50 @@ class UserViewSet(PermissionsModelViewSet):
 
         except Exception as exc:
             return Response(
-                {"reason": f"Unable to create merge request:\n\n{exc}"},
+                {"detail": f"Unable to create merge request:\n\n{exc}"},
                 status=HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
         return Response(
-            {"status": "ok"},
+            {"detail": "ok"},
+            status=HTTP_202_ACCEPTED,
+        )
+
+    @action(
+        detail=False,
+        methods=("POST",),
+    )
+    def premium_users_request(self, request, format=None):
+        """Send a request to the admin to become premium users."""
+
+        users = [user.lower() for user in _extract_params(request, "user", str)]
+        user_names = list(
+            self.get_queryset().filter(name__in=users).values_list("name", flat=True)
+        )
+
+        if not user_names:
+            raise NotFound(f"none of the users {users} could be found")
+
+        try:
+            mr_url = premium_feature_gitlab_merge_request(
+                users=user_names,
+                access_expiration=now() + timedelta(days=365),
+                gitlab_project_id=settings.GITLAB_PROJECT_ID,
+                gitlab_access_token=settings.GITLAB_CONFIG_TOKEN,
+                gitlab_url=settings.GITLAB_URL,
+            )
+            if not mr_url:
+                raise ValueError("Unable to create merge request")
+            LOGGER.info("Created merge request at <%s>", mr_url)
+
+        except Exception as exc:
+            return Response(
+                {"detail": f"Unable to create merge request:\n\n{exc}"},
+                status=HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(
+            {"detail": "ok"},
             status=HTTP_202_ACCEPTED,
         )
 
