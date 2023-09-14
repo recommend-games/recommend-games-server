@@ -6,9 +6,11 @@ import os.path
 import re
 import timeit
 from csv import DictWriter
-from datetime import timezone
+from datetime import datetime, timezone
 from functools import lru_cache, partial
 from pathlib import Path
+from typing import Iterable, Optional, Union
+import uuid
 
 from django.conf import settings
 from pytility import arg_to_iter, normalize_space, parse_date
@@ -253,3 +255,135 @@ class Timer:
             print(self.message % duration)
         else:
             self.logger.info(self.message, duration)
+
+
+def gitlab_merge_request(
+    *,
+    file_path: str,
+    file_content: str,
+    gitlab_project_id: int,
+    gitlab_access_token: str,
+    gitlab_url: str = "https://gitlab.com",
+    source_branch: Optional[str] = None,
+    target_branch: str = "main",
+) -> str:
+    """Upload a file to GitLab and create a merge request."""
+
+    try:
+        import gitlab
+    except ImportError:
+        LOGGER.exception("Please make sure <python-gitlab> is installed")
+        raise
+
+    gl = gitlab.Gitlab(gitlab_url, private_token=gitlab_access_token)
+    project = gl.projects.get(gitlab_project_id)
+
+    # create a new branch
+    source_branch = source_branch or f"mr-{uuid.uuid4()}"
+    try:
+        branch = project.branches.create(
+            {
+                "branch": source_branch,
+                "ref": target_branch,
+            }
+        )
+        LOGGER.info(
+            "Created branch <%s> from commit <%s>",
+            branch.name,
+            branch.commit["id"],
+        )
+    except gitlab.exceptions.GitlabCreateError:
+        LOGGER.exception(
+            "Failed to create branch <%s> from <%s>",
+            source_branch,
+            target_branch,
+        )
+        raise
+
+    # upload file
+    try:
+        file = project.files.create(
+            {
+                "file_path": file_path,
+                "branch": source_branch,
+                "content": file_content,
+                "commit_message": f"Added {file_path}",
+            }
+        )
+        LOGGER.info(
+            "Uploaded file <%s> to <%s>",
+            file_path,
+            file.branch,
+        )
+    except gitlab.exceptions.GitlabCreateError:
+        LOGGER.exception(
+            "Failed to upload file <%s> to <%s>",
+            file_path,
+            source_branch,
+        )
+        raise
+
+    # create merge request
+    try:
+        mr = project.mergerequests.create(
+            {
+                "source_branch": source_branch,
+                "target_branch": target_branch,
+                "title": f"Added {file_path}",
+                "description": f"Added {file_path}",
+            }
+        )
+        LOGGER.info(
+            "Created merge request <%s>",
+            mr.web_url,
+        )
+    except gitlab.exceptions.GitlabCreateError:
+        LOGGER.exception(
+            "Failed to create merge request from <%s> to <%s>",
+            source_branch,
+            target_branch,
+        )
+        raise
+
+    return mr.web_url
+
+
+def premium_feature_gitlab_merge_request(
+    *,
+    users: Iterable[str],
+    access_expiration: Union[datetime, str],
+    gitlab_project_id: int,
+    gitlab_access_token: str,
+    file_dir: str = "premium",
+    file_stem: Optional[str] = None,
+    gitlab_url: str = "https://gitlab.com",
+    source_branch: Optional[str] = None,
+    target_branch: str = "main",
+) -> str:
+    """Create a merge request to add users to the premium list."""
+
+    try:
+        import yaml
+    except ImportError:
+        LOGGER.exception("Please make sure <pyyaml> is installed")
+        raise
+
+    access_expiration = parse_date(access_expiration, tzinfo=timezone.utc)
+    if not access_expiration:
+        raise ValueError("Invalid access expiration")
+
+    data = [{user.strip().lower(): access_expiration.replace()} for user in users]
+    data_yaml = yaml.safe_dump(data)
+    now = datetime.utcnow().isoformat(timespec="seconds")
+    file_content = f"# Generated at {now}Z\n{data_yaml}\n"
+    file_path = f"{file_dir}/{file_stem or uuid.uuid4()}.yaml"
+
+    return gitlab_merge_request(
+        file_path=file_path,
+        file_content=file_content,
+        gitlab_project_id=gitlab_project_id,
+        gitlab_access_token=gitlab_access_token,
+        gitlab_url=gitlab_url,
+        source_branch=source_branch,
+        target_branch=target_branch,
+    )
