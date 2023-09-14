@@ -375,7 +375,7 @@ def premium_feature_gitlab_merge_request(
     data = [{user.strip().lower(): access_expiration.replace()} for user in users]
     data_yaml = yaml.safe_dump(data)
     now = datetime.utcnow().isoformat(timespec="seconds")
-    file_content = f"# Generated at {now}Z\n{data_yaml}\n"
+    file_content = f"# Generated at {now}Z\n{data_yaml}"
     sand = uuid.uuid4()
     file_path = f"{file_dir}/{file_stem or sand}.yaml"
     source_branch = source_branch or f"premium-{sand}"
