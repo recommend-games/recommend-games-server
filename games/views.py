@@ -35,6 +35,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_202_ACCEPTED
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework.utils.urls import remove_query_param, replace_query_param
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_csv.renderers import PaginatedCSVRenderer
@@ -952,6 +953,7 @@ class UserViewSet(PermissionsModelViewSet):
     @action(
         detail=True,
         methods=("POST",),
+        throttle_classes=(AnonRateThrottle,),
     )
     def premium_user_request(self, request, pk=None, format=None):
         """Send a request to the admin to become a premium user."""
@@ -983,6 +985,7 @@ class UserViewSet(PermissionsModelViewSet):
     @action(
         detail=False,
         methods=("POST",),
+        throttle_classes=(AnonRateThrottle,),
     )
     def premium_users_request(self, request, format=None):
         """Send a request to the admin to become premium users."""
