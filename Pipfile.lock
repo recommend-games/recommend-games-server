@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "0fd755c8a8c90bd4e31eeef60d507048f687d2d8e3d52718adf277b90b8f24ce"
+            "sha256": "5165f84d973c669ebd1cff2602f57f78ccac5e66bfe676bd17b48f138fdefbf0"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -29,11 +29,11 @@
                 "light"
             ],
             "hashes": [
-                "sha256:506c7d76d3d7ca87c71569f732d087ea1b5a2d6178963d7766330c917419143c",
-                "sha256:6d66a4130e266795dd6c6629bbd28eabca0e4d79cc33ac3afa5e837f480fffd1"
+                "sha256:fc66935dd5dad4c3e1257430ea52732ef6961f7924ab1ddce2ce8373bf29ca39",
+                "sha256:fd4eae9bb8428187bf43d24f891d8f3b09e446a3a9ea82fbf4d58c02fe4a460a"
             ],
             "index": "pypi",
-            "version": "==3.5.0"
+            "version": "==3.5.1"
         },
         "brotli": {
             "hashes": [
@@ -610,11 +610,11 @@
         },
         "awscli": {
             "hashes": [
-                "sha256:30884138fe25b1633fbf4e470ce0c4c7a078f5e9ef7e6f8d8bd659835a20da2a",
-                "sha256:d9e3b0720f7a2e27ea9806be8721460f16d55f6cf1da66d3a3e633cbde098963"
+                "sha256:2a4763ae0686c574d5fc83e49cd2d38d86dd53379050d9088ac2106a63c8c70a",
+                "sha256:ff3e3ed1f5973ad7f115339c046b2b4f9acdb7b4666709b3e503969329a11497"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==1.29.45"
+            "version": "==1.29.48"
         },
         "azure-common": {
             "hashes": [
@@ -632,10 +632,10 @@
         },
         "azure-storage-blob": {
             "hashes": [
-                "sha256:0016e0c549a80282d7b4920c03f2f4ba35c53e6e3c7dbcd2a4a8c8eb3882c1e7",
-                "sha256:c14b785a17050b30fc326a315bdae6bc4a078855f4f94a4c303ad74a48dc8c63"
+                "sha256:00b92568e91d608c04dfd4814c3b180818e690023493bb984c22dfc1a8a96e55",
+                "sha256:d3265c2403c28d8881326c365e9cf7ed2ad55fdac98404eae753548702b31ba2"
             ],
-            "version": "==12.17.0"
+            "version": "==12.18.1"
         },
         "babel": {
             "hashes": [
@@ -725,22 +725,22 @@
                 "light"
             ],
             "hashes": [
-                "sha256:506c7d76d3d7ca87c71569f732d087ea1b5a2d6178963d7766330c917419143c",
-                "sha256:6d66a4130e266795dd6c6629bbd28eabca0e4d79cc33ac3afa5e837f480fffd1"
+                "sha256:fc66935dd5dad4c3e1257430ea52732ef6961f7924ab1ddce2ce8373bf29ca39",
+                "sha256:fd4eae9bb8428187bf43d24f891d8f3b09e446a3a9ea82fbf4d58c02fe4a460a"
             ],
             "index": "pypi",
-            "version": "==3.5.0"
+            "version": "==3.5.1"
         },
         "board-game-scraper": {
             "extras": [
                 "cloud"
             ],
             "hashes": [
-                "sha256:10d89badb6918b2eec12af81cf5bf2d92c8b030aa96ddb981b96f34296fc79dd",
-                "sha256:f9b73d63e8f829465f128d542133463b3623bf2f7aa63bb2ff5e84ea9a7d12eb"
+                "sha256:b3346fc2ab9fb9679ae36020c64b5d2627e826189b6684cd4050f321ffa5f4d3",
+                "sha256:db7342204db1acd07f41dc8bd9efadc16ed653a04d3b00cfce18e8425268276c"
             ],
             "index": "pypi",
-            "version": "==2.20.0"
+            "version": "==2.21.0"
         },
         "board-game-utils": {
             "hashes": [
@@ -759,18 +759,18 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:4ee914266c9bed16978677a367fd05053d8dcaddcbe998c9df30787ab73f87aa",
-                "sha256:682abbd304e93e726163d7de7448c1bf88108c72cf6a23dceb6bba86fdc86dff"
+                "sha256:ec7895504e3b2dd35fbdb7397bc3c48daaba8e6f37bc436aa928ff4e745f0f1c",
+                "sha256:fed2d673fce33384697baa0028edfd18b06aa17af5c3ef82da75e9254a8ffb07"
             ],
-            "version": "==1.28.45"
+            "version": "==1.28.48"
         },
         "botocore": {
             "hashes": [
-                "sha256:85ff64a0ac2705c4ba36268c3b2dbc1184062e9cf729a89dd66c2f54f730fc79",
-                "sha256:cceb150cff1d7f7a6faf655510a8384eb4505a33b430495fe1744d03a70dc66a"
+                "sha256:6ed16f66aa6ed6070fed26d69764cb14c7759e4cc0b1c191283cc48b05d65de9",
+                "sha256:9618c06f7e08ed590dae6613b8b2511055f7d6c07517382143ef8563169d4ef1"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==1.31.45"
+            "version": "==1.31.48"
         },
         "btrees": {
             "hashes": [
