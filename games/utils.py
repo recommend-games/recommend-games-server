@@ -354,7 +354,7 @@ def premium_feature_gitlab_merge_request(
     access_expiration: Union[datetime, str],
     gitlab_project_id: int,
     gitlab_access_token: str,
-    file_dir: str = "premium",
+    file_dir: str = "users/premium",
     file_stem: Optional[str] = None,
     gitlab_url: str = "https://gitlab.com",
     source_branch: Optional[str] = None,
@@ -376,7 +376,9 @@ def premium_feature_gitlab_merge_request(
     data_yaml = yaml.safe_dump(data)
     now = datetime.utcnow().isoformat(timespec="seconds")
     file_content = f"# Generated at {now}Z\n{data_yaml}\n"
-    file_path = f"{file_dir}/{file_stem or uuid.uuid4()}.yaml"
+    sand = uuid.uuid4()
+    file_path = f"{file_dir}/{file_stem or sand}.yaml"
+    source_branch = source_branch or f"premium-{sand}"
 
     return gitlab_merge_request(
         file_path=file_path,
