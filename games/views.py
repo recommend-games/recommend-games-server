@@ -34,7 +34,11 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
-from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_202_ACCEPTED
+from rest_framework.status import (
+    HTTP_202_ACCEPTED,
+    HTTP_400_BAD_REQUEST,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+)
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.utils.urls import remove_query_param, replace_query_param
 from rest_framework.viewsets import ModelViewSet
@@ -256,6 +260,50 @@ def _get_compilations():
         Game.objects.filter(compilation=True)
         .order_by()
         .values_list("bgg_id", flat=True)
+    )
+
+
+def _gitlab_merge_request(
+    users: Union[str, Iterable[str]], access_days: int = 365
+) -> Response:
+    users = frozenset(user.lower() for user in arg_to_iter(users))
+    if not users:
+        return Response(
+            {"detail": "no users provided"},
+            status=HTTP_400_BAD_REQUEST,
+        )
+
+    gitlab_project_id = parse_int(settings.GITLAB_PROJECT_ID)
+    gitlab_access_token = settings.GITLAB_CONFIG_TOKEN
+    gitlab_url = settings.GITLAB_URL
+
+    if not gitlab_project_id or not gitlab_access_token or not gitlab_url:
+        return Response(
+            {"detail": "GitLab not configured on the server"},
+            status=HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    try:
+        mr_url = premium_feature_gitlab_merge_request(
+            users=users,
+            access_expiration=now() + timedelta(days=access_days),
+            gitlab_project_id=gitlab_project_id,
+            gitlab_access_token=gitlab_access_token,
+            gitlab_url=gitlab_url,
+        )
+        if not mr_url:
+            raise ValueError("Unable to create merge request")
+        LOGGER.info("Created merge request at <%s>", mr_url)
+
+    except Exception as exc:
+        return Response(
+            {"detail": f"Unable to create merge request:\n\n{exc}"},
+            status=HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    return Response(
+        {"detail": "ok"},
+        status=HTTP_202_ACCEPTED,
     )
 
 
@@ -958,29 +1006,7 @@ class UserViewSet(PermissionsModelViewSet):
     def premium_user_request(self, request, pk=None, format=None):
         """Send a request to the admin to become a premium user."""
         user = self.get_object()
-
-        try:
-            mr_url = premium_feature_gitlab_merge_request(
-                users=[user.name],
-                access_expiration=now() + timedelta(days=365),
-                gitlab_project_id=settings.GITLAB_PROJECT_ID,
-                gitlab_access_token=settings.GITLAB_CONFIG_TOKEN,
-                gitlab_url=settings.GITLAB_URL,
-            )
-            if not mr_url:
-                raise ValueError("Unable to create merge request")
-            LOGGER.info("Created merge request at <%s>", mr_url)
-
-        except Exception as exc:
-            return Response(
-                {"detail": f"Unable to create merge request:\n\n{exc}"},
-                status=HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-        return Response(
-            {"detail": "ok"},
-            status=HTTP_202_ACCEPTED,
-        )
+        return _gitlab_merge_request(users=[user.name], access_days=365)
 
     @action(
         detail=False,
@@ -998,28 +1024,7 @@ class UserViewSet(PermissionsModelViewSet):
         if not user_names:
             raise NotFound(f"none of the users {users} could be found")
 
-        try:
-            mr_url = premium_feature_gitlab_merge_request(
-                users=user_names,
-                access_expiration=now() + timedelta(days=365),
-                gitlab_project_id=settings.GITLAB_PROJECT_ID,
-                gitlab_access_token=settings.GITLAB_CONFIG_TOKEN,
-                gitlab_url=settings.GITLAB_URL,
-            )
-            if not mr_url:
-                raise ValueError("Unable to create merge request")
-            LOGGER.info("Created merge request at <%s>", mr_url)
-
-        except Exception as exc:
-            return Response(
-                {"detail": f"Unable to create merge request:\n\n{exc}"},
-                status=HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-        return Response(
-            {"detail": "ok"},
-            status=HTTP_202_ACCEPTED,
-        )
+        return _gitlab_merge_request(users=user_names, access_days=365)
 
 
 class CollectionViewSet(ModelViewSet):
