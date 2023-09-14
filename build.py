@@ -51,6 +51,7 @@ SETTINGS = django.conf.settings
 
 DATA_DIR = SETTINGS.DATA_DIR
 MODELS_DIR = SETTINGS.MODELS_DIR
+CONFIG_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "recommend-games-config"))
 SCRAPER_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "board-game-scraper"))
 RECOMMENDER_DIR = os.path.abspath(
     os.path.join(BASE_DIR, "..", "board-game-recommender")
@@ -1290,6 +1291,8 @@ def filldb(
         os.path.join(srp_dir, "bgg_GameItem.jl"),
         collection_paths=[os.path.join(srp_dir, "bgg_RatingItem.jl")],
         user_paths=[os.path.join(srp_dir, "bgg_UserItem.jl")],
+        # TODO update this Git repo beforehand
+        premium_user_dirs=[os.path.join(CONFIG_DIR, "users", "premium")],
         premium_user_paths=[os.path.join(BASE_DIR, "config", "premium.yaml")],
         in_format="jl",
         batch=100_000,
