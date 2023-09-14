@@ -144,6 +144,19 @@ def gitprepare(repo=SCRAPED_DATA_DIR):
 
 
 @task()
+def gitprepareconfig(repo=CONFIG_DIR):
+    """Check config Git repo is clean and up-to-date."""
+    LOGGER.info("Preparing Git repo <%s>...", repo)
+    with safe_cd(repo):
+        try:
+            execute("git", "checkout", "main")
+            execute("git", "pull", "--ff-only")
+            execute("git", "diff", "HEAD", "--name-only")
+        except SystemExit:
+            LOGGER.exception("There was a problem preparing <%s>...", repo)
+
+
+@task()
 def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
     """commit and push Git repo"""
     paths = paths or ("COUNT.md", "rankings", "scraped", "links.json", "prefixes.txt")
@@ -1269,7 +1282,7 @@ def migrate():
     django.core.management.call_command("migrate")
 
 
-@task(cleandata, migrate)
+@task(cleandata, gitprepareconfig, migrate)
 def filldb(
     src_dir=SCRAPED_DATA_DIR,
     rec_dir=os.path.join(RECOMMENDER_DIR, ".bgg"),
@@ -1291,7 +1304,6 @@ def filldb(
         os.path.join(srp_dir, "bgg_GameItem.jl"),
         collection_paths=[os.path.join(srp_dir, "bgg_RatingItem.jl")],
         user_paths=[os.path.join(srp_dir, "bgg_UserItem.jl")],
-        # TODO update this Git repo beforehand
         premium_user_dirs=[os.path.join(CONFIG_DIR, "users", "premium")],
         premium_user_paths=[os.path.join(BASE_DIR, "config", "premium.yaml")],
         in_format="jl",
