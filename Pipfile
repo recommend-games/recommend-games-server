@@ -23,7 +23,7 @@ whitenoise = {extras = ["brotli"], version = "*"}
 [dev-packages]
 black = "*"
 board-game-recommender = {extras = ["full", "light", "trust"], version = ">=3.3.0,<4.0.0"}
-board-game-scraper = {extras = ["cloud"], version = ">=2.11.3"}
+board-game-scraper = {extras = ["cloud"], version = ">=2.21.0"}
 board-game-utils = "*"
 csvkit = "*"
 decorator = "*"
