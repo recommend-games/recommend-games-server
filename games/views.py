@@ -35,6 +35,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.status import (
+    HTTP_200_OK,
     HTTP_202_ACCEPTED,
     HTTP_400_BAD_REQUEST,
     HTTP_500_INTERNAL_SERVER_ERROR,
@@ -997,6 +998,13 @@ class UserViewSet(PermissionsModelViewSet):
             data[key] = result
 
         return Response(data)
+
+    @action(detail=True)
+    def has_collection(self, request, pk=None, format=None):
+        """Check if a user has a collection."""
+        if Collection.objects.filter(user__name__iexact=pk).exists():
+            return Response({"detail": "ok"}, status=HTTP_200_OK)
+        raise NotFound(f"user <{pk}> could not be found")
 
     @action(
         detail=True,
