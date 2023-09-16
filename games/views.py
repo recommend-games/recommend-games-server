@@ -37,7 +37,9 @@ from rest_framework.settings import api_settings
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_202_ACCEPTED,
+    HTTP_204_NO_CONTENT,
     HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 from rest_framework.throttling import AnonRateThrottle
@@ -1003,8 +1005,11 @@ class UserViewSet(PermissionsModelViewSet):
     def has_collection(self, request, pk=None, format=None):
         """Check if a user has a collection."""
         if Collection.objects.filter(user__name__iexact=pk).exists():
-            return Response({"detail": "ok"}, status=HTTP_200_OK)
-        raise NotFound(f"user <{pk}> could not be found")
+            return Response(status=HTTP_204_NO_CONTENT)
+        return Response(
+            {"detail": f"no collection items for user <{pk}>"},
+            status=HTTP_404_NOT_FOUND,
+        )
 
     @action(
         detail=True,
