@@ -872,10 +872,38 @@
 			role="alert">
 		We didn't find any collection items for <span ng-repeat="mUser in missingCollections track by $index">"{{ mUser }}"<span ng-if="!$last">, </span></span>.
 		This means we won't be able to filter out games they already own or have played from the recommendations.
-		You can <a href="javascript:alert('Coming soon!');">request their collection to be added to the database</a>.
+		You can <a href="" data-toggle="modal" data-target="#collection-request-modal">request their collection to be added to the database</a>.
 		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
 			<span aria-hidden="true">&times;</span>
 		</button>
+	</div>
+
+	<div ng-if="!isEmpty(missingCollections) &amp;&amp; !userNotFound" class="modal fade" id="collection-request-modal" tabindex="-1" aria-labelledby="collection-request-modal-label" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="collection-request-modal-label">
+						Request to add user collection to database
+					</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p>
+						Do you want to request to add the following user collection<span ng-if="size(missingCollections) &gt; 1">s</span> to the database?
+					</p>
+					<ul>
+						<li ng-repeat="mUser in missingCollections">{{ mUser }}</li>
+					</ul>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<!-- TODO Send request! -->
+					<button type="button" class="btn btn-primary">Send request</button>
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<div ng-if="empty"
