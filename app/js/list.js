@@ -27,7 +27,8 @@ rgApp.controller('ListController', function ListController(
         params = filterService.getParams($routeParams),
         searchPromise = null,
         userStats = {},
-        fetchPopularGames;
+        fetchPopularGames,
+        collectionPromises;
 
     function filtersActive() {
         return _.sum([
@@ -208,6 +209,7 @@ rgApp.controller('ListController', function ListController(
     }
 
     $scope.user = _.join(params.for, ', ');
+    $scope.userCollection = null;
 
     $scope.exclude = {
         'rated': filterService.booleanDefault(params.excludeRated, true),
@@ -336,6 +338,7 @@ rgApp.controller('ListController', function ListController(
 
     $scope.clearFilters = function clearFilters() {
         $scope.user = null;
+        $scope.userCollection = null;
         $scope.likedGames = null;
         $scope.includeGames = null;
         $scope.excludeGames = null;
@@ -540,6 +543,16 @@ rgApp.controller('ListController', function ListController(
 
             renderSlider();
         });
+
+    collectionPromises = _(params.for).map(function (user) {
+        return [user, usersService.checkUserHasCollection(user, true)];
+    }).fromPairs();
+
+    $q.all(collectionPromises)
+        .then(function (collections) {
+            $scope.userCollection = collections;
+        })
+        .catch($log.error);
 
     if (params.designer) {
         personsService.getPerson(params.designer)
