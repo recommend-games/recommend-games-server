@@ -209,7 +209,8 @@ rgApp.controller('ListController', function ListController(
     }
 
     $scope.user = _.join(params.for, ', ');
-    $scope.userCollection = null;
+    $scope.userCollections = null;
+    $scope.missingCollections = null;
 
     $scope.exclude = {
         'rated': filterService.booleanDefault(params.excludeRated, true),
@@ -338,7 +339,8 @@ rgApp.controller('ListController', function ListController(
 
     $scope.clearFilters = function clearFilters() {
         $scope.user = null;
-        $scope.userCollection = null;
+        $scope.userCollections = null;
+        $scope.missingCollections = null;
         $scope.likedGames = null;
         $scope.includeGames = null;
         $scope.excludeGames = null;
@@ -550,7 +552,11 @@ rgApp.controller('ListController', function ListController(
 
     $q.all(collectionPromises)
         .then(function (collections) {
-            $scope.userCollection = collections;
+            $scope.userCollections = collections;
+            $scope.missingCollections = _(collections).toPairs()
+                .reject(_.property(1))
+                .map(_.property(0))
+                .value();
         })
         .catch($log.error);
 
