@@ -867,6 +867,16 @@
 			</a>
 		</em>
 	</p>
+	<div ng-if="!isEmpty(missingCollections) &amp;&amp; !userNotFound"
+			class="alert alert-primary alert-dismissible fade show"
+			role="alert">
+		We didn't find any collection items for <span ng-repeat="mUser in missingCollections track by $index">"{{ mUser }}"<span ng-if="!$last">, </span></span>.
+		This means we won't be able to filter out games they already own or have played from the recommendations.
+		You can <a href="javascript:alert('Coming soon!');">request their collection to be added to the database</a>.
+		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
 
 	<div ng-if="empty"
 			class="alert alert-warning"
