@@ -289,7 +289,7 @@ def _gitlab_merge_request(
         )
 
     access_days = max(min(access_days, 365), 30)
-    description = f"Request to add these users to the premium list:\n\n" + "\n".join(
+    description = f"## Premium user requests:\n\n" + "\n".join(
         f"- {user}" for user in users
     )
     if message:
