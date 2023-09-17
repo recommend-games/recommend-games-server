@@ -266,6 +266,8 @@ def gitlab_merge_request(
     gitlab_url: str = "https://gitlab.com",
     source_branch: Optional[str] = None,
     target_branch: str = "main",
+    title: Optional[str] = None,
+    description: Optional[str] = None,
 ) -> str:
     """Upload a file to GitLab and create a merge request."""
 
@@ -301,13 +303,14 @@ def gitlab_merge_request(
         raise
 
     # upload file
+    commit_message = f"Added {file_path}"
     try:
         file = project.files.create(
             {
                 "file_path": file_path,
                 "branch": source_branch,
                 "content": file_content,
-                "commit_message": f"Added {file_path}",
+                "commit_message": commit_message,
             }
         )
         LOGGER.info(
@@ -329,8 +332,8 @@ def gitlab_merge_request(
             {
                 "source_branch": source_branch,
                 "target_branch": target_branch,
-                "title": f"Added {file_path}",
-                "description": f"Added {file_path}",
+                "title": title or commit_message,
+                "description": description or commit_message,
             }
         )
         LOGGER.info(
@@ -359,6 +362,8 @@ def premium_feature_gitlab_merge_request(
     gitlab_url: str = "https://gitlab.com",
     source_branch: Optional[str] = None,
     target_branch: str = "main",
+    title: Optional[str] = None,
+    description: Optional[str] = None,
 ) -> str:
     """Create a merge request to add users to the premium list."""
 
@@ -368,11 +373,15 @@ def premium_feature_gitlab_merge_request(
         LOGGER.exception("Please make sure <pyyaml> is installed")
         raise
 
+    users = sorted(frozenset(user.lower() for user in arg_to_iter(users)))
+    if not users:
+        raise ValueError("No users provided")
+
     access_expiration = parse_date(access_expiration, tzinfo=timezone.utc)
     if not access_expiration:
         raise ValueError("Invalid access expiration")
 
-    data = [{user.strip().lower(): access_expiration.replace()} for user in users]
+    data = [{user: access_expiration.replace()} for user in users]
     data_yaml = yaml.safe_dump(data)
     now = datetime.utcnow().isoformat(timespec="seconds")
     file_content = f"# Generated at {now}Z\n{data_yaml}"
@@ -388,4 +397,10 @@ def premium_feature_gitlab_merge_request(
         gitlab_url=gitlab_url,
         source_branch=source_branch,
         target_branch=target_branch,
+        title=title or f"Add {len(users)} users to premium list",
+        description=description
+        or (
+            f"Request to add these users to the premium list:\n\n"
+            + "\n".join(f"- {user}" for user in users)
+        ),
     )

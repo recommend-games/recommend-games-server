@@ -27,7 +27,8 @@ rgApp.controller('ListController', function ListController(
         params = filterService.getParams($routeParams),
         searchPromise = null,
         userStats = {},
-        fetchPopularGames;
+        fetchPopularGames,
+        collectionPromises;
 
     function filtersActive() {
         return _.sum([
@@ -208,6 +209,8 @@ rgApp.controller('ListController', function ListController(
     }
 
     $scope.user = _.join(params.for, ', ');
+    $scope.userCollections = null;
+    $scope.missingCollections = null;
 
     $scope.exclude = {
         'rated': filterService.booleanDefault(params.excludeRated, true),
@@ -333,9 +336,15 @@ rgApp.controller('ListController', function ListController(
     $scope.hideScore = !_.isEmpty(params.for) && params.similarity;
     $scope.statsActive = false;
     $scope.userStats = {};
+    $scope.collectionRequestValidityOptions = _.range(1, 13);
+    $scope.collectionRequestValidity = 12;
+    $scope.collectionRequestDonation = false;
+    $scope.collectionRequestMessage = null;
 
     $scope.clearFilters = function clearFilters() {
         $scope.user = null;
+        $scope.userCollections = null;
+        $scope.missingCollections = null;
         $scope.likedGames = null;
         $scope.includeGames = null;
         $scope.excludeGames = null;
@@ -502,6 +511,20 @@ rgApp.controller('ListController', function ListController(
         });
     }
 
+    function submitCollectionRequest(users, validity, message) {
+        return usersService.submitPremiumUsersRequest(users, validity, message, false)
+            .then(function (response) {
+                $log.info(response);
+                $('#collection-request-modal').modal('hide');
+                $('#collection-request-modal-success').modal('show');
+            })
+            .catch(function (response) {
+                $log.error(response);
+                $('#collection-request-modal').modal('hide');
+                $('#collection-request-modal-error').modal('show');
+            });
+    }
+
     $scope.contains = contains;
     $scope.likeGame = likeGame;
     $scope.unlikeGame = unlikeGame;
@@ -509,6 +532,7 @@ rgApp.controller('ListController', function ListController(
     $scope.fetchAndUpdate = fetchAndUpdate;
     $scope.updateSearchGames = updateSearchGames;
     $scope.updateStats = updateStats;
+    $scope.submitCollectionRequest = submitCollectionRequest;
     $scope.modelUpdatedAt = null;
     $scope.userUpdatedAt = null;
 
@@ -540,6 +564,20 @@ rgApp.controller('ListController', function ListController(
 
             renderSlider();
         });
+
+    collectionPromises = _(params.for).map(function (user) {
+        return [user, usersService.checkUserHasCollection(user, true)];
+    }).fromPairs();
+
+    $q.all(collectionPromises)
+        .then(function (collections) {
+            $scope.userCollections = collections;
+            $scope.missingCollections = _(collections).toPairs()
+                .reject(_.property(1))
+                .map(_.property(0))
+                .value();
+        })
+        .catch($log.error);
 
     if (params.designer) {
         personsService.getPerson(params.designer)

@@ -784,6 +784,47 @@ rgApp.factory('usersService', function usersService(
             });
     };
 
+    service.checkUserHasCollection = function checkUserHasCollection(user, noblock) {
+        if (!user) {
+            return $q.reject('User name is required.');
+        }
+
+        user = _.toLower(user);
+
+        if (!_.isEmpty($sessionStorage['user_has_collection_' + user])) {
+            return $q.resolve($sessionStorage['user_has_collection_' + user]);
+        }
+
+        var userUri = encodeURIComponent(user);
+
+        return $http.get(API_URL + 'users/' + userUri + '/has_collection.json', {'noblock': !!noblock})
+            .then(function () {
+                $sessionStorage['user_has_collection_' + user] = true;
+                return true;
+            })
+            .catch(function () {
+                $sessionStorage['user_has_collection_' + user] = false;
+                return false;
+            });
+    };
+
+    service.submitPremiumUsersRequest = function submitPremiumUsersRequest(users, validity, message, noblock) {
+        if (_.isEmpty(users)) {
+            return $q.reject('User names are required.');
+        }
+
+        users = _.map(users, _.toLower);
+        validity = _.parseInt(validity) || 12;
+
+        var data = {
+            'user': users,
+            'access_days': validity * 30,
+            'message': message
+        };
+
+        return $http.post(API_URL + 'users/premium_users_request.json', data, {'noblock': !!noblock});
+    };
+
     return service;
 });
 
