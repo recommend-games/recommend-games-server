@@ -267,7 +267,9 @@ def _get_compilations():
 
 
 def _gitlab_merge_request(
-    users: Union[str, Iterable[str]], access_days: int = 365
+    users: Union[str, Iterable[str]],
+    access_days: int = 365,
+    message: Optional[str] = None,
 ) -> Response:
     users = frozenset(user.lower() for user in arg_to_iter(users))
     if not users:
@@ -286,6 +288,12 @@ def _gitlab_merge_request(
             status=HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
+    description = f"Request to add these users to the premium list:\n\n" + "\n".join(
+        f"- {user}" for user in users
+    )
+    if message:
+        description += f"\n\n## Message by the user:\n\n{message}"
+
     try:
         mr_url = premium_feature_gitlab_merge_request(
             users=users,
@@ -293,6 +301,7 @@ def _gitlab_merge_request(
             gitlab_project_id=gitlab_project_id,
             gitlab_access_token=gitlab_access_token,
             gitlab_url=gitlab_url,
+            description=description,
         )
         if not mr_url:
             raise ValueError("Unable to create merge request")
@@ -1004,6 +1013,7 @@ class UserViewSet(PermissionsModelViewSet):
     @action(detail=True)
     def has_collection(self, request, pk=None, format=None):
         """Check if a user has a collection."""
+        # TODO cross check with recommender.known_users?
         if Collection.objects.filter(user__name__iexact=pk).exists():
             return Response(status=HTTP_204_NO_CONTENT)
         return Response(
@@ -1019,7 +1029,13 @@ class UserViewSet(PermissionsModelViewSet):
     def premium_user_request(self, request, pk=None, format=None):
         """Send a request to the admin to become a premium user."""
         user = self.get_object()
-        return _gitlab_merge_request(users=[user.name], access_days=365)
+        message = next(_extract_params(request, "message"), None)
+        access_days = next(_extract_params(request, "access_days", parse_int), None)
+        return _gitlab_merge_request(
+            users=[user.name],
+            access_days=access_days or 365,
+            message=message,
+        )
 
     @action(
         detail=False,
@@ -1029,7 +1045,7 @@ class UserViewSet(PermissionsModelViewSet):
     def premium_users_request(self, request, format=None):
         """Send a request to the admin to become premium users."""
 
-        users = [user.lower() for user in _extract_params(request, "user", str)]
+        users = [user.lower() for user in _extract_params(request, "user")]
         user_names = list(
             self.get_queryset().filter(name__in=users).values_list("name", flat=True)
         )
@@ -1037,7 +1053,14 @@ class UserViewSet(PermissionsModelViewSet):
         if not user_names:
             raise NotFound(f"none of the users {users} could be found")
 
-        return _gitlab_merge_request(users=user_names, access_days=365)
+        message = next(_extract_params(request, "message"), None)
+        access_days = next(_extract_params(request, "access_days", parse_int), None)
+
+        return _gitlab_merge_request(
+            users=user_names,
+            access_days=access_days or 365,
+            message=message,
+        )
 
 
 class CollectionViewSet(ModelViewSet):
