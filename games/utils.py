@@ -373,11 +373,15 @@ def premium_feature_gitlab_merge_request(
         LOGGER.exception("Please make sure <pyyaml> is installed")
         raise
 
+    users = sorted(frozenset(user.lower() for user in arg_to_iter(users)))
+    if not users:
+        raise ValueError("No users provided")
+
     access_expiration = parse_date(access_expiration, tzinfo=timezone.utc)
     if not access_expiration:
         raise ValueError("Invalid access expiration")
 
-    data = [{user.strip().lower(): access_expiration.replace()} for user in users]
+    data = [{user: access_expiration.replace()} for user in users]
     data_yaml = yaml.safe_dump(data)
     now = datetime.utcnow().isoformat(timespec="seconds")
     file_content = f"# Generated at {now}Z\n{data_yaml}"
@@ -393,7 +397,7 @@ def premium_feature_gitlab_merge_request(
         gitlab_url=gitlab_url,
         source_branch=source_branch,
         target_branch=target_branch,
-        title=title or f"Add {len(data)} users to premium list",
+        title=title or f"Add {len(users)} users to premium list",
         description=description
         or (
             f"Request to add these users to the premium list:\n\n"

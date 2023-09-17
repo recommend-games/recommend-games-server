@@ -271,7 +271,7 @@ def _gitlab_merge_request(
     access_days: int = 365,
     message: Optional[str] = None,
 ) -> Response:
-    users = frozenset(user.lower() for user in arg_to_iter(users))
+    users = sorted(frozenset(user.lower() for user in arg_to_iter(users)))
     if not users:
         return Response(
             {"detail": "no users provided"},
