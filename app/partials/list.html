@@ -894,8 +894,24 @@
 						Do you want to request to add the following user collection<span ng-if="size(missingCollections) &gt; 1">s</span> to the database?
 					</p>
 					<ul>
-						<li ng-repeat="mUser in missingCollections">{{ mUser }}</li>
+						<li ng-repeat="mUser in missingCollections">
+							<a ng-href="https://boardgamegeek.com/user/{{ mUser }}"
+								target="_blank">{{ mUser }} <i class="fas fa-external-link-alt"></i></a>
+						</li>
 					</ul>
+					<p>
+						<strong><span class="recommend-games">Recommend.Games</span> is a hobby project kept alive with lots of passion. If your finances allow, we ask you to help us with server and domain costs by donating about 1€ per month through one of these links:</strong>
+					</p>
+					<ul>
+						<li><a href="https://paypal.me/mschepke" target="_blank"><i class="fab fa-paypal"></i> PayPal</a></li>
+						<li><a href="https://ko-fi.com/mshepherd" target="_blank">☕ Ko-fi.com</a></li>
+					</ul>
+					<p>
+						Alternatively, you can also donate to a charity of your choice that promotes a more diverse, sustainable and loving world.
+					</p>
+					<p>
+						<input type="checkbox" id="collection-request-donation" name="collection-request-donation" ng-model="collectionRequestDonation" /> <em>Honour system: I donated through the above links or for a good cause.</em>
+					</p>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
