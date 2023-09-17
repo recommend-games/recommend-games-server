@@ -288,6 +288,7 @@ def _gitlab_merge_request(
             status=HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
+    access_days = max(min(access_days, 365), 30)
     description = f"Request to add these users to the premium list:\n\n" + "\n".join(
         f"- {user}" for user in users
     )
