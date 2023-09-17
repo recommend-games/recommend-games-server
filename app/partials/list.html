@@ -878,7 +878,11 @@
 		</button>
 	</div>
 
-	<div ng-if="!isEmpty(missingCollections) &amp;&amp; !userNotFound" class="modal fade" id="collection-request-modal" tabindex="-1" aria-labelledby="collection-request-modal-label" aria-hidden="true">
+	<div class="modal fade"
+			id="collection-request-modal"
+			tabindex="-1"
+			aria-labelledby="collection-request-modal-label"
+			aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -896,7 +900,9 @@
 					<ul>
 						<li ng-repeat="mUser in missingCollections">
 							<a ng-href="https://boardgamegeek.com/user/{{ mUser }}"
-								target="_blank">{{ mUser }} <i class="fas fa-external-link-alt"></i></a>
+								target="_blank">
+								<strong>{{ mUser }}</strong> <i class="fas fa-external-link-alt"></i>
+							</a>
 						</li>
 					</ul>
 					<div class="form-group">
@@ -908,16 +914,18 @@
 								id="collection-request-validity">
 						</select>
 					</div>
-					<p>
-						<strong><span class="recommend-games">Recommend.Games</span> is a hobby project kept alive with lots of passion by volunteers. If your finances allow, we ask you to help us with server and domain costs by donating about 1€ per month through one of these links:</strong>
-					</p>
-					<ul>
-						<li><a href="https://paypal.me/mschepke" target="_blank"><i class="fab fa-paypal"></i> PayPal</a></li>
-						<li><a href="https://ko-fi.com/mshepherd" target="_blank">☕ Ko-fi.com</a></li>
-					</ul>
-					<p>
-						Alternatively, you can also donate to a charity of your choice that promotes a more diverse, sustainable and loving world.
-					</p>
+					<div class="alert alert-primary" role="alert">
+						<p>
+							<strong><span class="recommend-games">Recommend.Games</span> is a hobby project kept alive with lots of passion by volunteers. If your finances allow, we ask you to help us with server and domain costs by donating about 1€ per month through one of these links:</strong>
+						</p>
+						<ul>
+							<li><a href="https://paypal.me/mschepke" target="_blank"><i class="fab fa-paypal"></i> PayPal</a></li>
+							<li><a href="https://ko-fi.com/mshepherd" target="_blank">☕ Ko-fi.com</a></li>
+						</ul>
+						<p>
+							Alternatively, you can also donate to a charity of your choice that promotes a more diverse, sustainable and loving world.
+						</p>
+					</div>
 					<div class="form-group form-check">
 						<input type="checkbox"
 							id="collection-request-donation"
@@ -952,6 +960,80 @@
 							ng-click="submitCollectionRequest(missingCollections, collectionRequestValidity, collectionRequestMessage)"
 							class="btn btn-primary">
 						Send request
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade"
+			id="collection-request-modal-success"
+			tabindex="-1"
+			aria-labelledby="collection-request-modal-success-label"
+			aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="collection-request-modal-success-label">
+						Request successful!
+					</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="alert alert-success" role="alert">
+						Your request was successfully submitted and is now pending an admin's approval.
+					</div>
+					<p>
+						Please note that the review might take a few days. After approval, it might take up to a week for the database to be updated with the new collection items. We kindly ask for your patience.
+					</p>
+					<p>
+						<strong>Thank you for your support!</strong> ❤️ We hope you enjoy using <span class="recommend-games">Recommend.Games</span>.
+					</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button"
+							class="btn btn-success"
+							data-dismiss="modal">
+						OK
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade"
+			id="collection-request-modal-error"
+			tabindex="-1"
+			aria-labelledby="collection-request-modal-error-label"
+			aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="collection-request-modal-error-label">
+						There was a problem with your request…
+					</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="alert alert-danger" role="alert">
+						Your request could not be successfully submitted.
+					</div>
+					<p>
+						Maybe you made too many request too quickly. We kindly ask for your patience.
+					</p>
+					<p>
+						If you continue to experience this problem, please contact us through any of the means provided at the bottom of every page.
+					</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button"
+							class="btn btn-danger"
+							data-dismiss="modal">
+						OK
 					</button>
 				</div>
 			</div>

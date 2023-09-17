@@ -516,12 +516,12 @@ rgApp.controller('ListController', function ListController(
             .then(function (response) {
                 $log.info(response);
                 $('#collection-request-modal').modal('hide');
-                // TODO show success modal
+                $('#collection-request-modal-success').modal('show');
             })
             .catch(function (response) {
                 $log.error(response);
                 $('#collection-request-modal').modal('hide');
-                // TODO show error modal
+                $('#collection-request-modal-error').modal('show');
             });
     }
 
