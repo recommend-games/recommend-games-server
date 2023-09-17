@@ -338,6 +338,8 @@ rgApp.controller('ListController', function ListController(
     $scope.userStats = {};
     $scope.collectionRequestValidityOptions = _.range(1, 13);
     $scope.collectionRequestValidity = 12;
+    $scope.collectionRequestDonation = false;
+    $scope.collectionRequestMessage = null;
 
     $scope.clearFilters = function clearFilters() {
         $scope.user = null;
@@ -509,6 +511,20 @@ rgApp.controller('ListController', function ListController(
         });
     }
 
+    function submitCollectionRequest(users, validity, message) {
+        return usersService.submitPremiumUsersRequest(users, validity, message, false)
+            .then(function (response) {
+                $log.info(response);
+                $('#collection-request-modal').modal('hide');
+                // TODO show success modal
+            })
+            .catch(function (response) {
+                $log.error(response);
+                $('#collection-request-modal').modal('hide');
+                // TODO show error modal
+            });
+    }
+
     $scope.contains = contains;
     $scope.likeGame = likeGame;
     $scope.unlikeGame = unlikeGame;
@@ -516,6 +532,7 @@ rgApp.controller('ListController', function ListController(
     $scope.fetchAndUpdate = fetchAndUpdate;
     $scope.updateSearchGames = updateSearchGames;
     $scope.updateStats = updateStats;
+    $scope.submitCollectionRequest = submitCollectionRequest;
     $scope.modelUpdatedAt = null;
     $scope.userUpdatedAt = null;
 

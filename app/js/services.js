@@ -808,6 +808,23 @@ rgApp.factory('usersService', function usersService(
             });
     };
 
+    service.submitPremiumUsersRequest = function submitPremiumUsersRequest(users, validity, message, noblock) {
+        if (_.isEmpty(users)) {
+            return $q.reject('User names are required.');
+        }
+
+        users = _.map(users, _.toLower);
+        validity = _.parseInt(validity) || 12;
+
+        var data = {
+            'user': users,
+            'access_days': validity * 30,
+            'message': message
+        };
+
+        return $http.post(API_URL + 'users/premium_users_request.json', data, {'noblock': !!noblock});
+    };
+
     return service;
 });
 
