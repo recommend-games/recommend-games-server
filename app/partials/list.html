@@ -899,8 +899,17 @@
 								target="_blank">{{ mUser }} <i class="fas fa-external-link-alt"></i></a>
 						</li>
 					</ul>
+					<div class="form-group">
+						<label for="collection-request-validity">For how long should this request be valid?</label>
+						<select name="collection-request-validity"
+								ng-model="collectionRequestValidity"
+								ng-options="validity + ' month' + (validity > 1 ? 's' : '') for validity in collectionRequestValidityOptions"
+								class="form-control"
+								id="collection-request-validity">
+						</select>
+					</div>
 					<p>
-						<strong><span class="recommend-games">Recommend.Games</span> is a hobby project kept alive with lots of passion. If your finances allow, we ask you to help us with server and domain costs by donating about 1€ per month through one of these links:</strong>
+						<strong><span class="recommend-games">Recommend.Games</span> is a hobby project kept alive with lots of passion by volunteers. If your finances allow, we ask you to help us with server and domain costs by donating about 1€ per month through one of these links:</strong>
 					</p>
 					<ul>
 						<li><a href="https://paypal.me/mschepke" target="_blank"><i class="fab fa-paypal"></i> PayPal</a></li>
@@ -909,14 +918,42 @@
 					<p>
 						Alternatively, you can also donate to a charity of your choice that promotes a more diverse, sustainable and loving world.
 					</p>
-					<p>
-						<input type="checkbox" id="collection-request-donation" name="collection-request-donation" ng-model="collectionRequestDonation" /> <em>Honour system: I donated through the above links or for a good cause.</em>
-					</p>
+					<div class="form-group form-check">
+						<input type="checkbox"
+							id="collection-request-donation"
+							name="collection-request-donation"
+							class="form-check-input"
+							ng-model="collectionRequestDonation" />
+						<label class="form-check-label" for="collection-request-donation">
+							<em>Honour system: I donated through the above links or for a good cause. Suggested donation: {{ collectionRequestValidity }}€.</em>
+							<small class="text-secondary">(Note: we're not going to verify this. Pay what you can afford. If your situation doesn't allow for a donation, don't worry about it – <span class="recommend-games">Recommend.Games</span> is meant for everybody.)</small>
+						</label>
+					</div>
+					<div class="form-group">
+						<label for="collection-request-message"
+								class="col-form-label">
+							If you'd like you can add a message to your request (optional):
+						</label>
+						<textarea class="form-control"
+								id="collection-request-message"
+								ng-model="collectionRequestMessage"
+								placeholder="Thanks for making Recommend.Games! ❤️">
+						</textarea>
+					</div>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<button type="button"
+							class="btn btn-secondary"
+							data-dismiss="modal">
+						Close
+					</button>
 					<!-- TODO Send request! -->
-					<button type="button" class="btn btn-primary">Send request</button>
+					<button type="button"
+							ng-disabled="!collectionRequestDonation"
+							ng-click="TODO"
+							class="btn btn-primary">
+						Send request
+					</button>
 				</div>
 			</div>
 		</div>

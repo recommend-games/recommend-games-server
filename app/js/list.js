@@ -336,6 +336,8 @@ rgApp.controller('ListController', function ListController(
     $scope.hideScore = !_.isEmpty(params.for) && params.similarity;
     $scope.statsActive = false;
     $scope.userStats = {};
+    $scope.collectionRequestValidityOptions = _.range(1, 13);
+    $scope.collectionRequestValidity = 12;
 
     $scope.clearFilters = function clearFilters() {
         $scope.user = null;
