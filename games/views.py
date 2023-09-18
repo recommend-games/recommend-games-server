@@ -1025,6 +1025,7 @@ class UserViewSet(PermissionsModelViewSet):
     @action(
         detail=True,
         methods=("POST",),
+        permission_classes=(AlwaysAllowAny,),
         throttle_classes=(AnonRateThrottle,),
     )
     def premium_user_request(self, request, pk=None, format=None):
@@ -1041,6 +1042,7 @@ class UserViewSet(PermissionsModelViewSet):
     @action(
         detail=False,
         methods=("POST",),
+        permission_classes=(AlwaysAllowAny,),
         throttle_classes=(AnonRateThrottle,),
     )
     def premium_users_request(self, request, format=None):
