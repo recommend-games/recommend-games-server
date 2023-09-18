@@ -18,6 +18,7 @@ gunicorn = "*"
 pandas = "*"
 python-gitlab = "*"
 pytility = {extras = ["dates"], version = "*"}
+pyyaml = "*"
 whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
@@ -43,7 +44,6 @@ pynt-contrib = "*"
 pyspark = "<3.2.0"
 python-dateutil = "*"
 python-dotenv = "*"
-pyyaml = "*"
 rcssmin = "*"
 requests = "*"
 rjsmin = "*"
