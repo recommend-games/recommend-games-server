@@ -27,15 +27,14 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.status import (
-    HTTP_200_OK,
     HTTP_202_ACCEPTED,
     HTTP_204_NO_CONTENT,
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
     HTTP_500_INTERNAL_SERVER_ERROR,
+    HTTP_501_NOT_IMPLEMENTED,
 )
 from rest_framework.throttling import AnonRateThrottle
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_501_NOT_IMPLEMENTED
 from rest_framework.utils.urls import remove_query_param, replace_query_param
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_csv.renderers import PaginatedCSVRenderer
@@ -283,7 +282,7 @@ def _gitlab_merge_request(
         )
 
     access_days = max(min(access_days, 365), 30)
-    description = f"## Premium user requests:\n\n" + "\n".join(
+    description = "## Premium user requests:\n\n" + "\n".join(
         f"- {user}" for user in users
     )
     if message:

@@ -400,7 +400,7 @@ def premium_feature_gitlab_merge_request(
         title=title or f"Add {len(users)} users to premium list",
         description=description
         or (
-            f"Request to add these users to the premium list:\n\n"
+            "Request to add these users to the premium list:\n\n"
             + "\n".join(f"- {user}" for user in users)
         ),
     )
