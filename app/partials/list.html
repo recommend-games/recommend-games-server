@@ -295,39 +295,6 @@
 							</label>
 						</div>
 					</div>
-					<div class="{{ user ? '' : 'text-muted' }} mb-0">
-						Use recommender model:
-						<a href="/#/faq#what-are-the-standard-and-similarity-models-in-the-recommendation-settings"
-								data-toggle="tooltip"
-								data-placement="right"
-								title="Read more about the different models"
-								class="text-muted">
-							<i class="fas fa-info-circle"></i>
-						</a>
-					</div>
-					<div class="{{ user ? 'form-exclude-enabled' : 'form-exclude-disabled' }}">
-						<div class="form-check form-check-inline"
-								data-toggle="tooltip"
-								data-placement="bottom"
-								title="Use the default or similarity based model for recommendations">
-							<label class="form-check-label form-label-exclude {{ user &amp;&amp; !similarity ? 'text-success' : 'text-muted' }} mr-1"
-									for="recommender-similarity">
-								default
-							</label>
-							<label class="switch mb-0">
-								<input type="checkbox"
-									id="recommender-similarity"
-									name="recommender-similarity"
-									ng-model="similarity"
-									ng-disabled="true" />
-								<span class="slider bg-secondary"></span>
-							</label>
-							<label class="form-check-label form-label-exclude {{ user &amp;&amp; similarity ? 'text-success' : 'text-muted' }} ml-1"
-									for="recommender-similarity">
-								similarity
-							</label>
-						</div>
-					</div>
 				</div>
 			</form>
 
