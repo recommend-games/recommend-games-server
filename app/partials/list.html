@@ -167,7 +167,7 @@
 			</div>
 
 			<form ng-show="!activePane || activePane == 'bgg'"
-					ng-submit="updateParams()"
+					ng-submit="updateParams({'whatToPlay': false})"
 					id="fetch-game-form"
 					name="fetch-game-form"
 					novalidate="novalidate"
@@ -299,7 +299,7 @@
 			</form>
 
 			<form ng-show="activePane == 'what-to-play'"
-					ng-submit="TODO()"
+					ng-submit="updateParams({'whatToPlay': true})"
 					id="what-to-play-form"
 					name="what-to-play-form"
 					novalidate="novalidate"
@@ -309,7 +309,7 @@
 				<label for="wtp-user"
 						id="wtp-bgg-user-label"
 						class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
-					Personal recommendations for:
+					What to play with:
 				</label>
 				<div class="input-group">
 					<input type="search"

@@ -191,9 +191,14 @@ rgApp.controller('ListController', function ListController(
             });
     }
 
-    function updateParams() {
+    function updateParams(updates) {
         var parsed = filterService.paramsFromScope($scope);
         parsed.filters = null;
+        if (_.isPlainObject(updates)) {
+            _.forOwn(updates, function (value, key) {
+                parsed[key] = value;
+            });
+        }
         $route.updateParams(parsed);
     }
 
@@ -209,6 +214,7 @@ rgApp.controller('ListController', function ListController(
     }
 
     $scope.user = _.join(params.for, ', ');
+    $scope.whatToPlay = params.whatToPlay;
     $scope.userCollections = null;
     $scope.missingCollections = null;
 
@@ -542,6 +548,10 @@ rgApp.controller('ListController', function ListController(
     $scope.$watch('complexity.enabled', renderSlider);
     $scope.$watch('year.enabled', renderSlider);
     $scope.$watch('user', function () { $scope.groupRecommendation = _.includes($scope.user, ','); });
+
+    if (params.whatToPlay) {
+        showPane('what-to-play');
+    }
 
     fetchGames(1)
         .then(function () {

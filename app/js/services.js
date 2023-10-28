@@ -1073,6 +1073,7 @@ rgApp.factory('filterService', function filterService(
 
         var usersFor = parseList(params.for, true),
             user = !_.isEmpty(usersFor) ? usersFor : parseList(params.user, true),
+            whatToPlay = booleanDefault(params.whatToPlay, false),
             playerCount = _.parseInt(params.playerCount) || null,
             playTime = _.parseInt(params.playTime) || null,
             playerAge = _.parseInt(params.playerAge) || null,
@@ -1092,6 +1093,7 @@ rgApp.factory('filterService', function filterService(
 
         return {
             'for': _.isEmpty(user) ? null : user,
+            'whatToPlay': whatToPlay,
             'include': _.isEmpty(include) ? null : include,
             'exclude': _.isEmpty(exclude) ? null : exclude,
             'excludeRated': excludeRated === false ? false : null,
@@ -1131,6 +1133,7 @@ rgApp.factory('filterService', function filterService(
             exclude = parseIntList(scope.excludeGames),
             result = {
                 'for': _.isEmpty(userList) ? null : userList,
+                'whatToPlay': parseBoolean(scope.whatToPlay),
                 'include': _.isEmpty(include) ? null : include,
                 'exclude': _.isEmpty(exclude) ? null : exclude,
                 'search': scope.search,
