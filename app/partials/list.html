@@ -167,7 +167,7 @@
 			</div>
 
 			<form ng-show="!activePane || activePane == 'bgg'"
-					ng-submit="updateParams({'whatToPlay': false})"
+					ng-submit="updateParams({'whatToPlay': null})"
 					id="fetch-game-form"
 					name="fetch-game-form"
 					novalidate="novalidate"
@@ -298,6 +298,8 @@
 				</div>
 			</form>
 
+			<!-- TODO add random_seed to update in order to force refresh -->
+			<!-- also reproducible recommendations -->
 			<form ng-show="activePane == 'what-to-play'"
 					ng-submit="updateParams({'whatToPlay': true})"
 					id="what-to-play-form"

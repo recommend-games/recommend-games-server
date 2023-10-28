@@ -221,7 +221,11 @@ rgApp.factory('gamesService', function gamesService(
             params.page = page;
         }
 
-        if (!_.isEmpty(params.user) || !_.isEmpty(params.like)) {
+        if (params.whatToPlay) {
+            url += '/recommend_random';
+            params.whatToPlay = null;
+            // TODO what else?
+        } else if (!_.isEmpty(params.user) || !_.isEmpty(params.like)) {
             url += '/recommend';
         }
 
@@ -1226,7 +1230,13 @@ rgApp.factory('filterService', function filterService(
 
         if (!_.isEmpty(params.for)) {
             result.user = params.for;
-            if (_.size(params.for) === 1) {
+            if (params.whatToPlay) {
+                result.whatToPlay = true;
+                result.num_games = 25;
+                // TODO from actual params
+                result.owned = '_any';
+                result.played = null; // '_none'
+            } else if (_.size(params.for) === 1) {
                 result.exclude_known = booleanString(booleanDefault(params.excludeRated, true));
                 result.exclude_owned = booleanString(booleanDefault(params.excludeOwned, true));
                 result.exclude_wishlist = booleanDefault(params.excludeWishlist, false) ? 5 : null;
