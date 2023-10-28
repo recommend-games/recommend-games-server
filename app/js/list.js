@@ -106,6 +106,8 @@ rgApp.controller('ListController', function ListController(
         }
 
         if (_.isNil(promise)) {
+            // TODO let filtersFromParams() and getGames() handle whatToPlay
+            // or should it be its entirely own path?
             filters = filterService.filtersFromParams(parsed);
             if (!_.isEmpty(filters.like)) {
                 filters.num_votes__gte = 30;

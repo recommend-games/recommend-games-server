@@ -211,6 +211,8 @@ rgApp.factory('gamesService', function gamesService(
     }
 
     function getGames(page, filters, noblock) {
+        // TODO handle whatToPlay
+
         var url = API_URL + 'games',
             params = _.isEmpty(filters) ? {} : _.cloneDeep(filters);
         page = page || null;
@@ -1217,6 +1219,8 @@ rgApp.factory('filterService', function filterService(
     };
 
     service.filtersFromParams = function filtersFromParams(params) {
+        // TODO handle whatToPlay
+
         var result = {},
             playerSuffix = '',
             ageSuffix = '',
