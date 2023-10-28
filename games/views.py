@@ -1,4 +1,5 @@
 """ views """
+from collections import OrderedDict
 import logging
 from datetime import timedelta, timezone
 from functools import lru_cache, reduce
@@ -743,9 +744,16 @@ class GameViewSet(PermissionsModelViewSet):
             else Response(serializer.data)
         )
 
-    @action(detail=False, methods=("GET", "POST"), permission_classes=(AlwaysAllowAny,))
+    @action(
+        detail=False,
+        methods=("GET", "POST"),
+        permission_classes=(AlwaysAllowAny,),
+    )
     def recommend_random(self, request, format=None):
-        """TODO."""
+        """
+        Recommend a random selection of games based on the users'
+        preferences and collections.
+        """
 
         users = [user.lower() for user in _extract_params(request, "user", str)]
         num_games = min(
@@ -814,8 +822,16 @@ class GameViewSet(PermissionsModelViewSet):
         games = sorted(games, key=lambda game: game.rec_rank)
 
         serializer = self.get_serializer(instance=games, many=True)
-        # TODO should this still paginated?
-        return Response(serializer.data)
+        return Response(
+            OrderedDict(
+                [
+                    ("count", len(serializer.data)),
+                    ("next", None),
+                    ("previous", None),
+                    ("results", serializer.data),
+                ]
+            )
+        )
 
     @action(detail=True)
     def similar(self, request, pk=None, format=None):
