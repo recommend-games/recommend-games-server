@@ -37,6 +37,15 @@
 						class="nav-item nav-link {{ !activePane || activePane == 'bgg' ? 'active' : '' }}">
 					<abbr title="BoardGameGeek">BGG</abbr> account
 				</a>
+				<a id="what-to-play-tab"
+						ng-click="showPane('what-to-play'); toggleSelection(false)"
+						href=""
+						role="tab"
+						aria-controls="what-to-play-form"
+						aria-selected="{{ activePane == 'what-to-play' }}"
+						class="nav-item nav-link {{ activePane == 'what-to-play' ? 'active' : '' }}">
+					What to play?
+				</a>
 				<a id="select-games-tab"
 						ng-click="showPane('select'); toggleSelection(true)"
 						href=""
@@ -318,6 +327,54 @@
 								similarity
 							</label>
 						</div>
+					</div>
+				</div>
+			</form>
+
+			<form ng-show="activePane == 'what-to-play'"
+					ng-submit="TODO()"
+					id="what-to-play-form"
+					name="what-to-play-form"
+					novalidate="novalidate"
+					role="form"
+					aria-labelledby="what-to-play-tab"
+					class="form">
+				<label for="wtp-user"
+						id="wtp-bgg-user-label"
+						class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
+					Personal recommendations for:
+				</label>
+				<div class="input-group">
+					<input type="search"
+						id="wtp-user"
+						name="wtp-user"
+						ng-model="user"
+						ng-required="true"
+						ng-change="toggleCollapse('#wtp-form-exclude-filters', !!user)"
+						ng-focus="toggleCollapse('#wtp-form-exclude-filters', !!user)"
+						class="form-control"
+						placeholder="BoardGameGeek user name(s)"
+						aria-describedby="wtp-bgg-user-label" />
+					<div class="input-group-append">
+						<button type="button"
+								ng-disabled="!user"
+								ng-click="clearField('user', 'wtp-user'); toggleCollapse('#wtp-form-exclude-filters', false)"
+								class="btn btn-outline-secondary">
+							<i class="fas fa-times"></i>
+						</button>
+						<button type="submit"
+								ng-disabled="!user"
+								class="btn btn-primary">
+							<i class="fas fa-dice"></i>
+						</button>
+					</div>
+				</div>
+				<div id="wtp-form-exclude-filters" class="collapse">
+					<div class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
+						Exclude games from recommendations:
+					</div>
+					<div class="{{ user ? 'form-exclude-enabled' : 'form-exclude-disabled' }} mb-1">
+						TODO
 					</div>
 				</div>
 			</form>
