@@ -573,6 +573,7 @@ class GameViewSet(PermissionsModelViewSet):
             raise NotFound("none of the users could be found")
 
         # TODO include / exclude games based on users' collections (#228)
+        # Cf the collections module and recommend_random()
         include_ids = self._included_games(
             recommender=recommender,
             include_ids=include_ids,
