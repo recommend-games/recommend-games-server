@@ -3,7 +3,7 @@
 import os
 from datetime import timezone
 
-from pytility import parse_bool, parse_date
+from pytility import parse_bool, parse_date, parse_int
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -146,6 +146,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 25,
     "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
+    "DEFAULT_THROTTLE_RATES": {"anon": "1/hour"},
 }
 
 # API proxy
@@ -168,3 +169,8 @@ R_G_RANKING_EFFECTIVE_DATE = parse_date(
     os.getenv("R_G_RANKING_EFFECTIVE_DATE"),
     tzinfo=timezone.utc,
 ) or parse_date("2022-02-22T00:00Z")
+
+# GitLab R.G config settings
+GITLAB_URL = os.getenv("GITLAB_URL") or "https://gitlab.com"
+GITLAB_PROJECT_ID = parse_int(os.getenv("GITLAB_PROJECT_ID"))
+GITLAB_CONFIG_TOKEN = os.getenv("GITLAB_CONFIG_TOKEN")

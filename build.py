@@ -51,6 +51,7 @@ SETTINGS = django.conf.settings
 
 DATA_DIR = SETTINGS.DATA_DIR
 MODELS_DIR = SETTINGS.MODELS_DIR
+CONFIG_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "recommend-games-config"))
 SCRAPER_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "board-game-scraper"))
 RECOMMENDER_DIR = os.path.abspath(
     os.path.join(BASE_DIR, "..", "board-game-recommender")
@@ -136,6 +137,19 @@ def gitprepare(repo=SCRAPED_DATA_DIR):
     with safe_cd(repo):
         try:
             execute("git", "checkout", "master")
+            execute("git", "pull", "--ff-only")
+            execute("git", "diff", "HEAD", "--name-only")
+        except SystemExit:
+            LOGGER.exception("There was a problem preparing <%s>...", repo)
+
+
+@task()
+def gitprepareconfig(repo=CONFIG_DIR):
+    """Check config Git repo is clean and up-to-date."""
+    LOGGER.info("Preparing Git repo <%s>...", repo)
+    with safe_cd(repo):
+        try:
+            execute("git", "checkout", "main")
             execute("git", "pull", "--ff-only")
             execute("git", "diff", "HEAD", "--name-only")
         except SystemExit:
@@ -1268,7 +1282,7 @@ def migrate():
     django.core.management.call_command("migrate")
 
 
-@task(cleandata, migrate)
+@task(cleandata, gitprepareconfig, migrate)
 def filldb(
     src_dir=SCRAPED_DATA_DIR,
     rec_dir=os.path.join(RECOMMENDER_DIR, ".bgg"),
@@ -1290,6 +1304,7 @@ def filldb(
         os.path.join(srp_dir, "bgg_GameItem.jl"),
         collection_paths=[os.path.join(srp_dir, "bgg_RatingItem.jl")],
         user_paths=[os.path.join(srp_dir, "bgg_UserItem.jl")],
+        premium_user_dirs=[os.path.join(CONFIG_DIR, "users", "premium")],
         premium_user_paths=[os.path.join(BASE_DIR, "config", "premium.yaml")],
         in_format="jl",
         batch=100_000,

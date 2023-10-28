@@ -5,7 +5,7 @@ import logging
 import re
 import sys
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import timezone
 from functools import partial
 from itertools import combinations, groupby
 from pathlib import Path
@@ -15,6 +15,7 @@ import jmespath
 import turicreate as tc
 import yaml
 from board_game_recommender.utils import percentile_buckets, star_rating
+from board_game_scraper.utils import load_premium_users
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.transaction import atomic
@@ -540,24 +541,6 @@ def _load_add_data(files, id_field, *fields, in_format=None):
     return result
 
 
-def _load_premium_users(files, compare_date=None, in_format=None):
-    rows = _load(*arg_to_iter(files), in_format=in_format)
-    compare_date = parse_date(compare_date or datetime.utcnow(), tzinfo=timezone.utc)
-    LOGGER.info("Comparing premium expiration dates against <%s>", compare_date)
-    for row in rows:
-        for username, expiry_date in row.items():
-            username = username.lower()
-            expiry_date = parse_date(expiry_date, tzinfo=timezone.utc)
-            if expiry_date < compare_date:
-                LOGGER.info(
-                    "Premium for user <%s> ended on <%s>",
-                    username,
-                    expiry_date,
-                )
-            else:
-                yield username
-
-
 def _make_user(name, add_data):
     if not name:
         return None
@@ -690,8 +673,14 @@ class Command(BaseCommand):
             help="user file(s) to be processed",
         )
         parser.add_argument(
-            "--premium-user-paths",
+            "--premium-user-dirs",
             "-p",
+            nargs="+",
+            help="premium user dirs(s) to be processed",
+        )
+        parser.add_argument(
+            "--premium-user-paths",
+            "-P",
             nargs="+",
             help="premium user file(s) to be processed",
         )
@@ -805,7 +794,10 @@ class Command(BaseCommand):
                 "updated_at",
                 in_format=kwargs["in_format"],
             )
-            premium_users = _load_premium_users(files=kwargs.get("premium_user_paths"))
+            premium_users = load_premium_users(
+                dirs=kwargs.get("premium_user_dirs"),
+                files=kwargs.get("premium_user_paths"),
+            )
             secondary = {
                 "model": partial(_make_user, add_data=add_data) if add_data else User,
                 "from": "user_id",

@@ -1,6 +1,6 @@
 """ views """
 import logging
-from datetime import timezone
+from datetime import timedelta, timezone
 from functools import lru_cache, reduce
 from itertools import chain
 from operator import or_
@@ -26,6 +26,15 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
+from rest_framework.status import (
+    HTTP_200_OK,
+    HTTP_202_ACCEPTED,
+    HTTP_204_NO_CONTENT,
+    HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+)
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_501_NOT_IMPLEMENTED
 from rest_framework.utils.urls import remove_query_param, replace_query_param
 from rest_framework.viewsets import ModelViewSet
@@ -54,7 +63,12 @@ from .serializers import (
     RankingSerializer,
     UserSerializer,
 )
-from .utils import load_recommender, model_updated_at, server_version
+from .utils import (
+    load_recommender,
+    model_updated_at,
+    premium_feature_gitlab_merge_request,
+    server_version,
+)
 
 LOGGER = logging.getLogger(__name__)
 PAGE_SIZE = api_settings.PAGE_SIZE or 25
@@ -243,6 +257,60 @@ def _get_compilations():
         Game.objects.filter(compilation=True)
         .order_by()
         .values_list("bgg_id", flat=True)
+    )
+
+
+def _gitlab_merge_request(
+    users: Union[str, Iterable[str]],
+    access_days: int = 365,
+    message: Optional[str] = None,
+) -> Response:
+    users = sorted(frozenset(user.lower() for user in arg_to_iter(users)))
+    if not users:
+        return Response(
+            {"detail": "no users provided"},
+            status=HTTP_400_BAD_REQUEST,
+        )
+
+    gitlab_project_id = parse_int(settings.GITLAB_PROJECT_ID)
+    gitlab_access_token = settings.GITLAB_CONFIG_TOKEN
+    gitlab_url = settings.GITLAB_URL
+
+    if not gitlab_project_id or not gitlab_access_token or not gitlab_url:
+        return Response(
+            {"detail": "GitLab not configured on the server"},
+            status=HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    access_days = max(min(access_days, 365), 30)
+    description = f"## Premium user requests:\n\n" + "\n".join(
+        f"- {user}" for user in users
+    )
+    if message:
+        description += f"\n\n## Message by the user:\n\n{message}"
+
+    try:
+        mr_url = premium_feature_gitlab_merge_request(
+            users=users,
+            access_expiration=now() + timedelta(days=access_days),
+            gitlab_project_id=gitlab_project_id,
+            gitlab_access_token=gitlab_access_token,
+            gitlab_url=gitlab_url,
+            description=description,
+        )
+        if not mr_url:
+            raise ValueError("Unable to create merge request")
+        LOGGER.info("Created merge request at <%s>", mr_url)
+
+    except Exception as exc:
+        return Response(
+            {"detail": f"Unable to create merge request:\n\n{exc}"},
+            status=HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    return Response(
+        {"detail": "ok"},
+        status=HTTP_202_ACCEPTED,
     )
 
 
@@ -1029,6 +1097,60 @@ class UserViewSet(PermissionsModelViewSet):
             data[key] = result
 
         return Response(data)
+
+    @action(detail=True)
+    def has_collection(self, request, pk=None, format=None):
+        """Check if a user has a collection."""
+        # TODO cross check with recommender.known_users?
+        if Collection.objects.filter(user__name__iexact=pk).exists():
+            return Response(status=HTTP_204_NO_CONTENT)
+        return Response(
+            {"detail": f"no collection items for user <{pk}>"},
+            status=HTTP_404_NOT_FOUND,
+        )
+
+    @action(
+        detail=True,
+        methods=("POST",),
+        permission_classes=(AlwaysAllowAny,),
+        throttle_classes=(AnonRateThrottle,),
+    )
+    def premium_user_request(self, request, pk=None, format=None):
+        """Send a request to the admin to become a premium user."""
+        user = self.get_object()
+        message = next(_extract_params(request, "message"), None)
+        access_days = next(_extract_params(request, "access_days", parse_int), None)
+        return _gitlab_merge_request(
+            users=[user.name],
+            access_days=access_days or 365,
+            message=message,
+        )
+
+    @action(
+        detail=False,
+        methods=("POST",),
+        permission_classes=(AlwaysAllowAny,),
+        throttle_classes=(AnonRateThrottle,),
+    )
+    def premium_users_request(self, request, format=None):
+        """Send a request to the admin to become premium users."""
+
+        users = [user.lower() for user in _extract_params(request, "user")]
+        user_names = list(
+            self.get_queryset().filter(name__in=users).values_list("name", flat=True)
+        )
+
+        if not user_names:
+            raise NotFound(f"none of the users {users} could be found")
+
+        message = next(_extract_params(request, "message"), None)
+        access_days = next(_extract_params(request, "access_days", parse_int), None)
+
+        return _gitlab_merge_request(
+            users=user_names,
+            access_days=access_days or 365,
+            message=message,
+        )
 
 
 class CollectionViewSet(ModelViewSet):
