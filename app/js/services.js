@@ -1086,7 +1086,6 @@ rgApp.factory('filterService', function filterService(
             excludeWishlist = booleanDefault(params.excludeWishlist, false, _.size(user) !== 1),
             excludePlayed = booleanDefault(params.excludePlayed, false, _.size(user) !== 1),
             excludeClusters = booleanDefault(params.excludeClusters, true, _.size(user) !== 1),
-            similarity = booleanDefault(params.similarity, false, _.isEmpty(user)),
             yearMin = _.parseInt(params.yearMin),
             yearMax = _.parseInt(params.yearMax),
             ordering = validateOrdering(params.ordering),
@@ -1103,7 +1102,6 @@ rgApp.factory('filterService', function filterService(
             'excludeWishlist': excludeWishlist === true ? true : null,
             'excludePlayed': excludePlayed === true ? true : null,
             'excludeClusters': excludeClusters === false ? false : null,
-            'similarity': similarity === true ? true : null,
             'like': !_.isEmpty(like) && _.isEmpty(user) ? like : null,
             'search': _.trim(params.search) || null,
             'playerCount': playerCount,
@@ -1195,14 +1193,12 @@ rgApp.factory('filterService', function filterService(
             result.excludeWishlist = null;
             result.excludePlayed = null;
             result.excludeClusters = null;
-            result.similarity = null;
         } else {
             result.excludeRated = parseBoolean(_.get(scope, 'exclude.rated'));
             result.excludeOwned = parseBoolean(_.get(scope, 'exclude.owned'));
             result.excludeWishlist = parseBoolean(_.get(scope, 'exclude.wishlist'));
             result.excludePlayed = parseBoolean(_.get(scope, 'exclude.played'));
             result.excludeClusters = parseBoolean(_.get(scope, 'exclude.clusters'));
-            result.similarity = parseBoolean(scope.similarity);
         }
 
         result.like = !_.isEmpty(scope.likedGames) && _.isEmpty(userList) ? _.map(scope.likedGames, 'bgg_id') : null;
@@ -1230,7 +1226,6 @@ rgApp.factory('filterService', function filterService(
 
         if (!_.isEmpty(params.for)) {
             result.user = params.for;
-            result.model = params.similarity ? 'similarity' : null;
             if (_.size(params.for) === 1) {
                 result.exclude_known = booleanString(booleanDefault(params.excludeRated, true));
                 result.exclude_owned = booleanString(booleanDefault(params.excludeOwned, true));

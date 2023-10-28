@@ -228,8 +228,6 @@ rgApp.controller('ListController', function ListController(
         'clusters': filterService.booleanDefault(params.excludeClusters, true)
     };
 
-    $scope.similarity = params.similarity;
-
     $scope.search = params.search;
 
     $scope.count = {
@@ -341,7 +339,7 @@ rgApp.controller('ListController', function ListController(
     $scope.selectionActive = false;
     $scope.groupRecommendation = _.size(params.for) > 1;
     $scope.userNotFound = false;
-    $scope.hideScore = !_.isEmpty(params.for) && params.similarity;
+    $scope.hideScore = false;
     $scope.statsActive = false;
     $scope.userStats = {};
     $scope.collectionRequestValidityOptions = _.range(1, 13);
