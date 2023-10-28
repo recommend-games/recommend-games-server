@@ -1,10 +1,11 @@
 """ views """
+from collections import OrderedDict
 import logging
 from datetime import timedelta, timezone
 from functools import lru_cache, reduce
 from itertools import chain
 from operator import or_
-from typing import Callable, Iterable, Optional, Union
+from typing import Any, Callable, Iterable, Optional, Union
 
 import pandas as pd
 from django.conf import settings
@@ -13,15 +14,7 @@ from django.shortcuts import redirect
 from django.utils.timezone import now
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
-from pytility import (
-    arg_to_iter,
-    clear_list,
-    parse_bool,
-    parse_date,
-    parse_int,
-    take_first,
-    to_str,
-)
+from pytility import arg_to_iter, clear_list, parse_bool, parse_date, parse_int, to_str
 from rest_framework.decorators import action
 from rest_framework.exceptions import (
     MethodNotAllowed,
@@ -35,18 +28,19 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.status import (
-    HTTP_200_OK,
     HTTP_202_ACCEPTED,
     HTTP_204_NO_CONTENT,
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
     HTTP_500_INTERNAL_SERVER_ERROR,
+    HTTP_501_NOT_IMPLEMENTED,
 )
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.utils.urls import remove_query_param, replace_query_param
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_csv.renderers import PaginatedCSVRenderer
 
+from games.collections import all_collection, any_collection, none_collection
 from .models import (
     Category,
     Collection,
@@ -289,7 +283,7 @@ def _gitlab_merge_request(
         )
 
     access_days = max(min(access_days, 365), 30)
-    description = f"## Premium user requests:\n\n" + "\n".join(
+    description = "## Premium user requests:\n\n" + "\n".join(
         f"- {user}" for user in users
     )
     if message:
@@ -502,6 +496,25 @@ class GameViewSet(PermissionsModelViewSet):
         # Remove all excluded games
         return include_ids - exclude_ids
 
+    def _collection(
+        self,
+        *,
+        users: Iterable[str],
+        kind: str,
+        **filters: Any,
+    ) -> Iterable[str]:
+        """Return a list of game IDs that are in users' collections."""
+        users = list(users)
+        if not users or not kind or not filters:
+            return self.get_queryset().values_list("bgg_id", flat=True).order_by()
+        if kind == "_all":
+            return all_collection(users, **filters)
+        if kind == "_any":
+            return any_collection(users, **filters)
+        if kind == "_none":
+            return none_collection(users, **filters)
+        return any_collection([kind], **filters)
+
     def _recommend_rating(
         self,
         *,
@@ -560,6 +573,7 @@ class GameViewSet(PermissionsModelViewSet):
             raise NotFound("none of the users could be found")
 
         # TODO include / exclude games based on users' collections (#228)
+        # Cf the collections module and recommend_random()
         include_ids = self._included_games(
             recommender=recommender,
             include_ids=include_ids,
@@ -729,6 +743,95 @@ class GameViewSet(PermissionsModelViewSet):
             self.get_paginated_response(serializer.data)
             if paginate
             else Response(serializer.data)
+        )
+
+    @action(
+        detail=False,
+        methods=("GET", "POST"),
+        permission_classes=(AlwaysAllowAny,),
+    )
+    def recommend_random(self, request, format=None):
+        """
+        Recommend a random selection of games based on the users'
+        preferences and collections.
+        """
+
+        users = [user.lower() for user in _extract_params(request, "user", str)]
+        num_games = min(
+            parse_int(request.query_params.get("num_games")) or 1,
+            PAGE_SIZE,
+        )
+        random_seed = parse_int(request.query_params.get("random_seed"))
+
+        if not users:
+            return Response(
+                {"reason": "<user> cannot be empty"},
+                status=HTTP_400_BAD_REQUEST,
+            )
+
+        path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
+        recommender = load_recommender(path=path_light, site="light")
+
+        if recommender is None:
+            return Response(
+                {"reason": "unable to load recommender model"},
+                status=HTTP_501_NOT_IMPLEMENTED,
+            )
+
+        include = frozenset(_extract_params(request, "include", parse_int))
+        exclude = frozenset(_extract_params(request, "exclude", parse_int))
+        owned = request.query_params.get("owned")
+        played = request.query_params.get("played")
+
+        queryset = self.filter_queryset(self.get_queryset()).order_by()
+        if include:
+            queryset |= self.get_queryset().filter(bgg_id__in=include)
+        if exclude:
+            queryset = queryset.exclude(bgg_id__in=exclude)
+        if owned:
+            collection_bgg_ids = self._collection(
+                users=users,
+                kind=owned.lower(),
+                owned=True,
+            )
+            queryset = queryset.filter(bgg_id__in=collection_bgg_ids)
+        if played:
+            collection_bgg_ids = self._collection(
+                users=users,
+                kind=played.lower(),
+                play_count__gt=0,
+            )
+            queryset = queryset.filter(bgg_id__in=collection_bgg_ids)
+        bgg_ids = list(queryset.values_list("bgg_id", flat=True))
+
+        recommendations = recommender.recommend_random_games_as_numpy(
+            users=users,
+            games=bgg_ids,
+            num_games=num_games,
+            random_seed=random_seed,
+        )
+        recommendations_order = dict(
+            zip(
+                recommendations,
+                range(len(recommendations)),
+            )
+        )
+
+        games = queryset.filter(bgg_id__in=recommendations)
+        for game in games:
+            game.rec_rank = recommendations_order[game.bgg_id] + 1
+        games = sorted(games, key=lambda game: game.rec_rank)
+
+        serializer = self.get_serializer(instance=games, many=True)
+        return Response(
+            OrderedDict(
+                [
+                    ("count", len(serializer.data)),
+                    ("next", None),
+                    ("previous", None),
+                    ("results", serializer.data),
+                ]
+            )
         )
 
     @action(detail=True)
