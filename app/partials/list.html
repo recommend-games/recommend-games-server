@@ -431,6 +431,18 @@
 								Anyone
 							</label>
 						</div>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input"
+								type="radio"
+								name="what-to-play-played"
+								ng-model="whatToPlayConfig.played"
+								value="_all"
+								id="what-to-play-played-all" />
+							<label class="form-check-label"
+									for="what-to-play-played-all">
+								Everyone
+							</label>
+						</div>
 						<div ng-repeat="cUser in userList track by $index"
 								class="form-check form-check-inline">
 							<input class="form-check-input"

@@ -219,7 +219,7 @@ rgApp.factory('gamesService', function gamesService(
             params.page = page;
         }
 
-        if (params.whatToPlay) {
+        if (params.whatToPlay && !_.isEmpty(params.user)) {
             url += '/recommend_random';
             params.whatToPlay = null;
         } else if (!_.isEmpty(params.user) || !_.isEmpty(params.like)) {
