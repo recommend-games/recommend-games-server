@@ -1080,6 +1080,7 @@ rgApp.factory('filterService', function filterService(
         var usersFor = parseList(params.for, true),
             user = !_.isEmpty(usersFor) ? usersFor : parseList(params.user, true),
             whatToPlay = booleanDefault(params.whatToPlay, false),
+            randomSeed = _.parseInt(params.randomSeed) || null,
             playerCount = _.parseInt(params.playerCount) || null,
             playTime = _.parseInt(params.playTime) || null,
             playerAge = _.parseInt(params.playerAge) || null,
@@ -1099,6 +1100,7 @@ rgApp.factory('filterService', function filterService(
         return {
             'for': _.isEmpty(user) ? null : user,
             'whatToPlay': whatToPlay,
+            'randomSeed': randomSeed,
             'include': _.isEmpty(include) ? null : include,
             'exclude': _.isEmpty(exclude) ? null : exclude,
             'excludeRated': excludeRated === false ? false : null,
@@ -1137,12 +1139,13 @@ rgApp.factory('filterService', function filterService(
             exclude = parseIntList(scope.excludeGames),
             result = {
                 'for': _.isEmpty(userList) ? null : userList,
-                'whatToPlay': parseBoolean(scope.whatToPlay),
+                'whatToPlay': scope.whatToPlay,
+                'randomSeed': scope.randomSeed,
                 'include': _.isEmpty(include) ? null : include,
                 'exclude': _.isEmpty(exclude) ? null : exclude,
                 'search': scope.search,
                 'cooperative': scope.cooperative,
-                'bgaAvailable': parseBoolean(scope.bgaAvailable),
+                'bgaAvailable': scope.bgaAvailable,
                 'gameType': scope.gameType,
                 'category': scope.category,
                 'mechanic': scope.mechanic,
@@ -1232,6 +1235,7 @@ rgApp.factory('filterService', function filterService(
             result.user = params.for;
             if (params.whatToPlay) {
                 result.whatToPlay = true;
+                result.random_seed = params.randomSeed;
                 result.num_games = 25;
                 // TODO from actual params
                 result.owned = '_any';

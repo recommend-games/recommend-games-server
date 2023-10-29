@@ -298,10 +298,8 @@
 				</div>
 			</form>
 
-			<!-- TODO add random_seed to update in order to force refresh -->
-			<!-- also reproducible recommendations -->
 			<form ng-show="activePane == 'what-to-play'"
-					ng-submit="updateParams({'whatToPlay': true})"
+					ng-submit="updateParams({'whatToPlay': true, 'randomSeed': now()})"
 					id="what-to-play-form"
 					name="what-to-play-form"
 					novalidate="novalidate"
@@ -1109,6 +1107,18 @@
 								class="text-secondary">
 							({{ total }} games in total)
 						</small>
+					</h2>
+				</div>
+			</div>
+		</div>
+		<div ng-if="whatToPlay"
+				ng-click="updateParams({'whatToPlay': true, 'randomSeed': now()})"
+				class="col-lg-3 col-md-4 col-sm-6">
+			<div class="game game-more">
+				<div>
+					<h2 class="game-title">
+						<i class="fas fa-dice"></i>
+						Roll the dice!
 					</h2>
 				</div>
 			</div>

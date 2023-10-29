@@ -328,6 +328,7 @@ rgApp.controller('ListController', function ListController(
     $scope.ordering = params.ordering || 'rg';
 
     $scope.fetchGames = fetchGames;
+    $scope.now = _.now;
     $scope.pad = _.padStart;
     $scope.isEmpty = _.isEmpty;
     $scope.size = _.size;
