@@ -1110,7 +1110,7 @@ rgApp.factory('filterService', function filterService(
 
         return {
             'for': _.isEmpty(user) ? null : user,
-            'whatToPlay': whatToPlay,
+            'whatToPlay': whatToPlay ? true : null,
             'randomSeed': whatToPlay ? randomSeed : null,
             'include': _.isEmpty(include) ? null : include,
             'exclude': _.isEmpty(exclude) ? null : exclude,
