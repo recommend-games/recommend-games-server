@@ -106,8 +106,6 @@ rgApp.controller('ListController', function ListController(
         }
 
         if (_.isNil(promise)) {
-            // TODO let filtersFromParams() and getGames() handle whatToPlay
-            // or should it be its entirely own path?
             filters = filterService.filtersFromParams(parsed);
             if (!_.isEmpty(filters.like)) {
                 filters.num_votes__gte = 30;
@@ -216,9 +214,15 @@ rgApp.controller('ListController', function ListController(
     }
 
     $scope.user = _.join(params.for, ', ');
+    $scope.userList = filterService.parseList($scope.user, false);
     $scope.whatToPlay = params.whatToPlay;
     $scope.userCollections = null;
     $scope.missingCollections = null;
+
+    $scope.whatToPlayConfig = {
+        'owned': params.whatToPlayOwned,
+        'played': params.whatToPlayPlayed
+    };
 
     $scope.exclude = {
         'rated': filterService.booleanDefault(params.excludeRated, true),
@@ -332,6 +336,7 @@ rgApp.controller('ListController', function ListController(
     $scope.pad = _.padStart;
     $scope.isEmpty = _.isEmpty;
     $scope.size = _.size;
+    $scope.toLower = _.toLower;
     $scope.empty = false;
     $scope.total = null;
     $scope.renderSlider = renderSlider;
@@ -549,6 +554,7 @@ rgApp.controller('ListController', function ListController(
     $scope.$watch('complexity.enabled', renderSlider);
     $scope.$watch('year.enabled', renderSlider);
     $scope.$watch('user', function () { $scope.groupRecommendation = _.includes($scope.user, ','); });
+    $scope.$watch('user', function () { $scope.userList = filterService.parseList($scope.user, true); });
 
     if (params.whatToPlay) {
         showPane('what-to-play');

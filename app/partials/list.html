@@ -208,7 +208,7 @@
 					<div class="{{ user &amp;&amp; !groupRecommendation ? 'text-success' : 'text-muted' }} mb-0">
 						Exclude games from recommendations:
 					</div>
-					<div class="{{ user &amp;&amp; !groupRecommendation ? 'form-exclude-enabled' : 'form-exclude-disabled' }} mb-1">
+					<div class="{{ user &amp;&amp; !groupRecommendation ? 'form-exclude-enabled' : 'form-exclude-disabled' }} mb-0">
 						<div class="form-check form-check-inline"
 								data-toggle="tooltip"
 								data-placement="bottom"
@@ -338,10 +338,112 @@
 				</div>
 				<div id="wtp-form-exclude-filters" class="collapse">
 					<div class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
-						Exclude games from recommendations:
+						Only recommend games a player owns:
 					</div>
 					<div class="{{ user ? 'form-exclude-enabled' : 'form-exclude-disabled' }} mb-1">
-						TODO
+						<div class="form-check form-check-inline">
+							<input class="form-check-input"
+								type="radio"
+								name="what-to-play-owned"
+								ng-model="whatToPlayConfig.owned"
+								ng-value="null"
+								id="what-to-play-owned-off" />
+							<label class="form-check-label"
+									for="what-to-play-owned-off">
+								Off
+							</label>
+						</div>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input"
+								type="radio"
+								name="what-to-play-owned"
+								ng-model="whatToPlayConfig.owned"
+								value="_none"
+								id="what-to-play-owned-none" />
+							<label class="form-check-label"
+									for="what-to-play-owned-none">
+								No&nbsp;one
+							</label>
+						</div>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input"
+								type="radio"
+								name="what-to-play-owned"
+								ng-model="whatToPlayConfig.owned"
+								value="_any"
+								id="what-to-play-owned-any" />
+							<label class="form-check-label"
+									for="what-to-play-owned-any">
+								Anyone
+							</label>
+						</div>
+						<div ng-repeat="cUser in userList track by $index"
+								class="form-check form-check-inline">
+							<input class="form-check-input"
+								type="radio"
+								name="what-to-play-owned"
+								ng-model="whatToPlayConfig.owned"
+								ng-value="toLower(cUser)"
+								id="what-to-play-owned-user-{{ $index }}" />
+							<label class="form-check-label"
+									for="what-to-play-owned-user-{{ $index }}">
+								{{ cUser }}
+							</label>
+						</div>
+					</div>
+					<div class="{{ user ? 'text-success' : 'text-muted' }} mb-0">
+						Only recommend games a player has played:
+					</div>
+					<div class="{{ user ? 'form-exclude-enabled' : 'form-exclude-disabled' }} mb-0">
+						<div class="form-check form-check-inline">
+							<input class="form-check-input"
+								type="radio"
+								name="what-to-play-played"
+								ng-model="whatToPlayConfig.played"
+								ng-value="null"
+								id="what-to-play-played-off" />
+							<label class="form-check-label"
+									for="what-to-play-played-off">
+								Off
+							</label>
+						</div>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input"
+								type="radio"
+								name="what-to-play-played"
+								ng-model="whatToPlayConfig.played"
+								value="_none"
+								id="what-to-play-played-none" />
+							<label class="form-check-label"
+									for="what-to-play-played-none">
+								No&nbsp;one
+							</label>
+						</div>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input"
+								type="radio"
+								name="what-to-play-played"
+								ng-model="whatToPlayConfig.played"
+								value="_any"
+								id="what-to-play-played-any" />
+							<label class="form-check-label"
+									for="what-to-play-played-any">
+								Anyone
+							</label>
+						</div>
+						<div ng-repeat="cUser in userList track by $index"
+								class="form-check form-check-inline">
+							<input class="form-check-input"
+								type="radio"
+								name="what-to-play-played"
+								ng-model="whatToPlayConfig.played"
+								ng-value="toLower(cUser)"
+								id="what-to-play-played-user-{{ $index }}" />
+							<label class="form-check-label"
+									for="what-to-play-played-user-{{ $index }}">
+								{{ cUser }}
+							</label>
+						</div>
 					</div>
 				</div>
 			</form>
@@ -1111,7 +1213,7 @@
 				</div>
 			</div>
 		</div>
-		<div ng-if="whatToPlay"
+		<div ng-if="whatToPlay &amp;&amp; !isEmpty(games)"
 				ng-click="updateParams({'whatToPlay': true, 'randomSeed': now()})"
 				class="col-lg-3 col-md-4 col-sm-6">
 			<div class="game game-more">
