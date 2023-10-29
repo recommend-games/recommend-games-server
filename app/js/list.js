@@ -216,6 +216,7 @@ rgApp.controller('ListController', function ListController(
     $scope.user = _.join(params.for, ', ');
     $scope.userList = filterService.parseList($scope.user, false);
     $scope.whatToPlay = params.whatToPlay;
+    $scope.randomSeed = params.randomSeed;
     $scope.userCollections = null;
     $scope.missingCollections = null;
 
@@ -345,7 +346,7 @@ rgApp.controller('ListController', function ListController(
     $scope.selectionActive = false;
     $scope.groupRecommendation = _.size(params.for) > 1;
     $scope.userNotFound = false;
-    $scope.hideScore = false;
+    $scope.hideScore = params.whatToPlay;
     $scope.statsActive = false;
     $scope.userStats = {};
     $scope.collectionRequestValidityOptions = _.range(1, 13);
