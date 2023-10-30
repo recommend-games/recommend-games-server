@@ -1,5 +1,11 @@
 <?xml version="1.0"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    viewBox="0 0 512 512">
+  <defs>
+    <path d="M0,256a256,256 0 1,0 512,0a256,256 0 1,0 -512,0" id="circle" />
+  </defs>
+
   <!-- top face -->
   <path
     d="M255.76 44.764C249.584 44.764 243.407 46.148 238.623 48.916L85.87 137.276C76.3 142.812 76.3 151.566 85.87 157.102L238.623 245.462C248.193 250.998 263.326 250.998 272.895 245.462L425.648 157.102C435.218 151.567 435.218 142.812 425.648 137.277L272.895 48.917C268.11 46.147 261.935 44.764 255.76 44.764Z"
@@ -48,14 +54,15 @@
   <!-- Recommend.Games text -->
   <text
       fill="black"
-      x="50%"
-      y="100%"
-      dy="-10px"
+      dy="-5px"
       text-anchor="middle"
       font-variant="small-caps"
       font-size="50px"
-      font-weight="bold"
+      font-weight="500"
       font-family='-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"'>
-    Recommend.Games
+    <textPath xlink:href="#circle"
+        startOffset="25%">
+      Recommend.Games
+    </textPath>
   </text>
 </svg>
