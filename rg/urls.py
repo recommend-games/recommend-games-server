@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """ URLs """
 
 from django.conf import settings

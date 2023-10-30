@@ -1,19 +1,16 @@
-# -*- coding: utf-8 -*-
-
 """Extract ratings from Git repositories and train recommenders."""
 
 import logging
 import os
 import shutil
 import sys
-
 from datetime import timezone
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+from board_game_recommender import BGARecommender, BGGRecommender
 from django.core.management.base import BaseCommand
 from git import Repo
-from board_game_recommender import BGARecommender, BGGRecommender
 from pytility import arg_to_iter
 
 from ...models import Ranking

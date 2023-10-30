@@ -107,10 +107,10 @@
 
 # other
 **/*.bk
-**/data*/
+# **/data*/
 **/logs/
 **/tests/
-**/*.sqlite*
+# **/*.sqlite*
 **/.temp*
 **/.tc*
 **/.csslintrc*

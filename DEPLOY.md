@@ -1,5 +1,9 @@
 # Deployment to Google Cloud
 
+This document describes the deployment process to a new Google Cloud environment.
+If you just want to learn how to get started or what tools you need to install,
+read the [contribution guidelines](CONTRIBUTING.md).
+
 ## Create Google Cloud project
 
 Log in to [Google Cloud console](https://console.cloud.google.com) and create a
@@ -23,8 +27,9 @@ create a new app in the region of your choice with the flexible environment.
 ## Create Storage buckets
 
 Open the [Storage dashboard](https://console.cloud.google.com/storage) and
-create the buckets `$PROJECT-data` and `$PROJECT-logs` in the same region as the
-App Engine app above. Leave the default options otherwise.
+create the buckets `$PROJECT-data`, `$PROJECT-logs` and `$PROJECT-responses` in
+the same region as the App Engine app above. Leave the default options
+otherwise.
 
 ## Create PubSub topic and subscription
 
@@ -32,14 +37,20 @@ Open the [PubSub dashboard](https://console.cloud.google.com/cloudpubsub) and
 create the topic `users`, then two subscriptions attached to that topic:
 
 * `crawl` with "Pull" delivery type, "Never expire", 600 seconds acknowledgement
-deadline, and 1 day retention duration,
+  deadline, and 1 day retention duration,
 * `logs` with "Pull" delivery type, "Never expire", 600 seconds acknowledgement
-deadline, and 7 day retention duration.
+  deadline, and 7 day retention duration.
 
-Also make sure to update the PubSub project, topic, and subscription:
+Also create another topic `responses` and one subscription attached to that topic:
+
+* `response_logs` with "Pull" delivery type, "Never expire", 600 seconds
+  acknowledgement deadline, and 7 day retention duration.
+
+Then make sure to update the PubSub project, topic, and subscription:
 
 * `crawl` in the [scraper](https://gitlab.com/recommend.games/board-game-scraper/blob/master/.env.example),
-* `logs` in [`.env`](.env.example) and [`docker-compose.yaml`](docker-compose.yaml).
+* `logs` and `response_logs` in [`.env`](.env.example) and
+  [`docker-compose.yaml`](docker-compose.yaml).
 
 ## Enable Google Container Registry API
 
@@ -87,7 +98,8 @@ env_variables:
     GC_PROJECT: $PROJECT
     GC_DATA_BUCKET: $PROJECT-data
     PUBSUB_QUEUE_PROJECT: $PROJECT
-    PUBSUB_QUEUE_TOPIC: users
+    PUBSUB_QUEUE_TOPIC_USERS: users
+    PUBSUB_QUEUE_TOPIC_RESPONSES: responses
 ```
 
 The App Engine domain should be automatically added to `ALLOWED_HOSTS` in
@@ -106,7 +118,7 @@ You should now be able to deploy the service. For a full release, simply run
 If you don't need to build a new recommender and datebase version, it should
 suffice to run
 
-```
+```bash
 pipenv run pynt syncdata releaseserver
 ```
 

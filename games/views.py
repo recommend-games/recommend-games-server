@@ -1,44 +1,46 @@
-# -*- coding: utf-8 -*-
-
 """ views """
-
+from collections import OrderedDict
 import logging
-import os
-
-from datetime import timezone
-from functools import reduce
+from datetime import timedelta, timezone
+from functools import lru_cache, reduce
 from itertools import chain
 from operator import or_
-from typing import Callable, Iterable, Optional, Union
+from typing import Any, Callable, Iterable, Optional, Union
 
+import pandas as pd
 from django.conf import settings
-from django.db.models import Count, Q, Min
+from django.db.models import Count, Min, Q
 from django.shortcuts import redirect
+from django.utils.timezone import now
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
-from pytility import (
-    arg_to_iter,
-    clear_list,
-    parse_bool,
-    parse_date,
-    parse_int,
-    take_first,
-    to_str,
-)
+from pytility import arg_to_iter, clear_list, parse_bool, parse_date, parse_int, to_str
 from rest_framework.decorators import action
 from rest_framework.exceptions import (
+    MethodNotAllowed,
     NotAuthenticated,
     NotFound,
-    MethodNotAllowed,
     PermissionDenied,
 )
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
+from rest_framework.status import (
+    HTTP_202_ACCEPTED,
+    HTTP_204_NO_CONTENT,
+    HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+    HTTP_501_NOT_IMPLEMENTED,
+)
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework.utils.urls import remove_query_param, replace_query_param
 from rest_framework.viewsets import ModelViewSet
+from rest_framework_csv.renderers import PaginatedCSVRenderer
 
+from games.collections import all_collection, any_collection, none_collection
 from .models import (
     Category,
     Collection,
@@ -57,19 +59,19 @@ from .serializers import (
     GameTypeSerializer,
     MechanicSerializer,
     PersonSerializer,
-    RankingSerializer,
     RankingFatSerializer,
+    RankingSerializer,
     UserSerializer,
 )
 from .utils import (
     load_recommender,
     model_updated_at,
-    parse_version,
-    project_version,
-    pubsub_push,
+    premium_feature_gitlab_merge_request,
+    server_version,
 )
 
 LOGGER = logging.getLogger(__name__)
+PAGE_SIZE = api_settings.PAGE_SIZE or 25
 
 
 class PermissionsModelViewSet(ModelViewSet):
@@ -91,9 +93,9 @@ class PermissionsModelViewSet(ModelViewSet):
 class GamesActionViewSet(PermissionsModelViewSet):
     """add a games action"""
 
-    # pylint: disable=unused-argument,invalid-name
+    # pylint: disable=invalid-name,redefined-builtin,unused-argument
     @action(detail=True)
-    def games(self, request, pk=None):
+    def games(self, request, pk=None, format=None):
         """find all games"""
 
         obj = self.get_object()
@@ -156,39 +158,35 @@ class BGGParamsPagination(BodyParamsPagination):
     parsers = (to_str, parse_int)
 
 
-class BGAParamsPagination(BodyParamsPagination):
-    """Pagination for /recommend_bga endpoints."""
-
-    keys = ("user", "like")
-    parsers = (to_str, to_str)
-
-
-def _exclude(user=None, ids=None):
-    if ids is None:
-        return None
-
-    try:
-        import turicreate as tc
-    except ImportError:
-        LOGGER.exception("unable to import <turicreate>")
-        return None
-
-    ids = (
-        ids
-        if isinstance(ids, tc.SArray)
-        else tc.SArray(tuple(arg_to_iter(ids)), dtype=int)
-    )
-
-    # pylint: disable=len-as-condition
-    if ids is None or not len(ids):
-        return None
-
-    sframe = tc.SFrame({"bgg_id": ids})
-    sframe["bgg_user_name"] = user
-
-    del tc, ids
-
-    return sframe
+class PaginatedCSVGameRenderer(PaginatedCSVRenderer):
+    header = [
+        "bgg_id",
+        "name",
+        "year",
+        "rec_rank",
+        "rec_rating",
+        "bgg_rank",
+        "num_votes",
+        "avg_rating",
+        "bayes_rating",
+        "stddev_rating",
+        "complexity",
+        "language_dependency",
+        "kennerspiel_score",
+        "cooperative",
+        "min_age",
+        "min_age_rec",
+        "min_players",
+        "min_players_rec",
+        "min_players_best",
+        "max_players",
+        "max_players_rec",
+        "max_players_best",
+        "min_time",
+        "max_time",
+        "available_on_bga",
+        "url",
+    ]
 
 
 def _parse_parts(args):
@@ -253,6 +251,69 @@ def _add_games(data, bgg_ids=None, key="game"):
     return data
 
 
+@lru_cache(maxsize=8)
+def _get_compilations():
+    return frozenset(
+        Game.objects.filter(compilation=True)
+        .order_by()
+        .values_list("bgg_id", flat=True)
+    )
+
+
+def _gitlab_merge_request(
+    users: Union[str, Iterable[str]],
+    access_days: int = 365,
+    message: Optional[str] = None,
+) -> Response:
+    users = sorted(frozenset(user.lower() for user in arg_to_iter(users)))
+    if not users:
+        return Response(
+            {"detail": "no users provided"},
+            status=HTTP_400_BAD_REQUEST,
+        )
+
+    gitlab_project_id = parse_int(settings.GITLAB_PROJECT_ID)
+    gitlab_access_token = settings.GITLAB_CONFIG_TOKEN
+    gitlab_url = settings.GITLAB_URL
+
+    if not gitlab_project_id or not gitlab_access_token or not gitlab_url:
+        return Response(
+            {"detail": "GitLab not configured on the server"},
+            status=HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    access_days = max(min(access_days, 365), 30)
+    description = "## Premium user requests:\n\n" + "\n".join(
+        f"- {user}" for user in users
+    )
+    if message:
+        description += f"\n\n## Message by the user:\n\n{message}"
+
+    try:
+        mr_url = premium_feature_gitlab_merge_request(
+            users=users,
+            access_expiration=now() + timedelta(days=access_days),
+            gitlab_project_id=gitlab_project_id,
+            gitlab_access_token=gitlab_access_token,
+            gitlab_url=gitlab_url,
+            description=description,
+        )
+        if not mr_url:
+            raise ValueError("Unable to create merge request")
+        LOGGER.info("Created merge request at <%s>", mr_url)
+
+    except Exception as exc:
+        return Response(
+            {"detail": f"Unable to create merge request:\n\n{exc}"},
+            status=HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    return Response(
+        {"detail": "ok"},
+        status=HTTP_202_ACCEPTED,
+    )
+
+
 class GameFilter(FilterSet):
     """game filter"""
 
@@ -295,6 +356,7 @@ class GameFilter(FilterSet):
             "complexity": ["exact", "gt", "gte", "lt", "lte", "isnull"],
             "language_dependency": ["exact", "gt", "gte", "lt", "lte", "isnull"],
             "kennerspiel_score": ["exact", "gt", "gte", "lt", "lte", "isnull"],
+            "available_on_bga": ["exact"],
         }
 
 
@@ -347,151 +409,246 @@ class GameViewSet(PermissionsModelViewSet):
         "mechanic": (Mechanic.objects.all(), "games", MechanicSerializer),
     }
 
-    def _excluded_games(self, user, params, include=None, exclude=None):
-        params = params or {}
-        params.setdefault("exclude_known", True)
+    def _excluded_games(
+        self,
+        *,
+        user=None,
+        exclude_ids=None,
+        exclude_compilations=True,
+        exclude_known=True,
+        exclude_owned=True,
+        exclude_wishlist=None,
+        exclude_play_count=None,
+        exclude_clusters=False,
+    ):
+        exclude_ids = frozenset(arg_to_iter(exclude_ids))
 
-        exclude = frozenset(arg_to_iter(exclude)) | frozenset(
-            _parse_ints(params.get("exclude"))
-        )
+        if user:
+            queries = []
 
-        exclude_known = parse_bool(take_first(params.get("exclude_known")))
-        exclude_fields = [
-            field
-            for field in self.collection_fields
-            if parse_bool(take_first(params.get(f"exclude_{field}")))
-        ]
-        exclude_wishlist = parse_int(take_first(params.get("exclude_wishlist")))
-        exclude_play_count = parse_int(take_first(params.get("exclude_play_count")))
-        exclude_clusters = parse_bool(take_first(params.get("exclude_clusters")))
-
-        try:
-            queries = [Q(**{field: True}) for field in exclude_fields]
-            if exclude_known and exclude_clusters:
+            if exclude_known:
                 queries.append(Q(rating__isnull=False))
+            if exclude_owned:
+                queries.append(Q(owned=True))
             if exclude_wishlist:
                 queries.append(Q(wishlist__lte=exclude_wishlist))
             if exclude_play_count:
                 queries.append(Q(play_count__gte=exclude_play_count))
+
             if queries:
                 query = reduce(or_, queries)
-                exclude |= frozenset(
-                    User.objects.get(name=user)
-                    .collection_set.order_by()
+                exclude_ids |= frozenset(
+                    Collection.objects.filter(user=user)
                     .filter(query)
+                    .order_by()
                     .values_list("game_id", flat=True)
                 )
 
-        except Exception:
-            pass
+        if exclude_clusters and exclude_ids:
+            exclude_ids |= frozenset(
+                self.get_queryset()
+                .filter(cluster__in=exclude_ids)
+                .order_by()
+                .values_list("bgg_id", flat=True)
+            )
 
-        return tuple(exclude) if not include else tuple(exclude - include)
+        if exclude_compilations:
+            exclude_ids |= _get_compilations()
 
-    def _recommend_rating(self, user, recommender, params, include=None, exclude=None):
-        user = user.lower()
-        if user not in recommender.known_users:
-            raise NotFound(f"user <{user}> could not be found")
+        return exclude_ids
 
-        params = params or {}
-        include = (
-            frozenset(_parse_ints(params.get("include")))
-            if include is None
-            else include
+    def _included_games(
+        self,
+        *,
+        recommender,
+        user=None,
+        include_ids=None,
+        exclude_ids=None,
+        exclude_compilations=True,
+        exclude_known=True,
+        exclude_owned=True,
+        exclude_wishlist=None,
+        exclude_play_count=None,
+        exclude_clusters=False,
+    ):
+        include_ids = frozenset(arg_to_iter(include_ids))
+        exclude_ids = self._excluded_games(
+            user=user,
+            exclude_ids=exclude_ids,
+            exclude_compilations=exclude_compilations,
+            exclude_known=exclude_known,
+            exclude_owned=exclude_owned,
+            exclude_wishlist=exclude_wishlist,
+            exclude_play_count=exclude_play_count,
+            exclude_clusters=exclude_clusters,
         )
-        # we should only need this if params are set, but see #90
-        games = include | frozenset(
+        # If explicitly included, we don't exclude them here
+        exclude_ids -= include_ids
+
+        # Add all potential games not filtered out by query
+        include_ids |= frozenset(
             self.filter_queryset(self.get_queryset())
             .order_by()
             .values_list("bgg_id", flat=True)
         )
-        games &= recommender.rated_games
+        # We can only recommend games known to the recommender
+        include_ids &= recommender.rated_games
+        # Remove all excluded games
+        return include_ids - exclude_ids
 
-        if not games:
-            return ()
+    def _collection(
+        self,
+        *,
+        users: Iterable[str],
+        kind: str,
+        **filters: Any,
+    ) -> Iterable[str]:
+        """Return a list of game IDs that are in users' collections."""
+        users = list(users)
+        if not users or not kind or not filters:
+            return self.get_queryset().values_list("bgg_id", flat=True).order_by()
+        if kind == "_all":
+            return all_collection(users, **filters)
+        if kind == "_any":
+            return any_collection(users, **filters)
+        if kind == "_none":
+            return none_collection(users, **filters)
+        return any_collection([kind], **filters)
 
-        exclude = self._excluded_games(user, params, include, exclude)
-        similarity_model = take_first(params.get("model")) == "similarity"
+    def _recommend_rating(
+        self,
+        *,
+        user,
+        recommender,
+        include_ids=None,
+        exclude_ids=None,
+        exclude_compilations=True,
+        exclude_known=True,
+        exclude_owned=True,
+        exclude_wishlist=None,
+        exclude_play_count=None,
+        exclude_clusters=False,
+    ):
+        user = user.lower()
+        if user not in recommender.known_users:
+            raise NotFound(f"user <{user}> could not be found")
 
-        return recommender.recommend(
-            users=(user,),
-            games=games,
-            similarity_model=similarity_model,
-            exclude=_exclude(user, ids=exclude),
-            exclude_known=parse_bool(take_first(params.get("exclude_known"))),
-            exclude_clusters=parse_bool(take_first(params.get("exclude_clusters"))),
-            star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
+        include_ids = self._included_games(
+            user=user,
+            recommender=recommender,
+            include_ids=include_ids,
+            exclude_ids=exclude_ids,
+            exclude_compilations=exclude_compilations,
+            exclude_known=exclude_known,
+            exclude_owned=exclude_owned,
+            exclude_wishlist=exclude_wishlist,
+            exclude_play_count=exclude_play_count,
+            exclude_clusters=exclude_clusters,
         )
 
-    def _recommend_group_rating(self, users, recommender, params):
-        import turicreate as tc
+        if not include_ids:
+            return ()
 
+        recommendations = recommender.recommend(users=(user,))
+        recommendations = recommendations[
+            recommendations.index.isin(include_ids)
+        ].copy()
+        recommendations[(user, "rank")] = range(1, len(recommendations) + 1)
+
+        return recommendations
+
+    def _recommend_group_rating(
+        self,
+        *,
+        users,
+        recommender,
+        include_ids=None,
+        exclude_ids=None,
+        exclude_clusters=False,
+        exclude_compilations=True,
+    ):
         users = (user.lower() for user in users if user)
         users = [user for user in users if user in recommender.known_users]
         if not users:
             raise NotFound("none of the users could be found")
 
-        games = (
-            frozenset(
-                self.filter_queryset(self.get_queryset())
-                .order_by()
-                .values_list("bgg_id", flat=True)
-            )
-            & recommender.rated_games
+        # TODO include / exclude games based on users' collections (#228)
+        # Cf the collections module and recommend_random()
+        include_ids = self._included_games(
+            recommender=recommender,
+            include_ids=include_ids,
+            exclude_ids=exclude_ids,
+            exclude_clusters=exclude_clusters,
+            exclude_compilations=exclude_compilations,
         )
 
-        if not games:
+        if not include_ids:
             return ()
 
-        similarity_model = take_first(params.get("model")) == "similarity"
-
+        recommendations = recommender.recommend(users=users)
+        recommendations = recommendations[recommendations.index.isin(include_ids)]
         recommendations = (
-            recommender.recommend(
-                users=users,
-                games=games,
-                similarity_model=similarity_model,
-                # TODO we want to exclude games based on the group's collections, see #228
-                # exclude=(),
-                exclude_known=False,
-            )
-            .groupby(
-                key_column_names="bgg_id",
-                operations={"score": tc.aggregate.MEAN("score")},
-            )
-            .sort("score", ascending=False)
+            recommendations.xs(axis=1, key="score", level=1)
+            .mean(axis=1)
+            .sort_values(ascending=False)
         )
 
-        recommendations["rank"] = range(1, len(recommendations) + 1)
-
-        return recommendations
-
-    def _recommend_similar(self, like, recommender):
-        games = (
-            frozenset(
-                self.filter_queryset(self.get_queryset())
-                .order_by()
-                .values_list("bgg_id", flat=True)
-            )
-            & recommender.rated_games
+        return pd.DataFrame(
+            index=recommendations.index,
+            data={
+                ("_all", "score"): recommendations,
+                ("_all", "rank"): range(1, len(recommendations) + 1),
+            },
         )
 
-        if not games:
+    def _recommend_similar(
+        self,
+        *,
+        like,
+        recommender,
+        include_ids=None,
+        exclude_ids=None,
+        exclude_compilations=True,
+        exclude_clusters=False,
+    ):
+        like = frozenset(arg_to_iter(like)) & recommender.rated_games
+        if not like:
+            raise NotFound("Unable to create recommendations without games")
+
+        exclude_ids = frozenset(arg_to_iter(exclude_ids))
+        include_ids = self._included_games(
+            recommender=recommender,
+            include_ids=include_ids,
+            exclude_ids=exclude_ids | like,
+            exclude_compilations=exclude_compilations,
+            exclude_clusters=exclude_clusters,
+        )
+
+        if not include_ids:
             return ()
 
-        return recommender.recommend_similar(games=like, items=games)
+        scores = recommender.recommend_similar(games=like)["score"]
+        scores = scores[scores.index.isin(include_ids)].sort_values(ascending=False)
 
+        return pd.DataFrame(
+            index=scores.index,
+            data={
+                ("_all", "score"): scores,
+                ("_all", "rank"): range(1, len(scores) + 1),
+            },
+        )
+
+    # pylint: disable=redefined-builtin,unused-argument
     @action(
         detail=False,
         methods=("GET", "POST"),
         permission_classes=(AlwaysAllowAny,),
         pagination_class=BGGParamsPagination,
+        renderer_classes=tuple(api_settings.DEFAULT_RENDERER_CLASSES)
+        + (PaginatedCSVGameRenderer,),
     )
-    def recommend(self, request):
+    def recommend(self, request, format=None):
         """recommend games"""
-
-        site = request.query_params.get("site")
-
-        if site == "bga":
-            return self.recommend_bga(request)
 
         users = list(_extract_params(request, "user", str))
         like = list(_extract_params(request, "like", parse_int))
@@ -499,49 +656,73 @@ class GameViewSet(PermissionsModelViewSet):
         if not users and not like:
             return self.list(request)
 
-        if settings.PUBSUB_PUSH_ENABLED and users:
-            for user in users:
-                pubsub_push(user)
-
-        path = getattr(settings, "RECOMMENDER_PATH", None)
-        recommender = load_recommender(path, "bgg")
+        path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
+        recommender = load_recommender(path=path_light, site="light")
 
         if recommender is None:
             return self.list(request)
 
         include = frozenset(_extract_params(request, "include", parse_int))
         exclude = frozenset(_extract_params(request, "exclude", parse_int))
+        exclude_compilations = parse_bool(
+            request.query_params.get("exclude_compilations", True)
+        )
+        exclude_known = parse_bool(request.query_params.get("exclude_known"))
+        exclude_owned = parse_bool(request.query_params.get("exclude_owned"))
+        exclude_wishlist = parse_int(request.query_params.get("exclude_wishlist"))
+        exclude_play_count = parse_int(request.query_params.get("exclude_play_count"))
+        exclude_clusters = parse_bool(request.query_params.get("exclude_clusters"))
 
         recommendation = (
             self._recommend_rating(
                 user=users[0],
                 recommender=recommender,
-                params=dict(request.query_params),
-                include=include,
-                exclude=exclude,
+                include_ids=include,
+                exclude_ids=exclude,
+                exclude_compilations=exclude_compilations,
+                exclude_known=exclude_known,
+                exclude_owned=exclude_owned,
+                exclude_wishlist=exclude_wishlist,
+                exclude_play_count=exclude_play_count,
+                exclude_clusters=exclude_clusters,
             )
             if len(users) == 1
             else self._recommend_group_rating(
                 users=users,
                 recommender=recommender,
-                params=dict(request.query_params),
+                include_ids=include,
+                exclude_ids=exclude,
+                exclude_clusters=exclude_clusters,
+                exclude_compilations=exclude_compilations,
             )
             if users
-            else self._recommend_similar(like=like, recommender=recommender)
+            else self._recommend_similar(
+                like=like,
+                recommender=recommender,
+                include_ids=include,
+                exclude_ids=exclude,
+                exclude_compilations=exclude_compilations,
+                exclude_clusters=exclude_clusters,
+            )
         )
 
-        del like, path, recommender
+        del like, path_light, recommender
+
+        key = users[0].lower() if len(users) == 1 else "_all"
+        recommendation = recommendation.xs(axis=1, key=key)
+        recommendation.sort_values("rank", inplace=True)
+        recommendation = list(recommendation.itertuples(index=True))
 
         page = self.paginate_queryset(recommendation)
         if page is None:
-            recommendation = recommendation[:10]
+            recommendation = recommendation[:PAGE_SIZE]
             paginate = False
         else:
             recommendation = page
             paginate = True
         del page
 
-        recommendation = {game["bgg_id"]: game for game in recommendation}
+        recommendation = {game.Index: game for game in recommendation}
         queryset = self.filter_queryset(self.get_queryset())
         if include:
             queryset |= self.get_queryset().filter(bgg_id__in=include)
@@ -549,15 +730,13 @@ class GameViewSet(PermissionsModelViewSet):
 
         for game in games:
             rec = recommendation[game.bgg_id]
-            game.rec_rank = rec["rank"]
-            game.rec_rating = rec["score"] if users else None
-            game.rec_stars = rec.get("stars") if users else None
-
+            game.rec_rank = int(rec.rank)
+            game.rec_rating = rec.score if users else None
+            game.rec_stars = rec.stars if users and hasattr(rec, "stars") else None
+        games = sorted(games, key=lambda game: game.rec_rank)
         del recommendation
 
-        serializer = self.get_serializer(
-            instance=sorted(games, key=lambda game: game.rec_rank), many=True
-        )
+        serializer = self.get_serializer(instance=games, many=True)
         del games
 
         return (
@@ -566,93 +745,118 @@ class GameViewSet(PermissionsModelViewSet):
             else Response(serializer.data)
         )
 
-    # pylint: disable=no-self-use
-    def _recommend_group_rating_bga(self, users, recommender, params):
-        import turicreate as tc
-
-        users = [user for user in users if user in recommender.known_users]
-        if not users:
-            raise NotFound("none of the users could be found")
-
-        similarity_model = take_first(params.get("model")) == "similarity"
-
-        recommendations = (
-            recommender.recommend(
-                users=users,
-                games=recommender.rated_games,
-                similarity_model=similarity_model,
-                exclude_known=False,
-            )
-            .groupby(
-                key_column_names="bga_id",
-                operations={"score": tc.aggregate.MEAN("score")},
-            )
-            .sort("score", ascending=False)
-        )
-
-        recommendations["rank"] = range(1, len(recommendations) + 1)
-
-        return recommendations
-
     @action(
         detail=False,
         methods=("GET", "POST"),
         permission_classes=(AlwaysAllowAny,),
-        pagination_class=BGAParamsPagination,
     )
-    def recommend_bga(self, request):
-        """recommend games with Board Game Atlas data"""
+    def recommend_random(self, request, format=None):
+        """
+        Recommend a random selection of games based on the users'
+        preferences and collections.
+        """
 
-        path = getattr(settings, "BGA_RECOMMENDER_PATH", None)
-        recommender = load_recommender(path, "bga")
+        users = [user.lower() for user in _extract_params(request, "user", str)]
+        num_games = min(
+            parse_int(request.query_params.get("num_games")) or 1,
+            PAGE_SIZE,
+        )
+        random_seed = parse_int(request.query_params.get("random_seed"))
+
+        if not users:
+            return Response(
+                {"reason": "<user> cannot be empty"},
+                status=HTTP_400_BAD_REQUEST,
+            )
+
+        path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
+        recommender = load_recommender(path=path_light, site="light")
 
         if recommender is None:
-            return self.list(request)
-
-        users = list(_extract_params(request, "user", str))
-        like = list(_extract_params(request, "like", str))
-
-        recommendation = (
-            recommender.recommend_similar(games=like)
-            if like and not users
-            else self._recommend_group_rating_bga(
-                users, recommender, dict(request.query_params)
+            return Response(
+                {"reason": "unable to load recommender model"},
+                status=HTTP_501_NOT_IMPLEMENTED,
             )
-            if len(users) > 1
-            else recommender.recommend(
-                users=(take_first(users),),
-                similarity_model=request.query_params.get("model") == "similarity",
-                star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
+
+        include = frozenset(_extract_params(request, "include", parse_int))
+        exclude = frozenset(_extract_params(request, "exclude", parse_int))
+        owned = request.query_params.get("owned")
+        played = request.query_params.get("played")
+
+        queryset = self.filter_queryset(self.get_queryset()).order_by()
+        if include:
+            queryset |= self.get_queryset().filter(bgg_id__in=include)
+        if exclude:
+            queryset = queryset.exclude(bgg_id__in=exclude)
+        if owned:
+            collection_bgg_ids = self._collection(
+                users=users,
+                kind=owned.lower(),
+                owned=True,
+            )
+            queryset = queryset.filter(bgg_id__in=collection_bgg_ids)
+        if played:
+            collection_bgg_ids = self._collection(
+                users=users,
+                kind=played.lower(),
+                play_count__gt=0,
+            )
+            queryset = queryset.filter(bgg_id__in=collection_bgg_ids)
+        bgg_ids = list(queryset.values_list("bgg_id", flat=True))
+
+        recommendations = recommender.recommend_random_games_as_numpy(
+            users=users,
+            games=bgg_ids,
+            num_games=num_games,
+            random_seed=random_seed,
+        )
+        recommendations_order = dict(
+            zip(
+                recommendations,
+                range(len(recommendations)),
             )
         )
 
-        del path, recommender, users, like
+        games = queryset.filter(bgg_id__in=recommendations)
+        for game in games:
+            game.rec_rank = recommendations_order[game.bgg_id] + 1
+        games = sorted(games, key=lambda game: game.rec_rank)
 
-        page = self.paginate_queryset(recommendation)
-        return (
-            self.get_paginated_response(page)
-            if page is not None
-            else Response(list(recommendation[:10]))
+        serializer = self.get_serializer(instance=games, many=True)
+        return Response(
+            OrderedDict(
+                [
+                    ("count", len(serializer.data)),
+                    ("next", None),
+                    ("previous", None),
+                    ("results", serializer.data),
+                ]
+            )
         )
 
-    # pylint: disable=invalid-name
     @action(detail=True)
-    def similar(self, request, pk=None):
-        """find games similar to this game"""
+    def similar(self, request, pk=None, format=None):
+        """Find games similar to this game."""
 
-        site = request.query_params.get("site")
-
-        if site == "bga":
-            return self.similar_bga(request, pk)
-
-        path = getattr(settings, "RECOMMENDER_PATH", None)
-        recommender = load_recommender(path)
+        path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
+        recommender = load_recommender(path=path_light, site="light")
 
         if recommender is None:
             raise NotFound(f"cannot find similar games to <{pk}>")
 
-        games = recommender.similar_games(parse_int(pk), num_games=0)
-        del recommender
+        pk = parse_int(pk)
+        include_ids = self._included_games(
+            recommender=recommender,
+            exclude_ids=pk,
+            exclude_compilations=True,
+            exclude_clusters=True,
+        )
+        games = [
+            game
+            for game in recommender.similar_games([pk]).index
+            if game in include_ids
+        ]
+        del path_light, recommender, include_ids
 
         page = self.paginate_queryset(games)
         if page is None:
@@ -663,14 +867,15 @@ class GameViewSet(PermissionsModelViewSet):
             paginate = True
         del page
 
-        games = {game["similar"]: game for game in games}
+        games = {game: i + 1 for i, game in enumerate(games)}
         results = self.get_queryset().filter(bgg_id__in=games)
         for game in results:
-            game.sort_rank = games[game.bgg_id]["rank"]
+            game.sort_rank = games[game.bgg_id]
         del games
 
         serializer = self.get_serializer(
-            instance=sorted(results, key=lambda game: game.sort_rank), many=True
+            instance=sorted(results, key=lambda game: game.sort_rank),
+            many=True,
         )
         del results
 
@@ -680,30 +885,8 @@ class GameViewSet(PermissionsModelViewSet):
             else Response(serializer.data)
         )
 
-    # pylint: disable=unused-argument,invalid-name
     @action(detail=True)
-    def similar_bga(self, request, pk=None):
-        """find games similar to this game with BGA data"""
-
-        path = getattr(settings, "BGA_RECOMMENDER_PATH", None)
-        recommender = load_recommender(path, "bga")
-
-        if recommender is None:
-            raise NotFound(f"cannot find similar games to <{pk}>")
-
-        games = recommender.similar_games(pk, num_games=0)
-
-        del path, recommender
-
-        page = self.paginate_queryset(games)
-        return (
-            self.get_paginated_response(page)
-            if page is not None
-            else Response(list(games[:10]))
-        )
-
-    @action(detail=True)
-    def rankings(self, request, pk=None):
+    def rankings(self, request, pk=None, format=None):
         """Find historical rankings of a game."""
 
         filters = {
@@ -724,7 +907,7 @@ class GameViewSet(PermissionsModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False)
-    def history(self, request):
+    def history(self, request, format=None):
         """History of the top rankings."""
 
         top = parse_int(request.query_params.get("top")) or 100
@@ -768,9 +951,8 @@ class GameViewSet(PermissionsModelViewSet):
         ]
         return Response(data)
 
-    # pylint: disable=no-self-use
     @action(detail=False)
-    def updated_at(self, request):
+    def updated_at(self, request, format=None):
         """Get date of last model update."""
         updated_at = model_updated_at()
         if not updated_at:
@@ -778,17 +960,12 @@ class GameViewSet(PermissionsModelViewSet):
         return Response({"updated_at": updated_at})
 
     @action(detail=False)
-    def version(self, request):
+    def version(self, request, format=None):
         """Get project and server version."""
-        return Response(
-            {
-                "project_version": project_version(),
-                "server_version": parse_version(os.getenv("GAE_VERSION")),
-            }
-        )
+        return Response(server_version())
 
     @action(detail=False)
-    def stats(self, request):
+    def stats(self, request, format=None):
         """get games stats"""
 
         result = {"updated_at": model_updated_at()}
@@ -838,9 +1015,9 @@ class PersonViewSet(PermissionsModelViewSet):
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
 
-    # pylint: disable=unused-argument,invalid-name
+    # pylint: disable=invalid-name,redefined-builtin,unused-argument
     @action(detail=True)
-    def games(self, request, pk=None):
+    def games(self, request, pk=None, format=None):
         """find all games for a person"""
 
         person = self.get_object()
@@ -909,9 +1086,9 @@ class UserViewSet(PermissionsModelViewSet):
     lookup_url_kwarg = "pk"
     stats_sites = GameViewSet.stats_sites
 
-    # pylint: disable=unused-argument,invalid-name
+    # pylint: disable=invalid-name,redefined-builtin,unused-argument
     @action(detail=True)
-    def stats(self, request, pk=None):
+    def stats(self, request, pk=None, format=None):
         """get user stats"""
         user = self.get_object()
 
@@ -936,6 +1113,60 @@ class UserViewSet(PermissionsModelViewSet):
             data[key] = result
 
         return Response(data)
+
+    @action(detail=True)
+    def has_collection(self, request, pk=None, format=None):
+        """Check if a user has a collection."""
+        # TODO cross check with recommender.known_users?
+        if Collection.objects.filter(user__name__iexact=pk).exists():
+            return Response(status=HTTP_204_NO_CONTENT)
+        return Response(
+            {"detail": f"no collection items for user <{pk}>"},
+            status=HTTP_404_NOT_FOUND,
+        )
+
+    @action(
+        detail=True,
+        methods=("POST",),
+        permission_classes=(AlwaysAllowAny,),
+        throttle_classes=(AnonRateThrottle,),
+    )
+    def premium_user_request(self, request, pk=None, format=None):
+        """Send a request to the admin to become a premium user."""
+        user = self.get_object()
+        message = next(_extract_params(request, "message"), None)
+        access_days = next(_extract_params(request, "access_days", parse_int), None)
+        return _gitlab_merge_request(
+            users=[user.name],
+            access_days=access_days or 365,
+            message=message,
+        )
+
+    @action(
+        detail=False,
+        methods=("POST",),
+        permission_classes=(AlwaysAllowAny,),
+        throttle_classes=(AnonRateThrottle,),
+    )
+    def premium_users_request(self, request, format=None):
+        """Send a request to the admin to become premium users."""
+
+        users = [user.lower() for user in _extract_params(request, "user")]
+        user_names = list(
+            self.get_queryset().filter(name__in=users).values_list("name", flat=True)
+        )
+
+        if not user_names:
+            raise NotFound(f"none of the users {users} could be found")
+
+        message = next(_extract_params(request, "message"), None)
+        access_days = next(_extract_params(request, "access_days", parse_int), None)
+
+        return _gitlab_merge_request(
+            users=user_names,
+            access_days=access_days or 365,
+            message=message,
+        )
 
 
 class CollectionViewSet(ModelViewSet):
@@ -993,8 +1224,9 @@ class RankingViewSet(PermissionsModelViewSet):
         "date",
     )
 
+    # pylint: disable=redefined-builtin,unused-argument
     @action(detail=False)
-    def dates(self, request):
+    def dates(self, request, format=None):
         """Find all available dates with rankings."""
 
         query_set = self.get_queryset().order_by("ranking_type", "date")
@@ -1005,9 +1237,8 @@ class RankingViewSet(PermissionsModelViewSet):
 
         return Response(query_set.values("ranking_type", "date").distinct())
 
-    # pylint: disable=unused-argument
     @action(detail=False)
-    def games(self, request):
+    def games(self, request, format=None):
         """Similar to self.list(), but with full game details."""
 
         fat = parse_bool(next(_extract_params(request, "fat"), None))

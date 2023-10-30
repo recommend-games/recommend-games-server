@@ -18,7 +18,7 @@ rgApp.controller('NavController', function NavController(
     }
 
     function updateNewsCount() {
-        newsService.getNews(0, true)
+        newsService.getNews(0, false, true)
             .then(function (response) {
                 var lastVisit = newsService.getLastVisit(),
                     count = 0;

@@ -12,9 +12,11 @@ rgApp.controller('ListController', function ListController(
     $q,
     $route,
     $routeParams,
+    $sce,
     $scope,
     $timeout,
     $window,
+    MAINTENANCE_MODE,
     filterService,
     gamesService,
     personsService,
@@ -25,8 +27,8 @@ rgApp.controller('ListController', function ListController(
         params = filterService.getParams($routeParams),
         searchPromise = null,
         userStats = {},
-        canonical,
-        fetchPopularGames;
+        fetchPopularGames,
+        collectionPromises;
 
     function filtersActive() {
         return _.sum([
@@ -36,6 +38,7 @@ rgApp.controller('ListController', function ListController(
             !!$scope.complexity.enabled,
             !!$scope.year.enabled,
             !!$scope.cooperative,
+            !!$scope.bgaAvailable,
             !!$scope.gameType,
             !!$scope.category,
             !!$scope.mechanic,
@@ -104,6 +107,9 @@ rgApp.controller('ListController', function ListController(
 
         if (_.isNil(promise)) {
             filters = filterService.filtersFromParams(parsed);
+            if (!_.isEmpty(filters.like)) {
+                filters.num_votes__gte = 30;
+            }
             promise = gamesService.getGames(page, filters);
         }
 
@@ -162,13 +168,19 @@ rgApp.controller('ListController', function ListController(
                 $log.error(response);
                 $scope.empty = false;
                 $scope.total = null;
-                toastr.error(
-                    'Sorry, there was an error. Tap to try again...',
-                    'Error loading games',
-                    {'onTap': function onTap() {
-                        return fetchGames(page);
-                    }}
-                );
+
+                if (MAINTENANCE_MODE) {
+                    $scope.maintenanceMode = true;
+                    $scope.maintenanceMessage = $sce.trustAsHtml('For more details, please read <a href="https://blog.recommend.games/posts/announcement-hiatus/">this blog post</a>.');
+                } else {
+                    toastr.error(
+                        'Sorry, there was an error. Tap to try again...',
+                        'Error loading games',
+                        {'onTap': function onTap() {
+                            return fetchGames(page);
+                        }}
+                    );
+                }
             })
             .then(function () {
                 $(function () {
@@ -179,9 +191,14 @@ rgApp.controller('ListController', function ListController(
             });
     }
 
-    function updateParams() {
+    function updateParams(updates) {
         var parsed = filterService.paramsFromScope($scope);
         parsed.filters = null;
+        if (_.isPlainObject(updates)) {
+            _.forOwn(updates, function (value, key) {
+                parsed[key] = value;
+            });
+        }
         $route.updateParams(parsed);
     }
 
@@ -197,6 +214,16 @@ rgApp.controller('ListController', function ListController(
     }
 
     $scope.user = _.join(params.for, ', ');
+    $scope.userList = filterService.parseList($scope.user, false);
+    $scope.whatToPlay = params.whatToPlay;
+    $scope.randomSeed = params.randomSeed;
+    $scope.userCollections = null;
+    $scope.missingCollections = null;
+
+    $scope.whatToPlayConfig = {
+        'owned': params.whatToPlayOwned,
+        'played': params.whatToPlayPlayed
+    };
 
     $scope.exclude = {
         'rated': filterService.booleanDefault(params.excludeRated, true),
@@ -205,8 +232,6 @@ rgApp.controller('ListController', function ListController(
         'played': filterService.booleanDefault(params.excludePlayed, false),
         'clusters': filterService.booleanDefault(params.excludeClusters, true)
     };
-
-    $scope.similarity = params.similarity;
 
     $scope.search = params.search;
 
@@ -291,9 +316,13 @@ rgApp.controller('ListController', function ListController(
         }
     };
 
+    $scope.maintenanceMode = false;
+    $scope.maintenanceMessage = null;
+
     $scope.includeGames = params.include;
     $scope.excludeGames = params.exclude;
     $scope.cooperative = params.cooperative;
+    $scope.bgaAvailable = params.bgaAvailable;
     $scope.gameType = params.gameType;
     $scope.category = params.category;
     $scope.mechanic = params.mechanic;
@@ -304,9 +333,11 @@ rgApp.controller('ListController', function ListController(
     $scope.ordering = params.ordering || 'rg';
 
     $scope.fetchGames = fetchGames;
+    $scope.now = _.now;
     $scope.pad = _.padStart;
     $scope.isEmpty = _.isEmpty;
     $scope.size = _.size;
+    $scope.toLower = _.toLower;
     $scope.empty = false;
     $scope.total = null;
     $scope.renderSlider = renderSlider;
@@ -315,12 +346,18 @@ rgApp.controller('ListController', function ListController(
     $scope.selectionActive = false;
     $scope.groupRecommendation = _.size(params.for) > 1;
     $scope.userNotFound = false;
-    $scope.hideScore = !_.isEmpty(params.for) && params.similarity;
+    $scope.hideScore = params.whatToPlay;
     $scope.statsActive = false;
     $scope.userStats = {};
+    $scope.collectionRequestValidityOptions = _.range(1, 13);
+    $scope.collectionRequestValidity = 12;
+    $scope.collectionRequestDonation = false;
+    $scope.collectionRequestMessage = null;
 
     $scope.clearFilters = function clearFilters() {
         $scope.user = null;
+        $scope.userCollections = null;
+        $scope.missingCollections = null;
         $scope.likedGames = null;
         $scope.includeGames = null;
         $scope.excludeGames = null;
@@ -331,6 +368,7 @@ rgApp.controller('ListController', function ListController(
         $scope.complexity.enabled = false;
         $scope.year.enabled = false;
         $scope.cooperative = null;
+        $scope.bgaAvailable = false;
         $scope.gameType = null;
         $scope.category = null;
         $scope.mechanic = null;
@@ -486,6 +524,20 @@ rgApp.controller('ListController', function ListController(
         });
     }
 
+    function submitCollectionRequest(users, validity, message) {
+        return usersService.submitPremiumUsersRequest(users, validity, message, false)
+            .then(function (response) {
+                $log.info(response);
+                $('#collection-request-modal').modal('hide');
+                $('#collection-request-modal-success').modal('show');
+            })
+            .catch(function (response) {
+                $log.error(response);
+                $('#collection-request-modal').modal('hide');
+                $('#collection-request-modal-error').modal('show');
+            });
+    }
+
     $scope.contains = contains;
     $scope.likeGame = likeGame;
     $scope.unlikeGame = unlikeGame;
@@ -493,6 +545,7 @@ rgApp.controller('ListController', function ListController(
     $scope.fetchAndUpdate = fetchAndUpdate;
     $scope.updateSearchGames = updateSearchGames;
     $scope.updateStats = updateStats;
+    $scope.submitCollectionRequest = submitCollectionRequest;
     $scope.modelUpdatedAt = null;
     $scope.userUpdatedAt = null;
 
@@ -502,6 +555,11 @@ rgApp.controller('ListController', function ListController(
     $scope.$watch('complexity.enabled', renderSlider);
     $scope.$watch('year.enabled', renderSlider);
     $scope.$watch('user', function () { $scope.groupRecommendation = _.includes($scope.user, ','); });
+    $scope.$watch('user', function () { $scope.userList = filterService.parseList($scope.user, false); });
+
+    if (params.whatToPlay) {
+        showPane('what-to-play');
+    }
 
     fetchGames(1)
         .then(function () {
@@ -524,6 +582,20 @@ rgApp.controller('ListController', function ListController(
 
             renderSlider();
         });
+
+    collectionPromises = _(params.for).map(function (user) {
+        return [user, usersService.checkUserHasCollection(user, true)];
+    }).fromPairs();
+
+    $q.all(collectionPromises)
+        .then(function (collections) {
+            $scope.userCollections = collections;
+            $scope.missingCollections = _(collections).toPairs()
+                .reject(_.property(1))
+                .map(_.property(0))
+                .value();
+        })
+        .catch($log.error);
 
     if (params.designer) {
         personsService.getPerson(params.designer)
@@ -604,10 +676,6 @@ rgApp.controller('ListController', function ListController(
     gamesService.setCanonicalUrl($location.path(), filterService.getParams($routeParams));
     gamesService.setImage();
     gamesService.setDescription();
-
-    canonical = gamesService.urlAndPath($location.path(), undefined, true);
-    $scope.disqusId = canonical.path;
-    $scope.disqusUrl = canonical.url;
 
     $http.get('https://blog.recommend.games/index.xml')
         .then(function (response) {

@@ -13,10 +13,12 @@ rgApp.controller('HistoryController', function HistoryController(
     $scope,
     $timeout,
     API_URL,
+    NEW_RANKING_DATE,
     gamesService
 ) {
     var $ = angular.element,
-        rankingType = $routeParams.type || 'fac',
+        defaultRankingType = moment() >= NEW_RANKING_DATE ? 'r_g' : 'fac',
+        rankingType = $routeParams.type || defaultRankingType,
         defaultStartDate = moment().subtract(1, 'year'),
         startDateParam = moment($routeParams.startDate || null),
         startDate = startDateParam.isValid() ? startDateParam : defaultStartDate,
@@ -57,9 +59,8 @@ rgApp.controller('HistoryController', function HistoryController(
                 position: 'right'
             }
         },
-        canonicalPath = rankingType === 'fac' ? '/' + _.split($location.path(), '/')[1] : $location.path(),
-        canonicalParams = {},
-        canonical;
+        canonicalPath = rankingType === defaultRankingType ? '/' + _.split($location.path(), '/')[1] : $location.path(),
+        canonicalParams = {};
 
     $scope.type = rankingType;
     $scope.top = top;
@@ -129,11 +130,11 @@ rgApp.controller('HistoryController', function HistoryController(
         });
     }
 
-    $http.get(API_URL + 'games/history/', {'params': params})
+    $http.get(API_URL + 'games/history.json', {'params': params})
         .then(function (response) {
             $scope.data = response.data;
             $scope.datasets = makeDataSets(response.data, rankingType, startDate, endDate);
-            return findElement('#rg-history');
+            return findElement('#rg-history-container');
         })
         .then(function (container) {
             var rows = _.size($scope.datasets),
@@ -174,8 +175,4 @@ rgApp.controller('HistoryController', function HistoryController(
     gamesService.setDescription('Visualization of the top ' + top + ' history');
     gamesService.setCanonicalUrl(canonicalPath, canonicalParams);
     gamesService.setImage(); // TODO should be an image of the canvas
-
-    canonical = gamesService.urlAndPath($location.path(), canonicalParams, true);
-    $scope.disqusId = canonical.path;
-    $scope.disqusUrl = canonical.url;
 });

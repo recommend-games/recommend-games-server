@@ -7,41 +7,49 @@ verify_ssl = true
 python_version = "3.7"
 
 [packages]
-board-game-recommender = "*"
+board-game-recommender = {extras = ["light"], version = ">=3.5.1,<4.0.0"}
 django = ">=3.1.2"
+django-api-proxy = "*"
 django-extensions = "*"
 django-filter = "*"
-django-rest-framework-proxy = {ref = "django3", git = "https://github.com/MarkusShepherd/django-rest-framework-proxy.git"}
 djangorestframework = "*"
-google-cloud-pubsub = "*"
+djangorestframework-csv = "*"
 gunicorn = "*"
-markdown = "*"
 pandas = "*"
+python-gitlab = "*"
 pytility = {extras = ["dates"], version = "*"}
-turicreate = "*"
+pyyaml = "*"
 whitenoise = {extras = ["brotli"], version = "*"}
 
 [dev-packages]
-black = "==21.7b0" # no released version, so need to pin exact pre-release version
-board-game-scraper = {extras = ["cloud"], version = ">=2.11.3"}
+black = "*"
+board-game-recommender = {extras = ["full", "light", "trust"], version = ">=3.3.0,<4.0.0"}
+board-game-scraper = {extras = ["cloud"], version = ">=2.21.0"}
 board-game-utils = "*"
 csvkit = "*"
+decorator = "*"
 dedupe = ">=2.0.6"
 gitpython = "*"
 ipython = "*"
+jmespath = "*"
 lxml = "*"
+markdown = "*"
 mypy = "*"
 pre-commit = "*"
+prettytable = "*"
 psutil = "*"
 pylint = "*"
 pynt = "*"
 pynt-contrib = "*"
+pyspark = "<3.2.0"
 python-dateutil = "*"
 python-dotenv = "*"
 rcssmin = "*"
 requests = "*"
 rjsmin = "*"
-scikit-learn = "*"
+scikit-learn = "==1.0.2" # should match version used for kennerspiel.joblib
+scipy = "==1.7.3" # should match version used for kennerspiel.joblib
 smart-open = {extras = ["all"], version = ">=1.8.1"}
 snaptime = "*"
 tqdm = "*"
+turicreate = "*"

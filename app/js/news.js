@@ -6,6 +6,7 @@
 
 rgApp.controller('NewsController', function NewsController(
     $location,
+    $log,
     $scope,
     gamesService,
     newsService
@@ -15,12 +16,15 @@ rgApp.controller('NewsController', function NewsController(
             .then(function (response) {
                 $scope.articles = response.page === 0 || _.isEmpty($scope.articles) ? response.articles
                     : _.concat($scope.articles, response.articles);
+                $scope.empty = _.isEmpty($scope.articles);
                 $scope.nextPage = response.nextPage;
                 $scope.total = response.total;
+            })
+            .catch(function (response) {
+                $log.error(response);
+                $scope.empty = _.isEmpty($scope.articles);
             });
     }
-
-    var canonical;
 
     $scope.fetchNews = fetchNews;
 
@@ -34,8 +38,4 @@ rgApp.controller('NewsController', function NewsController(
     gamesService.setCanonicalUrl($location.path());
 
     newsService.setLastVisit();
-
-    canonical = gamesService.urlAndPath($location.path(), undefined, true);
-    $scope.disqusId = canonical.path;
-    $scope.disqusUrl = canonical.url;
 });

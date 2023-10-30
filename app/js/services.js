@@ -11,12 +11,10 @@ rgApp.factory('gamesService', function gamesService(
     $http,
     $q,
     $sessionStorage,
-    $window,
     API_URL,
     APP_TITLE,
     CANONICAL_URL,
     DEFAULT_IMAGE,
-    GA_TRACKING_ID,
     SITE_DESCRIPTION
 ) {
     var $ = angular.element,
@@ -213,7 +211,7 @@ rgApp.factory('gamesService', function gamesService(
     }
 
     function getGames(page, filters, noblock) {
-        var url = API_URL + 'games/',
+        var url = API_URL + 'games',
             params = _.isEmpty(filters) ? {} : _.cloneDeep(filters);
         page = page || null;
 
@@ -221,13 +219,16 @@ rgApp.factory('gamesService', function gamesService(
             params.page = page;
         }
 
-        if (!_.isEmpty(params.user) || !_.isEmpty(params.like)) {
-            url += 'recommend/';
+        if (params.whatToPlay && !_.isEmpty(params.user)) {
+            url += '/recommend_random';
+            params.whatToPlay = null;
+        } else if (!_.isEmpty(params.user) || !_.isEmpty(params.like)) {
+            url += '/recommend';
         }
 
         $log.debug('query parameters', params);
 
-        return $http.get(url, {'params': params, 'noblock': !!noblock})
+        return $http.get(url + '.json', {'params': params, 'noblock': !!noblock})
             .then(function (response) {
                 var games = _.get(response, 'data.results');
 
@@ -268,7 +269,7 @@ rgApp.factory('gamesService', function gamesService(
             return $q.resolve(cached);
         }
 
-        return $http.get(API_URL + 'games/' + id + '/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'games/' + id + '.json', {'noblock': !!noblock})
             .then(function (response) {
                 var responseId = _.get(response, 'data.bgg_id'),
                     game;
@@ -329,9 +330,13 @@ rgApp.factory('gamesService', function gamesService(
     };
 
     service.getSimilarGames = function getSimilarGames(gameId, page, noblock) {
+        var url = API_URL + 'games/' + gameId + '/similar.json',
+            params = {'num_votes__gte': 30};
+
         page = page || null;
-        var url = API_URL + 'games/' + gameId + '/similar/',
-            params = page ? {'page': page} : null;
+        if (page) {
+            params.page = page;
+        }
 
         return $http.get(url, {'params': params, 'noblock': !!noblock})
             .then(function (response) {
@@ -371,7 +376,7 @@ rgApp.factory('gamesService', function gamesService(
         }
 
         function fetchList(page) {
-            return $http.get(API_URL + model + '/', {'params': {'page': page}, 'noblock': !!noblock})
+            return $http.get(API_URL + model + '.json', {'params': {'page': page}, 'noblock': !!noblock})
                 .then(function (response) {
                     var results = _.get(response, 'data.results', []),
                         next = _.get(response, 'data.next'),
@@ -422,7 +427,7 @@ rgApp.factory('gamesService', function gamesService(
             return $q.resolve($sessionStorage.games_stats.updated_at_str);
         }
 
-        return $http.get(API_URL + 'games/updated_at/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'games/updated_at.json', {'noblock': !!noblock})
             .then(function (response) {
                 var data = processDate(response.data, 'updated_at');
                 if (!data.updated_at_str) {
@@ -463,7 +468,7 @@ rgApp.factory('gamesService', function gamesService(
             return $q.resolve($sessionStorage.games_stats);
         }
 
-        return $http.get(API_URL + 'games/stats/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'games/stats.json', {'noblock': !!noblock})
             .then(function (response) {
                 var stats = response.data;
                 if (_.isEmpty(stats)) {
@@ -496,7 +501,7 @@ rgApp.factory('gamesService', function gamesService(
             params.date__lte = date.format('YYYY-MM-DD');
         }
 
-        return $http.get(API_URL + 'rankings/games/', {'params': params, 'noblock': !!noblock})
+        return $http.get(API_URL + 'rankings/games.json', {'params': params, 'noblock': !!noblock})
             .then(function (response) {
                 var rankings = _.get(response, 'data.results'),
                     chartDate = moment(_.get(rankings, '[0].date')),
@@ -550,7 +555,7 @@ rgApp.factory('gamesService', function gamesService(
             return $q.resolve(parsed);
         }
 
-        return $http.get(API_URL + 'rankings/dates/', {'params': params, 'noblock': !!noblock})
+        return $http.get(API_URL + 'rankings/dates.json', {'params': params, 'noblock': !!noblock})
             .then(function (response) {
                 var rankings = _.get(response, 'data'),
                     dates = _(rankings)
@@ -674,10 +679,6 @@ rgApp.factory('gamesService', function gamesService(
             '<meta property="og:url" content="' + canonical.url + '" />'
         );
 
-        if (GA_TRACKING_ID && $window.gtag) {
-            $window.gtag('config', GA_TRACKING_ID, {'page_path': '/' + canonical.path});
-        }
-
         return canonical;
     };
 
@@ -768,7 +769,7 @@ rgApp.factory('usersService', function usersService(
 
         var userUri = encodeURIComponent(user);
 
-        return $http.get(API_URL + 'users/' + userUri + '/stats/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'users/' + userUri + '/stats.json', {'noblock': !!noblock})
             .then(function (response) {
                 var stats = response.data;
                 if (_.isEmpty(stats)) {
@@ -784,6 +785,47 @@ rgApp.factory('usersService', function usersService(
                 response = _.isString(response) ? response : 'Unable to load stats for "' + user + '".';
                 return $q.reject(response);
             });
+    };
+
+    service.checkUserHasCollection = function checkUserHasCollection(user, noblock) {
+        if (!user) {
+            return $q.reject('User name is required.');
+        }
+
+        user = _.toLower(user);
+
+        if (!_.isEmpty($sessionStorage['user_has_collection_' + user])) {
+            return $q.resolve($sessionStorage['user_has_collection_' + user]);
+        }
+
+        var userUri = encodeURIComponent(user);
+
+        return $http.get(API_URL + 'users/' + userUri + '/has_collection.json', {'noblock': !!noblock})
+            .then(function () {
+                $sessionStorage['user_has_collection_' + user] = true;
+                return true;
+            })
+            .catch(function () {
+                $sessionStorage['user_has_collection_' + user] = false;
+                return false;
+            });
+    };
+
+    service.submitPremiumUsersRequest = function submitPremiumUsersRequest(users, validity, message, noblock) {
+        if (_.isEmpty(users)) {
+            return $q.reject('User names are required.');
+        }
+
+        users = _.map(users, _.toLower);
+        validity = _.parseInt(validity) || 12;
+
+        var data = {
+            'user': users,
+            'access_days': validity * 30,
+            'message': message
+        };
+
+        return $http.post(API_URL + 'users/premium_users_request.json', data, {'noblock': !!noblock});
     };
 
     return service;
@@ -810,7 +852,7 @@ rgApp.factory('personsService', function personsService(
             return $q.resolve(cached);
         }
 
-        return $http.get(API_URL + 'persons/' + id + '/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'persons/' + id + '.json', {'noblock': !!noblock})
             .then(function (response) {
                 var responseId = _.get(response, 'data.bgg_id'),
                     person;
@@ -840,14 +882,21 @@ rgApp.factory('newsService', function newsService(
     $log,
     $q,
     $sessionStorage,
-    API_URL
+    API_URL,
+    NEWS_API_FALLBACK_URL
 ) {
     var service = {};
 
     $sessionStorage.news = [];
 
-    function formatUrl(page) {
-        return API_URL + 'news/news_' + _.padStart(page, 5, '0') + '.json';
+    function formatUrl(page, fallback) {
+        var file = 'news_' + _.padStart(page, 5, '0') + '.json';
+
+        if (fallback) {
+            return NEWS_API_FALLBACK_URL + file;
+        }
+
+        return API_URL + 'news/' + file;
     }
 
     function processNews(article) {
@@ -856,14 +905,14 @@ rgApp.factory('newsService', function newsService(
         return article;
     }
 
-    service.getNews = function getNews(page, noblock) {
+    function getNews(page, fallback, noblock) {
         page = _.parseInt(page) || 0;
 
         if (!_.isEmpty($sessionStorage.news[page])) {
             return $q.resolve($sessionStorage.news[page]);
         }
 
-        return $http.get(formatUrl(page), {'noblock': !!noblock})
+        return $http.get(formatUrl(page, fallback), {'noblock': !!noblock})
             .then(function (response) {
                 var articles = _.map(_.get(response, 'data.results'), processNews),
                     result = {
@@ -879,6 +928,11 @@ rgApp.factory('newsService', function newsService(
             })
             .catch(function (response) {
                 $log.error(response);
+
+                if (!fallback) {
+                    return getNews(page, true, noblock);
+                }
+
                 return {
                     'page': page,
                     'articles': [],
@@ -886,7 +940,9 @@ rgApp.factory('newsService', function newsService(
                     'total': null
                 };
             });
-    };
+    }
+
+    service.getNews = getNews;
 
     service.setLastVisit = function setLastVisit(date) {
         date = moment(date || undefined);
@@ -1015,11 +1071,27 @@ rgApp.factory('filterService', function filterService(
         return orderingValues[ordering] || orderingValues.rg;
     }
 
+    function validateCollection(kind, potentialUsers) {
+        kind = _.toLower(kind);
+        if (_.includes(['_all', '_any', '_none'], kind)) {
+            return kind;
+        }
+
+        potentialUsers = _.map(potentialUsers, _.toLower);
+        if (_.includes(potentialUsers, kind)) {
+            return kind;
+        }
+
+        return null;
+    }
+
     function parseParams(params) {
         params = params || {};
 
         var usersFor = parseList(params.for, true),
             user = !_.isEmpty(usersFor) ? usersFor : parseList(params.user, true),
+            whatToPlay = !_.isEmpty(user) && booleanDefault(params.whatToPlay, false),
+            randomSeed = _.parseInt(params.randomSeed) || null,
             playerCount = _.parseInt(params.playerCount) || null,
             playTime = _.parseInt(params.playTime) || null,
             playerAge = _.parseInt(params.playerAge) || null,
@@ -1030,14 +1102,16 @@ rgApp.factory('filterService', function filterService(
             excludeWishlist = booleanDefault(params.excludeWishlist, false, _.size(user) !== 1),
             excludePlayed = booleanDefault(params.excludePlayed, false, _.size(user) !== 1),
             excludeClusters = booleanDefault(params.excludeClusters, true, _.size(user) !== 1),
-            similarity = booleanDefault(params.similarity, false, _.isEmpty(user)),
             yearMin = _.parseInt(params.yearMin),
             yearMax = _.parseInt(params.yearMax),
             ordering = validateOrdering(params.ordering),
-            like = parseIntList(params.like);
+            like = parseIntList(params.like),
+            bgaAvailable = booleanDefault(params.bgaAvailable, false);
 
         return {
             'for': _.isEmpty(user) ? null : user,
+            'whatToPlay': whatToPlay ? true : null,
+            'randomSeed': whatToPlay ? randomSeed : null,
             'include': _.isEmpty(include) ? null : include,
             'exclude': _.isEmpty(exclude) ? null : exclude,
             'excludeRated': excludeRated === false ? false : null,
@@ -1045,7 +1119,8 @@ rgApp.factory('filterService', function filterService(
             'excludeWishlist': excludeWishlist === true ? true : null,
             'excludePlayed': excludePlayed === true ? true : null,
             'excludeClusters': excludeClusters === false ? false : null,
-            'similarity': similarity === true ? true : null,
+            'whatToPlayOwned': whatToPlay ? validateCollection(params.whatToPlayOwned, user) : null,
+            'whatToPlayPlayed': whatToPlay ? validateCollection(params.whatToPlayPlayed, user) : null,
             'like': !_.isEmpty(like) && _.isEmpty(user) ? like : null,
             'search': _.trim(params.search) || null,
             'playerCount': playerCount,
@@ -1059,6 +1134,7 @@ rgApp.factory('filterService', function filterService(
             'yearMin': yearMin && yearMin > yearFloor ? yearMin : null,
             'yearMax': yearMax && yearMax <= yearNow ? yearMax : null,
             'cooperative': validateBoolean(params.cooperative),
+            'bgaAvailable': bgaAvailable || null,
             'gameType': _.parseInt(params.gameType) || null,
             'category': _.parseInt(params.category) || null,
             'mechanic': _.parseInt(params.mechanic) || null,
@@ -1074,12 +1150,15 @@ rgApp.factory('filterService', function filterService(
         var userList = parseList(scope.user, true),
             include = parseIntList(scope.includeGames),
             exclude = parseIntList(scope.excludeGames),
+            whatToPlay = parseBoolean(scope.whatToPlay),
             result = {
                 'for': _.isEmpty(userList) ? null : userList,
+                'whatToPlay': whatToPlay,
                 'include': _.isEmpty(include) ? null : include,
                 'exclude': _.isEmpty(exclude) ? null : exclude,
                 'search': scope.search,
                 'cooperative': scope.cooperative,
+                'bgaAvailable': scope.bgaAvailable,
                 'gameType': scope.gameType,
                 'category': scope.category,
                 'mechanic': scope.mechanic,
@@ -1128,20 +1207,28 @@ rgApp.factory('filterService', function filterService(
             result.yearMax = null;
         }
 
-        if (_.isEmpty(userList)) {
+        if (_.isEmpty(userList) || whatToPlay) {
             result.excludeRated = null;
             result.excludeOwned = null;
             result.excludeWishlist = null;
             result.excludePlayed = null;
             result.excludeClusters = null;
-            result.similarity = null;
         } else {
             result.excludeRated = parseBoolean(_.get(scope, 'exclude.rated'));
             result.excludeOwned = parseBoolean(_.get(scope, 'exclude.owned'));
             result.excludeWishlist = parseBoolean(_.get(scope, 'exclude.wishlist'));
             result.excludePlayed = parseBoolean(_.get(scope, 'exclude.played'));
             result.excludeClusters = parseBoolean(_.get(scope, 'exclude.clusters'));
-            result.similarity = parseBoolean(scope.similarity);
+        }
+
+        if (whatToPlay) {
+            result.randomSeed = scope.randomSeed;
+            result.whatToPlayOwned = scope.whatToPlayConfig.owned;
+            result.whatToPlayPlayed = scope.whatToPlayConfig.played;
+        } else {
+            result.randomSeed = null;
+            result.whatToPlayOwned = null;
+            result.whatToPlayPlayed = null;
         }
 
         result.like = !_.isEmpty(scope.likedGames) && _.isEmpty(userList) ? _.map(scope.likedGames, 'bgg_id') : null;
@@ -1167,8 +1254,13 @@ rgApp.factory('filterService', function filterService(
 
         if (!_.isEmpty(params.for)) {
             result.user = params.for;
-            result.model = params.similarity ? 'similarity' : null;
-            if (_.size(params.for) === 1) {
+            if (params.whatToPlay) {
+                result.whatToPlay = true;
+                result.random_seed = params.randomSeed;
+                result.num_games = 25;
+                result.owned = params.whatToPlayOwned;
+                result.played = params.whatToPlayPlayed;
+            } else if (_.size(params.for) === 1) {
                 result.exclude_known = booleanString(booleanDefault(params.excludeRated, true));
                 result.exclude_owned = booleanString(booleanDefault(params.excludeOwned, true));
                 result.exclude_wishlist = booleanDefault(params.excludeWishlist, false) ? 5 : null;
@@ -1177,6 +1269,7 @@ rgApp.factory('filterService', function filterService(
             }
         } else if (!_.isEmpty(params.like)) {
             result.like = params.like;
+            result.exclude_clusters = booleanString(booleanDefault(params.excludeClusters, true));
         } else {
             result.ordering = orderingParams(params.ordering);
             mainOrdering = _.split(result.ordering, ',', 1)[0];
@@ -1234,6 +1327,10 @@ rgApp.factory('filterService', function filterService(
             result.cooperative = params.cooperative;
         }
 
+        if (params.bgaAvailable) {
+            result.available_on_bga = params.bgaAvailable ? 'True' : null;
+        }
+
         if (params.gameType) {
             result.game_type = params.gameType;
         }
@@ -1258,6 +1355,7 @@ rgApp.factory('filterService', function filterService(
     };
 
     service.booleanDefault = booleanDefault;
+    service.parseList = parseList;
     service.validateAgeType = validateAgeType;
     service.validateBoolean = validateBoolean;
     service.validateCountType = validateCountType;
@@ -1283,7 +1381,7 @@ rgApp.factory('rankingsService', function rankingsService(
             return $q.resolve(cached);
         }
 
-        return $http.get(API_URL + 'games/' + id + '/rankings/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'games/' + id + '/rankings.json', {'noblock': !!noblock})
             .then(function (response) {
                 var rankings = response.data;
 
@@ -1324,7 +1422,7 @@ rgApp.factory('metaService', function metaService(
             return $q.resolve($sessionStorage.version);
         }
 
-        return $http.get(API_URL + 'games/version/', {'noblock': !!noblock})
+        return $http.get(API_URL + 'games/version.json', {'noblock': !!noblock})
             .then(function (response) {
                 var version = response.data;
                 if (_.isEmpty(version) || !_.isPlainObject(version)) {

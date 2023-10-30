@@ -2,9 +2,20 @@
 <section xmlns="http://www.w3.org/1999/xhtml"
 		id="rg-news">
 	<h1>News</h1>
+
 	<p class="lead">
 		News about board games, aggregated for you from the top sources of the hobby.
 	</p>
+
+	<div ng-if="empty"
+			class="alert alert-warning"
+			role="alert">
+		<h4 class="alert-heading">No news found</h4>
+		<p class="mb-0">
+			Unable to load any news. 😢 Please try again later…
+		</p>
+	</div>
+
 	<div class="row">
 		<a ng-repeat="article in articles"
 			article-square=""
@@ -28,8 +39,4 @@
 			</div>
 		</div>
 	</div>
-
-	<disqus ng-if="disqusId &amp;&amp; disqusUrl"
-		identifier="disqusId"
-		url="disqusUrl"></disqus>
 </section>

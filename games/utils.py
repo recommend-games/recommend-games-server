@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """ utils """
 
 import json
@@ -7,11 +5,12 @@ import logging
 import os.path
 import re
 import timeit
-
 from csv import DictWriter
-from datetime import timezone
+from datetime import datetime, timezone
 from functools import lru_cache, partial
 from pathlib import Path
+from typing import Iterable, Optional, Union
+import uuid
 
 from django.conf import settings
 from pytility import arg_to_iter, normalize_space, parse_date
@@ -39,63 +38,31 @@ def serialize_date(date, tzinfo=None):
 @lru_cache(maxsize=8)
 def load_recommender(path, site="bgg"):
     """load recommender from given path"""
+
     if not path:
         return None
+
     try:
+        if site == "light":
+            from board_game_recommender import LightGamesRecommender
+
+            LOGGER.info("Trying to load <LightGamesRecommender> from <%s>", path)
+            return LightGamesRecommender.from_npz(path)
+
         if site == "bga":
             from board_game_recommender import BGARecommender
 
+            LOGGER.info("Trying to load <BGARecommender> from <%s>", path)
             return BGARecommender.load(path=path)
+
         from board_game_recommender import BGGRecommender
 
+        LOGGER.info("Trying to load <BGGRecommender> from <%s>", path)
         return BGGRecommender.load(path=path)
+
     except Exception:
         LOGGER.exception("unable to load recommender model from <%s>", path)
-    return None
 
-
-@lru_cache(maxsize=8)
-def pubsub_client():
-    """Google Cloud PubSub client"""
-    try:
-        from google.cloud import pubsub
-
-        return pubsub.PublisherClient()
-    except Exception:
-        LOGGER.exception("unable to initialise PubSub client")
-    return None
-
-
-def pubsub_push(
-    message,
-    project=settings.PUBSUB_QUEUE_PROJECT,
-    topic=settings.PUBSUB_QUEUE_TOPIC,
-    encoding="utf-8",
-    **kwargs,
-):
-    """publish message"""
-
-    if not project or not topic:
-        return None
-
-    client = pubsub_client()
-
-    if client is None:
-        return None
-
-    if isinstance(message, str):
-        message = message.encode(encoding)
-    assert isinstance(message, bytes)
-
-    # pylint: disable=no-member
-    path = client.topic_path(project, topic)
-
-    LOGGER.debug("pushing message %r to <%s>", message, path)
-
-    try:
-        return client.publish(topic=path, data=message, **kwargs)
-    except Exception:
-        LOGGER.exception("unable to send message %r", message)
     return None
 
 
@@ -103,7 +70,7 @@ def pubsub_push(
 def model_updated_at(file_path=settings.MODEL_UPDATED_FILE):
     """latest model update"""
     try:
-        with open(file_path) as file_obj:
+        with open(file_path, encoding="utf-8") as file_obj:
             updated_at = file_obj.read()
         updated_at = normalize_space(updated_at)
         return parse_date(updated_at, tzinfo=timezone.utc)
@@ -125,12 +92,24 @@ def parse_version(version):
 def project_version(file_path=settings.PROJECT_VERSION_FILE):
     """Project version."""
     try:
-        with open(file_path) as file_obj:
+        with open(file_path, encoding="utf-8") as file_obj:
             version = file_obj.read()
         return parse_version(version)
     except Exception:
         pass
     return None
+
+
+@lru_cache(maxsize=8)
+def server_version(file_path=settings.PROJECT_VERSION_FILE) -> dict:
+    """Full server version."""
+    release_version = project_version(file_path=file_path)
+    heroku_version = parse_version(os.getenv("HEROKU_RELEASE_VERSION"))
+    server_version = "-".join(filter(None, (release_version, heroku_version)))
+    return {
+        "project_version": release_version,
+        "server_version": server_version or None,
+    }
 
 
 def save_recommender_ranking(recommender, dst, similarity_model=False):
@@ -142,7 +121,7 @@ def save_recommender_ranking(recommender, dst, similarity_model=False):
         dst,
     )
 
-    recommendations = recommender.recommend(similarity_model=similarity_model)
+    recommendations = recommender.recommend(users=(), similarity_model=similarity_model)
     if "name" in recommendations.column_names():
         recommendations.remove_column("name", inplace=True)
 
@@ -154,7 +133,7 @@ def save_recommender_ranking(recommender, dst, similarity_model=False):
 
 def count_lines(path) -> int:
     """Return the line count of a given path."""
-    with open(path) as file:
+    with open(path, encoding="utf-8") as file:
         return sum(1 for _ in file)
 
 
@@ -166,7 +145,10 @@ def count_files(path, glob=None) -> int:
 
 
 def count_lines_and_files(
-    paths_lines=None, paths_files=None, line_glob=None, file_glob=None
+    paths_lines=None,
+    paths_files=None,
+    line_glob=None,
+    file_glob=None,
 ) -> dict:
     """Counts lines and files in the given paths."""
 
@@ -234,7 +216,11 @@ def jl_to_csv(in_path, out_path, columns=None, joiner=","):
         "Reading JSON lines from <%s> and writing CSV to <%s>...", in_path, out_path
     )
 
-    with open(in_path) as in_file, open(out_path, "w") as out_file:
+    with open(in_path, encoding="utf-8") as in_file, open(
+        out_path,
+        "w",
+        encoding="utf-8",
+    ) as out_file:
         if not columns:
             row = next(in_file, None)
             row = _process_row(row, joiner=joiner) if row else {}
@@ -269,3 +255,152 @@ class Timer:
             print(self.message % duration)
         else:
             self.logger.info(self.message, duration)
+
+
+def gitlab_merge_request(
+    *,
+    file_path: str,
+    file_content: str,
+    gitlab_project_id: int,
+    gitlab_access_token: str,
+    gitlab_url: str = "https://gitlab.com",
+    source_branch: Optional[str] = None,
+    target_branch: str = "main",
+    title: Optional[str] = None,
+    description: Optional[str] = None,
+) -> str:
+    """Upload a file to GitLab and create a merge request."""
+
+    try:
+        import gitlab
+    except ImportError:
+        LOGGER.exception("Please make sure <python-gitlab> is installed")
+        raise
+
+    gl = gitlab.Gitlab(gitlab_url, private_token=gitlab_access_token)
+    project = gl.projects.get(gitlab_project_id)
+
+    # create a new branch
+    source_branch = source_branch or f"mr-{uuid.uuid4()}"
+    try:
+        branch = project.branches.create(
+            {
+                "branch": source_branch,
+                "ref": target_branch,
+            }
+        )
+        LOGGER.info(
+            "Created branch <%s> from commit <%s>",
+            branch.name,
+            branch.commit["id"],
+        )
+    except gitlab.exceptions.GitlabCreateError:
+        LOGGER.exception(
+            "Failed to create branch <%s> from <%s>",
+            source_branch,
+            target_branch,
+        )
+        raise
+
+    # upload file
+    commit_message = f"Added {file_path}"
+    try:
+        file = project.files.create(
+            {
+                "file_path": file_path,
+                "branch": source_branch,
+                "content": file_content,
+                "commit_message": commit_message,
+            }
+        )
+        LOGGER.info(
+            "Uploaded file <%s> to <%s>",
+            file_path,
+            file.branch,
+        )
+    except gitlab.exceptions.GitlabCreateError:
+        LOGGER.exception(
+            "Failed to upload file <%s> to <%s>",
+            file_path,
+            source_branch,
+        )
+        raise
+
+    # create merge request
+    try:
+        mr = project.mergerequests.create(
+            {
+                "source_branch": source_branch,
+                "target_branch": target_branch,
+                "title": title or commit_message,
+                "description": description or commit_message,
+            }
+        )
+        LOGGER.info(
+            "Created merge request <%s>",
+            mr.web_url,
+        )
+    except gitlab.exceptions.GitlabCreateError:
+        LOGGER.exception(
+            "Failed to create merge request from <%s> to <%s>",
+            source_branch,
+            target_branch,
+        )
+        raise
+
+    return mr.web_url
+
+
+def premium_feature_gitlab_merge_request(
+    *,
+    users: Iterable[str],
+    access_expiration: Union[datetime, str],
+    gitlab_project_id: int,
+    gitlab_access_token: str,
+    file_dir: str = "users/premium",
+    file_stem: Optional[str] = None,
+    gitlab_url: str = "https://gitlab.com",
+    source_branch: Optional[str] = None,
+    target_branch: str = "main",
+    title: Optional[str] = None,
+    description: Optional[str] = None,
+) -> str:
+    """Create a merge request to add users to the premium list."""
+
+    try:
+        import yaml
+    except ImportError:
+        LOGGER.exception("Please make sure <pyyaml> is installed")
+        raise
+
+    users = sorted(frozenset(user.lower() for user in arg_to_iter(users)))
+    if not users:
+        raise ValueError("No users provided")
+
+    access_expiration = parse_date(access_expiration, tzinfo=timezone.utc)
+    if not access_expiration:
+        raise ValueError("Invalid access expiration")
+
+    data = [{user: access_expiration.replace()} for user in users]
+    data_yaml = yaml.safe_dump(data)
+    now = datetime.utcnow().isoformat(timespec="seconds")
+    file_content = f"# Generated at {now}Z\n{data_yaml}"
+    sand = uuid.uuid4()
+    file_path = f"{file_dir}/{file_stem or sand}.yaml"
+    source_branch = source_branch or f"premium-{sand}"
+
+    return gitlab_merge_request(
+        file_path=file_path,
+        file_content=file_content,
+        gitlab_project_id=gitlab_project_id,
+        gitlab_access_token=gitlab_access_token,
+        gitlab_url=gitlab_url,
+        source_branch=source_branch,
+        target_branch=target_branch,
+        title=title or f"Add {len(users)} users to premium list",
+        description=description
+        or (
+            "Request to add these users to the premium list:\n\n"
+            + "\n".join(f"- {user}" for user in users)
+        ),
+    )
