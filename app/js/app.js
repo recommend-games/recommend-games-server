@@ -38,7 +38,10 @@ rgApp.config(function (
         })
         .hashPrefix('');
 
-    $routeProvider.when('/game/:id', {
+    $routeProvider.when('/game/:id/videos', {
+        templateUrl: '/partials/videos.html',
+        controller: 'VideosController'
+    }).when('/game/:id', {
         templateUrl: '/partials/detail.html',
         controller: 'DetailController'
     }).when('/news', {

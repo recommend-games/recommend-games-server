@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<section xmlns="http://www.w3.org/1999/xhtml"
+		id="game-videos">
+	<h1>
+		<span ng-if="game.name_short"
+				data-toggle="tooltip"
+				title="{{ game.name }}">
+			{{ game.name_short }}
+		</span>
+		<span ng-if="!game.name_short">{{ game.name }}</span>
+		<small ng-if="game.year || game.designer_display"
+				class="text-secondary">
+			<span ng-if="game.designer_display">by {{ game.designer_display }}</span>
+			<span ng-if="game.year">({{ game.year }})</span>
+		</small>
+	</h1>
+
+	<p class="lead">Back to the game's <a ng-href="/#/game/{{ game.bgg_id }}">main page</a>.</p>
+
+	<div class="row">
+		<div ng-repeat="youtubeUrl in youtubeUrls"
+			class="col-xl-4 col-md-6">
+			<div class="video">
+				<div>
+					<iframe ng-src="{{ youtubeUrl }}"
+						title="TODO"
+						frameborder="0"
+						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+						allowfullscreen="allowfullscreen"></iframe>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>

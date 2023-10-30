@@ -219,7 +219,10 @@ rgApp.factory('gamesService', function gamesService(
             params.page = page;
         }
 
-        if (!_.isEmpty(params.user) || !_.isEmpty(params.like)) {
+        if (params.whatToPlay && !_.isEmpty(params.user)) {
+            url += '/recommend_random';
+            params.whatToPlay = null;
+        } else if (!_.isEmpty(params.user) || !_.isEmpty(params.like)) {
             url += '/recommend';
         }
 
@@ -1068,11 +1071,27 @@ rgApp.factory('filterService', function filterService(
         return orderingValues[ordering] || orderingValues.rg;
     }
 
+    function validateCollection(kind, potentialUsers) {
+        kind = _.toLower(kind);
+        if (_.includes(['_all', '_any', '_none'], kind)) {
+            return kind;
+        }
+
+        potentialUsers = _.map(potentialUsers, _.toLower);
+        if (_.includes(potentialUsers, kind)) {
+            return kind;
+        }
+
+        return null;
+    }
+
     function parseParams(params) {
         params = params || {};
 
         var usersFor = parseList(params.for, true),
             user = !_.isEmpty(usersFor) ? usersFor : parseList(params.user, true),
+            whatToPlay = !_.isEmpty(user) && booleanDefault(params.whatToPlay, false),
+            randomSeed = _.parseInt(params.randomSeed) || null,
             playerCount = _.parseInt(params.playerCount) || null,
             playTime = _.parseInt(params.playTime) || null,
             playerAge = _.parseInt(params.playerAge) || null,
@@ -1083,7 +1102,6 @@ rgApp.factory('filterService', function filterService(
             excludeWishlist = booleanDefault(params.excludeWishlist, false, _.size(user) !== 1),
             excludePlayed = booleanDefault(params.excludePlayed, false, _.size(user) !== 1),
             excludeClusters = booleanDefault(params.excludeClusters, true, _.size(user) !== 1),
-            similarity = booleanDefault(params.similarity, false, _.isEmpty(user)),
             yearMin = _.parseInt(params.yearMin),
             yearMax = _.parseInt(params.yearMax),
             ordering = validateOrdering(params.ordering),
@@ -1092,6 +1110,8 @@ rgApp.factory('filterService', function filterService(
 
         return {
             'for': _.isEmpty(user) ? null : user,
+            'whatToPlay': whatToPlay ? true : null,
+            'randomSeed': whatToPlay ? randomSeed : null,
             'include': _.isEmpty(include) ? null : include,
             'exclude': _.isEmpty(exclude) ? null : exclude,
             'excludeRated': excludeRated === false ? false : null,
@@ -1099,7 +1119,8 @@ rgApp.factory('filterService', function filterService(
             'excludeWishlist': excludeWishlist === true ? true : null,
             'excludePlayed': excludePlayed === true ? true : null,
             'excludeClusters': excludeClusters === false ? false : null,
-            'similarity': similarity === true ? true : null,
+            'whatToPlayOwned': whatToPlay ? validateCollection(params.whatToPlayOwned, user) : null,
+            'whatToPlayPlayed': whatToPlay ? validateCollection(params.whatToPlayPlayed, user) : null,
             'like': !_.isEmpty(like) && _.isEmpty(user) ? like : null,
             'search': _.trim(params.search) || null,
             'playerCount': playerCount,
@@ -1129,13 +1150,15 @@ rgApp.factory('filterService', function filterService(
         var userList = parseList(scope.user, true),
             include = parseIntList(scope.includeGames),
             exclude = parseIntList(scope.excludeGames),
+            whatToPlay = parseBoolean(scope.whatToPlay),
             result = {
                 'for': _.isEmpty(userList) ? null : userList,
+                'whatToPlay': whatToPlay,
                 'include': _.isEmpty(include) ? null : include,
                 'exclude': _.isEmpty(exclude) ? null : exclude,
                 'search': scope.search,
                 'cooperative': scope.cooperative,
-                'bgaAvailable': parseBoolean(scope.bgaAvailable),
+                'bgaAvailable': scope.bgaAvailable,
                 'gameType': scope.gameType,
                 'category': scope.category,
                 'mechanic': scope.mechanic,
@@ -1184,20 +1207,28 @@ rgApp.factory('filterService', function filterService(
             result.yearMax = null;
         }
 
-        if (_.isEmpty(userList)) {
+        if (_.isEmpty(userList) || whatToPlay) {
             result.excludeRated = null;
             result.excludeOwned = null;
             result.excludeWishlist = null;
             result.excludePlayed = null;
             result.excludeClusters = null;
-            result.similarity = null;
         } else {
             result.excludeRated = parseBoolean(_.get(scope, 'exclude.rated'));
             result.excludeOwned = parseBoolean(_.get(scope, 'exclude.owned'));
             result.excludeWishlist = parseBoolean(_.get(scope, 'exclude.wishlist'));
             result.excludePlayed = parseBoolean(_.get(scope, 'exclude.played'));
             result.excludeClusters = parseBoolean(_.get(scope, 'exclude.clusters'));
-            result.similarity = parseBoolean(scope.similarity);
+        }
+
+        if (whatToPlay) {
+            result.randomSeed = scope.randomSeed;
+            result.whatToPlayOwned = scope.whatToPlayConfig.owned;
+            result.whatToPlayPlayed = scope.whatToPlayConfig.played;
+        } else {
+            result.randomSeed = null;
+            result.whatToPlayOwned = null;
+            result.whatToPlayPlayed = null;
         }
 
         result.like = !_.isEmpty(scope.likedGames) && _.isEmpty(userList) ? _.map(scope.likedGames, 'bgg_id') : null;
@@ -1223,8 +1254,13 @@ rgApp.factory('filterService', function filterService(
 
         if (!_.isEmpty(params.for)) {
             result.user = params.for;
-            result.model = params.similarity ? 'similarity' : null;
-            if (_.size(params.for) === 1) {
+            if (params.whatToPlay) {
+                result.whatToPlay = true;
+                result.random_seed = params.randomSeed;
+                result.num_games = 25;
+                result.owned = params.whatToPlayOwned;
+                result.played = params.whatToPlayPlayed;
+            } else if (_.size(params.for) === 1) {
                 result.exclude_known = booleanString(booleanDefault(params.excludeRated, true));
                 result.exclude_owned = booleanString(booleanDefault(params.excludeOwned, true));
                 result.exclude_wishlist = booleanDefault(params.excludeWishlist, false) ? 5 : null;
@@ -1319,6 +1355,7 @@ rgApp.factory('filterService', function filterService(
     };
 
     service.booleanDefault = booleanDefault;
+    service.parseList = parseList;
     service.validateAgeType = validateAgeType;
     service.validateBoolean = validateBoolean;
     service.validateCountType = validateCountType;
