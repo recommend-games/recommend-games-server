@@ -15,16 +15,20 @@
 		</small>
 	</h1>
 
-	<iframe ng-repeat="youtubeUrl in youtubeUrls"
-		width="560"
-		height="315"
-		ng-src="{{ youtubeUrl }}"
-		title="YouTube video player"
-		frameborder="0"
-		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-		allowfullscreen="allowfullscreen"></iframe>
+	<p class="lead">Back to the game's <a ng-href="/#/game/{{ game.bgg_id }}">main page</a>.</p>
 
-	<disqus ng-if="disqusId &amp;&amp; disqusUrl"
-		identifier="disqusId"
-		url="disqusUrl"></disqus>
+	<div class="row">
+		<div ng-repeat="youtubeUrl in youtubeUrls"
+			class="col-xl-4 col-md-6">
+			<div class="video">
+				<div>
+					<iframe ng-src="{{ youtubeUrl }}"
+						title="TODO"
+						frameborder="0"
+						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+						allowfullscreen="allowfullscreen"></iframe>
+				</div>
+			</div>
+		</div>
+	</div>
 </section>

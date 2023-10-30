@@ -4,17 +4,22 @@
 }
 
 .game,
-.article {
+.article,
+.video {
     background-color: lightgrey;
     background-color: rgba(192, 192, 192, .5);
-    background-position: center top;
-    background-repeat: no-repeat;
-    background-size: cover;
     border-radius: 5px;
     display: block;
     margin: 5px 0;
     padding-bottom: 100%;
     position: relative;
+}
+
+.game,
+.article {
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 .article {
@@ -29,6 +34,20 @@
     cursor: pointer;
 }
 
+.video {
+    padding-bottom: 56.25%; /* 16:9 */
+}
+
+.game > div,
+.article > div,
+.video > div {
+    border-radius: 5px;
+    height: 100%;
+    overflow: hidden;
+    position: absolute;
+    width: 100%;
+}
+
 .game > div,
 .article > div {
     background-image: linear-gradient(
@@ -36,10 +55,10 @@
         transparent,
         rgba(0, 0, 0, .2),
         black);
-    border-radius: 5px;
+ }
+
+.video > div > iframe {
     height: 100%;
-    overflow: hidden;
-    position: absolute;
     width: 100%;
 }
 
