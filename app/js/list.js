@@ -555,7 +555,7 @@ rgApp.controller('ListController', function ListController(
     $scope.$watch('complexity.enabled', renderSlider);
     $scope.$watch('year.enabled', renderSlider);
     $scope.$watch('user', function () { $scope.groupRecommendation = _.includes($scope.user, ','); });
-    $scope.$watch('user', function () { $scope.userList = filterService.parseList($scope.user, true); });
+    $scope.$watch('user', function () { $scope.userList = filterService.parseList($scope.user, false); });
 
     if (params.whatToPlay) {
         showPane('what-to-play');
