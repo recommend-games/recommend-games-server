@@ -94,6 +94,9 @@ sitepackages/
 # MyPy
 .mypy*
 
+# VSCode
+.vscode/
+
 # others
 .DS_Store
 .~*
