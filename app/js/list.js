@@ -191,9 +191,14 @@ rgApp.controller('ListController', function ListController(
             });
     }
 
-    function updateParams() {
+    function updateParams(updates) {
         var parsed = filterService.paramsFromScope($scope);
         parsed.filters = null;
+        if (_.isPlainObject(updates)) {
+            _.forOwn(updates, function (value, key) {
+                parsed[key] = value;
+            });
+        }
         $route.updateParams(parsed);
     }
 
@@ -209,8 +214,16 @@ rgApp.controller('ListController', function ListController(
     }
 
     $scope.user = _.join(params.for, ', ');
+    $scope.userList = filterService.parseList($scope.user, false);
+    $scope.whatToPlay = params.whatToPlay;
+    $scope.randomSeed = params.randomSeed;
     $scope.userCollections = null;
     $scope.missingCollections = null;
+
+    $scope.whatToPlayConfig = {
+        'owned': params.whatToPlayOwned,
+        'played': params.whatToPlayPlayed
+    };
 
     $scope.exclude = {
         'rated': filterService.booleanDefault(params.excludeRated, true),
@@ -219,8 +232,6 @@ rgApp.controller('ListController', function ListController(
         'played': filterService.booleanDefault(params.excludePlayed, false),
         'clusters': filterService.booleanDefault(params.excludeClusters, true)
     };
-
-    $scope.similarity = params.similarity;
 
     $scope.search = params.search;
 
@@ -322,9 +333,11 @@ rgApp.controller('ListController', function ListController(
     $scope.ordering = params.ordering || 'rg';
 
     $scope.fetchGames = fetchGames;
+    $scope.now = _.now;
     $scope.pad = _.padStart;
     $scope.isEmpty = _.isEmpty;
     $scope.size = _.size;
+    $scope.toLower = _.toLower;
     $scope.empty = false;
     $scope.total = null;
     $scope.renderSlider = renderSlider;
@@ -333,7 +346,7 @@ rgApp.controller('ListController', function ListController(
     $scope.selectionActive = false;
     $scope.groupRecommendation = _.size(params.for) > 1;
     $scope.userNotFound = false;
-    $scope.hideScore = !_.isEmpty(params.for) && params.similarity;
+    $scope.hideScore = params.whatToPlay;
     $scope.statsActive = false;
     $scope.userStats = {};
     $scope.collectionRequestValidityOptions = _.range(1, 13);
@@ -542,6 +555,11 @@ rgApp.controller('ListController', function ListController(
     $scope.$watch('complexity.enabled', renderSlider);
     $scope.$watch('year.enabled', renderSlider);
     $scope.$watch('user', function () { $scope.groupRecommendation = _.includes($scope.user, ','); });
+    $scope.$watch('user', function () { $scope.userList = filterService.parseList($scope.user, false); });
+
+    if (params.whatToPlay) {
+        showPane('what-to-play');
+    }
 
     fetchGames(1)
         .then(function () {
