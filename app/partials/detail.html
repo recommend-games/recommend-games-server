@@ -311,13 +311,18 @@
 				<strong>{{ game.language_dependency | number:2 }} / 5</strong> ({{ game.language_dependency_string }})
 			</dd>
 
-			<dt ng-if="game.external_links &amp;&amp; game.external_links.length"
+			<dt ng-if="(game.external_links &amp;&amp; game.external_links.length) || (game.video_url &amp;&amp; game.video_url.length)"
 					class="col-md-3 col-sm-4 col-12">
 				<i class="fas fa-mouse-pointer"></i>
 				External links
 			</dt>
-			<dd ng-if="game.external_links &amp;&amp; game.external_links.length"
+			<dd ng-if="(game.external_links &amp;&amp; game.external_links.length) || (game.video_url &amp;&amp; game.video_url.length)"
 					class="col-md-9 col-sm-8 col-12">
+				<span ng-if="game.video_url &amp;&amp; game.video_url.length">
+					<a ng-href="/#/game/{{ game.bgg_id }}/videos">
+						<i class="fab fa-youtube"></i>
+						<strong>YouTube videos</strong></a><span ng-if="game.external_links &amp;&amp; game.external_links.length">, </span>
+				</span>
 				<span ng-repeat="link in game.external_links">
 					<a ng-href="{{ link.url }}" target="_blank">
 						<span ng-if="$first || link.site !== game.external_links[$index - 1].site">
