@@ -136,7 +136,7 @@ def gitprepare(repo=SCRAPED_DATA_DIR):
     LOGGER.info("Preparing Git repo <%s>...", repo)
     with safe_cd(repo):
         try:
-            execute("git", "checkout", "master")
+            execute("git", "checkout", "main")
             execute("git", "pull", "--ff-only")
             execute("git", "diff", "HEAD", "--name-only")
         except SystemExit:
@@ -181,7 +181,7 @@ def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
             LOGGER.info("Nothing to commit...")
 
         try:
-            execute("git", "push", "framagit", "master")
+            execute("git", "push", "framagit", "main")
         except SystemExit:
             LOGGER.exception("Unable to push...")
 
