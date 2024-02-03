@@ -159,7 +159,7 @@ def gitprepareconfig(repo=CONFIG_DIR):
 @task()
 def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
     """commit and push Git repo"""
-    paths = paths or ("COUNT.md", "rankings", "scraped", "links.json", "prefixes.txt")
+    paths = paths or ("COUNT.md", "rankings", "scraped", "links.json")
     LOGGER.info("Updating paths %r in Git repo <%s>...", paths, repo)
     with safe_cd(repo):
         try:
