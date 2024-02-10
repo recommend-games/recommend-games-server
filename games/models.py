@@ -120,7 +120,6 @@ class Game(Model):
     dbpedia_id = JSONField(default=list)
     luding_id = JSONField(default=list)
     spielen_id = JSONField(default=list)
-    bga_id = JSONField(default=list)
 
     available_on_bga = BooleanField(default=False, db_index=True)
 
