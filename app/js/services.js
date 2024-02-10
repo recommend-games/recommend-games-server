@@ -20,7 +20,7 @@ rgApp.factory('gamesService', function gamesService(
     var $ = angular.element,
         service = {},
         cache = {},
-        linkedSites = ['bgg', 'bga', 'wikidata', 'wikipedia', 'luding', 'spielen'];
+        linkedSites = ['bgg', 'wikidata', 'wikipedia', 'luding', 'spielen'];
 
     function putCache(game, id) {
         if (_.isEmpty(game)) {
@@ -82,10 +82,6 @@ rgApp.factory('gamesService', function gamesService(
             result.url = 'https://boardgamegeek.com/boardgame/' + id + '/';
             result.label = 'BoardGameGeek';
             result.icon_url = '/assets/bgg-color.svg';
-        } else if (site === 'bga') {
-            result.url = 'https://www.boardgameatlas.com/search/game/' + id + '?amazonTag=ludoj0f-20';
-            result.label = 'Board Game Atlas';
-            result.icon_url = '/assets/bga.png';
         } else if (site === 'wikidata') {
             result.url = 'https://www.wikidata.org/wiki/' + id;
             result.label = 'Wikidata';

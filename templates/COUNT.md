@@ -4,9 +4,6 @@ Current item count as of **{date}**:
 
 ## Games, ratings, etc
 
-* [Board Game Atlas](https://www.boardgameatlas.com/):
-  * {lc_bga_GameItem:,d} games
-  * {lc_bga_RatingItem:,d} ratings
 * [BoardGameGeek](https://boardgamegeek.com/):
   * {lc_bgg_GameItem:,d} games
   * {lc_bgg_UserItem:,d} users
@@ -22,9 +19,6 @@ Current item count as of **{date}**:
 
 ## Rankings
 
-* [Board Game Atlas](https://www.boardgameatlas.com/):
-  * {fc_bga_factor:,d} factor rankings
-  * {fc_bga_similarity:,d} similarity rankings
 * [BoardGameGeek](https://boardgamegeek.com/):
   * {fc_bgg_bgg:,d} geek rankings
   * {fc_bgg_factor:,d} rankings

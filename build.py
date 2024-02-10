@@ -29,7 +29,7 @@ from functools import lru_cache
 from pathlib import Path
 
 import django
-from board_game_recommender import BGARecommender, BGGRecommender, LightGamesRecommender
+from board_game_recommender import BGGRecommender, LightGamesRecommender
 from dotenv import load_dotenv
 from pynt import task
 from pyntcontrib import execute, safe_cd
@@ -100,7 +100,6 @@ GAMES_CSV_COLUMNS = (
     "bayes_rating",
     "complexity",
     "language_dependency",
-    "bga_id",
     "dbpedia_id",
     "luding_id",
     "spielen_id",
@@ -254,41 +253,6 @@ def _merge_kwargs(
         kwargs.setdefault("sort_keys", True)
 
     return kwargs
-
-
-@task()
-def mergebga(in_paths=None, out_path=None, full=False):
-    """merge Board Game Atlas game data"""
-    latest_min = None  # django.utils.timezone.now() - timedelta(days=days)
-    merge(
-        **_merge_kwargs(
-            site="bga",
-            in_paths=in_paths,
-            out_path=out_path,
-            full=full,
-            latest_min=latest_min,
-        )
-    )
-
-
-@task()
-def mergebgaratings(in_paths=None, out_path=None, full=False):
-    """merge Board Game Atlas rating data"""
-    latest_min = None  # django.utils.timezone.now() - timedelta(days=days)
-    merge(
-        **_merge_kwargs(
-            site="bga",
-            item="RatingItem",
-            in_paths=in_paths,
-            out_path=out_path,
-            full=full,
-            latest_min=latest_min,
-            keys=("bga_user_id", "bga_id"),
-            fieldnames_exclude=("bgg_user_play_count",)
-            if parse_bool(full)
-            else ("bgg_user_play_count", "published_at", "updated_at", "scraped_at"),
-        )
-    )
 
 
 @task()
@@ -812,14 +776,12 @@ def mergenews(
 
 
 @task(
-    mergebga,
     mergebgg,
     mergedbpedia,
     mergeluding,
     mergespielen,
     mergewikidata,
     mergenews,
-    mergebgaratings,
     mergebggusers,
     mergebggratings,
     mergebggrankings,
@@ -866,7 +828,6 @@ def link(
     gazetteer=os.path.join(MODELS_DIR, "cluster", "gazetteer.pickle"),
     paths=(
         os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_GameItem.jl"),
-        os.path.join(SCRAPED_DATA_DIR, "scraped", "bga_GameItem.jl"),
         os.path.join(SCRAPED_DATA_DIR, "scraped", "spielen_GameItem.jl"),
         os.path.join(SCRAPED_DATA_DIR, "scraped", "luding_GameItem.jl"),
         os.path.join(SCRAPED_DATA_DIR, "scraped", "wikidata_GameItem.jl"),
@@ -902,7 +863,6 @@ def labellinks(
     gazetteer=os.path.join(MODELS_DIR, "cluster", "gazetteer.pickle"),
     paths=(
         os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_GameItem.jl"),
-        os.path.join(SCRAPED_DATA_DIR, "scraped", "bga_GameItem.jl"),
         os.path.join(SCRAPED_DATA_DIR, "scraped", "spielen_GameItem.jl"),
         os.path.join(SCRAPED_DATA_DIR, "scraped", "luding_GameItem.jl"),
         os.path.join(SCRAPED_DATA_DIR, "scraped", "wikidata_GameItem.jl"),
@@ -1053,35 +1013,6 @@ def trainbgg(
         light.to_npz(out_path_light)
 
 
-@task()
-def trainbga(
-    games_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bga_GameItem.jl"),
-    ratings_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bga_RatingItem.jl"),
-    out_path=os.path.join(RECOMMENDER_DIR, ".bga"),
-    users=None,
-    num_factors=32,
-    max_iterations=1000,
-):
-    """train Board Game Atlas recommender model"""
-
-    num_factors = parse_int(num_factors) or 32
-
-    _train(
-        recommender_cls=BGARecommender,
-        games_file=games_file,
-        ratings_file=ratings_file,
-        out_path=out_path,
-        users=users,
-        num_factors=num_factors,
-        max_iterations=max_iterations,
-    )
-
-
-@task(trainbgg, trainbga)
-def train():
-    """train BoardGameGeek and Board Game Atlas recommender models"""
-
-
 def _save_ranking(
     recommender,
     dst_dir,
@@ -1196,36 +1127,6 @@ def savebggrankings(
         dst_dir=dst_dir / "r_g",
         file_name=file_name,
     )
-
-
-@task()
-def savebgarankings(
-    recommender_path=os.path.join(RECOMMENDER_DIR, ".bga"),
-    dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bga"),
-    file_name=f"{DATE_FORMAT_COMPACT}.csv",
-):
-    """Take a snapshot of the Board Game Atlas rankings."""
-    from games.utils import load_recommender
-
-    LOGGER.info("Loading Board Game Atlas recommender from <%s>...", recommender_path)
-    recommender = load_recommender(recommender_path, site="bga")
-    _save_ranking(
-        recommender=recommender,
-        dst_dir=os.path.join(dst_dir, "factor"),
-        file_name=file_name,
-        similarity_model=False,
-    )
-    _save_ranking(
-        recommender=recommender,
-        dst_dir=os.path.join(dst_dir, "similarity"),
-        file_name=file_name,
-        similarity_model=True,
-    )
-
-
-@task(savebggrankings, savebgarankings)
-def saverankings():
-    """Take a snapshot of both BoardGameGeek and Board Game Atlas rankings."""
 
 
 @task()
@@ -1360,16 +1261,6 @@ def cpdirs(
         dst_path = os.path.join(dst_dir, sub_dir)
         LOGGER.info("Copying <%s> to <%s>...", src_path, dst_path)
         shutil.copytree(src_path, dst_path)
-
-
-@task()
-def cpdirsbga(
-    src_dir=os.path.join(RECOMMENDER_DIR, ".bga"),
-    dst_dir=os.path.join(DATA_DIR, "recommender_bga"),
-    sub_dirs=("recommender", "similarity"),
-):
-    """copy BGA recommender files"""
-    cpdirs(src_dir, dst_dir, sub_dirs)
 
 
 @task()
@@ -1811,8 +1702,8 @@ def builddb():
     makecsvs,
     referencecsvs,
     link,
-    train,
-    saverankings,
+    trainbgg,
+    savebggrankings,
     builddb,
     deduplicate,
     updatecount,

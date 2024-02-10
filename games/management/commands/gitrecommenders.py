@@ -8,7 +8,7 @@ from datetime import timezone
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from board_game_recommender import BGARecommender, BGGRecommender
+from board_game_recommender import BGGRecommender
 from django.core.management.base import BaseCommand
 from git import Repo
 from pytility import arg_to_iter
@@ -214,7 +214,6 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("repos", nargs="+")
-        parser.add_argument("--site", "-s", default="bgg", choices=("bgg", "bga"))
         parser.add_argument("--dirs", "-d", nargs="+", default=("scraped", "results"))
         parser.add_argument("--out-recommender", "-e")
         parser.add_argument("--out-rankings", "-a")
@@ -291,7 +290,7 @@ class Command(BaseCommand):
 
         LOGGER.info(kwargs)
 
-        site = kwargs["site"]
+        site = "bgg"
 
         recommender_dir = (
             Path(kwargs["out_recommender"]).resolve() / site
@@ -311,7 +310,7 @@ class Command(BaseCommand):
             self._process_repo(
                 repo=Path(repo).resolve(),
                 directories=kwargs["dirs"],
-                recommender_cls=BGARecommender if site == "bga" else BGGRecommender,
+                recommender_cls=BGGRecommender,
                 recommender_dir=recommender_dir,
                 ranking_dir=ranking_dir,
                 game_item=f"{site}_GameItem",

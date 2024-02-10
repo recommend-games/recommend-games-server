@@ -49,12 +49,6 @@ def load_recommender(path, site="bgg"):
             LOGGER.info("Trying to load <LightGamesRecommender> from <%s>", path)
             return LightGamesRecommender.from_npz(path)
 
-        if site == "bga":
-            from board_game_recommender import BGARecommender
-
-            LOGGER.info("Trying to load <BGARecommender> from <%s>", path)
-            return BGARecommender.load(path=path)
-
         from board_game_recommender import BGGRecommender
 
         LOGGER.info("Trying to load <BGGRecommender> from <%s>", path)
