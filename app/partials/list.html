@@ -1005,6 +1005,15 @@
 			</a>
 		</em>
 	</p>
+	<div ng-if="!isEmpty(missingCollections) &amp;&amp; !isEmpty(currUser) &amp;&amp; userNotFound"
+			class="alert alert-warning alert-dismissible fade show"
+			role="alert">
+		If you just recently started rating games on BoardGameGeek, our scrapers might not have found your profile yet.
+		You can <a href="" data-toggle="modal" data-target="#collection-request-modal" class="alert-link">request your collection to be added to the database</a> and help our scrapers to find the new ratings faster.
+		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
 	<div ng-if="!isEmpty(missingCollections) &amp;&amp; !userNotFound"
 			class="alert alert-warning alert-dismissible fade show"
 			role="alert">
