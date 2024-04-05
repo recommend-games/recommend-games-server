@@ -1151,9 +1151,17 @@ class UserViewSet(PermissionsModelViewSet):
     def premium_users_request(self, request, format=None):
         """Send a request to the admin to become premium users."""
 
+        strict = parse_bool(next(_extract_params(request, "strict"), None))
+
         users = [user.lower() for user in _extract_params(request, "user")]
-        user_names = list(
-            self.get_queryset().filter(name__in=users).values_list("name", flat=True)
+        user_names = (
+            list(
+                self.get_queryset()
+                .filter(name__in=users)
+                .values_list("name", flat=True)
+            )
+            if strict
+            else users
         )
 
         if not user_names:
