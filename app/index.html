@@ -109,6 +109,7 @@
 	<script src="/js/stats.js"></script>
 	<script src="/js/news.js"></script>
 	<script src="/js/about.js"></script>
+	<script src="/js/donate.js"></script>
 	<script src="/js/faq.js"></script>
 
 	<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
@@ -218,6 +219,12 @@
 							About
 						</a>
 					</li>
+					<li class="nav-item {{ path === '/donate' ? 'active' : '' }} text-nowrap">
+						<a href="/#/donate"
+								class="nav-link">
+							Donate
+						</a>
+					</li>
 					<li class="nav-item {{ path === '/faq' ? 'active' : '' }} text-nowrap">
 						<a href="/#/faq"
 								class="nav-link">
@@ -265,6 +272,11 @@
 				<li class="nav-item">
 					<a class="nav-link" href="/#/about">
 						<i class="fas fa-info-circle"></i> About
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="/#/donate">
+						<i class="fas fa-hand-holding-usd"></i> Donate
 					</a>
 				</li>
 				<li class="nav-item">
