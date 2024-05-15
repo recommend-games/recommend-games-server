@@ -68,6 +68,9 @@ rgApp.config(function (
     }).when('/about', {
         templateUrl: '/partials/about.html',
         controller: 'AboutController'
+    }).when('/donate', {
+        templateUrl: '/partials/donate.html',
+        controller: 'DonateController'
     }).when('/faq', {
         templateUrl: '/partials/faq.html',
         controller: 'FaqController'
