@@ -3,14 +3,33 @@
 set -euo pipefail
 
 SAVE_DIR="$(pwd)"
-SERVER_DIR="$(dirname "$(readlink --canonicalize "${BASH_SOURCE[0]}")")"
-STATIC_DIR="$(readlink --canonicalize "${SERVER_DIR}/../recommend-games-api/public/")"
+SERVER_DIR="${HOME}/Recommend.Games/recommend-games-server"
+STATIC_DIR="${HOME}/Recommend.Games/recommend-games-api/public"
 
 export LC_ALL=en_US.utf-8
 export LANG=en_US.utf-8
 
 cd "${SERVER_DIR}"
-pipenv run pynt releasefull
+pipenv run pynt \
+    gitprepare \
+    makecsvs \
+    referencecsvs \
+    link \
+    trainbgg \
+    savebggrankings \
+    cleandata \
+    filldb \
+    kennerspiel \
+    dateflag \
+    splithotness \
+    historicalbggrankings \
+    weeklycharts \
+    compressdb \
+    cplight \
+    sitemap \
+    deduplicate \
+    updatecount \
+    gitupdate
 
 cd "${STATIC_DIR}"
 git rm -rf "${STATIC_DIR}"
