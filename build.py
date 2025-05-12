@@ -907,6 +907,7 @@ def _train(
         num_factors=num_factors,
         max_iterations=parse_int(max_iterations),
         verbose=True,
+        defaults=False,
         **filters,
     )
 
@@ -984,18 +985,6 @@ def trainbgg(
     filters = {}
 
     num_factors = parse_int(num_factors) or 32
-
-    min_votes = parse_int(min_votes) or _min_votes_from_date(
-        first_date=min_votes_anchor_date,
-        second_date=None,
-        seconds_per_step=min_votes_seconds_per_step,
-        max_value=min_votes_max_value,
-        min_value=1,
-    )
-
-    if min_votes is not None:
-        LOGGER.info("Filter out games with less than %d votes", min_votes)
-        filters["num_votes__gte"] = min_votes
 
     recommender = _train(
         recommender_cls=BGGRecommender,
