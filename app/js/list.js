@@ -171,7 +171,7 @@ rgApp.controller('ListController', function ListController(
 
                 if (MAINTENANCE_MODE) {
                     $scope.maintenanceMode = true;
-                    $scope.maintenanceMessage = $sce.trustAsHtml('For more details, please read <a href="https://blog.recommend.games/posts/announcement-hiatus/">this blog post</a>.');
+                    $scope.maintenanceMessage = $sce.trustAsHtml('For more details, please read <a href="https://analysisparalysis.games/posts/announcement-hiatus/">this blog post</a>.');
                 } else {
                     toastr.error(
                         'Sorry, there was an error. Tap to try again...',
@@ -677,7 +677,7 @@ rgApp.controller('ListController', function ListController(
     gamesService.setImage();
     gamesService.setDescription();
 
-    $http.get('https://blog.recommend.games/index.xml')
+    $http.get('https://analysisparalysis.games/index.xml')
         .then(function (response) {
             var xml = $.parseXML(response.data),
                 feed = $(xml),

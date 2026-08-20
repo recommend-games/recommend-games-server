@@ -150,7 +150,7 @@ rgApp.controller('DetailController', function DetailController(
 
             if (MAINTENANCE_MODE) {
                 $scope.maintenanceMode = true;
-                $scope.maintenanceMessage = $sce.trustAsHtml('For more details, please read <a href="https://blog.recommend.games/posts/announcement-hiatus/">this blog post</a>.');
+                $scope.maintenanceMessage = $sce.trustAsHtml('For more details, please read <a href="https://analysisparalysis.games/posts/announcement-hiatus/">this blog post</a>.');
             } else {
                 $scope.errorMessage = 'Unable to load the game. 😢 Please try again later…';
             }
