@@ -1725,7 +1725,24 @@ def minify(src=os.path.join(BASE_DIR, "app"), dst=os.path.join(BASE_DIR, ".temp"
     )
 
 
-@task(cleanstatic, minify)
+@task()
+def cpsitemap(
+    src_path=os.path.join(DATA_DIR, "sitemap.xml"),
+    dst_path=os.path.join(BASE_DIR, ".temp", "sitemap.xml"),
+):
+    """Copy the sitemap into the static files dir."""
+
+    if not os.path.isfile(src_path):
+        raise FileNotFoundError(
+            f"Sitemap <{src_path}> does not exist, run the `sitemap` task first"
+        )
+
+    LOGGER.info("Copying <%s> to <%s>...", src_path, dst_path)
+    os.makedirs(os.path.dirname(dst_path), exist_ok=True)
+    shutil.copy2(src_path, dst_path)
+
+
+@task(cleanstatic, minify, cpsitemap)
 def collectstatic(delete=True):
     """Collect static files."""
 
