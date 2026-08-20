@@ -120,3 +120,6 @@ recommender/
 gs*.json
 requirements.txt
 sitemap.xml
+
+# Claude
+.claude/
