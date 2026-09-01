@@ -3,9 +3,9 @@
 set -euo pipefail
 
 SAVE_DIR="$(pwd)"
-SCRIPT_DIR="$(dirname "$(readlink --canonicalize "${BASH_SOURCE[0]}")")"
-SERVER_DIR="$(readlink --canonicalize "${SCRIPT_DIR}/../")"
-FEEDS_DIR="$(readlink --canonicalize "${SERVER_DIR}/../board-game-scraper/feeds/")"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SERVER_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+FEEDS_DIR="$(cd "${SERVER_DIR}/../board-game-scraper/feeds" && pwd)"
 
 export LC_ALL=en_US.utf-8
 export LANG=en_US.utf-8
@@ -16,10 +16,12 @@ for TYPE in 'rankings' 'abstract' 'children' 'customizable' 'family' 'party' 'st
 do
     [[ "${TYPE}" == 'rankings' ]] && SITE='bgg_rankings' || SITE="bgg_rankings_${TYPE}"
     echo "Processing rankings of type <${TYPE}>…"
-    pipenv run pynt "mergebgg${TYPE}[in_paths=${FEEDS_DIR}/${SITE}/GameItem/*-json-*,days=365]" "split${TYPE}[overwrite=1]"
+    uv run invoke -c build \
+        "mergebgg${TYPE}" --in-paths "${FEEDS_DIR}/${SITE}/GameItem/*-json-*" --days 365 \
+        "split${TYPE}" --overwrite
 done
 
-pipenv run pynt deduplicate updatecount gitupdate
+uv run invoke -c build deduplicate updatecount gitupdate
 
 echo 'Done.'
 
