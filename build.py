@@ -31,7 +31,7 @@ import shutil
 import subprocess
 import sys
 from contextlib import contextmanager
-from datetime import UTC, timedelta
+from datetime import UTC
 from functools import lru_cache
 from pathlib import Path
 
@@ -225,650 +225,274 @@ def gitupdate(c, *paths, repo=SCRAPED_DATA_DIR, name=__name__):
             LOGGER.exception("Unable to push...")
 
 
-def _merge_column(name, col_type=None):
-    """Translate a column name plus a legacy type tag into a polars expression.
-
-    board-game-scraper described key/latest columns as (name, type) pairs; the
-    merger takes polars expressions instead. Timestamps are strings in the
-    schemas, hence the explicit parse for "date".
-    """
-
-    import polars as pl
-
-    column = pl.col(name)
-    if col_type == "istr":
-        return column.str.to_lowercase()
-    if col_type == "date":
-        return column.str.to_datetime(time_zone="UTC")
-    return column
-
-
-def _merge_columns(names, col_types=None):
-    names = tuple(arg_to_iter(names))
-    if not names:
-        raise ValueError("At least one column is required")
-    col_types = tuple(arg_to_iter(col_types))
-    col_types += (None,) * (len(names) - len(col_types))
-    return [
-        _merge_column(name, col_type)
-        for name, col_type in zip(names, col_types, strict=True)
-    ]
-
-
-@task()
-def merge(
-    c,
-    in_paths,
-    out_path,
-    item="GameItem",
-    keys="id",
-    key_types=None,
-    latest=None,
-    latest_types=None,
-    latest_min=None,
-    fieldnames=None,
-    fieldnames_exclude=None,
-    sort_keys=False,
-    sort_fields=None,
-    sort_descending=False,
+def _run_merge(
+    merge_config,
+    overwrite=True,
+    drop_empty=True,
+    sort_keys=True,
+    progress_bar=False,
 ):
-    """merge scraped files"""
-
-    from board_game_merger.config import MergeConfig
     from board_game_merger.merge import merge_files
-    from board_game_merger.schemas import ITEM_TYPE_SCHEMA
 
-    out_path = str(out_path).format(
-        date=django.utils.timezone.now().strftime(DATE_FORMAT_DASH),
-    )
+    if DRY_RUN:
+        LOGGER.info(
+            "[DRY RUN] Would merge <%s> into <%s>",
+            merge_config.in_paths,
+            merge_config.out_path,
+        )
+        return
 
-    LOGGER.info("Merging files <%s> into <%s>...", in_paths, out_path)
-
-    _remove(out_path)
-    os.makedirs(os.path.dirname(out_path), exist_ok=True)
-
-    merge_config = MergeConfig(
-        schema=ITEM_TYPE_SCHEMA[item],
-        in_paths=list(map(str, arg_to_iter(in_paths))),
-        out_path=out_path,
-        key_col=_merge_columns(keys, key_types),
-        latest_col=_merge_columns(latest, latest_types),
-        latest_min=latest_min,
-        sort_fields=list(arg_to_iter(sort_fields)) or None,
-        sort_descending=parse_bool(sort_descending),
-        fieldnames_include=list(arg_to_iter(fieldnames)) or None,
-        fieldnames_exclude=list(arg_to_iter(fieldnames_exclude)) or None,
+    LOGGER.info(
+        "Merging files <%s> into <%s>...",
+        merge_config.in_paths,
+        merge_config.out_path,
     )
 
     try:
         merge_files(
             merge_config=merge_config,
-            overwrite=True,
-            drop_empty=True,
-            sort_keys=parse_bool(sort_keys),
-            progress_bar=False,
+            overwrite=overwrite,
+            drop_empty=drop_empty,
+            sort_keys=sort_keys,
+            progress_bar=progress_bar,
         )
     except Exception:
         LOGGER.exception(
             "Unable to merge files <%s> into <%s>...",
-            in_paths,
-            out_path,
+            merge_config.in_paths,
+            merge_config.out_path,
         )
 
 
-def _merge_kwargs(
+def _site_merge_config(
     site,
     item="GameItem",
     in_paths=None,
     out_path=None,
-    full=False,
-    **kwargs,
+    clean=True,
+    days=None,
 ):
-    kwargs["item"] = item
-    kwargs["in_paths"] = in_paths or os.path.join(SCRAPER_DIR, "feeds", site, item, "*")
-    kwargs.setdefault("keys", f"{site}_id")
-    kwargs.setdefault("key_types", "int" if site in ("bgg", "luding") else "str")
-    kwargs.setdefault("latest", "scraped_at")
-    kwargs.setdefault("latest_types", "date")
+    from board_game_merger.config import MergeConfig
 
-    if parse_bool(full):
-        kwargs["out_path"] = out_path or os.path.join(
-            SCRAPER_DIR,
-            "feeds",
-            site,
-            item,
-            "{date}_merged.jl",
+    clean = parse_bool(clean)
+    days = parse_float(days)
+
+    in_paths = in_paths or (Path(SCRAPER_DIR) / "feeds" / site / item)
+    if clean:
+        out_path = out_path or (
+            Path(SCRAPED_DATA_DIR) / "scraped" / f"{site}_{item}.jl"
         )
-
     else:
-        kwargs["out_path"] = out_path or os.path.join(
-            SCRAPED_DATA_DIR,
-            "scraped",
-            f"{site}_{item}.jl",
+        date_str = django.utils.timezone.now().strftime(DATE_FORMAT_DASH)
+        out_path = out_path or (
+            Path(SCRAPER_DIR) / "feeds" / site / item / f"{date_str}-merged.jl"
         )
-        kwargs.setdefault(
-            "fieldnames_exclude",
-            ("published_at", "updated_at", "scraped_at"),
+
+    return MergeConfig.site_config(
+        site=site,
+        item=item,
+        in_paths=in_paths,
+        out_path=out_path,
+        clean_results=clean,
+        latest_min_days=days,
+    )
+
+
+@task()
+def merge(
+    c,
+    site="all",
+    item="GameItem",
+    in_paths=None,
+    out_path=None,
+    clean=True,
+    overwrite=True,
+    days=None,
+    progress_bar=False,
+):
+    """Merge scraped data files using board-game-merger."""
+    from board_game_merger.config import MergeConfig
+
+    clean = parse_bool(clean)
+    overwrite = parse_bool(overwrite)
+    days = parse_float(days)
+    progress_bar = parse_bool(progress_bar)
+
+    if site == "all":
+        for config in MergeConfig.all_sites_config(
+            clean_results=clean,
+            latest_min_days=days,
+        ):
+            site_name = (
+                "bgg_hotness"
+                if "bgg_hotness" in str(config.in_paths)
+                else "bgg"
+                if "/bgg/" in str(config.in_paths)
+                else Path(config.in_paths).parent.name
+            )
+            item_name = Path(config.in_paths).name
+            cfg = _site_merge_config(
+                site=site_name,
+                item=item_name,
+                in_paths=in_paths,
+                out_path=out_path,
+                clean=clean,
+                days=days,
+            )
+            _run_merge(
+                cfg,
+                overwrite=overwrite,
+                drop_empty=True,
+                sort_keys=clean,
+                progress_bar=progress_bar,
+            )
+    else:
+        cfg = _site_merge_config(
+            site=site,
+            item=item,
+            in_paths=in_paths,
+            out_path=out_path,
+            clean=clean,
+            days=days,
         )
-        kwargs.setdefault("sort_keys", True)
-
-    return kwargs
-
-
-@task()
-def mergebgg(c, in_paths=None, out_path=None, full=False):
-    """merge BoardGameGeek game data"""
-    merge(
-        c, **_merge_kwargs(site="bgg", in_paths=in_paths, out_path=out_path, full=full)
-    )
+        _run_merge(
+            cfg,
+            overwrite=overwrite,
+            drop_empty=True,
+            sort_keys=clean,
+            progress_bar=progress_bar,
+        )
 
 
 @task()
-def mergebggusers(c, in_paths=None, out_path=None, full=False):
-    """merge BoardGameGeek user data"""
+def mergebgg(c, in_paths=None, out_path=None, clean=True, overwrite=True):
+    """Merge BoardGameGeek game data."""
     merge(
         c,
-        **_merge_kwargs(
-            site="bgg",
-            item="UserItem",
-            in_paths=in_paths,
-            out_path=out_path,
-            full=full,
-            keys="bgg_user_name",
-            key_types="istr",
-            fieldnames_exclude=None
-            if parse_bool(full)
-            else ("published_at", "scraped_at"),
-        ),
+        site="bgg",
+        item="GameItem",
+        in_paths=in_paths,
+        out_path=out_path,
+        clean=clean,
+        overwrite=overwrite,
     )
 
 
 @task()
-def mergebggratings(c, in_paths=None, out_path=None, full=False):
-    """merge BoardGameGeek rating data"""
+def mergebggusers(c, in_paths=None, out_path=None, clean=True, overwrite=True):
+    """Merge BoardGameGeek user data."""
     merge(
         c,
-        **_merge_kwargs(
-            site="bgg",
-            item="RatingItem",
-            in_paths=in_paths,
-            out_path=out_path,
-            full=full,
-            keys=("bgg_user_name", "bgg_id"),
-            key_types=("istr", "int"),
-            fieldnames_exclude=None
-            if parse_bool(full)
-            else ("published_at", "scraped_at"),
-        ),
+        site="bgg",
+        item="UserItem",
+        in_paths=in_paths,
+        out_path=out_path,
+        clean=clean,
+        overwrite=overwrite,
     )
 
 
 @task()
-def mergebggrankings(c, in_paths=None, out_path=None, full=False, days=None):
-    """merge BoardGameGeek ranking data"""
-
-    full = parse_bool(full)
-    days = parse_int(days)
-    days = 7 if not days and not full else days
-    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
-
+def mergebggratings(c, in_paths=None, out_path=None, clean=True, overwrite=True):
+    """Merge BoardGameGeek rating data."""
     merge(
         c,
-        **_merge_kwargs(
-            site="bgg_rankings",
-            item="GameItem",
-            in_paths=in_paths,
-            out_path=out_path,
-            full=full,
-            keys=("published_at", "bgg_id"),
-            key_types=("date", "int"),
-            latest_min=latest_min,
-            fieldnames=None
-            if full
-            else (
-                "published_at",
-                "bgg_id",
-                "rank",
-                "name",
-                "year",
-                "num_votes",
-                "bayes_rating",
-                "avg_rating",
-            ),
-            fieldnames_exclude=None,
-            sort_keys=False,
-            sort_fields=("published_at", "rank"),
-        ),
+        site="bgg",
+        item="RatingItem",
+        in_paths=in_paths,
+        out_path=out_path,
+        clean=clean,
+        overwrite=overwrite,
     )
 
 
 @task()
-def mergebgghotness(c, in_paths=None, out_path=None, full=False, days=None):
+def mergebgghotness(
+    c, in_paths=None, out_path=None, clean=True, overwrite=True, days=None
+):
     """Merge BoardGameGeek hotness data."""
-
-    full = parse_bool(full)
-    days = parse_int(days)
-    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
-
     merge(
         c,
-        **_merge_kwargs(
-            site="bgg_hotness",
-            item="GameItem",
-            in_paths=in_paths,
-            out_path=out_path,
-            full=full,
-            keys=("published_at", "bgg_id"),
-            key_types=("date", "int"),
-            latest_min=latest_min,
-            fieldnames=None
-            if full
-            else (
-                "published_at",
-                "rank",
-                "bgg_id",
-                "name",
-                "year",
-                "image_url",
-            ),
-            fieldnames_exclude=None,
-            sort_keys=False,
-            sort_fields=("published_at", "rank"),
-        ),
+        site="bgg_hotness",
+        item="GameItem",
+        in_paths=in_paths,
+        out_path=out_path,
+        clean=clean,
+        overwrite=overwrite,
+        days=days,
     )
 
 
 @task()
-def mergebggabstract(c, in_paths=None, out_path=None, full=False, days=None):
-    """merge BoardGameGeek abstract ranking data"""
-
-    full = parse_bool(full)
-    days = parse_int(days)
-    days = 7 if not days and not full else days
-    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
-
+def mergedbpedia(c, in_paths=None, out_path=None, clean=True, overwrite=True):
+    """Merge DBpedia game data."""
     merge(
         c,
-        **_merge_kwargs(
-            site="bgg_rankings_abstract",
-            item="GameItem",
-            in_paths=in_paths,
-            out_path=out_path,
-            full=full,
-            keys=("published_at", "bgg_id"),
-            key_types=("date", "int"),
-            latest_min=latest_min,
-            fieldnames=None
-            if full
-            else (
-                "published_at",
-                "bgg_id",
-                "rank",
-                "name",
-                "year",
-                "num_votes",
-                "bayes_rating",
-                "avg_rating",
-            ),
-            fieldnames_exclude=None,
-            sort_keys=False,
-            sort_fields=("published_at", "rank"),
-        ),
+        site="dbpedia",
+        item="GameItem",
+        in_paths=in_paths,
+        out_path=out_path,
+        clean=clean,
+        overwrite=overwrite,
     )
 
 
 @task()
-def mergebggchildren(c, in_paths=None, out_path=None, full=False, days=None):
-    """merge BoardGameGeek children ranking data"""
-
-    full = parse_bool(full)
-    days = parse_int(days)
-    days = 7 if not days and not full else days
-    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
-
+def mergeluding(c, in_paths=None, out_path=None, clean=True, overwrite=True):
+    """Merge Luding.org game data."""
     merge(
         c,
-        **_merge_kwargs(
-            site="bgg_rankings_children",
-            item="GameItem",
-            in_paths=in_paths,
-            out_path=out_path,
-            full=full,
-            keys=("published_at", "bgg_id"),
-            key_types=("date", "int"),
-            latest_min=latest_min,
-            fieldnames=None
-            if full
-            else (
-                "published_at",
-                "bgg_id",
-                "rank",
-                "name",
-                "year",
-                "num_votes",
-                "bayes_rating",
-                "avg_rating",
-            ),
-            fieldnames_exclude=None,
-            sort_keys=False,
-            sort_fields=("published_at", "rank"),
-        ),
+        site="luding",
+        item="GameItem",
+        in_paths=in_paths,
+        out_path=out_path,
+        clean=clean,
+        overwrite=overwrite,
     )
 
 
 @task()
-def mergebggcustomizable(c, in_paths=None, out_path=None, full=False, days=None):
-    """merge BoardGameGeek customizable ranking data"""
-
-    full = parse_bool(full)
-    days = parse_int(days)
-    days = 7 if not days and not full else days
-    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
-
+def mergespielen(c, in_paths=None, out_path=None, clean=True, overwrite=True):
+    """Merge Spielen.de game data."""
     merge(
         c,
-        **_merge_kwargs(
-            site="bgg_rankings_customizable",
-            item="GameItem",
-            in_paths=in_paths,
-            out_path=out_path,
-            full=full,
-            keys=("published_at", "bgg_id"),
-            key_types=("date", "int"),
-            latest_min=latest_min,
-            fieldnames=None
-            if full
-            else (
-                "published_at",
-                "bgg_id",
-                "rank",
-                "name",
-                "year",
-                "num_votes",
-                "bayes_rating",
-                "avg_rating",
-            ),
-            fieldnames_exclude=None,
-            sort_keys=False,
-            sort_fields=("published_at", "rank"),
-        ),
+        site="spielen",
+        item="GameItem",
+        in_paths=in_paths,
+        out_path=out_path,
+        clean=clean,
+        overwrite=overwrite,
     )
 
 
 @task()
-def mergebggfamily(c, in_paths=None, out_path=None, full=False, days=None):
-    """merge BoardGameGeek family ranking data"""
-
-    full = parse_bool(full)
-    days = parse_int(days)
-    days = 7 if not days and not full else days
-    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
-
+def mergewikidata(c, in_paths=None, out_path=None, clean=True, overwrite=True):
+    """Merge Wikidata game data."""
     merge(
         c,
-        **_merge_kwargs(
-            site="bgg_rankings_family",
-            item="GameItem",
-            in_paths=in_paths,
-            out_path=out_path,
-            full=full,
-            keys=("published_at", "bgg_id"),
-            key_types=("date", "int"),
-            latest_min=latest_min,
-            fieldnames=None
-            if full
-            else (
-                "published_at",
-                "bgg_id",
-                "rank",
-                "name",
-                "year",
-                "num_votes",
-                "bayes_rating",
-                "avg_rating",
-            ),
-            fieldnames_exclude=None,
-            sort_keys=False,
-            sort_fields=("published_at", "rank"),
-        ),
-    )
-
-
-@task()
-def mergebggparty(c, in_paths=None, out_path=None, full=False, days=None):
-    """merge BoardGameGeek party ranking data"""
-
-    full = parse_bool(full)
-    days = parse_int(days)
-    days = 7 if not days and not full else days
-    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
-
-    merge(
-        c,
-        **_merge_kwargs(
-            site="bgg_rankings_party",
-            item="GameItem",
-            in_paths=in_paths,
-            out_path=out_path,
-            full=full,
-            keys=("published_at", "bgg_id"),
-            key_types=("date", "int"),
-            latest_min=latest_min,
-            fieldnames=None
-            if full
-            else (
-                "published_at",
-                "bgg_id",
-                "rank",
-                "name",
-                "year",
-                "num_votes",
-                "bayes_rating",
-                "avg_rating",
-            ),
-            fieldnames_exclude=None,
-            sort_keys=False,
-            sort_fields=("published_at", "rank"),
-        ),
-    )
-
-
-@task()
-def mergebggstrategy(c, in_paths=None, out_path=None, full=False, days=None):
-    """merge BoardGameGeek strategy ranking data"""
-
-    full = parse_bool(full)
-    days = parse_int(days)
-    days = 7 if not days and not full else days
-    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
-
-    merge(
-        c,
-        **_merge_kwargs(
-            site="bgg_rankings_strategy",
-            item="GameItem",
-            in_paths=in_paths,
-            out_path=out_path,
-            full=full,
-            keys=("published_at", "bgg_id"),
-            key_types=("date", "int"),
-            latest_min=latest_min,
-            fieldnames=None
-            if full
-            else (
-                "published_at",
-                "bgg_id",
-                "rank",
-                "name",
-                "year",
-                "num_votes",
-                "bayes_rating",
-                "avg_rating",
-            ),
-            fieldnames_exclude=None,
-            sort_keys=False,
-            sort_fields=("published_at", "rank"),
-        ),
-    )
-
-
-@task()
-def mergebggthematic(c, in_paths=None, out_path=None, full=False, days=None):
-    """merge BoardGameGeek thematic ranking data"""
-
-    full = parse_bool(full)
-    days = parse_int(days)
-    days = 7 if not days and not full else days
-    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
-
-    merge(
-        c,
-        **_merge_kwargs(
-            site="bgg_rankings_thematic",
-            item="GameItem",
-            in_paths=in_paths,
-            out_path=out_path,
-            full=full,
-            keys=("published_at", "bgg_id"),
-            key_types=("date", "int"),
-            latest_min=latest_min,
-            fieldnames=None
-            if full
-            else (
-                "published_at",
-                "bgg_id",
-                "rank",
-                "name",
-                "year",
-                "num_votes",
-                "bayes_rating",
-                "avg_rating",
-            ),
-            fieldnames_exclude=None,
-            sort_keys=False,
-            sort_fields=("published_at", "rank"),
-        ),
-    )
-
-
-@task()
-def mergebggwar(c, in_paths=None, out_path=None, full=False, days=None):
-    """merge BoardGameGeek war ranking data"""
-
-    full = parse_bool(full)
-    days = parse_int(days)
-    days = 7 if not days and not full else days
-    latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
-
-    merge(
-        c,
-        **_merge_kwargs(
-            site="bgg_rankings_war",
-            item="GameItem",
-            in_paths=in_paths,
-            out_path=out_path,
-            full=full,
-            keys=("published_at", "bgg_id"),
-            key_types=("date", "int"),
-            latest_min=latest_min,
-            fieldnames=None
-            if full
-            else (
-                "published_at",
-                "bgg_id",
-                "rank",
-                "name",
-                "year",
-                "num_votes",
-                "bayes_rating",
-                "avg_rating",
-            ),
-            fieldnames_exclude=None,
-            sort_keys=False,
-            sort_fields=("published_at", "rank"),
-        ),
-    )
-
-
-@task()
-def mergedbpedia(c, in_paths=None, out_path=None, full=False):
-    """merge DBpedia game data"""
-    merge(
-        c,
-        **_merge_kwargs(
-            site="dbpedia",
-            in_paths=in_paths,
-            out_path=out_path,
-            full=full,
-        ),
-    )
-
-
-@task()
-def mergeluding(c, in_paths=None, out_path=None, full=False):
-    """merge Luding.org game data"""
-    merge(
-        c,
-        **_merge_kwargs(
-            site="luding",
-            in_paths=in_paths,
-            out_path=out_path,
-            full=full,
-        ),
-    )
-
-
-@task()
-def mergespielen(c, in_paths=None, out_path=None, full=False):
-    """merge Spielen.de game data"""
-    merge(
-        c,
-        **_merge_kwargs(
-            site="spielen",
-            in_paths=in_paths,
-            out_path=out_path,
-            full=full,
-        ),
-    )
-
-
-@task()
-def mergewikidata(c, in_paths=None, out_path=None, full=False):
-    """merge Wikidata game data"""
-    merge(
-        c,
-        **_merge_kwargs(
-            site="wikidata",
-            in_paths=in_paths,
-            out_path=out_path,
-            full=full,
-        ),
+        site="wikidata",
+        item="GameItem",
+        in_paths=in_paths,
+        out_path=out_path,
+        clean=clean,
+        overwrite=overwrite,
     )
 
 
 @task(
-    mergebgg,
+    mergebgghotness,
     mergedbpedia,
     mergeluding,
     mergespielen,
     mergewikidata,
+    mergebgg,
     mergebggusers,
     mergebggratings,
-    mergebggrankings,
-    mergebgghotness,
-    mergebggabstract,
-    mergebggchildren,
-    mergebggcustomizable,
-    mergebggfamily,
-    mergebggparty,
-    mergebggstrategy,
-    mergebggthematic,
-    mergebggwar,
 )
 def mergeall(
     c,
 ):
-    """merge all sites and items"""
+    """Merge all sites and items."""
 
 
 @task()
