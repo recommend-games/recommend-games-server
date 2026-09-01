@@ -5,27 +5,70 @@ contribute to this project.
 
 ## Getting started
 
-In order to get your environment set up, first make sure you have
-[Pipenv](https://pipenv.readthedocs.io/) installed. Then install and activate
-the environment via
+Make sure you have [uv](https://docs.astral.sh/uv/) installed, then set up the
+environment:
 
 ```bash
-pipenv install --dev
-pipenv shell
+uv sync
 ```
+
+That installs Python 3.14 (per `.python-version`), the runtime dependencies and
+the `build` and `dev` dependency groups.
 
 Check if Django is installed and has no issues:
 
 ```bash
-./manage.py check
+uv run ./manage.py check
 ```
 
-In order to build the full environment, you'll need to install the following tools:
+Run the app against an existing database:
+
+```bash
+uv run ./manage.py runserver
+```
+
+### A note on architecture
+
+The `build` group installs [PyTorch](https://pytorch.org/), which publishes no
+macOS x86_64 wheels. On an Intel Mac `uv sync` will fail trying to build torch
+from source. You can still work on everything the server itself does with:
+
+```bash
+uv sync --no-default-groups
+```
+
+Training the recommender and building the database require Linux or Apple
+Silicon.
+
+## Build tasks
+
+Build orchestration lives in [`build.py`](build.py) and runs through
+[invoke](https://www.pyinvoke.org/):
+
+```bash
+uv run invoke -c build --list          # show all tasks
+uv run invoke -c build builddb         # build a new database
+uv run invoke -c build --dry release   # show what a release would do
+```
+
+See [`release.sh`](release.sh) for the full release pipeline.
+
+## Linting and formatting
+
+[ruff](https://docs.astral.sh/ruff/) handles linting and formatting, wired up
+through pre-commit:
+
+```bash
+uv run pre-commit install
+uv run pre-commit run --all-files
+```
+
+The `lint` task additionally runs the non-Python linters, which you need to
+install separately:
 
 * [Git](https://git-scm.com/)
 * [Docker](https://www.docker.com/)
 * [SQLite](https://www.sqlite.org)
-* [Google Cloud SDK](https://cloud.google.com/sdk/)
 * [ShellCheck](https://github.com/koalaman/shellcheck)
 * [Hadolint](https://github.com/hadolint/hadolint)
 * [MarkdownLint](https://github.com/igorshubovych/markdownlint-cli)
@@ -35,5 +78,5 @@ In order to build the full environment, you'll need to install the following too
 * [JSLint](https://github.com/reid/node-jslint)
 * [CSSLint](https://github.com/CSSLint/csslint)
 
-If you want to deploy the server to a new Google Cloud environment, read the
-[deployment guidelines](DEPLOY.md).
+Read the [deployment guidelines](DEPLOY.md) for how a release reaches
+production.
