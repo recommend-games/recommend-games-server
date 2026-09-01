@@ -1,137 +1,72 @@
-# Deployment to Google Cloud
+# Deployment
 
-This document describes the deployment process to a new Google Cloud environment.
-If you just want to learn how to get started or what tools you need to install,
-read the [contribution guidelines](CONTRIBUTING.md).
+The service is deployed as a Docker image to the
+[Heroku container registry](https://devcenter.heroku.com/articles/container-registry-and-runtime).
 
-## Create Google Cloud project
+There are two independent release paths:
 
-Log in to [Google Cloud console](https://console.cloud.google.com) and create a
-new project. We'll refer to the project ID you chose as `$PROJECT`.
+1. **Data + static API** — rebuilds the SQLite database and publishes a static
+   API to the sibling `recommend-games-api` repository.
+2. **Server image** — builds and releases the Docker image that serves the API.
 
-You may have to activate billing and upgrade your account to access all features
-required for this project.
+## Prerequisites
 
-Run `gcloud init` to initialise your project in your terminal, then authenticate
-via `gcloud auth login`. In case you're having trouble with Python 2 vs 3, try:
+* [uv](https://docs.astral.sh/uv/) and the project environment (`uv sync`)
+* [Docker](https://www.docker.com/)
+* [SQLite](https://www.sqlite.org)
+* The [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli), logged in
+  via `heroku login`
+* These sibling checkouts next to this repository:
+  * `board-game-data` — scraped data and rankings
+  * `board-game-scraper` — scraper feeds
+  * `board-game-recommender` — where the trained model is written
+  * `recommend-games-config` — premium user config
+  * `recommend-games-api` — target for the static API
 
-```bash
-CLOUDSDK_PYTHON=python3 gcloud auth login
-```
+Set `HEROKU_APP` in `.env` (see [`.env.example`](.env.example)) if the app is
+not named `recommend-games`.
 
-## Create App Engine app
+Training the recommender needs PyTorch, which has no macOS x86_64 wheels — a
+full release therefore requires Linux or Apple Silicon.
 
-Open the [App Engine dashboard](https://console.cloud.google.com/appengine) and
-create a new app in the region of your choice with the flexible environment.
-
-## Create Storage buckets
-
-Open the [Storage dashboard](https://console.cloud.google.com/storage) and
-create the buckets `$PROJECT-data`, `$PROJECT-logs` and `$PROJECT-responses` in
-the same region as the App Engine app above. Leave the default options
-otherwise.
-
-## Create PubSub topic and subscription
-
-Open the [PubSub dashboard](https://console.cloud.google.com/cloudpubsub) and
-create the topic `users`, then two subscriptions attached to that topic:
-
-* `crawl` with "Pull" delivery type, "Never expire", 600 seconds acknowledgement
-  deadline, and 1 day retention duration,
-* `logs` with "Pull" delivery type, "Never expire", 600 seconds acknowledgement
-  deadline, and 7 day retention duration.
-
-Also create another topic `responses` and one subscription attached to that topic:
-
-* `response_logs` with "Pull" delivery type, "Never expire", 600 seconds
-  acknowledgement deadline, and 7 day retention duration.
-
-Then make sure to update the PubSub project, topic, and subscription:
-
-* `crawl` in the [scraper](https://gitlab.com/recommend.games/board-game-scraper/blob/master/.env.example),
-* `logs` and `response_logs` in [`.env`](.env.example) and
-  [`docker-compose.yaml`](docker-compose.yaml).
-
-## Enable Google Container Registry API
-
-Go to the [APIs & Services dashboard](https://console.cloud.google.com/apis/dashboard),
-find the [Google Container Registry API](https://console.cloud.google.com/apis/library/containerregistry.googleapis.com),
-and enable it.
-
-## Create credentials for default service account
-
-Go to the [IAM & admin dashboard](https://console.cloud.google.com/iam-admin),
-section [Service accounts](https://console.cloud.google.com/iam-admin/serviceaccounts),
-and find the App Engine default service account. Select "Create key" from the
-actions, and download the key in JSON format. Move that file to the root of this
-project as `gs.json`. **This is a private key, do not check it into version
-control!**
-
-Make sure `gcloud` uses these credentials by editing the following lines in
-your local `~/.boto`:
-
-```
-# Google OAuth2 service account credentials (for "gs://" URIs):
-gs_service_key_file = /path/to/gs.json
-```
-
-Now you should be able to log in to [Container Registry](https://console.cloud.google.com/gcr):
-
-```bash
-cat gs.json | docker login -u _json_key --password-stdin https://gcr.io
-```
-
-Read more about using [JSON credentials to access GCR](https://cloud.google.com/container-registry/docs/advanced-authentication#json_key_file).
-
-## Update settings
-
-Edit your [`.env`](.env.example) file to use the correct project:
-
-```bash
-GC_PROJECT=$PROJECT
-```
-
-Similarly, edit [`app.yaml`](app.yaml) to use the correct environment variables:
-
-```yaml
-env_variables:
-    GC_PROJECT: $PROJECT
-    GC_DATA_BUCKET: $PROJECT-data
-    PUBSUB_QUEUE_PROJECT: $PROJECT
-    PUBSUB_QUEUE_TOPIC_USERS: users
-    PUBSUB_QUEUE_TOPIC_RESPONSES: responses
-```
-
-The App Engine domain should be automatically added to `ALLOWED_HOSTS` in
-[settings.py](rg/settings.py) if `$GC_PROJECT` is configured correctly.
-Should you experience problems with your domain not being whitelisted, check
-there first.
-
-## Deploy
-
-You should now be able to deploy the service. For a full release, simply run
+## Releasing data
 
 ```bash
 ./release.sh
 ```
 
-If you don't need to build a new recommender and datebase version, it should
-suffice to run
+This runs the full task chain through invoke — merging scraped files, training
+the recommender, snapshotting the R.G rankings, rebuilding the database,
+scoring Kennerspiel, generating the sitemap — and then publishes the static API
+and pushes it.
+
+To inspect what a release would do without touching anything:
 
 ```bash
-pipenv run pynt syncdata releaseserver
+uv run invoke -c build --dry builddbfull
 ```
 
-Either way, after successful deployment the service should be available at
-[https://$PROJECT.appspot.com/](https://this-could-be-your-project.appspot.com/).
+## Releasing the server
 
-## Configure domains
+```bash
+uv run invoke -c build release       # rebuild the database, then deploy
+uv run invoke -c build releasefull   # also re-merge and retrain first
+```
 
-If you're using custom domains, navigate to the
-[corresponding settings](https://console.cloud.google.com/appengine/settings/domains)
-and follow the instructions. If the domain was previously used in a different
-project, you will need to unassign it first.
+Both end in `releaseserver`, which builds the image, tags the commit with the
+contents of [`VERSION`](VERSION), pushes to `registry.heroku.com` and calls
+`heroku container:release`.
 
-## Enjoy!
+To build and run the image locally instead:
 
-Everything should be done! Sit back and relax...
+```bash
+docker compose up --build
+```
+
+The image contains only the runtime dependencies plus `rg/`, `games/`,
+`static/` and `data/`. Everything that builds data — PyTorch, pandas,
+scikit-learn, invoke — stays on the developer machine.
+
+Note that `static/` and `data/` are build artifacts and are not in Git; run
+`uv run invoke -c build collectstatic` and the data pipeline before building
+the image.
