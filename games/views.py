@@ -2,16 +2,17 @@
 
 import logging
 from collections import OrderedDict
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Iterator
 from datetime import UTC, timedelta
 from functools import lru_cache, reduce
 from itertools import chain
 from operator import or_
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import polars as pl
 from django.conf import settings
-from django.db.models import Count, Min, Q
+from django.db.models import Count, Min, Q, QuerySet
+from django.http import HttpRequest, HttpResponsePermanentRedirect
 from django.shortcuts import redirect
 from django.utils.timezone import now
 from django_filters import FilterSet
@@ -26,7 +27,8 @@ from rest_framework.exceptions import (
 )
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.status import (
@@ -73,21 +75,24 @@ from .utils import (
     server_version,
 )
 
+if TYPE_CHECKING:
+    from board_game_recommender import LightGamesRecommender
+
 LOGGER = logging.getLogger(__name__)
-PAGE_SIZE = api_settings.PAGE_SIZE or 25
+PAGE_SIZE: int = api_settings.PAGE_SIZE or 25
 
 
 class PermissionsModelViewSet(ModelViewSet):
     """add permissions based on settings"""
 
-    def get_permissions(self):
+    def get_permissions(self) -> tuple[BasePermission, ...]:
         for permission in super().get_permissions():
             if isinstance(permission, AlwaysAllowAny):
                 return (permission,)
         cls = ReadOnly if settings.READ_ONLY else AllowAny
         return (cls(),)
 
-    def handle_exception(self, exc):
+    def handle_exception(self, exc: Exception) -> Response:
         if settings.READ_ONLY and isinstance(exc, (NotAuthenticated, PermissionDenied)):
             exc = MethodNotAllowed(self.request.method)
         return super().handle_exception(exc)
@@ -98,7 +103,12 @@ class GamesActionViewSet(PermissionsModelViewSet):
 
     # pylint: disable=invalid-name,redefined-builtin,unused-argument
     @action(detail=True)
-    def games(self, request, pk=None, format=None):
+    def games(
+        self,
+        request: Request,
+        pk: Any | None = None,
+        format: str | None = None,
+    ) -> Response:
         """find all games"""
 
         obj = self.get_object()
@@ -121,9 +131,9 @@ class BodyParamsPagination(PageNumberPagination):
     """Parse params from body and use in pagination."""
 
     keys: str | Iterable[str]
-    parsers: Callable | Iterable[Callable | None]
+    parsers: Callable[..., Any] | Iterable[Callable[..., Any] | None]
 
-    def get_next_link(self):
+    def get_next_link(self) -> str | None:
         url = super().get_next_link()
         if url is None:
             return None
@@ -138,7 +148,7 @@ class BodyParamsPagination(PageNumberPagination):
             )
         return url
 
-    def get_previous_link(self):
+    def get_previous_link(self) -> str | None:
         url = super().get_previous_link()
         if url is None:
             return None
@@ -192,7 +202,7 @@ class PaginatedCSVGameRenderer(PaginatedCSVRenderer):
     ]
 
 
-def _parse_parts(args):
+def _parse_parts(args: Any) -> Iterator[Any]:
     for arg in arg_to_iter(args):
         if isinstance(arg, str):
             for parsed in arg.split(","):
@@ -205,13 +215,17 @@ def _parse_parts(args):
             yield arg
 
 
-def _parse_ints(args):
+def _parse_ints(args: Any) -> Iterator[int]:
     for parsed in map(parse_int, _parse_parts(args)):
         if parsed is not None:
             yield parsed
 
 
-def _extract_params(request, key, parser=None):
+def _extract_params(
+    request: Request,
+    key: str,
+    parser: Callable[[Any], Any] | None = None,
+) -> Iterator[Any]:
     data_values = (
         arg_to_iter(request.data.get(key))
         if isinstance(request.data, dict)
@@ -230,7 +244,7 @@ def _extract_params(request, key, parser=None):
             yield value
 
 
-def _light_games(bgg_ids=None):
+def _light_games(bgg_ids: int | Iterable[int] | None = None) -> QuerySet[Game]:
     # pylint: disable=no-member
     games = (
         Game.objects.all()
@@ -240,12 +254,18 @@ def _light_games(bgg_ids=None):
     return games.values("bgg_id", "name", "year", "image_url")
 
 
-def _light_games_dict(bgg_ids=None):
+def _light_games_dict(
+    bgg_ids: int | Iterable[int] | None = None,
+) -> dict[int, dict[str, Any]]:
     games = _light_games(bgg_ids)
     return {game["bgg_id"]: game for game in games}
 
 
-def _add_games(data, bgg_ids=None, key="game"):
+def _add_games(
+    data: list[dict[str, Any]],
+    bgg_ids: int | Iterable[int] | None = None,
+    key: str = "game",
+) -> list[dict[str, Any]]:
     games = _light_games_dict(bgg_ids)
     for item in data:
         game = games.get(item.get(key))
@@ -255,7 +275,7 @@ def _add_games(data, bgg_ids=None, key="game"):
 
 
 @lru_cache(maxsize=8)
-def _get_compilations():
+def _get_compilations() -> frozenset[int]:
     return frozenset(
         Game.objects.filter(compilation=True)
         .order_by()
@@ -263,7 +283,12 @@ def _get_compilations():
     )
 
 
-def _rank_recommendations(recommendations, *, score_column, include_ids):
+def _rank_recommendations(
+    recommendations: pl.DataFrame,
+    *,
+    score_column: str,
+    include_ids: Iterable[int],
+) -> pl.DataFrame:
     """Narrow a recommender result to (bgg_id, score, rank), ranked by score.
 
     board-game-recommender returns a wide frame with one ``<key>_score`` column
@@ -435,15 +460,15 @@ class GameViewSet(PermissionsModelViewSet):
     def _excluded_games(
         self,
         *,
-        user=None,
-        exclude_ids=None,
-        exclude_compilations=True,
-        exclude_known=True,
-        exclude_owned=True,
-        exclude_wishlist=None,
-        exclude_play_count=None,
-        exclude_clusters=False,
-    ):
+        user: str | User | None = None,
+        exclude_ids: int | Iterable[int] | None = None,
+        exclude_compilations: bool = True,
+        exclude_known: bool = True,
+        exclude_owned: bool = True,
+        exclude_wishlist: int | None = None,
+        exclude_play_count: int | None = None,
+        exclude_clusters: bool = False,
+    ) -> frozenset[int]:
         exclude_ids = frozenset(arg_to_iter(exclude_ids))
 
         if user:
@@ -483,17 +508,17 @@ class GameViewSet(PermissionsModelViewSet):
     def _included_games(
         self,
         *,
-        recommender,
-        user=None,
-        include_ids=None,
-        exclude_ids=None,
-        exclude_compilations=True,
-        exclude_known=True,
-        exclude_owned=True,
-        exclude_wishlist=None,
-        exclude_play_count=None,
-        exclude_clusters=False,
-    ):
+        recommender: LightGamesRecommender,
+        user: str | User | None = None,
+        include_ids: int | Iterable[int] | None = None,
+        exclude_ids: int | Iterable[int] | None = None,
+        exclude_compilations: bool = True,
+        exclude_known: bool = True,
+        exclude_owned: bool = True,
+        exclude_wishlist: int | None = None,
+        exclude_play_count: int | None = None,
+        exclude_clusters: bool = False,
+    ) -> frozenset[int]:
         include_ids = frozenset(arg_to_iter(include_ids))
         exclude_ids = self._excluded_games(
             user=user,
@@ -541,17 +566,17 @@ class GameViewSet(PermissionsModelViewSet):
     def _recommend_rating(
         self,
         *,
-        user,
-        recommender,
-        include_ids=None,
-        exclude_ids=None,
-        exclude_compilations=True,
-        exclude_known=True,
-        exclude_owned=True,
-        exclude_wishlist=None,
-        exclude_play_count=None,
-        exclude_clusters=False,
-    ):
+        user: str,
+        recommender: LightGamesRecommender,
+        include_ids: int | Iterable[int] | None = None,
+        exclude_ids: int | Iterable[int] | None = None,
+        exclude_compilations: bool = True,
+        exclude_known: bool = True,
+        exclude_owned: bool = True,
+        exclude_wishlist: int | None = None,
+        exclude_play_count: int | None = None,
+        exclude_clusters: bool = False,
+    ) -> pl.DataFrame | tuple[()]:
         user = user.lower()
         if user not in recommender.known_users:
             raise NotFound(f"user <{user}> could not be found")
@@ -581,13 +606,13 @@ class GameViewSet(PermissionsModelViewSet):
     def _recommend_group_rating(
         self,
         *,
-        users,
-        recommender,
-        include_ids=None,
-        exclude_ids=None,
-        exclude_clusters=False,
-        exclude_compilations=True,
-    ):
+        users: Iterable[str],
+        recommender: LightGamesRecommender,
+        include_ids: int | Iterable[int] | None = None,
+        exclude_ids: int | Iterable[int] | None = None,
+        exclude_clusters: bool = False,
+        exclude_compilations: bool = True,
+    ) -> pl.DataFrame | tuple[()]:
         users = (user.lower() for user in users if user)
         users = [user for user in users if user in recommender.known_users]
         if not users:
@@ -621,13 +646,13 @@ class GameViewSet(PermissionsModelViewSet):
     def _recommend_similar(
         self,
         *,
-        like,
-        recommender,
-        include_ids=None,
-        exclude_ids=None,
-        exclude_compilations=True,
-        exclude_clusters=False,
-    ):
+        like: int | Iterable[int],
+        recommender: LightGamesRecommender,
+        include_ids: int | Iterable[int] | None = None,
+        exclude_ids: int | Iterable[int] | None = None,
+        exclude_compilations: bool = True,
+        exclude_clusters: bool = False,
+    ) -> pl.DataFrame | tuple[()]:
         like = frozenset(arg_to_iter(like)) & recommender.rated_games
         if not like:
             raise NotFound("Unable to create recommendations without games")
@@ -661,7 +686,11 @@ class GameViewSet(PermissionsModelViewSet):
             PaginatedCSVGameRenderer,
         ),
     )
-    def recommend(self, request, format=None):
+    def recommend(
+        self,
+        request: Request,
+        format: str | None = None,
+    ) -> Response:
         """recommend games"""
 
         users = list(_extract_params(request, "user", str))
@@ -764,7 +793,11 @@ class GameViewSet(PermissionsModelViewSet):
         methods=("GET", "POST"),
         permission_classes=(AlwaysAllowAny,),
     )
-    def recommend_random(self, request, format=None):
+    def recommend_random(
+        self,
+        request: Request,
+        format: str | None = None,
+    ) -> Response:
         """
         Recommend a random selection of games based on the users'
         preferences and collections.
@@ -849,7 +882,12 @@ class GameViewSet(PermissionsModelViewSet):
         )
 
     @action(detail=True)
-    def similar(self, request, pk=None, format=None):
+    def similar(
+        self,
+        request: Request,
+        pk: Any | None = None,
+        format: str | None = None,
+    ) -> Response:
         """Find games similar to this game."""
 
         path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
@@ -900,7 +938,12 @@ class GameViewSet(PermissionsModelViewSet):
         )
 
     @action(detail=True)
-    def rankings(self, request, pk=None, format=None):
+    def rankings(
+        self,
+        request: Request,
+        pk: Any | None = None,
+        format: str | None = None,
+    ) -> Response:
         """Find historical rankings of a game."""
 
         filters = {
@@ -917,7 +960,11 @@ class GameViewSet(PermissionsModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False)
-    def history(self, request, format=None):
+    def history(
+        self,
+        request: Request,
+        format: str | None = None,
+    ) -> Response:
         """History of the top rankings."""
 
         top = parse_int(request.query_params.get("top")) or 100
@@ -958,7 +1005,11 @@ class GameViewSet(PermissionsModelViewSet):
         return Response(data)
 
     @action(detail=False)
-    def updated_at(self, request, format=None):
+    def updated_at(
+        self,
+        request: Request,
+        format: str | None = None,
+    ) -> Response:
         """Get date of last model update."""
         updated_at = model_updated_at()
         if not updated_at:
@@ -966,12 +1017,20 @@ class GameViewSet(PermissionsModelViewSet):
         return Response({"updated_at": updated_at})
 
     @action(detail=False)
-    def version(self, request, format=None):
+    def version(
+        self,
+        request: Request,
+        format: str | None = None,
+    ) -> Response:
         """Get project and server version."""
         return Response(server_version())
 
     @action(detail=False)
-    def stats(self, request, format=None):
+    def stats(
+        self,
+        request: Request,
+        format: str | None = None,
+    ) -> Response:
         """get games stats"""
 
         result = {"updated_at": model_updated_at()}
@@ -1023,7 +1082,12 @@ class PersonViewSet(PermissionsModelViewSet):
 
     # pylint: disable=invalid-name,redefined-builtin,unused-argument
     @action(detail=True)
-    def games(self, request, pk=None, format=None):
+    def games(
+        self,
+        request: Request,
+        pk: Any | None = None,
+        format: str | None = None,
+    ) -> Response:
         """find all games for a person"""
 
         person = self.get_object()
@@ -1094,7 +1158,12 @@ class UserViewSet(PermissionsModelViewSet):
 
     # pylint: disable=invalid-name,redefined-builtin,unused-argument
     @action(detail=True)
-    def stats(self, request, pk=None, format=None):
+    def stats(
+        self,
+        request: Request,
+        pk: Any | None = None,
+        format: str | None = None,
+    ) -> Response:
         """get user stats"""
         user = self.get_object()
 
@@ -1121,7 +1190,12 @@ class UserViewSet(PermissionsModelViewSet):
         return Response(data)
 
     @action(detail=True)
-    def has_collection(self, request, pk=None, format=None):
+    def has_collection(
+        self,
+        request: Request,
+        pk: Any | None = None,
+        format: str | None = None,
+    ) -> Response:
         """Check if a user has a collection."""
         # TODO cross check with recommender.known_users?
         if Collection.objects.filter(user__name__iexact=pk).exists():
@@ -1137,7 +1211,12 @@ class UserViewSet(PermissionsModelViewSet):
         permission_classes=(AlwaysAllowAny,),
         throttle_classes=(AnonRateThrottle,),
     )
-    def premium_user_request(self, request, pk=None, format=None):
+    def premium_user_request(
+        self,
+        request: Request,
+        pk: Any | None = None,
+        format: str | None = None,
+    ) -> Response:
         """Send a request to the admin to become a premium user."""
         user = self.get_object()
         message = next(_extract_params(request, "message"), None)
@@ -1154,7 +1233,11 @@ class UserViewSet(PermissionsModelViewSet):
         permission_classes=(AlwaysAllowAny,),
         throttle_classes=(AnonRateThrottle,),
     )
-    def premium_users_request(self, request, format=None):
+    def premium_users_request(
+        self,
+        request: Request,
+        format: str | None = None,
+    ) -> Response:
         """Send a request to the admin to become premium users."""
 
         strict = parse_bool(next(_extract_params(request, "strict"), None))
@@ -1190,7 +1273,7 @@ class CollectionViewSet(ModelViewSet):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
 
-    def get_permissions(self):
+    def get_permissions(self) -> tuple[BasePermission, ...]:
         cls = AllowAny if settings.DEBUG else IsAuthenticated
         return (cls(),)
 
@@ -1240,7 +1323,11 @@ class RankingViewSet(PermissionsModelViewSet):
 
     # pylint: disable=redefined-builtin,unused-argument
     @action(detail=False)
-    def dates(self, request, format=None):
+    def dates(
+        self,
+        request: Request,
+        format: str | None = None,
+    ) -> Response:
         """Find all available dates with rankings."""
 
         query_set = self.get_queryset().order_by("ranking_type", "date")
@@ -1252,7 +1339,11 @@ class RankingViewSet(PermissionsModelViewSet):
         return Response(query_set.values("ranking_type", "date").distinct())
 
     @action(detail=False)
-    def games(self, request, format=None):
+    def games(
+        self,
+        request: Request,
+        format: str | None = None,
+    ) -> Response:
         """Similar to self.list(), but with full game details."""
 
         fat = parse_bool(next(_extract_params(request, "fat"), None))
@@ -1278,7 +1369,7 @@ class RankingViewSet(PermissionsModelViewSet):
         return Response(data)
 
 
-def redirect_view(request):
+def redirect_view(request: HttpRequest) -> HttpResponsePermanentRedirect:
     """Redirect to a given path."""
     path = request.GET.get("to") or "/"
     return redirect(path if path.startswith("/") else f"/{path}", permanent=True)
