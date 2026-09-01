@@ -1,16 +1,16 @@
-""" utils """
+"""utils"""
 
 import json
 import logging
 import os.path
 import re
 import timeit
+import uuid
+from collections.abc import Iterable
 from csv import DictWriter
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from functools import lru_cache, partial
 from pathlib import Path
-from typing import Iterable, Optional, Union
-import uuid
 
 from django.conf import settings
 from pytility import arg_to_iter, normalize_space, parse_date
@@ -67,7 +67,7 @@ def model_updated_at(file_path=settings.MODEL_UPDATED_FILE):
         with open(file_path, encoding="utf-8") as file_obj:
             updated_at = file_obj.read()
         updated_at = normalize_space(updated_at)
-        return parse_date(updated_at, tzinfo=timezone.utc)
+        return parse_date(updated_at, tzinfo=UTC)
     except Exception:
         pass
     return None
@@ -210,11 +210,14 @@ def jl_to_csv(in_path, out_path, columns=None, joiner=","):
         "Reading JSON lines from <%s> and writing CSV to <%s>...", in_path, out_path
     )
 
-    with open(in_path, encoding="utf-8") as in_file, open(
-        out_path,
-        "w",
-        encoding="utf-8",
-    ) as out_file:
+    with (
+        open(in_path, encoding="utf-8") as in_file,
+        open(
+            out_path,
+            "w",
+            encoding="utf-8",
+        ) as out_file,
+    ):
         if not columns:
             row = next(in_file, None)
             row = _process_row(row, joiner=joiner) if row else {}
@@ -258,10 +261,10 @@ def gitlab_merge_request(
     gitlab_project_id: int,
     gitlab_access_token: str,
     gitlab_url: str = "https://gitlab.com",
-    source_branch: Optional[str] = None,
+    source_branch: str | None = None,
     target_branch: str = "main",
-    title: Optional[str] = None,
-    description: Optional[str] = None,
+    title: str | None = None,
+    description: str | None = None,
 ) -> str:
     """Upload a file to GitLab and create a merge request."""
 
@@ -348,16 +351,16 @@ def gitlab_merge_request(
 def premium_feature_gitlab_merge_request(
     *,
     users: Iterable[str],
-    access_expiration: Union[datetime, str],
+    access_expiration: datetime | str,
     gitlab_project_id: int,
     gitlab_access_token: str,
     file_dir: str = "users/premium",
-    file_stem: Optional[str] = None,
+    file_stem: str | None = None,
     gitlab_url: str = "https://gitlab.com",
-    source_branch: Optional[str] = None,
+    source_branch: str | None = None,
     target_branch: str = "main",
-    title: Optional[str] = None,
-    description: Optional[str] = None,
+    title: str | None = None,
+    description: str | None = None,
 ) -> str:
     """Create a merge request to add users to the premium list."""
 
@@ -371,7 +374,7 @@ def premium_feature_gitlab_merge_request(
     if not users:
         raise ValueError("No users provided")
 
-    access_expiration = parse_date(access_expiration, tzinfo=timezone.utc)
+    access_expiration = parse_date(access_expiration, tzinfo=UTC)
     if not access_expiration:
         raise ValueError("Invalid access expiration")
 

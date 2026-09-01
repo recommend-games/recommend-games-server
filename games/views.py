@@ -1,11 +1,13 @@
-""" views """
-from collections import OrderedDict
+"""views"""
+
 import logging
-from datetime import timedelta, timezone
+from collections import OrderedDict
+from collections.abc import Callable, Iterable
+from datetime import UTC, timedelta
 from functools import lru_cache, reduce
 from itertools import chain
 from operator import or_
-from typing import Any, Callable, Iterable, Optional, Union
+from typing import Any
 
 import pandas as pd
 from django.conf import settings
@@ -41,6 +43,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework_csv.renderers import PaginatedCSVRenderer
 
 from games.collections import all_collection, any_collection, none_collection
+
 from .models import (
     Category,
     Collection,
@@ -117,8 +120,8 @@ class GamesActionViewSet(PermissionsModelViewSet):
 class BodyParamsPagination(PageNumberPagination):
     """Parse params from body and use in pagination."""
 
-    keys: Union[str, Iterable[str]]
-    parsers: Union[Callable, Iterable[Optional[Callable]]]
+    keys: str | Iterable[str]
+    parsers: Callable | Iterable[Callable | None]
 
     def get_next_link(self):
         url = super().get_next_link()
@@ -261,9 +264,9 @@ def _get_compilations():
 
 
 def _gitlab_merge_request(
-    users: Union[str, Iterable[str]],
+    users: str | Iterable[str],
     access_days: int = 365,
-    message: Optional[str] = None,
+    message: str | None = None,
 ) -> Response:
     users = sorted(frozenset(user.lower() for user in arg_to_iter(users)))
     if not users:
@@ -644,8 +647,10 @@ class GameViewSet(PermissionsModelViewSet):
         methods=("GET", "POST"),
         permission_classes=(AlwaysAllowAny,),
         pagination_class=BGGParamsPagination,
-        renderer_classes=tuple(api_settings.DEFAULT_RENDERER_CLASSES)
-        + (PaginatedCSVGameRenderer,),
+        renderer_classes=(
+            *api_settings.DEFAULT_RENDERER_CLASSES,
+            PaginatedCSVGameRenderer,
+        ),
     )
     def recommend(self, request, format=None):
         """recommend games"""
@@ -892,12 +897,8 @@ class GameViewSet(PermissionsModelViewSet):
         filters = {
             "game": pk,
             "ranking_type__in": clear_list(_extract_params(request, "ranking_type")),
-            "date__gte": parse_date(
-                request.query_params.get("date__gte"), tzinfo=timezone.utc
-            ),
-            "date__lte": parse_date(
-                request.query_params.get("date__lte"), tzinfo=timezone.utc
-            ),
+            "date__gte": parse_date(request.query_params.get("date__gte"), tzinfo=UTC),
+            "date__lte": parse_date(request.query_params.get("date__lte"), tzinfo=UTC),
         }
         filters = {k: v for k, v in filters.items() if v}
         queryset = Ranking.objects.filter(**filters)
@@ -915,12 +916,8 @@ class GameViewSet(PermissionsModelViewSet):
 
         filters = {
             "ranking_type": ranking_type,
-            "date__gte": parse_date(
-                request.query_params.get("date__gte"), tzinfo=timezone.utc
-            ),
-            "date__lte": parse_date(
-                request.query_params.get("date__lte"), tzinfo=timezone.utc
-            ),
+            "date__gte": parse_date(request.query_params.get("date__gte"), tzinfo=UTC),
+            "date__lte": parse_date(request.query_params.get("date__lte"), tzinfo=UTC),
         }
         filters = {k: v for k, v in filters.items() if v}
         queryset = Ranking.objects.filter(**filters)

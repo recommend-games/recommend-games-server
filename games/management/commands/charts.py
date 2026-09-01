@@ -3,7 +3,7 @@
 import json
 import logging
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from itertools import islice, tee
 from pathlib import Path
 
@@ -28,9 +28,7 @@ def _process_ratings(lines, keys=("bgg_id", "bgg_user_rating", "updated_at")):
             continue
 
         yield {
-            k: parse_date(item.get(k), tzinfo=timezone.utc)
-            if k.endswith("_at")
-            else item.get(k)
+            k: parse_date(item.get(k), tzinfo=UTC) if k.endswith("_at") else item.get(k)
             for k in keys
         }
 
@@ -51,7 +49,7 @@ def exp_decay(
     halflife=60 * 60 * 24 * 30,  # 30 days
 ):
     """Calculate exponential decay with given halflife."""
-    anchor = anchor or datetime.utcnow().replace(tzinfo=timezone.utc)
+    anchor = anchor or datetime.utcnow().replace(tzinfo=UTC)
     ages = (anchor - dates).total_seconds()
     return np.exp2(-ages / halflife)
 
@@ -67,7 +65,7 @@ def calculate_charts(
 ) -> pd.DataFrame:
     """Calculate charts for the given timeframe."""
 
-    end_date = end_date or datetime.utcnow().replace(tzinfo=timezone.utc)
+    end_date = end_date or datetime.utcnow().replace(tzinfo=UTC)
     pct_lower, pct_upper = percentiles
     ratings = ratings[ratings["updated_at"] <= end_date]  # don't care past end date
 
@@ -191,12 +189,12 @@ class Command(BaseCommand):
         with Timer(message="Loading ratings", logger=LOGGER):
             ratings = _ratings_data(path=kwargs["in_file"], max_rows=kwargs["max_rows"])
 
-        min_date_args = parse_date(kwargs["min_date"], tzinfo=timezone.utc)
+        min_date_args = parse_date(kwargs["min_date"], tzinfo=UTC)
         min_date_ratings = ratings["updated_at"].min()
         min_date = (
             max(min_date_args, min_date_ratings) if min_date_args else min_date_ratings
         )
-        max_date_args = parse_date(kwargs["max_date"], tzinfo=timezone.utc)
+        max_date_args = parse_date(kwargs["max_date"], tzinfo=UTC)
         max_date_ratings = ratings["updated_at"].max()
         max_date = (
             min(max_date_args, max_date_ratings) if max_date_args else max_date_ratings

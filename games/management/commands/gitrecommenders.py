@@ -4,7 +4,7 @@ import logging
 import os
 import shutil
 import sys
-from datetime import timezone
+from datetime import UTC
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -116,7 +116,7 @@ def _process_commit(
     overwrite=False,
     dry_run=False,
 ):
-    date = commit.authored_datetime.astimezone(timezone.utc)
+    date = commit.authored_datetime.astimezone(UTC)
 
     LOGGER.info("Processing commit <%s> from %s", commit, date)
 

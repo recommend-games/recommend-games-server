@@ -1,4 +1,4 @@
-""" generate a sitemap """
+"""generate a sitemap"""
 
 import logging
 import sys

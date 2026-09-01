@@ -4,7 +4,7 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -44,7 +44,7 @@ class Command(BaseCommand):
         )
 
     # pylint: disable=no-self-use
-    def paginated_result(self, results: List) -> Dict:
+    def paginated_result(self, results: list) -> dict:
         """Mock a paginated API response."""
         return {
             "count": len(results),
@@ -112,7 +112,7 @@ class Command(BaseCommand):
         *,
         query_set,
         serializer_class,
-        base_dir: Union[Path, str],
+        base_dir: Path | str,
         model_name: str,
     ) -> None:
         """Save model data to a give output dir."""

@@ -24,7 +24,7 @@ import logging
 import os
 import shutil
 import sys
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
 from functools import lru_cache
 from pathlib import Path
 
@@ -929,10 +929,8 @@ def _min_votes_from_date(
     max_value,
     min_value=1,
 ):
-    first_date = parse_date(first_date, tzinfo=timezone.utc)
-    second_date = (
-        parse_date(second_date, tzinfo=timezone.utc) or django.utils.timezone.now()
-    )
+    first_date = parse_date(first_date, tzinfo=UTC)
+    second_date = parse_date(second_date, tzinfo=UTC) or django.utils.timezone.now()
     seconds_per_step = parse_float(seconds_per_step)
     max_value = parse_int(max_value)
     min_value = parse_int(min_value)
@@ -1520,7 +1518,7 @@ def historicalbggrankings(
                 date_str, _ = os.path.splitext(file)
                 date = parse_date(
                     date_str,
-                    tzinfo=timezone.utc,
+                    tzinfo=UTC,
                     format_str=DATE_FORMAT_DASH,
                 )
                 if date is None:
@@ -1590,9 +1588,10 @@ def updatecount(
     dst.parent.mkdir(parents=True, exist_ok=True)
     LOGGER.info("Reading template from <%s>, writing result to <%s>...", template, dst)
 
-    with template.open(encoding="utf-8") as template_file, dst.open(
-        "w", encoding="utf-8"
-    ) as dst_file:
+    with (
+        template.open(encoding="utf-8") as template_file,
+        dst.open("w", encoding="utf-8") as dst_file,
+    ):
         template_str = template_file.read()
         count_str = template_str.format(**counts)
         dst_file.write(count_str)

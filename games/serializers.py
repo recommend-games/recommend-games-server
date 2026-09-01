@@ -1,4 +1,4 @@
-""" serializers """
+"""serializers"""
 
 from rest_framework.serializers import (
     CharField,

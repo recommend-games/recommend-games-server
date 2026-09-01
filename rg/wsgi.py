@@ -1,4 +1,4 @@
-""" WSGI """
+"""WSGI"""
 
 import os
 

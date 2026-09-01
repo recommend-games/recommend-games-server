@@ -4,7 +4,7 @@ import csv
 import logging
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from functools import lru_cache
 from itertools import groupby
 from pathlib import Path
@@ -40,19 +40,19 @@ def _make_instruction(day):
     return f"@w{day_number + 1}+1w-1d" if isinstance(day_number, int) else day
 
 
-def _following(date, week_day="SUN", tzinfo=timezone.utc):
+def _following(date, week_day="SUN", tzinfo=UTC):
     date = parse_date(date, tzinfo=tzinfo).astimezone(tzinfo)
     instruction = _make_instruction(week_day)
     return snap(date, instruction).date()
 
 
-def _extract_date(path_file, tzinfo=timezone.utc):
+def _extract_date(path_file, tzinfo=UTC):
     file_name = os.path.basename(path_file)
     date_str, _ = os.path.splitext(file_name)
     return parse_date(date_str, tzinfo=tzinfo)
 
 
-def parse_ranking_csv(path_file, date=None, tzinfo=timezone.utc):
+def parse_ranking_csv(path_file, date=None, tzinfo=UTC):
     """Parses a ranking CSV file."""
 
     LOGGER.info("Reading ranking from <%s>...", path_file)
@@ -68,7 +68,7 @@ def parse_ranking_csv(path_file, date=None, tzinfo=timezone.utc):
 def parse_ranking_csvs(
     path_dir,
     week_day="SUN",
-    tzinfo=timezone.utc,
+    tzinfo=UTC,
     min_date=None,
     max_date=None,
 ):
@@ -188,7 +188,7 @@ class Command(BaseCommand):
         Ranking.CHARTS: (
             "charts",
             "all",
-            datetime(2016, 1, 1, tzinfo=timezone.utc),
+            datetime(2016, 1, 1, tzinfo=UTC),
             None,
         ),
     }

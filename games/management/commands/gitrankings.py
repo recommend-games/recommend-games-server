@@ -4,7 +4,7 @@ import json
 import logging
 import os
 import sys
-from datetime import timezone
+from datetime import UTC
 from itertools import product
 
 import pandas as pd
@@ -125,7 +125,7 @@ class Command(BaseCommand):
                 if data_frame is None:
                     continue
 
-                date = item["date"].astimezone(timezone.utc)
+                date = item["date"].astimezone(UTC)
                 out_path = date.strftime(out_template)
 
                 LOGGER.info("Saving <%d> rows to <%s>...", len(data_frame), out_path)
