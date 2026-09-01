@@ -501,7 +501,7 @@ def trainbgg(
     ratings_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem.jl"),
     out_path_light=os.path.join(RECOMMENDER_DIR, ".bgg.light.npz"),
     num_factors=32,
-    num_epochs=20,
+    num_epochs=300,
     batch_size=1 << 16,
     learning_rate=1e-3,
     seed=None,
@@ -512,7 +512,7 @@ def trainbgg(
     from board_game_recommender.dnn import train
 
     num_factors = parse_int(num_factors) or 32
-    num_epochs = parse_int(num_epochs) or 20
+    num_epochs = parse_int(num_epochs) or 300
     batch_size = parse_int(batch_size) or (1 << 16)
     learning_rate = parse_float(learning_rate) or 1e-3
     seed = parse_int(seed)
