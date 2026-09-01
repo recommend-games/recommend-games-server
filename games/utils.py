@@ -146,6 +146,55 @@ def star_rating(score, buckets, low=1, high=5):
     return high
 
 
+def _load_yaml(path, encoding="utf-8"):
+    path = Path(path).resolve()
+    LOGGER.info("Loading YAML from <%s>", path)
+    try:
+        import yaml
+
+        with path.open(encoding=encoding) as yaml_file:
+            yield from yaml.safe_load(yaml_file)
+    except Exception:
+        LOGGER.exception("Unable to load YAML from <%s>", path)
+
+
+def load_premium_users(dirs=None, files=None, compare_date=None, encoding="utf-8"):
+    """Load premium users from YAML files and compare against given date.
+
+    Vendored from board_game_scraper.utils -- that package is the sole source of
+    the pyspark and scrapy<2.1 dependencies and is no longer installed here.
+    """
+
+    compare_date = parse_date(compare_date, tzinfo=UTC) or datetime.now(UTC)
+    LOGGER.info("Comparing premium expiration dates against <%s>", compare_date)
+
+    for file_dir in arg_to_iter(dirs):
+        file_dir = Path(file_dir).resolve()
+        if file_dir.is_dir():
+            LOGGER.info("Loading YAML files from config dir <%s>", file_dir)
+            yield from load_premium_users(
+                files=file_dir.glob("*.yaml"),
+                compare_date=compare_date,
+                encoding=encoding,
+            )
+        else:
+            LOGGER.warning("Skipping non-existing config dir <%s>", file_dir)
+
+    for path in arg_to_iter(files):
+        for row in _load_yaml(path, encoding):
+            for username, expiry_date in row.items():
+                username = username.lower()
+                expiry_date = parse_date(expiry_date, tzinfo=UTC)
+                if expiry_date < compare_date:
+                    LOGGER.info(
+                        "Premium for user <%s> ended on <%s>",
+                        username,
+                        expiry_date,
+                    )
+                else:
+                    yield username
+
+
 def count_lines(path) -> int:
     """Return the line count of a given path."""
     with open(path, encoding="utf-8") as file:

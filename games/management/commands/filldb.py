@@ -14,7 +14,6 @@ from pathlib import Path
 import jmespath
 import polars as pl
 import yaml
-from board_game_scraper.utils import load_premium_users
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.transaction import atomic
@@ -22,7 +21,12 @@ from django.utils.timezone import now
 from pytility import arg_to_iter, batchify, parse_date, parse_int, take_first
 
 from ...models import Category, Collection, Game, GameType, Mechanic, Person, User
-from ...utils import format_from_path, percentile_buckets, star_rating
+from ...utils import (
+    format_from_path,
+    load_premium_users,
+    percentile_buckets,
+    star_rating,
+)
 
 LOGGER = logging.getLogger(__name__)
 VALUE_ID_REGEX = re.compile(r"^(.*?)(:(\d+))?$")
