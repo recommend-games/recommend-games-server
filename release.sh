@@ -10,7 +10,7 @@ export LC_ALL=en_US.utf-8
 export LANG=en_US.utf-8
 
 cd "${SERVER_DIR}"
-pipenv run pynt \
+uv run invoke -c build \
     gitprepare \
     makecsvs \
     referencecsvs \
@@ -35,7 +35,7 @@ cd "${STATIC_DIR}"
 git rm -rf "${STATIC_DIR}"
 
 cd "${SERVER_DIR}"
-pipenv run ./manage.py staticapi \
+uv run ./manage.py staticapi \
     --base-dir "${STATIC_DIR}" \
     --max-items 10000
 

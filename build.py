@@ -1,14 +1,19 @@
 #!/usr/bin/env python
 
 """
-Pynt build file.
+Invoke build file.
 
-Make sure you installed all the Python dependencies (including dev) from Pipfile.lock:
+Install the Python dependencies (including the build group) with uv, then run
+tasks against this file:
 
 ```bash
-pipenv shell
-pipenv install --dev
+uv sync
+uv run invoke -c build --list
+uv run invoke -c build builddb
 ```
+
+Note the `build` dependency group installs torch, which publishes no macOS
+x86_64 wheels -- so the data pipeline requires Linux or Apple Silicon.
 
 Non-Python dependencies:
 
@@ -23,7 +28,9 @@ Non-Python dependencies:
 import logging
 import os
 import shutil
+import subprocess
 import sys
+from contextlib import contextmanager
 from datetime import UTC, timedelta
 from functools import lru_cache
 from pathlib import Path
@@ -31,8 +38,7 @@ from pathlib import Path
 import django
 from board_game_recommender import BGGRecommender, LightGamesRecommender
 from dotenv import load_dotenv
-from pynt import task
-from pyntcontrib import execute, safe_cd
+from invoke import task
 from pytility import arg_to_iter, parse_bool, parse_date, parse_float, parse_int
 from snaptime import snap
 
@@ -47,6 +53,38 @@ sys.path.insert(0, BASE_DIR)
 django.setup()
 
 LOGGER = logging.getLogger(__name__)
+
+
+# invoke's --dry/-R only suppresses its own c.run(), so execute() has to honour
+# it itself -- otherwise `invoke --dry release` would really push to Heroku.
+DRY_RUN = bool({"-R", "--dry"} & set(sys.argv))
+
+
+# Replacements for pyntcontrib's execute() and safe_cd(). Deliberately kept
+# instead of invoke's c.run()/c.cd(): those take a shell string, while the ~30
+# call sites here pass argv lists, some of them variadic -- re-quoting them
+# would be a needless source of bugs with paths containing spaces.
+def execute(*args, **kwargs):
+    """Run a command, raising CalledProcessError if it fails."""
+    if DRY_RUN:
+        LOGGER.info("[DRY RUN] Would execute %s", " ".join(map(str, args)))
+        return None
+    LOGGER.info("Executing %s", " ".join(map(str, args)))
+    return subprocess.run([str(arg) for arg in args], check=True, **kwargs)
+
+
+@contextmanager
+def safe_cd(path):
+    """Change into a directory, always restoring the previous one."""
+    prev = os.getcwd()
+    LOGGER.info("Changing directory to <%s>", path)
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(prev)
+
+
 SETTINGS = django.conf.settings
 
 DATA_DIR = SETTINGS.DATA_DIR
@@ -122,6 +160,9 @@ def _server_version(path=os.path.join(BASE_DIR, "VERSION")):
 
 
 def _remove(path):
+    if DRY_RUN:
+        LOGGER.info("[DRY RUN] Would remove <%s>", path)
+        return
     LOGGER.info("Removing <%s> if it exists...", path)
     try:
         os.remove(path)
@@ -130,7 +171,7 @@ def _remove(path):
 
 
 @task()
-def gitprepare(repo=SCRAPED_DATA_DIR):
+def gitprepare(c, repo=SCRAPED_DATA_DIR):
     """check Git repo is clean and up-to-date"""
     LOGGER.info("Preparing Git repo <%s>...", repo)
     with safe_cd(repo):
@@ -143,7 +184,7 @@ def gitprepare(repo=SCRAPED_DATA_DIR):
 
 
 @task()
-def gitprepareconfig(repo=CONFIG_DIR):
+def gitprepareconfig(c, repo=CONFIG_DIR):
     """Check config Git repo is clean and up-to-date."""
     LOGGER.info("Preparing Git repo <%s>...", repo)
     with safe_cd(repo):
@@ -156,7 +197,7 @@ def gitprepareconfig(repo=CONFIG_DIR):
 
 
 @task()
-def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
+def gitupdate(c, *paths, repo=SCRAPED_DATA_DIR, name=__name__):
     """commit and push Git repo"""
     paths = paths or ("COUNT.md", "rankings", "scraped", "links.json")
     LOGGER.info("Updating paths %r in Git repo <%s>...", paths, repo)
@@ -186,7 +227,7 @@ def gitupdate(*paths, repo=SCRAPED_DATA_DIR, name=__name__):
 
 
 @task()
-def merge(in_paths, out_path, **kwargs):
+def merge(c, in_paths, out_path, **kwargs):
     """merge scraped files"""
     from board_game_scraper.merge import merge_files
 
@@ -256,15 +297,18 @@ def _merge_kwargs(
 
 
 @task()
-def mergebgg(in_paths=None, out_path=None, full=False):
+def mergebgg(c, in_paths=None, out_path=None, full=False):
     """merge BoardGameGeek game data"""
-    merge(**_merge_kwargs(site="bgg", in_paths=in_paths, out_path=out_path, full=full))
+    merge(
+        c, **_merge_kwargs(site="bgg", in_paths=in_paths, out_path=out_path, full=full)
+    )
 
 
 @task()
-def mergebggusers(in_paths=None, out_path=None, full=False):
+def mergebggusers(c, in_paths=None, out_path=None, full=False):
     """merge BoardGameGeek user data"""
     merge(
+        c,
         **_merge_kwargs(
             site="bgg",
             item="UserItem",
@@ -276,14 +320,15 @@ def mergebggusers(in_paths=None, out_path=None, full=False):
             fieldnames_exclude=None
             if parse_bool(full)
             else ("published_at", "scraped_at"),
-        )
+        ),
     )
 
 
 @task()
-def mergebggratings(in_paths=None, out_path=None, full=False):
+def mergebggratings(c, in_paths=None, out_path=None, full=False):
     """merge BoardGameGeek rating data"""
     merge(
+        c,
         **_merge_kwargs(
             site="bgg",
             item="RatingItem",
@@ -295,12 +340,12 @@ def mergebggratings(in_paths=None, out_path=None, full=False):
             fieldnames_exclude=None
             if parse_bool(full)
             else ("published_at", "scraped_at"),
-        )
+        ),
     )
 
 
 @task()
-def mergebggrankings(in_paths=None, out_path=None, full=False, days=None):
+def mergebggrankings(c, in_paths=None, out_path=None, full=False, days=None):
     """merge BoardGameGeek ranking data"""
 
     full = parse_bool(full)
@@ -309,6 +354,7 @@ def mergebggrankings(in_paths=None, out_path=None, full=False, days=None):
     latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
 
     merge(
+        c,
         **_merge_kwargs(
             site="bgg_rankings",
             item="GameItem",
@@ -333,12 +379,12 @@ def mergebggrankings(in_paths=None, out_path=None, full=False, days=None):
             fieldnames_exclude=None,
             sort_keys=False,
             sort_fields=("published_at", "rank"),
-        )
+        ),
     )
 
 
 @task()
-def mergebgghotness(in_paths=None, out_path=None, full=False, days=None):
+def mergebgghotness(c, in_paths=None, out_path=None, full=False, days=None):
     """Merge BoardGameGeek hotness data."""
 
     full = parse_bool(full)
@@ -346,6 +392,7 @@ def mergebgghotness(in_paths=None, out_path=None, full=False, days=None):
     latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
 
     merge(
+        c,
         **_merge_kwargs(
             site="bgg_hotness",
             item="GameItem",
@@ -368,12 +415,12 @@ def mergebgghotness(in_paths=None, out_path=None, full=False, days=None):
             fieldnames_exclude=None,
             sort_keys=False,
             sort_fields=("published_at", "rank"),
-        )
+        ),
     )
 
 
 @task()
-def mergebggabstract(in_paths=None, out_path=None, full=False, days=None):
+def mergebggabstract(c, in_paths=None, out_path=None, full=False, days=None):
     """merge BoardGameGeek abstract ranking data"""
 
     full = parse_bool(full)
@@ -382,6 +429,7 @@ def mergebggabstract(in_paths=None, out_path=None, full=False, days=None):
     latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
 
     merge(
+        c,
         **_merge_kwargs(
             site="bgg_rankings_abstract",
             item="GameItem",
@@ -406,12 +454,12 @@ def mergebggabstract(in_paths=None, out_path=None, full=False, days=None):
             fieldnames_exclude=None,
             sort_keys=False,
             sort_fields=("published_at", "rank"),
-        )
+        ),
     )
 
 
 @task()
-def mergebggchildren(in_paths=None, out_path=None, full=False, days=None):
+def mergebggchildren(c, in_paths=None, out_path=None, full=False, days=None):
     """merge BoardGameGeek children ranking data"""
 
     full = parse_bool(full)
@@ -420,6 +468,7 @@ def mergebggchildren(in_paths=None, out_path=None, full=False, days=None):
     latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
 
     merge(
+        c,
         **_merge_kwargs(
             site="bgg_rankings_children",
             item="GameItem",
@@ -444,12 +493,12 @@ def mergebggchildren(in_paths=None, out_path=None, full=False, days=None):
             fieldnames_exclude=None,
             sort_keys=False,
             sort_fields=("published_at", "rank"),
-        )
+        ),
     )
 
 
 @task()
-def mergebggcustomizable(in_paths=None, out_path=None, full=False, days=None):
+def mergebggcustomizable(c, in_paths=None, out_path=None, full=False, days=None):
     """merge BoardGameGeek customizable ranking data"""
 
     full = parse_bool(full)
@@ -458,6 +507,7 @@ def mergebggcustomizable(in_paths=None, out_path=None, full=False, days=None):
     latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
 
     merge(
+        c,
         **_merge_kwargs(
             site="bgg_rankings_customizable",
             item="GameItem",
@@ -482,12 +532,12 @@ def mergebggcustomizable(in_paths=None, out_path=None, full=False, days=None):
             fieldnames_exclude=None,
             sort_keys=False,
             sort_fields=("published_at", "rank"),
-        )
+        ),
     )
 
 
 @task()
-def mergebggfamily(in_paths=None, out_path=None, full=False, days=None):
+def mergebggfamily(c, in_paths=None, out_path=None, full=False, days=None):
     """merge BoardGameGeek family ranking data"""
 
     full = parse_bool(full)
@@ -496,6 +546,7 @@ def mergebggfamily(in_paths=None, out_path=None, full=False, days=None):
     latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
 
     merge(
+        c,
         **_merge_kwargs(
             site="bgg_rankings_family",
             item="GameItem",
@@ -520,12 +571,12 @@ def mergebggfamily(in_paths=None, out_path=None, full=False, days=None):
             fieldnames_exclude=None,
             sort_keys=False,
             sort_fields=("published_at", "rank"),
-        )
+        ),
     )
 
 
 @task()
-def mergebggparty(in_paths=None, out_path=None, full=False, days=None):
+def mergebggparty(c, in_paths=None, out_path=None, full=False, days=None):
     """merge BoardGameGeek party ranking data"""
 
     full = parse_bool(full)
@@ -534,6 +585,7 @@ def mergebggparty(in_paths=None, out_path=None, full=False, days=None):
     latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
 
     merge(
+        c,
         **_merge_kwargs(
             site="bgg_rankings_party",
             item="GameItem",
@@ -558,12 +610,12 @@ def mergebggparty(in_paths=None, out_path=None, full=False, days=None):
             fieldnames_exclude=None,
             sort_keys=False,
             sort_fields=("published_at", "rank"),
-        )
+        ),
     )
 
 
 @task()
-def mergebggstrategy(in_paths=None, out_path=None, full=False, days=None):
+def mergebggstrategy(c, in_paths=None, out_path=None, full=False, days=None):
     """merge BoardGameGeek strategy ranking data"""
 
     full = parse_bool(full)
@@ -572,6 +624,7 @@ def mergebggstrategy(in_paths=None, out_path=None, full=False, days=None):
     latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
 
     merge(
+        c,
         **_merge_kwargs(
             site="bgg_rankings_strategy",
             item="GameItem",
@@ -596,12 +649,12 @@ def mergebggstrategy(in_paths=None, out_path=None, full=False, days=None):
             fieldnames_exclude=None,
             sort_keys=False,
             sort_fields=("published_at", "rank"),
-        )
+        ),
     )
 
 
 @task()
-def mergebggthematic(in_paths=None, out_path=None, full=False, days=None):
+def mergebggthematic(c, in_paths=None, out_path=None, full=False, days=None):
     """merge BoardGameGeek thematic ranking data"""
 
     full = parse_bool(full)
@@ -610,6 +663,7 @@ def mergebggthematic(in_paths=None, out_path=None, full=False, days=None):
     latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
 
     merge(
+        c,
         **_merge_kwargs(
             site="bgg_rankings_thematic",
             item="GameItem",
@@ -634,12 +688,12 @@ def mergebggthematic(in_paths=None, out_path=None, full=False, days=None):
             fieldnames_exclude=None,
             sort_keys=False,
             sort_fields=("published_at", "rank"),
-        )
+        ),
     )
 
 
 @task()
-def mergebggwar(in_paths=None, out_path=None, full=False, days=None):
+def mergebggwar(c, in_paths=None, out_path=None, full=False, days=None):
     """merge BoardGameGeek war ranking data"""
 
     full = parse_bool(full)
@@ -648,6 +702,7 @@ def mergebggwar(in_paths=None, out_path=None, full=False, days=None):
     latest_min = django.utils.timezone.now() - timedelta(days=days) if days else None
 
     merge(
+        c,
         **_merge_kwargs(
             site="bgg_rankings_war",
             item="GameItem",
@@ -672,64 +727,69 @@ def mergebggwar(in_paths=None, out_path=None, full=False, days=None):
             fieldnames_exclude=None,
             sort_keys=False,
             sort_fields=("published_at", "rank"),
-        )
+        ),
     )
 
 
 @task()
-def mergedbpedia(in_paths=None, out_path=None, full=False):
+def mergedbpedia(c, in_paths=None, out_path=None, full=False):
     """merge DBpedia game data"""
     merge(
+        c,
         **_merge_kwargs(
             site="dbpedia",
             in_paths=in_paths,
             out_path=out_path,
             full=full,
-        )
+        ),
     )
 
 
 @task()
-def mergeluding(in_paths=None, out_path=None, full=False):
+def mergeluding(c, in_paths=None, out_path=None, full=False):
     """merge Luding.org game data"""
     merge(
+        c,
         **_merge_kwargs(
             site="luding",
             in_paths=in_paths,
             out_path=out_path,
             full=full,
-        )
+        ),
     )
 
 
 @task()
-def mergespielen(in_paths=None, out_path=None, full=False):
+def mergespielen(c, in_paths=None, out_path=None, full=False):
     """merge Spielen.de game data"""
     merge(
+        c,
         **_merge_kwargs(
             site="spielen",
             in_paths=in_paths,
             out_path=out_path,
             full=full,
-        )
+        ),
     )
 
 
 @task()
-def mergewikidata(in_paths=None, out_path=None, full=False):
+def mergewikidata(c, in_paths=None, out_path=None, full=False):
     """merge Wikidata game data"""
     merge(
+        c,
         **_merge_kwargs(
             site="wikidata",
             in_paths=in_paths,
             out_path=out_path,
             full=full,
-        )
+        ),
     )
 
 
 @task()
 def mergenews(
+    c,
     in_paths=(
         os.path.join(SCRAPER_DIR, "feeds", "news", "*.jl"),
         os.path.join(SCRAPER_DIR, "feeds", "news", "*", "*", "*.jl"),
@@ -738,6 +798,7 @@ def mergenews(
 ):
     """merge news articles"""
     merge(
+        c,
         **_merge_kwargs(
             site="news",
             item="ArticleItem",
@@ -771,7 +832,7 @@ def mergenews(
             sort_keys=False,
             sort_latest=True,
             sort_descending=True,
-        )
+        ),
     )
 
 
@@ -795,12 +856,15 @@ def mergenews(
     mergebggthematic,
     mergebggwar,
 )
-def mergeall():
+def mergeall(
+    c,
+):
     """merge all sites and items"""
 
 
 @task()
 def split(
+    c,
     in_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem.jl"),
     out_dir=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem"),
     trie_file=os.path.join(SCRAPED_DATA_DIR, "prefixes.txt"),
@@ -825,6 +889,7 @@ def split(
 
 @task()
 def link(
+    c,
     gazetteer=os.path.join(MODELS_DIR, "cluster", "gazetteer.pickle"),
     paths=(
         os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_GameItem.jl"),
@@ -860,6 +925,7 @@ def link(
 
 @task()
 def labellinks(
+    c,
     gazetteer=os.path.join(MODELS_DIR, "cluster", "gazetteer.pickle"),
     paths=(
         os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_GameItem.jl"),
@@ -874,6 +940,7 @@ def labellinks(
 ):
     """label new training examples and link items"""
     link(
+        c,
         gazetteer=gazetteer,
         paths=paths,
         training_file=training_file,
@@ -965,6 +1032,7 @@ def _min_votes_from_date(
 
 @task()
 def trainbgg(
+    c,
     games_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_GameItem.jl"),
     ratings_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem.jl"),
     out_path=os.path.join(RECOMMENDER_DIR, ".bgg"),
@@ -1073,6 +1141,7 @@ def _save_rg_ranking(
 
 @task()
 def savebggrankings(
+    c,
     recommender_path=os.path.join(RECOMMENDER_DIR, ".bgg"),
     ratings_path=Path(SCRAPED_DATA_DIR).resolve() / "scraped" / "bgg_RatingItem.jl",
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg"),
@@ -1118,6 +1187,7 @@ def savebggrankings(
 
 @task()
 def weeklycharts(
+    c,
     src_file=Path(SCRAPED_DATA_DIR) / "scraped" / "bgg_RatingItem.jl",
     dst_dir=Path(SCRAPED_DATA_DIR) / "rankings" / "bgg" / "charts",
     dst_file=f"{DATE_FORMAT_COMPACT}.csv",
@@ -1149,7 +1219,7 @@ def weeklycharts(
 
 
 @task()
-def cleandata(src_dir=DATA_DIR, bk_dir=f"{DATA_DIR}.bk"):
+def cleandata(c, src_dir=DATA_DIR, bk_dir=f"{DATA_DIR}.bk"):
     """clean data file"""
     LOGGER.info(
         "Removing old backup dir <%s> (if any), moving current data dir to backup, "
@@ -1157,6 +1227,9 @@ def cleandata(src_dir=DATA_DIR, bk_dir=f"{DATA_DIR}.bk"):
         bk_dir,
         src_dir,
     )
+    if DRY_RUN:
+        LOGGER.info("[DRY RUN] Would rotate <%s> to <%s>", src_dir, bk_dir)
+        return
     shutil.rmtree(bk_dir, ignore_errors=True)
     if os.path.exists(src_dir):
         os.rename(src_dir, bk_dir)
@@ -1164,14 +1237,20 @@ def cleandata(src_dir=DATA_DIR, bk_dir=f"{DATA_DIR}.bk"):
 
 
 @task()
-def migrate():
+def migrate(
+    c,
+):
     """database migration"""
     assert not SETTINGS.DEBUG
+    if DRY_RUN:
+        LOGGER.info("[DRY RUN] Would run migrations")
+        return
     django.core.management.call_command("migrate")
 
 
 @task(cleandata, gitprepareconfig, migrate)
 def filldb(
+    c,
     src_dir=SCRAPED_DATA_DIR,
     rec_dir=os.path.join(RECOMMENDER_DIR, ".bgg"),
     ranking_date=getattr(SETTINGS, "R_G_RANKING_EFFECTIVE_DATE", None),
@@ -1185,7 +1264,7 @@ def filldb(
     )
 
     srp_dir = os.path.join(src_dir, "scraped")
-    dry_run = parse_bool(dry_run)
+    dry_run = parse_bool(dry_run) or DRY_RUN
 
     django.core.management.call_command(
         "filldb",
@@ -1206,6 +1285,7 @@ def filldb(
 
 @task()
 def kennerspiel(
+    c,
     model_path=Path(MODELS_DIR) / "kennerspiel.joblib",
     batch_size=10_000,
     dry_run=False,
@@ -1214,7 +1294,7 @@ def kennerspiel(
 
     model_path = Path(model_path).resolve()
     batch_size = parse_int(batch_size)
-    dry_run = parse_bool(dry_run)
+    dry_run = parse_bool(dry_run) or DRY_RUN
 
     LOGGER.info(
         "Calculate Kennerspiel scores with model <%s> and write them to the database",
@@ -1230,13 +1310,14 @@ def kennerspiel(
 
 
 @task()
-def compressdb(db_file=os.path.join(DATA_DIR, "db.sqlite3")):
+def compressdb(c, db_file=os.path.join(DATA_DIR, "db.sqlite3")):
     """compress SQLite database file"""
     execute("sqlite3", db_file, "VACUUM;")
 
 
 @task()
 def cpdirs(
+    c,
     src_dir=os.path.join(RECOMMENDER_DIR, ".bgg"),
     dst_dir=os.path.join(DATA_DIR, "recommender_bgg"),
     sub_dirs=("recommender", "similarity", "clusters", "compilations"),
@@ -1252,6 +1333,7 @@ def cpdirs(
 
 @task()
 def cplight(
+    c,
     src_path=os.path.join(RECOMMENDER_DIR, ".bgg.light.npz"),
     dst_path=os.path.join(DATA_DIR, "recommender_light.npz"),
 ):
@@ -1261,7 +1343,7 @@ def cplight(
 
 
 @task()
-def dateflag(dst=SETTINGS.MODEL_UPDATED_FILE, date=None):
+def dateflag(c, dst=SETTINGS.MODEL_UPDATED_FILE, date=None):
     """write date to file"""
     from games.utils import serialize_date
 
@@ -1274,6 +1356,7 @@ def dateflag(dst=SETTINGS.MODEL_UPDATED_FILE, date=None):
 
 @task()
 def bggranking(
+    c,
     dst=os.path.join(
         SCRAPED_DATA_DIR,
         "rankings",
@@ -1292,6 +1375,7 @@ def bggranking(
 
 @task()
 def splitrankings(
+    c,
     src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_GameItem.jl"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg"),
     dst_file=f"{DATE_FORMAT_COMPACT}.csv",
@@ -1309,6 +1393,7 @@ def splitrankings(
 
 @task()
 def splithotness(
+    c,
     src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_hotness_GameItem.jl"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "hotness"),
     dst_file=f"{DATE_FORMAT_COMPACT}.csv",
@@ -1327,6 +1412,7 @@ def splithotness(
 
 @task()
 def splitabstract(
+    c,
     src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_abstract_GameItem.jl"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_abstract"),
     dst_file=f"{DATE_FORMAT_COMPACT}.csv",
@@ -1344,6 +1430,7 @@ def splitabstract(
 
 @task()
 def splitchildren(
+    c,
     src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_children_GameItem.jl"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_children"),
     dst_file=f"{DATE_FORMAT_COMPACT}.csv",
@@ -1361,6 +1448,7 @@ def splitchildren(
 
 @task()
 def splitcustomizable(
+    c,
     src=os.path.join(
         SCRAPED_DATA_DIR, "scraped", "bgg_rankings_customizable_GameItem.jl"
     ),
@@ -1380,6 +1468,7 @@ def splitcustomizable(
 
 @task()
 def splitfamily(
+    c,
     src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_family_GameItem.jl"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_family"),
     dst_file=f"{DATE_FORMAT_COMPACT}.csv",
@@ -1397,6 +1486,7 @@ def splitfamily(
 
 @task()
 def splitparty(
+    c,
     src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_party_GameItem.jl"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_party"),
     dst_file=f"{DATE_FORMAT_COMPACT}.csv",
@@ -1414,6 +1504,7 @@ def splitparty(
 
 @task()
 def splitstrategy(
+    c,
     src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_strategy_GameItem.jl"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_strategy"),
     dst_file=f"{DATE_FORMAT_COMPACT}.csv",
@@ -1431,6 +1522,7 @@ def splitstrategy(
 
 @task()
 def splitthematic(
+    c,
     src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_thematic_GameItem.jl"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_thematic"),
     dst_file=f"{DATE_FORMAT_COMPACT}.csv",
@@ -1448,6 +1540,7 @@ def splitthematic(
 
 @task()
 def splitwar(
+    c,
     src=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_rankings_war_GameItem.jl"),
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg", "bgg_war"),
     dst_file=f"{DATE_FORMAT_COMPACT}.csv",
@@ -1475,12 +1568,15 @@ def splitwar(
     splitthematic,
     splitwar,
 )
-def splitall():
+def splitall(
+    c,
+):
     """Split all rankings data."""
 
 
 @task()
 def historicalbggrankings(
+    c,
     repo=os.path.abspath(os.path.join(BASE_DIR, "..", "bgg-ranking-historicals")),
     dst=os.path.join(
         SCRAPED_DATA_DIR,
@@ -1544,13 +1640,13 @@ def historicalbggrankings(
 
 
 @task()
-def fillrankingdb(path=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg")):
+def fillrankingdb(c, path=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg")):
     """Parses the ranking CSVs and writes them to the database."""
     django.core.management.call_command("fillrankingdb", path)
 
 
 @task()
-def deduplicate(rankings_path=os.path.join(SCRAPED_DATA_DIR, "rankings")):
+def deduplicate(c, rankings_path=os.path.join(SCRAPED_DATA_DIR, "rankings")):
     """Deduplicate rankings files."""
     rankings_path = Path(rankings_path).resolve()
     LOGGER.info("Finding sub dirs in <%s>", rankings_path)
@@ -1561,6 +1657,7 @@ def deduplicate(rankings_path=os.path.join(SCRAPED_DATA_DIR, "rankings")):
 
 @task()
 def updatecount(
+    c,
     dst=os.path.join(SCRAPED_DATA_DIR, "COUNT.md"),
     template=os.path.join(BASE_DIR, "templates", "COUNT.md"),
     paths_lines=os.path.join(SCRAPED_DATA_DIR, "scraped"),
@@ -1599,6 +1696,7 @@ def updatecount(
 
 @task()
 def makecsvs(
+    c,
     in_dir=os.path.join(SCRAPED_DATA_DIR, "scraped"),
     glob="*_GameItem.jl",
     file_ext=".csv",
@@ -1640,6 +1738,7 @@ def makecsvs(
 
 @task()
 def referencecsvs(
+    c,
     in_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_GameItem.jl"),
     out_dir=os.path.join(SCRAPED_DATA_DIR, "scraped"),
     out_file="bgg_{entity}.csv",
@@ -1655,7 +1754,7 @@ def referencecsvs(
 
 
 @task()
-def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_000):
+def sitemap(c, url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_000):
     """Generate sitemap.xml."""
     limit = parse_int(limit) or 50_000
     LOGGER.info(
@@ -1680,7 +1779,9 @@ def sitemap(url=URL_LIVE, dst=os.path.join(DATA_DIR, "sitemap.xml"), limit=50_00
     cplight,
     sitemap,
 )
-def builddb():
+def builddb(
+    c,
+):
     """build a new database"""
 
 
@@ -1697,22 +1798,27 @@ def builddb():
     updatecount,
     gitupdate,
 )
-def builddbfull():
+def builddbfull(
+    c,
+):
     """merge, link, train, and build, all relevant files"""
 
 
 @task()
-def cleanstatic(base_dir=BASE_DIR, sub_dirs=None):
+def cleanstatic(c, base_dir=BASE_DIR, sub_dirs=None):
     """clean static files"""
     sub_dirs = sub_dirs or (".temp", "static")
     for sub_dir in sub_dirs:
         target = os.path.join(base_dir, sub_dir)
+        if DRY_RUN:
+            LOGGER.info("[DRY RUN] Would remove dir <%s>", target)
+            continue
         LOGGER.info("Removing dir <%s>...", target)
         shutil.rmtree(target, ignore_errors=True)
 
 
 @task()
-def minify(src=os.path.join(BASE_DIR, "app"), dst=os.path.join(BASE_DIR, ".temp")):
+def minify(c, src=os.path.join(BASE_DIR, "app"), dst=os.path.join(BASE_DIR, ".temp")):
     """copy front-end files and minify HTML, JavaScript, and CSS"""
     LOGGER.info("Copying and minifying files from <%s> to <%s>...", src, dst)
     django.core.management.call_command(
@@ -1726,6 +1832,7 @@ def minify(src=os.path.join(BASE_DIR, "app"), dst=os.path.join(BASE_DIR, ".temp"
 
 @task()
 def cpsitemap(
+    c,
     src_path=os.path.join(DATA_DIR, "sitemap.xml"),
     dst_path=os.path.join(BASE_DIR, ".temp", "sitemap.xml"),
 ):
@@ -1742,7 +1849,7 @@ def cpsitemap(
 
 
 @task(cleanstatic, minify, cpsitemap)
-def collectstatic(delete=True):
+def collectstatic(c, delete=True):
     """Collect static files."""
 
     assert not SETTINGS.DEBUG
@@ -1760,7 +1867,7 @@ def collectstatic(delete=True):
 
 
 @task(collectstatic)
-def buildserver(images=None, tags=None):
+def buildserver(c, images=None, tags=None):
     """build Docker image"""
 
     images = images or (f"registry.heroku.com/{HEROKU_APP}/web",)
@@ -1790,7 +1897,7 @@ def buildserver(images=None, tags=None):
 
 
 @task()
-def pushserver(image=None):
+def pushserver(c, image=None):
     """push Docker image to remote repo"""
     image = image or f"registry.heroku.com/{HEROKU_APP}/web"
     LOGGER.info("Pushing Docker image <%s> to repo…", image)
@@ -1799,40 +1906,48 @@ def pushserver(image=None):
 
 
 @task(buildserver, pushserver)
-def releaseserver(heroku_app=HEROKU_APP):
+def releaseserver(c, heroku_app=HEROKU_APP):
     """build, push, and deploy new server version"""
     LOGGER.info("Releasing new version of Heroku app <%s>…", heroku_app)
     execute("heroku", "container:release", f"--app={heroku_app}", "--verbose", "web")
 
 
 @task(builddb, buildserver)
-def build():
+def build(
+    c,
+):
     """build database and server"""
 
 
 @task(builddbfull, buildserver)
-def buildfull():
+def buildfull(
+    c,
+):
     """merge, link, train, and build database and server"""
 
 
 @task(builddb, releaseserver)
-def release():
+def release(
+    c,
+):
     """release database and server"""
 
 
 @task(builddbfull, releaseserver)
-def releasefull():
+def releasefull(
+    c,
+):
     """merge, link, train, build, and release database and server"""
 
 
 @task()
-def lintshell(base_dir=BASE_DIR):
+def lintshell(c, base_dir=BASE_DIR):
     """lint Shell scripts"""
     execute("find", base_dir, "-iname", "*.sh", "-ls", "-exec", "shellcheck", "{}", ";")
 
 
 @task()
-def lintdocker(base_dir=BASE_DIR):
+def lintdocker(c, base_dir=BASE_DIR):
     """Lint Dockerfiles."""
     execute(
         "find",
@@ -1848,7 +1963,7 @@ def lintdocker(base_dir=BASE_DIR):
 
 
 @task()
-def lintmarkdown(base_dir=BASE_DIR):
+def lintmarkdown(c, base_dir=BASE_DIR):
     """Lint Markdown documents."""
     execute(
         "find",
@@ -1865,7 +1980,7 @@ def lintmarkdown(base_dir=BASE_DIR):
 
 
 @task()
-def lintpy(*modules):
+def lintpy(c, *modules):
     """lint Python files"""
     modules = modules or ("games", "rg", "build.py", "manage.py")
     with safe_cd(BASE_DIR):
@@ -1874,7 +1989,9 @@ def lintpy(*modules):
 
 
 @task()
-def linthtml():
+def linthtml(
+    c,
+):
     """lint HTML files"""
     with safe_cd(os.path.join(BASE_DIR, "app")):
         execute("htmlhint", "--ignore", "google*.html,yandex*.html")
@@ -1882,7 +1999,9 @@ def linthtml():
 
 
 @task()
-def lintjs():
+def lintjs(
+    c,
+):
     """lint JavaScript files"""
     with safe_cd(os.path.join(BASE_DIR, "app")):
         execute("jslint", "js/*.js")
@@ -1890,15 +2009,25 @@ def lintjs():
 
 
 @task()
-def lintcss():
+def lintcss(
+    c,
+):
     """lint JavaScript files"""
     with safe_cd(os.path.join(BASE_DIR, "app")):
         execute("csslint", "app.css")
 
 
-@task(lintshell, lintdocker, lintmarkdown, lintpy, linthtml, lintjs, lintcss)
-def lint():
+@task(
+    lintshell,
+    lintdocker,
+    lintmarkdown,
+    lintpy,
+    linthtml,
+    lintjs,
+    lintcss,
+    default=True,
+)
+def lint(
+    c,
+):
     """lint everything"""
-
-
-__DEFAULT__ = lint
