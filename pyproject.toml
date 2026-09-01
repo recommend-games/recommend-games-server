@@ -1,0 +1,95 @@
+[project]
+name = "recommend-games-server"
+version = "2.9.4"
+description = "Recommend.Games — board game recommendations"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Markus Shepherd", email = "markus@recommend.games" }]
+requires-python = ">=3.14"
+
+# Runtime dependencies: everything the Docker image needs to serve requests,
+# and nothing else. The build pipeline lives in the "build" group below.
+dependencies = [
+    "board-game-recommender>=4.4.0,<5.0.0",
+    "django>=6.0,<7.0",
+    "django-api-proxy",
+    "django-extensions",
+    "django-filter",
+    "djangorestframework",
+    "djangorestframework-csv",
+    "gunicorn",
+    "polars>=1.0.0,<2.0.0",
+    "python-dotenv",
+    "python-gitlab",
+    "pytility[dates]",
+    "pyyaml",
+    "whitenoise[brotli]",
+]
+
+[dependency-groups]
+# Building the database, training the recommender, releasing the image.
+# Runs on the developer machine only -- never installed into the image.
+build = [
+    "board-game-recommender[torch]>=4.4.0,<5.0.0",
+    "board-game-merger>=1.0.0,<2.0.0",
+    "spiel-des-jahres[kennerspiel]>=0.7.0",
+    # spiel-des-jahres 0.7.0 passes ColumnTransformer(force_int_remainder_cols=),
+    # which scikit-learn removed in 1.9. Unpin once it stops doing that.
+    "scikit-learn<1.9",
+    "invoke>=2.0.0",
+    # pandas 3 changes copy-on-write and string dtype defaults; the kennerspiel
+    # command is pandas-heavy. Unpin once that migration is done on purpose.
+    "pandas<3",
+    # games/rankings.py uses scipy.stats.shapiro for the user trust score.
+    "scipy",
+    "csvkit",
+    "gitpython",
+    "jmespath",
+    "lxml",
+    "markdown",
+    "prettytable",
+    "psutil",
+    "python-dateutil",
+    "rcssmin",
+    "rjsmin",
+    "requests",
+    "smart-open[all]",
+    "snaptime",
+    "tqdm",
+]
+dev = ["ipython", "pre-commit", "ruff", "ty"]
+
+[tool.uv]
+default-groups = ["build", "dev"]
+# NOTE: torch publishes no macOS x86_64 wheels after 2.8, so the "build" group
+# installs only on Linux and Apple Silicon. An Intel Mac can still work on the
+# serving path with `uv sync --no-default-groups`; `uv sync` will fail there
+# trying to build torch from its sdist. Deliberately NOT expressed as
+# `environments = [...]` -- that constrains the whole lockfile and would block
+# the runtime group on Intel too.
+
+[tool.ruff]
+target-version = "py314"
+extend-exclude = ["games/migrations", "app", "static"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "RUF"]
+ignore = [
+    "B904",   # raise ... from err -- noisy in DRF view code
+    "E501",   # line length is the formatter's job (it won't split long strings)
+    "RUF012", # mutable class attrs need ClassVar -- Django/DRF idiom
+    "SIM105", # contextlib.suppress over try/except/pass
+    # zip(..., strict=) changes runtime behaviour on length mismatch, so each
+    # call site needs a decision rather than a blanket fix. Tracked separately.
+    "B905",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Computed path defaults in argument lists are the idiom throughout the build
+# tasks and the management commands: they are evaluated once at import, which
+# is exactly what is wanted for a task's default paths.
+"build.py" = ["B008"]
+"games/management/commands/*.py" = ["B008"]
+
+[tool.ty.src]
+exclude = ["games/migrations", "app", "static"]

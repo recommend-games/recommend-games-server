@@ -1,17 +1,22 @@
-FROM python:3.7.17-alpine3.18
+FROM python:3.14-slim
 
 ENV LANG=C.UTF-8
 ENV MAILTO=''
 ENV PYTHONPATH=.
+ENV PYTHONUNBUFFERED=1
+# Install into the image's own site-packages, not a virtualenv.
+ENV UV_PROJECT_ENVIRONMENT=/usr/local
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
 
-RUN mkdir -p /app
+COPY --from=ghcr.io/astral-sh/uv:0.12.8 /uv /uvx /bin/
+
 WORKDIR /app
 
-RUN apk add --no-cache g++=12.2.1_git20220924-r10 \
-    && rm -rf /var/cache/apk/* \
-    && python3.7 -m pip install --no-cache-dir --upgrade pipenv==2023.9.8
-COPY Pipfile* ./
-RUN pipenv install --system --deploy --verbose
+# Runtime dependencies only -- the build/dev groups (torch, invoke, pandas,
+# scikit-learn, ...) run on the developer machine and never enter the image.
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-default-groups --no-install-project
 
 COPY VERSION VERSION
 COPY rg rg
@@ -19,7 +24,7 @@ COPY games games
 COPY static static
 COPY data data
 
-RUN adduser -D gamer
+RUN useradd --create-home gamer
 USER gamer
 
 CMD gunicorn \
