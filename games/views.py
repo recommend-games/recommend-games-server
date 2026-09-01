@@ -9,7 +9,7 @@ from itertools import chain
 from operator import or_
 from typing import Any
 
-import pandas as pd
+import polars as pl
 from django.conf import settings
 from django.db.models import Count, Min, Q
 from django.shortcuts import redirect
@@ -260,6 +260,26 @@ def _get_compilations():
         Game.objects.filter(compilation=True)
         .order_by()
         .values_list("bgg_id", flat=True)
+    )
+
+
+def _rank_recommendations(recommendations, *, score_column, include_ids):
+    """Narrow a recommender result to (bgg_id, score, rank), ranked by score.
+
+    board-game-recommender returns a wide frame with one ``<key>_score`` column
+    per user plus an ``index`` column holding the game IDs, and its ranks cover
+    the whole catalogue. We filter to the games we may actually recommend and
+    then re-rank, so that ranks are contiguous from 1 for the filtered set.
+    """
+
+    return (
+        recommendations.select(
+            pl.col("index").alias("bgg_id"),
+            pl.col(score_column).alias("score"),
+        )
+        .filter(pl.col("bgg_id").is_in(list(include_ids)))
+        .sort("score", descending=True)
+        .with_row_index("rank", offset=1)
     )
 
 
@@ -552,13 +572,11 @@ class GameViewSet(PermissionsModelViewSet):
         if not include_ids:
             return ()
 
-        recommendations = recommender.recommend(users=(user,))
-        recommendations = recommendations[
-            recommendations.index.isin(include_ids)
-        ].copy()
-        recommendations[(user, "rank")] = range(1, len(recommendations) + 1)
-
-        return recommendations
+        return _rank_recommendations(
+            recommender.recommend(users=(user,)),
+            score_column=f"{user}_score",
+            include_ids=include_ids,
+        )
 
     def _recommend_group_rating(
         self,
@@ -588,20 +606,16 @@ class GameViewSet(PermissionsModelViewSet):
         if not include_ids:
             return ()
 
+        # Mean of the per-user scores. NOTE: the recommender also offers
+        # recommend_group(), which aggregates differently and is cheaper --
+        # switching to it is a deliberate ranking change, not a refactor.
         recommendations = recommender.recommend(users=users)
-        recommendations = recommendations[recommendations.index.isin(include_ids)]
-        recommendations = (
-            recommendations.xs(axis=1, key="score", level=1)
-            .mean(axis=1)
-            .sort_values(ascending=False)
-        )
+        mean_score = pl.mean_horizontal(f"{user}_score" for user in users)
 
-        return pd.DataFrame(
-            index=recommendations.index,
-            data={
-                ("_all", "score"): recommendations,
-                ("_all", "rank"): range(1, len(recommendations) + 1),
-            },
+        return _rank_recommendations(
+            recommendations.with_columns(mean_score.alias("_group_score")),
+            score_column="_group_score",
+            include_ids=include_ids,
         )
 
     def _recommend_similar(
@@ -630,15 +644,10 @@ class GameViewSet(PermissionsModelViewSet):
         if not include_ids:
             return ()
 
-        scores = recommender.recommend_similar(games=like)["score"]
-        scores = scores[scores.index.isin(include_ids)].sort_values(ascending=False)
-
-        return pd.DataFrame(
-            index=scores.index,
-            data={
-                ("_all", "score"): scores,
-                ("_all", "rank"): range(1, len(scores) + 1),
-            },
+        return _rank_recommendations(
+            recommender.recommend_similar(games=like),
+            score_column="_all_score",
+            include_ids=include_ids,
         )
 
     # pylint: disable=redefined-builtin,unused-argument
@@ -662,7 +671,7 @@ class GameViewSet(PermissionsModelViewSet):
             return self.list(request)
 
         path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
-        recommender = load_recommender(path=path_light, site="light")
+        recommender = load_recommender(path=path_light)
 
         if recommender is None:
             return self.list(request)
@@ -713,10 +722,10 @@ class GameViewSet(PermissionsModelViewSet):
 
         del like, path_light, recommender
 
-        key = users[0].lower() if len(users) == 1 else "_all"
-        recommendation = recommendation.xs(axis=1, key=key)
-        recommendation.sort_values("rank", inplace=True)
-        recommendation = list(recommendation.itertuples(index=True))
+        # The helpers above already return (bgg_id, score, rank) sorted by rank.
+        recommendation = (
+            list(recommendation.iter_rows(named=True)) if len(recommendation) else []
+        )
 
         page = self.paginate_queryset(recommendation)
         if page is None:
@@ -727,7 +736,7 @@ class GameViewSet(PermissionsModelViewSet):
             paginate = True
         del page
 
-        recommendation = {game.Index: game for game in recommendation}
+        recommendation = {row["bgg_id"]: row for row in recommendation}
         queryset = self.filter_queryset(self.get_queryset())
         if include:
             queryset |= self.get_queryset().filter(bgg_id__in=include)
@@ -735,9 +744,9 @@ class GameViewSet(PermissionsModelViewSet):
 
         for game in games:
             rec = recommendation[game.bgg_id]
-            game.rec_rank = int(rec.rank)
-            game.rec_rating = rec.score if users else None
-            game.rec_stars = rec.stars if users and hasattr(rec, "stars") else None
+            game.rec_rank = int(rec["rank"])
+            game.rec_rating = rec["score"] if users else None
+            game.rec_stars = rec.get("stars") if users else None
         games = sorted(games, key=lambda game: game.rec_rank)
         del recommendation
 
@@ -775,7 +784,7 @@ class GameViewSet(PermissionsModelViewSet):
             )
 
         path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
-        recommender = load_recommender(path=path_light, site="light")
+        recommender = load_recommender(path=path_light)
 
         if recommender is None:
             return Response(
@@ -844,7 +853,7 @@ class GameViewSet(PermissionsModelViewSet):
         """Find games similar to this game."""
 
         path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
-        recommender = load_recommender(path=path_light, site="light")
+        recommender = load_recommender(path=path_light)
 
         if recommender is None:
             raise NotFound(f"cannot find similar games to <{pk}>")
@@ -858,7 +867,7 @@ class GameViewSet(PermissionsModelViewSet):
         )
         games = [
             game
-            for game in recommender.similar_games([pk]).index
+            for game in recommender.similar_games([pk])["index"]
             if game in include_ids
         ]
         del path_light, recommender, include_ids
