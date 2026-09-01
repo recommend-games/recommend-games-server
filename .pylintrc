@@ -1,8 +1,0 @@
-[recommend.games]
-disable=broad-except,protected-access,too-many-arguments,too-many-ancestors,too-many-instance-attributes,too-many-locals,too-many-statements,import-outside-toplevel
-max-branches=20
-max-returns=10
-min-public-methods=0
-min-similarity-lines=20
-ignore=migrations
-extension-pkg-whitelist=lxml.etree,lxml.objectify
