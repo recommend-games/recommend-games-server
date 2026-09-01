@@ -1,4 +1,4 @@
-""" models """
+"""models"""
 
 from django.db.models import (
     CASCADE,

@@ -1,6 +1,8 @@
 """Functions for working with collections of games."""
 
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
+
 from games.models import Collection, Game
 
 

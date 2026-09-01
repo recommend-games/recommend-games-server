@@ -1,15 +1,15 @@
-""" fill database """
+"""fill database"""
 
 import json
 import logging
 import re
 import sys
 from collections import defaultdict
-from datetime import timezone
+from collections.abc import Iterable
+from datetime import UTC
 from functools import partial
 from itertools import combinations, groupby
 from pathlib import Path
-from typing import Iterable, Optional
 
 import jmespath
 import turicreate as tc
@@ -64,13 +64,13 @@ def _load(*paths, in_format=None):
 def _find_latest_ranking(
     path_dir: Path,
     glob: str = "*.csv",
-    star_percentiles=Optional[Iterable[float]],
+    star_percentiles: Iterable[float] | None = None,
 ) -> tc.SFrame:
     path_dir = path_dir.resolve()
     LOGGER.info("Searching <%s> for latest ranking", path_dir)
     path_file = max(
         path_dir.glob(glob),
-        key=lambda p: parse_date(p.stem, tzinfo=timezone.utc),
+        key=lambda p: parse_date(p.stem, tzinfo=UTC),
     )
 
     LOGGER.info("Loading ranking from <%s>", path_file)
@@ -99,7 +99,7 @@ def _rating_data(
 
     r_g_ranking_effective_date = parse_date(
         r_g_ranking_effective_date,
-        tzinfo=timezone.utc,
+        tzinfo=UTC,
     )
 
     if (

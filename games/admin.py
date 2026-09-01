@@ -1,4 +1,4 @@
-""" admin settings """
+"""admin settings"""
 
 from django.conf import settings
 from django.contrib import admin

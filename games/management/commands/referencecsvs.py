@@ -4,8 +4,9 @@ import csv
 import json
 import logging
 import sys
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any, Generator, Optional, Tuple
+from typing import Any
 
 from django.core.management.base import BaseCommand
 from pytility import arg_to_iter, parse_int
@@ -14,14 +15,14 @@ from tqdm import tqdm
 LOGGER = logging.getLogger(__name__)
 
 
-def _parse_id(string: Any) -> Tuple[Optional[int], Optional[str]]:
+def _parse_id(string: Any) -> tuple[int | None, str | None]:
     if not string or not isinstance(string, str):
         return None, None
     name, id_ = string.rsplit(":", 1)
     return parse_int(id_), name
 
 
-def _parse_ids(values: Any) -> Generator[Tuple[int, str], None, None]:
+def _parse_ids(values: Any) -> Generator[tuple[int, str]]:
     for value in arg_to_iter(values):
         id_, name = _parse_id(value)
         if id_ and name:

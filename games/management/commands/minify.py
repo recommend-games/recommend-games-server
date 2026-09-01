@@ -1,4 +1,4 @@
-""" Minify static files """
+"""Minify static files"""
 
 import logging
 import os
@@ -130,7 +130,7 @@ class Command(BaseCommand):
             rmtree(kwargs["destination"], ignore_errors=True)
 
         exclude = tuple(arg_to_iter(kwargs["exclude"]))
-        exclude = exclude + (re.compile(r"^\."),) if kwargs["exclude_dot"] else exclude
+        exclude = (*exclude, re.compile(r"^\.")) if kwargs["exclude_dot"] else exclude
 
         LOGGER.info("excluding files: %s", exclude)
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-""" command line script """
+"""command line script"""
 
 import os
 import sys

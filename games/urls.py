@@ -1,8 +1,8 @@
-""" URLs """
+"""URLs"""
 
 from django.urls import include, path, re_path
-from rest_framework.routers import DefaultRouter
 from django_api_proxy.views import ProxyView
+from rest_framework.routers import DefaultRouter
 
 from .views import (
     CategoryViewSet,

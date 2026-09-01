@@ -1,7 +1,7 @@
-""" settings """
+"""settings"""
 
 import os
-from datetime import timezone
+from datetime import UTC
 
 from pytility import parse_bool, parse_date, parse_int
 
@@ -166,7 +166,7 @@ MIN_VOTES_SECONDS_PER_STEP = 10 * 24 * 60 * 60  # 10 days
 
 R_G_RANKING_EFFECTIVE_DATE = parse_date(
     os.getenv("R_G_RANKING_EFFECTIVE_DATE"),
-    tzinfo=timezone.utc,
+    tzinfo=UTC,
 ) or parse_date("2022-02-22T00:00Z")
 
 # GitLab R.G config settings

@@ -1,4 +1,4 @@
-""" Stress test command """
+"""Stress test command"""
 
 import logging
 import os.path
