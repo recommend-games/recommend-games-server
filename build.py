@@ -225,37 +225,97 @@ def gitupdate(c, *paths, repo=SCRAPED_DATA_DIR, name=__name__):
             LOGGER.exception("Unable to push...")
 
 
-@task()
-def merge(c, in_paths, out_path, **kwargs):
-    """merge scraped files"""
-    from board_game_scraper.merge import merge_files
+def _merge_column(name, col_type=None):
+    """Translate a column name plus a legacy type tag into a polars expression.
 
-    kwargs.setdefault("log_level", "WARN")
+    board-game-scraper described key/latest columns as (name, type) pairs; the
+    merger takes polars expressions instead. Timestamps are strings in the
+    schemas, hence the explicit parse for "date".
+    """
+
+    import polars as pl
+
+    column = pl.col(name)
+    if col_type == "istr":
+        return column.str.to_lowercase()
+    if col_type == "date":
+        return column.str.to_datetime(time_zone="UTC")
+    return column
+
+
+def _merge_columns(names, col_types=None):
+    names = tuple(arg_to_iter(names))
+    if not names:
+        raise ValueError("At least one column is required")
+    col_types = tuple(arg_to_iter(col_types))
+    col_types += (None,) * (len(names) - len(col_types))
+    return [
+        _merge_column(name, col_type)
+        for name, col_type in zip(names, col_types, strict=True)
+    ]
+
+
+@task()
+def merge(
+    c,
+    in_paths,
+    out_path,
+    item="GameItem",
+    keys="id",
+    key_types=None,
+    latest=None,
+    latest_types=None,
+    latest_min=None,
+    fieldnames=None,
+    fieldnames_exclude=None,
+    sort_keys=False,
+    sort_fields=None,
+    sort_descending=False,
+):
+    """merge scraped files"""
+
+    from board_game_merger.config import MergeConfig
+    from board_game_merger.merge import merge_files
+    from board_game_merger.schemas import ITEM_TYPE_SCHEMA
+
     out_path = str(out_path).format(
         date=django.utils.timezone.now().strftime(DATE_FORMAT_DASH),
     )
 
-    LOGGER.info(
-        "Merging files <%s> into <%s> with args %r...",
-        in_paths,
-        out_path,
-        kwargs,
-    )
+    LOGGER.info("Merging files <%s> into <%s>...", in_paths, out_path)
 
     _remove(out_path)
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
 
+    merge_config = MergeConfig(
+        schema=ITEM_TYPE_SCHEMA[item],
+        in_paths=list(map(str, arg_to_iter(in_paths))),
+        out_path=out_path,
+        key_col=_merge_columns(keys, key_types),
+        latest_col=_merge_columns(latest, latest_types),
+        latest_min=latest_min,
+        sort_fields=list(arg_to_iter(sort_fields)) or None,
+        sort_descending=parse_bool(sort_descending),
+        fieldnames_include=list(arg_to_iter(fieldnames)) or None,
+        fieldnames_exclude=list(arg_to_iter(fieldnames_exclude)) or None,
+    )
+
     try:
-        merge_files(in_paths=in_paths, out_path=out_path, **kwargs)
+        merge_files(
+            merge_config=merge_config,
+            overwrite=True,
+            drop_empty=True,
+            sort_keys=parse_bool(sort_keys),
+            progress_bar=False,
+        )
     except Exception:
         LOGGER.exception(
-            "Unable to merge files <%s> into <%s>…",
+            "Unable to merge files <%s> into <%s>...",
             in_paths,
             out_path,
         )
 
 
-# TODO use merge_config from board-game-scraper (#328)
 def _merge_kwargs(
     site,
     item="GameItem",
@@ -264,12 +324,12 @@ def _merge_kwargs(
     full=False,
     **kwargs,
 ):
+    kwargs["item"] = item
     kwargs["in_paths"] = in_paths or os.path.join(SCRAPER_DIR, "feeds", site, item, "*")
     kwargs.setdefault("keys", f"{site}_id")
     kwargs.setdefault("key_types", "int" if site in ("bgg", "luding") else "str")
     kwargs.setdefault("latest", "scraped_at")
     kwargs.setdefault("latest_types", "date")
-    kwargs.setdefault("concat_output", True)
 
     if parse_bool(full):
         kwargs["out_path"] = out_path or os.path.join(
@@ -786,62 +846,12 @@ def mergewikidata(c, in_paths=None, out_path=None, full=False):
     )
 
 
-@task()
-def mergenews(
-    c,
-    in_paths=(
-        os.path.join(SCRAPER_DIR, "feeds", "news", "*.jl"),
-        os.path.join(SCRAPER_DIR, "feeds", "news", "*", "*", "*.jl"),
-    ),
-    out_path=None,
-):
-    """merge news articles"""
-    merge(
-        c,
-        **_merge_kwargs(
-            site="news",
-            item="ArticleItem",
-            in_paths=in_paths,
-            out_path=out_path,
-            keys=("article_id",),
-            latest=("published_at", "scraped_at"),
-            latest_types=("date", "date"),
-            latest_min=None,
-            latest_required=True,
-            fieldnames=(
-                "article_id",
-                "url_canonical",
-                "url_mobile",
-                "url_amp",
-                "url_thumbnail",
-                "published_at",
-                "title_full",
-                "title_short",
-                "author",
-                "description",
-                "summary",
-                "category",
-                "keyword",
-                "section_inferred",
-                "country",
-                "language",
-                "source_name",
-            ),
-            fieldnames_exclude=None,
-            sort_keys=False,
-            sort_latest=True,
-            sort_descending=True,
-        ),
-    )
-
-
 @task(
     mergebgg,
     mergedbpedia,
     mergeluding,
     mergespielen,
     mergewikidata,
-    mergenews,
     mergebggusers,
     mergebggratings,
     mergebggrankings,
@@ -859,95 +869,6 @@ def mergeall(
     c,
 ):
     """merge all sites and items"""
-
-
-@task()
-def split(
-    c,
-    in_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem.jl"),
-    out_dir=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem"),
-    trie_file=os.path.join(SCRAPED_DATA_DIR, "prefixes.txt"),
-    fields="bgg_user_name",
-    limit=300_000,
-    construct=False,
-):
-    """split file along prefixes"""
-    from board_game_scraper.prefixes import split_file
-
-    _remove(out_dir)
-    split_file(
-        in_file=in_file,
-        out_file=os.path.join(out_dir, "{prefix}.jl"),
-        fields=fields,
-        trie_file=trie_file,
-        limits=(parse_int(limit),),
-        construct=parse_bool(construct),
-    )
-    _remove(in_file)
-
-
-@task()
-def link(
-    c,
-    gazetteer=os.path.join(MODELS_DIR, "cluster", "gazetteer.pickle"),
-    paths=(
-        os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_GameItem.jl"),
-        os.path.join(SCRAPED_DATA_DIR, "scraped", "spielen_GameItem.jl"),
-        os.path.join(SCRAPED_DATA_DIR, "scraped", "luding_GameItem.jl"),
-        os.path.join(SCRAPED_DATA_DIR, "scraped", "wikidata_GameItem.jl"),
-    ),
-    training_file=os.path.join(MODELS_DIR, "cluster", "training.json"),
-    manual_labelling=False,
-    threshold=None,
-    output=os.path.join(SCRAPED_DATA_DIR, "links.json"),
-    pretty_print=True,
-):
-    """link items"""
-
-    try:
-        from board_game_scraper.cluster import link_games
-
-        LOGGER.info("Using model %r to link files %r...", gazetteer, paths)
-
-        link_games(
-            gazetteer=gazetteer,
-            paths=paths,
-            training_file=training_file if manual_labelling else None,
-            manual_labelling=parse_bool(manual_labelling),
-            threshold=parse_float(threshold),
-            output=output,
-            pretty_print=parse_bool(pretty_print),
-        )
-    except Exception:
-        LOGGER.exception("Linking failed…")
-
-
-@task()
-def labellinks(
-    c,
-    gazetteer=os.path.join(MODELS_DIR, "cluster", "gazetteer.pickle"),
-    paths=(
-        os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_GameItem.jl"),
-        os.path.join(SCRAPED_DATA_DIR, "scraped", "spielen_GameItem.jl"),
-        os.path.join(SCRAPED_DATA_DIR, "scraped", "luding_GameItem.jl"),
-        os.path.join(SCRAPED_DATA_DIR, "scraped", "wikidata_GameItem.jl"),
-    ),
-    training_file=os.path.join(MODELS_DIR, "cluster", "training.json"),
-    threshold=None,
-    output=os.path.join(SCRAPED_DATA_DIR, "links.json"),
-    pretty_print=True,
-):
-    """label new training examples and link items"""
-    link(
-        c,
-        gazetteer=gazetteer,
-        paths=paths,
-        training_file=training_file,
-        manual_labelling=True,
-        threshold=parse_float(threshold),
-        output=output,
-        pretty_print=parse_bool(pretty_print),
-    )
 
 
 @task()
@@ -1250,8 +1171,6 @@ def kennerspiel(
 def compressdb(c, db_file=os.path.join(DATA_DIR, "db.sqlite3")):
     """compress SQLite database file"""
     execute("sqlite3", db_file, "VACUUM;")
-
-
 
 
 @task()
@@ -1713,7 +1632,6 @@ def builddb(
     mergeall,
     makecsvs,
     referencecsvs,
-    link,
     trainbgg,
     savebggrankings,
     builddb,
@@ -1950,7 +1868,5 @@ def lintcss(
     lintcss,
     default=True,
 )
-def lint(
-    c,
-):
+def lint(c):
     """lint everything"""

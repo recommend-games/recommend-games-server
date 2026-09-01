@@ -14,7 +14,6 @@ uv run invoke -c build \
     gitprepare \
     makecsvs \
     referencecsvs \
-    link \
     trainbgg \
     savebggrankings \
     cleandata \
