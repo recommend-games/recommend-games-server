@@ -12,9 +12,8 @@ from itertools import combinations, groupby
 from pathlib import Path
 
 import jmespath
-import turicreate as tc
+import polars as pl
 import yaml
-from board_game_recommender.utils import percentile_buckets, star_rating
 from board_game_scraper.utils import load_premium_users
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -23,7 +22,7 @@ from django.utils.timezone import now
 from pytility import arg_to_iter, batchify, parse_date, parse_int, take_first
 
 from ...models import Category, Collection, Game, GameType, Mechanic, Person, User
-from ...utils import format_from_path, load_recommender
+from ...utils import format_from_path, percentile_buckets, star_rating
 
 LOGGER = logging.getLogger(__name__)
 VALUE_ID_REGEX = re.compile(r"^(.*?)(:(\d+))?$")
@@ -65,7 +64,7 @@ def _find_latest_ranking(
     path_dir: Path,
     glob: str = "*.csv",
     star_percentiles: Iterable[float] | None = None,
-) -> tc.SFrame:
+) -> pl.DataFrame:
     path_dir = path_dir.resolve()
     LOGGER.info("Searching <%s> for latest ranking", path_dir)
     path_file = max(
@@ -74,62 +73,57 @@ def _find_latest_ranking(
     )
 
     LOGGER.info("Loading ranking from <%s>", path_file)
-    recommendations = tc.SFrame.read_csv(str(path_file))["rank", "bgg_id", "score"]
+    recommendations = pl.read_csv(path_file).select("rank", "bgg_id", "score")
 
     if star_percentiles:
-        buckets = tuple(percentile_buckets(recommendations["score"], star_percentiles))
-        recommendations["stars"] = [
-            star_rating(score=score, buckets=buckets, low=1.0, high=5.0)
-            for score in recommendations["score"]
-        ]
+        scores = recommendations["score"].to_list()
+        buckets = tuple(percentile_buckets(scores, star_percentiles))
+        recommendations = recommendations.with_columns(
+            pl.Series(
+                "stars",
+                [
+                    star_rating(score=score, buckets=buckets, low=1.0, high=5.0)
+                    for score in scores
+                ],
+                dtype=pl.Float64,
+            )
+        )
 
     return recommendations
 
 
 def _rating_data(
-    recommender_path=getattr(settings, "RECOMMENDER_PATH", None),
     pk_field="bgg_id",
     rankings_path=None,
     r_g_ranking_effective_date=getattr(settings, "R_G_RANKING_EFFECTIVE_DATE", None),
 ):
-    recommender = load_recommender(recommender_path, "bgg")
-
-    if not recommender:
-        return {}
-
     r_g_ranking_effective_date = parse_date(
         r_g_ranking_effective_date,
         tzinfo=UTC,
     )
 
     if (
-        rankings_path
-        and r_g_ranking_effective_date
-        and now() >= r_g_ranking_effective_date
+        not rankings_path
+        or not r_g_ranking_effective_date
+        or now() < r_g_ranking_effective_date
     ):
-        LOGGER.info(
-            "Using new R.G ranking effective from %s",
-            r_g_ranking_effective_date,
-        )
-        recommendations = _find_latest_ranking(
-            path_dir=Path(rankings_path),
-            star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
-        )
-    else:
-        recommendations = recommender.recommend(
-            users=(),
-            star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
-        )
+        LOGGER.info("No R.G ranking to load, skipping rating data")
+        return {}
+
+    LOGGER.info(
+        "Using R.G ranking effective from %s",
+        r_g_ranking_effective_date,
+    )
+    recommendations = _find_latest_ranking(
+        path_dir=Path(rankings_path),
+        star_percentiles=getattr(settings, "STAR_PERCENTILES", None),
+    )
 
     LOGGER.info("Loaded recommendations for %d games", len(recommendations))
 
-    count = -1
     result = {}
 
-    for count, game in enumerate(recommendations):
-        if count and count % 1000 == 0:
-            LOGGER.info("processed %d items so far", count)
-
+    for game in recommendations.iter_rows(named=True):
         pkey = game.get(pk_field)
         if pkey is None:
             continue
@@ -140,7 +134,7 @@ def _rating_data(
             "rec_stars": game.get("stars"),
         }
 
-    LOGGER.info("processed %d items in total", count)
+    LOGGER.info("processed %d items in total", len(result))
 
     return result
 
@@ -361,8 +355,52 @@ def _create_references(
     LOGGER.info("done updating")
 
 
-def _generate_cluster_pairs(model, recommender):
-    for cluster in recommender.clusters:
+CLUSTER_FIELDS = ("compilation_of", "implementation", "integration")
+
+
+def _make_clusters(items, id_field="bgg_id", cluster_fields=CLUSTER_FIELDS):
+    """Group games into clusters of alternate editions and implementations.
+
+    These used to come off the Turi Create model, which built them as the
+    connected components of a graph over the compilation/implementation/
+    integration links. That has nothing to do with the recommender, so it is
+    computed straight from the game data here -- via union-find, so no extra
+    dependency is needed.
+    """
+
+    parent = {}
+
+    def find(key):
+        parent.setdefault(key, key)
+        while parent[key] != key:
+            parent[key] = parent[parent[key]]
+            key = parent[key]
+        return key
+
+    def union(left, right):
+        root_left, root_right = find(left), find(right)
+        if root_left != root_right:
+            parent[root_right] = root_left
+
+    for item in items:
+        pkey = parse_int(item.get(id_field))
+        if pkey is None:
+            continue
+        for field in cluster_fields:
+            for other in arg_to_iter(item.get(field)):
+                other = parse_int(other)
+                if other is not None and other != pkey:
+                    union(pkey, other)
+
+    clusters = defaultdict(list)
+    for key in parent:
+        clusters[find(key)].append(key)
+
+    return [cluster for cluster in clusters.values() if len(cluster) > 1]
+
+
+def _generate_cluster_pairs(model, clusters):
+    for cluster in clusters:
         for pk_1, pk_2 in combinations(cluster, 2):
             instance_1 = model.objects.filter(pk=pk_1).first()
             instance_2 = model.objects.filter(pk=pk_2).first()
@@ -372,22 +410,19 @@ def _generate_cluster_pairs(model, recommender):
 
 def _create_clusters(
     model,
-    recommender_path=getattr(settings, "RECOMMENDER_PATH", None),
+    items,
     batch_size=None,
     dry_run=False,
 ):
-    recommender = load_recommender(recommender_path, "bgg")
+    clusters = _make_clusters(items)
 
-    if not recommender:
+    if not clusters:
+        LOGGER.info("No clusters found, skipping")
         return
 
-    LOGGER.info(
-        "Loaded a total of %d clusters from recommender %s",
-        len(recommender.clusters),
-        recommender,
-    )
+    LOGGER.info("Found a total of %d clusters in the game data", len(clusters))
 
-    cluster_pairs = _generate_cluster_pairs(model, recommender)
+    cluster_pairs = _generate_cluster_pairs(model, clusters)
 
     batches = (
         batchify(
@@ -697,12 +732,6 @@ class Command(BaseCommand):
             help="batch size for DB transactions",
         )
         parser.add_argument(
-            "--recommender",
-            "-r",
-            default=getattr(settings, "RECOMMENDER_PATH", None),
-            help="path to recommender model",
-        )
-        parser.add_argument(
             "--rankings",
             "-R",
             help="path to recommendation CSVs",
@@ -733,7 +762,6 @@ class Command(BaseCommand):
         items = tuple(_load(*kwargs["paths"]))
         # pylint: disable=no-member
         add_data = _rating_data(
-            recommender_path=kwargs["recommender"],
             pk_field=Game._meta.pk.name,
             rankings_path=kwargs["rankings"],
             r_g_ranking_effective_date=kwargs["ranking_date"],
@@ -777,7 +805,7 @@ class Command(BaseCommand):
 
         _create_clusters(
             model=Game,
-            recommender_path=kwargs["recommender"],
+            items=items,
             batch_size=kwargs["batch"],
             dry_run=kwargs["dry_run"],
         )

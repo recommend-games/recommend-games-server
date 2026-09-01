@@ -36,7 +36,6 @@ from functools import lru_cache
 from pathlib import Path
 
 import django
-from board_game_recommender import BGGRecommender, LightGamesRecommender
 from dotenv import load_dotenv
 from invoke import task
 from pytility import arg_to_iter, parse_bool, parse_date, parse_float, parse_int
@@ -951,149 +950,73 @@ def labellinks(
     )
 
 
-def _train(
-    recommender_cls,
-    games_file,
-    ratings_file,
-    out_path=None,
-    users=None,
-    num_factors=32,
-    max_iterations=100,
-    **filters,
-):
-    LOGGER.info(
-        "Training %r recommender model with games <%s> and ratings <%s>...",
-        recommender_cls,
-        games_file,
-        ratings_file,
-    )
-    recommender = recommender_cls.train_from_files(
-        games_file=games_file,
-        ratings_file=ratings_file,
-        similarity_model=True,
-        num_factors=num_factors,
-        max_iterations=parse_int(max_iterations),
-        verbose=True,
-        defaults=False,
-        **filters,
-    )
-
-    recommendations = recommender.recommend(users=users, num_games=100)
-    recommendations.print_rows(num_rows=100)
-
-    if out_path:
-        LOGGER.info("Saving model %r to <%s>...", recommender, out_path)
-        shutil.rmtree(out_path, ignore_errors=True)
-        recommender.save(out_path)
-
-    return recommender
-
-
-def _min_votes_from_date(
-    first_date,
-    second_date,
-    seconds_per_step,
-    max_value,
-    min_value=1,
-):
-    first_date = parse_date(first_date, tzinfo=UTC)
-    second_date = parse_date(second_date, tzinfo=UTC) or django.utils.timezone.now()
-    seconds_per_step = parse_float(seconds_per_step)
-    max_value = parse_int(max_value)
-    min_value = parse_int(min_value)
-
-    if (
-        not first_date
-        or not second_date
-        or not seconds_per_step
-        or max_value is None
-        or min_value is None
-    ):
-        return None
-
-    LOGGER.info(
-        "Comparing %s and %s to compute required votes",
-        first_date,
-        second_date,
-    )
-
-    delta = second_date - first_date
-    seconds = delta.total_seconds()
-    steps = parse_int(seconds / seconds_per_step)
-
-    LOGGER.info(
-        "%.1f seconds have passed between first and second date, i.e., %d steps",
-        seconds,
-        steps,
-    )
-
-    return min(max(max_value - steps, min_value), max_value)
-
-
 @task()
 def trainbgg(
     c,
-    games_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_GameItem.jl"),
     ratings_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem.jl"),
-    out_path=os.path.join(RECOMMENDER_DIR, ".bgg"),
     out_path_light=os.path.join(RECOMMENDER_DIR, ".bgg.light.npz"),
-    users=None,
     num_factors=32,
-    max_iterations=1000,
-    min_votes=None,
-    min_votes_anchor_date=MIN_VOTES_ANCHOR_DATE,
-    min_votes_seconds_per_step=MIN_VOTES_SECONDS_PER_STEP,
-    # pylint: disable=no-member
-    min_votes_max_value=BGGRecommender.default_filters.get("num_votes__gte"),
+    num_epochs=20,
+    batch_size=1 << 16,
+    learning_rate=1e-3,
+    seed=None,
 ):
     """train BoardGameGeek recommender model"""
 
-    filters = {}
+    import polars as pl
+    from board_game_recommender.dnn import train
 
     num_factors = parse_int(num_factors) or 32
+    num_epochs = parse_int(num_epochs) or 20
+    batch_size = parse_int(batch_size) or (1 << 16)
+    learning_rate = parse_float(learning_rate) or 1e-3
+    seed = parse_int(seed)
 
-    recommender = _train(
-        recommender_cls=BGGRecommender,
-        games_file=games_file,
-        ratings_file=ratings_file,
-        out_path=out_path,
-        users=users,
-        num_factors=num_factors,
-        max_iterations=max_iterations,
-        **filters,
+    LOGGER.info(
+        "Training recommender model from ratings <%s> with %d factors for %d epochs...",
+        ratings_file,
+        num_factors,
+        num_epochs,
     )
 
-    if out_path_light:
-        light = LightGamesRecommender.from_turi_create(recommender.model)
-        light.to_npz(out_path_light)
+    ratings = pl.read_ndjson(
+        ratings_file,
+        schema={
+            "bgg_user_name": pl.String,
+            "bgg_id": pl.Int64,
+            "bgg_user_rating": pl.Float64,
+        },
+    )
+    LOGGER.info("Loaded %d ratings", len(ratings))
 
+    result = train(
+        ratings,
+        num_factors=num_factors,
+        num_epochs=num_epochs,
+        batch_size=batch_size,
+        learning_rate=learning_rate,
+        seed=seed,
+    )
 
-def _save_ranking(
-    recommender,
-    dst_dir,
-    file_name=f"{DATE_FORMAT_COMPACT}.csv",
-    similarity_model=False,
-):
-    from games.utils import save_recommender_ranking
-
-    file_name = django.utils.timezone.now().strftime(file_name)
-    dst_path = os.path.join(dst_dir, file_name)
-
-    _remove(dst_path)
-    os.makedirs(dst_dir, exist_ok=True)
-
-    save_recommender_ranking(recommender, dst_path, similarity_model)
+    LOGGER.info("Saving model to <%s>...", out_path_light)
+    _remove(out_path_light)
+    os.makedirs(os.path.dirname(out_path_light), exist_ok=True)
+    result.to_collaborative_filtering_data().to_npz(out_path_light)
+    LOGGER.info("Done training.")
 
 
 def _save_rg_ranking(
     recommender,
     path_ratings,
+    games_file,
     top,
     min_ratings,
     dst_dir,
     file_name=f"{DATE_FORMAT_COMPACT}.csv",
 ):
-    from board_game_recommender.rankings import calculate_rankings
+    import polars as pl
+
+    from games.rankings import calculate_rankings
 
     dst_dir = Path(dst_dir).resolve()
     dst_path = dst_dir / django.utils.timezone.now().strftime(file_name)
@@ -1105,17 +1028,32 @@ def _save_rg_ranking(
         path_ratings,
     )
     LOGGER.info(
-        "Using top %d games and %d min ratings, saving results to <%s>…",
+        "Using top %d games and %d min ratings, saving results to <%s>...",
         top,
         min_ratings,
         dst_path,
     )
 
+    # Compilations used to come off the Turi Create model, which read them from
+    # this same games file. Taking them straight from the file keeps that
+    # behaviour and avoids depending on database state -- savebggrankings runs
+    # before filldb, so the database still holds the previous build's data.
+    compilations = frozenset(
+        pl.scan_ndjson(
+            games_file,
+            schema={"bgg_id": pl.Int64, "compilation": pl.Boolean},
+        )
+        .filter(pl.col("compilation"))
+        .collect()["bgg_id"]
+        .to_list()
+    )
+
     rankings = calculate_rankings(
         recommender=recommender,
-        path_ratings=str(path_ratings),
+        ratings_path=path_ratings,
         top=top,
         min_ratings=min_ratings,
+        exclude_games=compilations,
     )
 
     LOGGER.info("Calculated R.G rankings for %d games", len(rankings))
@@ -1123,9 +1061,16 @@ def _save_rg_ranking(
     _remove(dst_path)
     dst_dir.mkdir(parents=True, exist_ok=True)
 
-    rankings.rename({"rank": "rank_raw", "score": "score_raw"}, inplace=True)
-    rankings.rename({"rank_weighted": "rank", "score_weighted": "score"}, inplace=True)
-    rankings = rankings[
+    # The published ranking is the trust-weighted one; the unweighted variant is
+    # carried alongside as "raw".
+    rankings = rankings.rename(
+        {
+            "rank": "rank_raw",
+            "score": "score_raw",
+            "rank_weighted": "rank",
+            "score_weighted": "score",
+        }
+    ).select(
         "rank",
         "bgg_id",
         "score",
@@ -1133,17 +1078,17 @@ def _save_rg_ranking(
         "score_raw",
         "avg_rating",
         "num_votes",
-    ]
-    rankings = rankings.sort("rank")
+    )
 
-    rankings.export_csv(str(dst_path))
+    rankings.sort("rank").write_csv(dst_path)
 
 
 @task()
 def savebggrankings(
     c,
-    recommender_path=os.path.join(RECOMMENDER_DIR, ".bgg"),
+    recommender_path=os.path.join(RECOMMENDER_DIR, ".bgg.light.npz"),
     ratings_path=Path(SCRAPED_DATA_DIR).resolve() / "scraped" / "bgg_RatingItem.jl",
+    games_file=Path(SCRAPED_DATA_DIR).resolve() / "scraped" / "bgg_GameItem.jl",
     dst_dir=os.path.join(SCRAPED_DATA_DIR, "rankings", "bgg"),
     file_name=f"{DATE_FORMAT_COMPACT}.csv",
     top_k_games=100,
@@ -1159,25 +1104,17 @@ def savebggrankings(
     min_ratings = parse_int(min_ratings) or 10
 
     LOGGER.info("Loading BoardGameGeek recommender from <%s>...", recommender_path)
-    recommender = load_recommender(recommender_path, site="bgg")
-
-    _save_ranking(
-        recommender=recommender,
-        dst_dir=dst_dir / "factor",
-        file_name=file_name,
-        similarity_model=False,
-    )
-
-    _save_ranking(
-        recommender=recommender,
-        dst_dir=dst_dir / "similarity",
-        file_name=file_name,
-        similarity_model=True,
-    )
+    # trainbgg may have just rewritten this file in the same process, and
+    # load_recommender is lru_cache'd -- drop the cache so we read from disk.
+    load_recommender.cache_clear()
+    recommender = load_recommender(recommender_path)
+    if recommender is None:
+        raise ValueError(f"Unable to load recommender from <{recommender_path}>")
 
     _save_rg_ranking(
         recommender=recommender,
         path_ratings=ratings_path,
+        games_file=Path(games_file).resolve(),
         top=top_k_games,
         min_ratings=min_ratings,
         dst_dir=dst_dir / "r_g",
@@ -1315,20 +1252,6 @@ def compressdb(c, db_file=os.path.join(DATA_DIR, "db.sqlite3")):
     execute("sqlite3", db_file, "VACUUM;")
 
 
-@task()
-def cpdirs(
-    c,
-    src_dir=os.path.join(RECOMMENDER_DIR, ".bgg"),
-    dst_dir=os.path.join(DATA_DIR, "recommender_bgg"),
-    sub_dirs=("recommender", "similarity", "clusters", "compilations"),
-):
-    """copy recommender files"""
-    sub_dirs = sub_dirs.split(",") if isinstance(sub_dirs, str) else sub_dirs
-    for sub_dir in sub_dirs:
-        src_path = os.path.join(src_dir, sub_dir)
-        dst_path = os.path.join(dst_dir, sub_dir)
-        LOGGER.info("Copying <%s> to <%s>...", src_path, dst_path)
-        shutil.copytree(src_path, dst_path)
 
 
 @task()
