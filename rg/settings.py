@@ -118,8 +118,6 @@ TIME_ZONE = "UTC"
 
 USE_I18N = True
 
-USE_L10N = True
-
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
@@ -128,11 +126,16 @@ USE_TZ = True
 STATIC_URL = "/"
 STATIC_ROOT = os.path.join(BASE_DIR, "app" if DEBUG else "static")
 STATICFILES_DIRS = [] if DEBUG else [os.path.join(BASE_DIR, ".temp")]
-STATICFILES_STORAGE = (
-    "django.contrib.staticfiles.storage.StaticFilesStorage"
-    if DEBUG
-    else "whitenoise.storage.CompressedManifestStaticFilesStorage"
-)
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if DEBUG
+            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        ),
+    },
+}
 
 MEDIA_URL = "media/"
 
@@ -154,7 +157,6 @@ API_PROXY = {"HOST": "https://news.recommend.games"}
 
 # Custom
 
-RECOMMENDER_PATH = os.path.join(DATA_DIR, "recommender_bgg")
 LIGHT_RECOMMENDER_PATH = os.path.join(DATA_DIR, "recommender_light.npz")
 STAR_PERCENTILES = (0.165, 0.365, 0.615, 0.815, 0.915, 0.965, 0.985, 0.995)
 

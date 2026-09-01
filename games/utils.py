@@ -36,23 +36,17 @@ def serialize_date(date, tzinfo=None):
 
 
 @lru_cache(maxsize=8)
-def load_recommender(path, site="bgg"):
+def load_recommender(path):
     """load recommender from given path"""
 
     if not path:
         return None
 
     try:
-        if site == "light":
-            from board_game_recommender import LightGamesRecommender
+        from board_game_recommender import LightGamesRecommender
 
-            LOGGER.info("Trying to load <LightGamesRecommender> from <%s>", path)
-            return LightGamesRecommender.from_npz(path)
-
-        from board_game_recommender import BGGRecommender
-
-        LOGGER.info("Trying to load <BGGRecommender> from <%s>", path)
-        return BGGRecommender.load(path=path)
+        LOGGER.info("Trying to load <LightGamesRecommender> from <%s>", path)
+        return LightGamesRecommender.from_npz(path)
 
     except Exception:
         LOGGER.exception("unable to load recommender model from <%s>", path)
