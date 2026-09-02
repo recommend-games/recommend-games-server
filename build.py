@@ -173,26 +173,26 @@ def _remove(path):
 def gitprepare(c, repo=SCRAPED_DATA_DIR):
     """check Git repo is clean and up-to-date"""
     LOGGER.info("Preparing Git repo <%s>...", repo)
-    with safe_cd(repo):
-        try:
+    try:
+        with safe_cd(repo):
             execute("git", "checkout", "main")
             execute("git", "pull", "--ff-only")
             execute("git", "diff", "HEAD", "--name-only")
-        except SystemExit:
-            LOGGER.exception("There was a problem preparing <%s>...", repo)
+    except Exception:
+        LOGGER.exception("There was a problem preparing <%s>...", repo)
 
 
 @task()
 def gitprepareconfig(c, repo=CONFIG_DIR):
     """Check config Git repo is clean and up-to-date."""
     LOGGER.info("Preparing Git repo <%s>...", repo)
-    with safe_cd(repo):
-        try:
+    try:
+        with safe_cd(repo):
             execute("git", "checkout", "main")
             execute("git", "pull", "--ff-only")
             execute("git", "diff", "HEAD", "--name-only")
-        except SystemExit:
-            LOGGER.exception("There was a problem preparing <%s>...", repo)
+    except Exception:
+        LOGGER.exception("There was a problem preparing <%s>...", repo)
 
 
 @task()
@@ -200,29 +200,32 @@ def gitupdate(c, *paths, repo=SCRAPED_DATA_DIR, name=__name__):
     """commit and push Git repo"""
     paths = paths or ("COUNT.md", "rankings", "scraped", "links.json")
     LOGGER.info("Updating paths %r in Git repo <%s>...", paths, repo)
-    with safe_cd(repo):
-        try:
-            execute("git", "gc", "--prune=now")
-            execute("git", "add", "--", *paths)
-        except SystemExit:
-            LOGGER.exception("There was a problem in repo <%s>...", repo)
+    try:
+        with safe_cd(repo):
+            try:
+                execute("git", "gc", "--prune=now")
+                execute("git", "add", "--", *paths)
+            except Exception:
+                LOGGER.exception("There was a problem in repo <%s>...", repo)
 
-        try:
-            execute(
-                "git",
-                "commit",
-                "--no-gpg-sign",
-                "--message",
-                f"automatic commit by <{name}>",
-            )
-            execute("git", "gc", "--prune=now")
-        except SystemExit:
-            LOGGER.info("Nothing to commit...")
+            try:
+                execute(
+                    "git",
+                    "commit",
+                    "--no-gpg-sign",
+                    "--message",
+                    f"automatic commit by <{name}>",
+                )
+                execute("git", "gc", "--prune=now")
+            except Exception:
+                LOGGER.info("Nothing to commit...")
 
-        try:
-            execute("git", "push", "framagit", "main")
-        except SystemExit:
-            LOGGER.exception("Unable to push...")
+            try:
+                execute("git", "push", "framagit", "main")
+            except Exception:
+                LOGGER.exception("Unable to push...")
+    except Exception:
+        LOGGER.exception("There was a problem updating repo <%s>...", repo)
 
 
 def _run_merge(
