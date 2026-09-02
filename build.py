@@ -814,7 +814,7 @@ def dateflag(c, dst=SETTINGS.MODEL_UPDATED_FILE, date=None):
     from games.utils import serialize_date
 
     date = parse_date(date) or django.utils.timezone.now()
-    date_str = serialize_date(date, tzinfo=django.utils.timezone.utc)
+    date_str = serialize_date(date, tzinfo=UTC)
     LOGGER.info("Writing date <%s> to <%s>...", date_str, dst)
     with open(dst, "w", encoding="utf-8") as file:
         file.write(date_str)
