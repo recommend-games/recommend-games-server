@@ -865,7 +865,7 @@ def historicalbggrankings(
         try:
             execute("git", "checkout", "master")
             execute("git", "pull", "--ff-only")
-        except SystemExit:
+        except Exception:
             LOGGER.exception(
                 "There was a problem updating BGG rankings repo <%s>",
                 repo,
@@ -1154,7 +1154,7 @@ def buildserver(c, images=None, tags=None):
         LOGGER.info("Adding Git tag <v%s> if it doesn't exist", version)
         try:
             execute("git", "tag", f"v{version}")
-        except SystemExit:
+        except Exception:
             pass  # tag already exists
 
 
