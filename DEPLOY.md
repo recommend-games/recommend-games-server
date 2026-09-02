@@ -3,11 +3,10 @@
 The service is deployed as a Docker image to the
 [Heroku container registry](https://devcenter.heroku.com/articles/container-registry-and-runtime).
 
-There are two independent release paths:
+There are two release paths:
 
-1. **Data + static API** — rebuilds the SQLite database and publishes a static
-   API to the sibling `recommend-games-api` repository.
-2. **Server image** — builds and releases the Docker image that serves the API.
+1. **Full end-to-end release** — merges scraped data, trains the recommender, rebuilds the SQLite database, and builds and deploys the server Docker image.
+2. **Database-only rebuild** — rebuilds the database from existing scraped data and trained models without deploying.
 
 ## Prerequisites
 
@@ -21,7 +20,6 @@ There are two independent release paths:
   * `board-game-scraper` — scraper feeds
   * `board-game-recommender` — where the trained model is written
   * `recommend-games-config` — premium user config
-  * `recommend-games-api` — target for the static API
 
 Set `HEROKU_APP` in `.env` (see [`.env.example`](.env.example)) if the app is
 not named `recommend-games`.
@@ -29,21 +27,21 @@ not named `recommend-games`.
 Training the recommender needs PyTorch, which has no macOS x86_64 wheels — a
 full release therefore requires Linux or Apple Silicon.
 
-## Releasing data
+## Full release
 
 ```bash
 ./release.sh
 ```
 
-This runs the full task chain through invoke — merging scraped files, training
-the recommender, snapshotting the R.G rankings, rebuilding the database,
-scoring Kennerspiel, generating the sitemap — and then publishes the static API
-and pushes it.
+This runs `uv run invoke -c build releasefull` — merging scraped files, training
+the recommender, snapshotting the R.G rankings, rebuilding rankings and charts,
+rebuilding the database, scoring Kennerspiel, generating the sitemap, committing data
+updates, and building/releasing the Docker image to Heroku.
 
 To inspect what a release would do without touching anything:
 
 ```bash
-uv run invoke -c build --dry builddbfull
+uv run invoke -c build --dry releasefull
 ```
 
 ## Releasing the server
