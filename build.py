@@ -1146,7 +1146,7 @@ def buildserver(c, images=None, tags=None):
 
     LOGGER.info("Building Docker image with tags %s...", all_tags)
 
-    command = ["docker", "build"]
+    command = ["docker", "build", "--platform", "linux/amd64"]
     for tag in all_tags:
         command.extend(("--tag", tag))
     command.append(".")
