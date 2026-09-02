@@ -861,47 +861,53 @@ def historicalbggrankings(
 
     overwrite = parse_bool(overwrite)
 
-    with safe_cd(repo):
-        try:
-            execute("git", "checkout", "master")
-            execute("git", "pull", "--ff-only")
-        except Exception:
-            LOGGER.exception(
-                "There was a problem updating BGG rankings repo <%s>",
-                repo,
-            )
-
-        for root, _, files in os.walk("."):
-            for file in files:
-                if format_from_path(file) != "csv":
-                    continue
-
-                date_str, _ = os.path.splitext(file)
-                date = parse_date(
-                    date_str,
-                    tzinfo=UTC,
-                    format_str=DATE_FORMAT_DASH,
+    try:
+        with safe_cd(repo):
+            try:
+                execute("git", "checkout", "master")
+                execute("git", "pull", "--ff-only")
+            except Exception:
+                LOGGER.exception(
+                    "There was a problem updating BGG rankings repo <%s>",
+                    repo,
                 )
-                if date is None:
-                    continue
 
-                in_path = os.path.abspath(os.path.join(root, file))
-                dst_path = date.strftime(dst)
+            for root, _, files in os.walk("."):
+                for file in files:
+                    if format_from_path(file) != "csv":
+                        continue
 
-                if not overwrite and os.path.exists(dst_path):
-                    LOGGER.debug(
-                        "Output file <%s> already exists, skipping <%s>...",
-                        dst_path,
-                        in_path,
+                    date_str, _ = os.path.splitext(file)
+                    date = parse_date(
+                        date_str,
+                        tzinfo=UTC,
+                        format_str=DATE_FORMAT_DASH,
                     )
-                    continue
+                    if date is None:
+                        continue
 
-                LOGGER.info(
-                    "Reading from file <%s> and writing to <%s>...",
-                    in_path,
-                    dst_path,
-                )
-                execute("bash", script, in_path, dst_path)
+                    in_path = os.path.abspath(os.path.join(root, file))
+                    dst_path = date.strftime(dst)
+
+                    if not overwrite and os.path.exists(dst_path):
+                        LOGGER.debug(
+                            "Output file <%s> already exists, skipping <%s>...",
+                            dst_path,
+                            in_path,
+                        )
+                        continue
+
+                    LOGGER.info(
+                        "Reading from file <%s> and writing to <%s>...",
+                        in_path,
+                        dst_path,
+                    )
+                    execute("bash", script, in_path, dst_path)
+    except Exception:
+        LOGGER.exception(
+            "There was a problem loading historical BGG rankings from <%s>",
+            repo,
+        )
 
 
 @task()
