@@ -97,6 +97,12 @@ RECOMMENDER_DIR = os.path.abspath(
 SCRAPED_DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "board-game-data"))
 # Outside DATA_DIR, which cleandata wipes every build.
 MODEL_ARCHIVE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "model-archive"))
+EPOCH_SCOUT_CACHE_PATH = os.path.join(MODELS_DIR, "epoch_scout_cache.json")
+
+# Tier 2 (#428) defaults, shared by trainbgg and epochscout below.
+TIER2_LEARNING_RATE = 1e-3
+TIER2_LR_STEP_SIZE = None
+TIER2_LR_GAMMA = 0.5
 
 DATE_FORMAT_DASH = "%Y-%m-%dT%H-%M-%S"
 DATE_FORMAT_COMPACT = "%Y%m%d-%H%M%S"
@@ -518,18 +524,81 @@ def mergeall(
 
 
 @task()
+def epochscout(
+    c,
+    ratings_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem.jl"),
+    cache_path=EPOCH_SCOUT_CACHE_PATH,
+    num_factors=32,
+    batch_size=1 << 16,
+    learning_rate=TIER2_LEARNING_RATE,
+    lr_step_size=TIER2_LR_STEP_SIZE,
+    lr_gamma=TIER2_LR_GAMMA,
+    power_users=200,
+    test_rows=100,
+    metric="ndcg",
+    k=25,
+    patience=10,
+    eval_every=5,
+    max_epochs=1000,
+    seed=None,
+):
+    """Force a fresh epoch scout and refresh the cache `trainbgg` reads."""
+
+    from epoch_scout import ScoutConfig, resolve_num_epochs
+
+    config = ScoutConfig(
+        num_factors=parse_int(num_factors) or 32,
+        batch_size=parse_int(batch_size) or (1 << 16),
+        learning_rate=parse_float(learning_rate) or TIER2_LEARNING_RATE,
+        lr_step_size=parse_int(lr_step_size),
+        lr_gamma=parse_float(lr_gamma) or TIER2_LR_GAMMA,
+        power_users=parse_int(power_users) or 200,
+        test_rows=parse_int(test_rows) or 100,
+        metric=metric,
+        k=parse_int(k) or 25,
+        patience=parse_int(patience) or 10,
+        eval_every=parse_int(eval_every) or 5,
+        max_epochs=parse_int(max_epochs) or 1000,
+        seed=parse_int(seed),
+    )
+    num_epochs = resolve_num_epochs(
+        ratings_file,
+        cache_path,
+        config,
+        max_age_days=0,
+        force=True,
+        now=django.utils.timezone.now(),
+    )
+    LOGGER.info("Scouted epoch count: %d", num_epochs)
+
+
+@task()
 def trainbgg(
     c,
     ratings_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem.jl"),
     out_path_light=os.path.join(RECOMMENDER_DIR, ".bgg.light.npz"),
     archive_dir=MODEL_ARCHIVE_DIR,
     num_factors=32,
-    num_epochs=300,
+    num_epochs=None,
     batch_size=1 << 16,
-    learning_rate=1e-3,
+    learning_rate=TIER2_LEARNING_RATE,
+    lr_step_size=TIER2_LR_STEP_SIZE,
+    lr_gamma=TIER2_LR_GAMMA,
+    epoch_scout_cache=EPOCH_SCOUT_CACHE_PATH,
+    epoch_scout_max_age_days=7,
+    force_scout=False,
+    scout_power_users=200,
+    scout_test_rows=100,
+    scout_metric="ndcg",
+    scout_k=25,
+    scout_patience=10,
+    scout_eval_every=5,
+    scout_max_epochs=1000,
     seed=None,
 ):
     """train BoardGameGeek recommender model"""
+
+    import functools
 
     import polars as pl
     from board_game_recommender.dnn import (
@@ -537,12 +606,44 @@ def trainbgg(
         training_metadata,
         write_training_metadata,
     )
+    from torch import optim
+
+    from epoch_scout import ScoutConfig, resolve_num_epochs
 
     num_factors = parse_int(num_factors) or 32
-    num_epochs = parse_int(num_epochs) or 300
+    num_epochs = parse_int(num_epochs)
     batch_size = parse_int(batch_size) or (1 << 16)
-    learning_rate = parse_float(learning_rate) or 1e-3
+    learning_rate = parse_float(learning_rate) or TIER2_LEARNING_RATE
+    lr_step_size = parse_int(lr_step_size)
+    lr_gamma = parse_float(lr_gamma) or TIER2_LR_GAMMA
     seed = parse_int(seed)
+
+    # An explicit --num-epochs always wins over the cached/scouted value (#429).
+    epoch_count_scouted = num_epochs is None
+    if epoch_count_scouted:
+        scout_config = ScoutConfig(
+            num_factors=num_factors,
+            batch_size=batch_size,
+            learning_rate=learning_rate,
+            lr_step_size=lr_step_size,
+            lr_gamma=lr_gamma,
+            power_users=parse_int(scout_power_users) or 200,
+            test_rows=parse_int(scout_test_rows) or 100,
+            metric=scout_metric,
+            k=parse_int(scout_k) or 25,
+            patience=parse_int(scout_patience) or 10,
+            eval_every=parse_int(scout_eval_every) or 5,
+            max_epochs=parse_int(scout_max_epochs) or 1000,
+            seed=seed,
+        )
+        num_epochs = resolve_num_epochs(
+            ratings_file,
+            epoch_scout_cache,
+            scout_config,
+            max_age_days=parse_int(epoch_scout_max_age_days) or 7,
+            force=parse_bool(force_scout),
+            now=django.utils.timezone.now(),
+        )
 
     LOGGER.info(
         "Training recommender model from ratings <%s> with %d factors for %d epochs...",
@@ -561,12 +662,21 @@ def trainbgg(
     )
     LOGGER.info("Loaded %d ratings", len(ratings))
 
+    # Always trains on the full dataset, never the scout's held-out split.
+    lr_scheduler_factory = (
+        functools.partial(
+            optim.lr_scheduler.StepLR, step_size=lr_step_size, gamma=lr_gamma
+        )
+        if lr_step_size
+        else None
+    )
     result = train(
         ratings,
         num_factors=num_factors,
         num_epochs=num_epochs,
         batch_size=batch_size,
         learning_rate=learning_rate,
+        lr_scheduler_factory=lr_scheduler_factory,
         seed=seed,
     )
 
@@ -581,10 +691,14 @@ def trainbgg(
             "num_epochs": num_epochs,
             "batch_size": batch_size,
             "learning_rate": learning_rate,
+            "lr_step_size": lr_step_size,
+            "lr_gamma": lr_gamma if lr_step_size else None,
             "unobserved_rating_value": result.unobserved_rating_value,
             "seed": seed,
         },
     )
+    if epoch_count_scouted:
+        metadata["epoch_scout"] = {"cache_path": str(epoch_scout_cache)}
     metadata["recommend_games_server_git"] = _git_provenance(BASE_DIR)
     ratings_stat = os.stat(ratings_file)
     metadata["ratings_data"] = {
