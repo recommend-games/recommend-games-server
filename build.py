@@ -553,6 +553,113 @@ def trainbgg(
     LOGGER.info("Done training.")
 
 
+@task()
+def tier2search(
+    c,
+    ratings_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem.jl"),
+    out_dir=os.path.join(MODELS_DIR, "hp_search"),
+    power_users=200,
+    test_rows=100,
+    metric="ndcg",
+    k=25,
+    patience=10,
+    eval_every=5,
+    max_epochs=1000,
+    seed=None,
+):
+    """Compare trainbgg's optimizer/LR candidates on nDCG@25, ECS@25 as a degeneracy check."""
+
+    import polars as pl
+    from board_game_recommender.evaluation import (
+        recommender_test_data_from_frame,
+        split_train_test,
+    )
+
+    from hyperparameter_search import (
+        TrialConfig,
+        compare_trials,
+        write_comparison_report,
+    )
+
+    power_users = parse_int(power_users) or 200
+    test_rows = parse_int(test_rows) or 100
+    k = parse_int(k) or 25
+    patience = parse_int(patience) or 10
+    eval_every = parse_int(eval_every) or 5
+    max_epochs = parse_int(max_epochs) or 1000
+    seed = parse_int(seed)
+
+    LOGGER.info("Loading ratings from <%s>...", ratings_file)
+    ratings = pl.read_ndjson(
+        ratings_file,
+        schema={
+            "bgg_user_name": pl.String,
+            "bgg_id": pl.Int64,
+            "bgg_user_rating": pl.Float64,
+        },
+    )
+    LOGGER.info("Loaded %d ratings", len(ratings))
+
+    train_data, test_data_raw = split_train_test(
+        ratings,
+        threshold_power_users=power_users,
+        num_test_rows=test_rows,
+        seed=seed,
+    )
+    test_data = recommender_test_data_from_frame(
+        test_data_raw,
+        ratings_per_user=test_rows,
+    )
+
+    configs = [
+        TrialConfig(name="flat_adam_1e-3", train_kwargs={"learning_rate": 1e-3}),
+        TrialConfig(
+            name="adam_decay_1e-3_step5_gamma0.5",
+            train_kwargs={"learning_rate": 1e-3},
+            lr_step_size=5,
+            lr_gamma=0.5,
+        ),
+        TrialConfig(name="flat_adam_3e-4", train_kwargs={"learning_rate": 3e-4}),
+    ]
+
+    results = compare_trials(
+        train_data,
+        test_data,
+        configs,
+        metric=metric,
+        k=k,
+        patience=patience,
+        eval_every=eval_every,
+        max_epochs=max_epochs,
+        seed=seed,
+    )
+
+    LOGGER.info(
+        "Winner: %s (%s@%d=%.4f)",
+        results[0].name,
+        metric,
+        k,
+        results[0].best_value,
+    )
+    for result in results:
+        LOGGER.info(
+            "  %-30s %s@%d=%.4f  ECS@%d=%.1f  best_epoch=%s  stopped=%s",
+            result.name,
+            metric,
+            k,
+            result.best_value,
+            k,
+            result.metrics["effective_catalog_size"][k],
+            result.best_epoch,
+            result.stopped,
+        )
+
+    out_path = Path(out_dir) / django.utils.timezone.now().strftime(
+        f"tier2_{DATE_FORMAT_COMPACT}.json"
+    )
+    write_comparison_report(results, out_path)
+
+
 def _save_rg_ranking(
     recommender,
     path_ratings,
