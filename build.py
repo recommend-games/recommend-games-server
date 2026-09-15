@@ -37,6 +37,7 @@ from pathlib import Path
 
 import django
 from dotenv import load_dotenv
+from git import Repo
 from invoke import task
 from pytility import arg_to_iter, parse_bool, parse_date, parse_float, parse_int
 from snaptime import snap
@@ -94,6 +95,8 @@ RECOMMENDER_DIR = os.path.abspath(
     os.path.join(BASE_DIR, "..", "board-game-recommender")
 )
 SCRAPED_DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "board-game-data"))
+# Outside DATA_DIR, which cleandata wipes every build.
+MODEL_ARCHIVE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "model-archive"))
 
 DATE_FORMAT_DASH = "%Y-%m-%dT%H-%M-%S"
 DATE_FORMAT_COMPACT = "%Y%m%d-%H%M%S"
@@ -167,6 +170,22 @@ def _remove(path):
         os.remove(path)
     except OSError:
         shutil.rmtree(path, ignore_errors=True)
+
+
+def _git_provenance(repo_path: str) -> dict[str, object] | None:
+    """
+    Return the checked-out commit SHA and dirty state of a Git repo, or None
+    if `repo_path` isn't one (e.g. no `.git` in a stripped-down container).
+    """
+    try:
+        repo = Repo(repo_path)
+        return {
+            "sha": repo.head.commit.hexsha,
+            "dirty": repo.is_dirty(untracked_files=True),
+        }
+    except Exception:
+        LOGGER.exception("Unable to determine Git provenance for <%s>", repo_path)
+        return None
 
 
 @task()
@@ -503,6 +522,7 @@ def trainbgg(
     c,
     ratings_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem.jl"),
     out_path_light=os.path.join(RECOMMENDER_DIR, ".bgg.light.npz"),
+    archive_dir=MODEL_ARCHIVE_DIR,
     num_factors=32,
     num_epochs=300,
     batch_size=1 << 16,
@@ -512,7 +532,11 @@ def trainbgg(
     """train BoardGameGeek recommender model"""
 
     import polars as pl
-    from board_game_recommender.dnn import train
+    from board_game_recommender.dnn import (
+        train,
+        training_metadata,
+        write_training_metadata,
+    )
 
     num_factors = parse_int(num_factors) or 32
     num_epochs = parse_int(num_epochs) or 300
@@ -550,6 +574,36 @@ def trainbgg(
     _remove(out_path_light)
     os.makedirs(os.path.dirname(out_path_light), exist_ok=True)
     result.to_collaborative_filtering_data().to_npz(out_path_light)
+
+    metadata = training_metadata(
+        hyperparameters={
+            "num_factors": num_factors,
+            "num_epochs": num_epochs,
+            "batch_size": batch_size,
+            "learning_rate": learning_rate,
+            "unobserved_rating_value": result.unobserved_rating_value,
+            "seed": seed,
+        },
+    )
+    metadata["recommend_games_server_git"] = _git_provenance(BASE_DIR)
+    ratings_stat = os.stat(ratings_file)
+    metadata["ratings_data"] = {
+        "path": str(ratings_file),
+        "row_count": len(ratings),
+        "size_bytes": ratings_stat.st_size,
+        "modified": ratings_stat.st_mtime,
+        # gitupdate commits this file only after trainbgg runs, so this SHA
+        # predates it -- row_count/size/modified are the real fingerprint.
+        "git": _git_provenance(SCRAPED_DATA_DIR),
+    }
+
+    timestamp = django.utils.timezone.now().strftime(DATE_FORMAT_COMPACT)
+    archive_path = os.path.join(archive_dir, f"{timestamp}.npz")
+    LOGGER.info("Archiving model and provenance to <%s>...", archive_path)
+    os.makedirs(archive_dir, exist_ok=True)
+    shutil.copy2(out_path_light, archive_path)
+    write_training_metadata(archive_path, metadata)
+
     LOGGER.info("Done training.")
 
 
