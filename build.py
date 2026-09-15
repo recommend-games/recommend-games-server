@@ -619,7 +619,12 @@ def tier2search(
             lr_step_size=5,
             lr_gamma=0.5,
         ),
-        TrialConfig(name="flat_adam_3e-4", train_kwargs={"learning_rate": 3e-4}),
+        TrialConfig(
+            name="adam_decay_1e-3_step10_gamma0.5",
+            train_kwargs={"learning_rate": 1e-3},
+            lr_step_size=10,
+            lr_gamma=0.5,
+        ),
     ]
 
     results = compare_trials(
@@ -643,13 +648,21 @@ def tier2search(
     )
     for result in results:
         LOGGER.info(
-            "  %-30s %s@%d=%.4f  ECS@%d=%.1f  best_epoch=%s  stopped=%s",
+            "  %-30s %s@%d=%.4f  nDCG_exp@%d=%.4f  RMSE=%.4f  ECS@%d=%.1f  "
+            "coverage@%d=%.4f  novelty@%d=%.4f  best_epoch=%s  stopped=%s",
             result.name,
             metric,
             k,
             result.best_value,
             k,
+            result.metrics["ndcg_exp"][k],
+            result.metrics["rmse"],
+            k,
             result.metrics["effective_catalog_size"][k],
+            k,
+            result.metrics["catalog_coverage"][k],
+            k,
+            result.metrics["novelty"][k],
             result.best_epoch,
             result.stopped,
         )
