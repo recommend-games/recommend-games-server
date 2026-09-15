@@ -619,7 +619,7 @@ def tier2search(
     patience=10,
     eval_every=5,
     max_epochs=1000,
-    seed=None,
+    seed=428,
 ):
     """Compare trainbgg's optimizer/LR candidates on nDCG@25, ECS@25 as a degeneracy check."""
 
@@ -667,16 +667,18 @@ def tier2search(
 
     configs = [
         TrialConfig(name="flat_adam_1e-3", train_kwargs={"learning_rate": 1e-3}),
+        # Step size must be comparable to flat_adam_1e-3's ~265-epoch
+        # convergence horizon, or decay zeroes the LR before it can compete.
         TrialConfig(
-            name="adam_decay_1e-3_step5_gamma0.5",
+            name="adam_decay_1e-3_step100_gamma0.5",
             train_kwargs={"learning_rate": 1e-3},
-            lr_step_size=5,
+            lr_step_size=100,
             lr_gamma=0.5,
         ),
         TrialConfig(
-            name="adam_decay_1e-3_step10_gamma0.5",
+            name="adam_decay_1e-3_step150_gamma0.5",
             train_kwargs={"learning_rate": 1e-3},
-            lr_step_size=10,
+            lr_step_size=150,
             lr_gamma=0.5,
         ),
     ]
