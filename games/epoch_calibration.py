@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     import os
 
-    from hyperparameter_search import TrialResult
+    from games.hyperparameter_search import TrialResult
 
 LOGGER = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ def run_calibration(
         split_train_test,
     )
 
-    from hyperparameter_search import TrialConfig, run_trial
+    from games.hyperparameter_search import TrialConfig, run_trial
 
     ratings = pl.read_ndjson(
         ratings_file,

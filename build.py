@@ -594,7 +594,7 @@ def epochcalibrate(
 ):
     """Force a fresh epoch calibration and refresh the cache `trainbgg` reads."""
 
-    from epoch_calibration import CalibrationConfig, calibrate_num_epochs
+    from games.epoch_calibration import CalibrationConfig, calibrate_num_epochs
 
     config = CalibrationConfig(
         num_factors=parse_int(num_factors) or TIER1_HYPERPARAMETERS["num_factors"],
@@ -656,7 +656,7 @@ def trainbgg(
     from board_game_recommender.dnn import train, write_training_metadata
     from torch import optim
 
-    from epoch_calibration import CalibrationConfig, calibrate_num_epochs
+    from games.epoch_calibration import CalibrationConfig, calibrate_num_epochs
 
     num_factors = parse_int(num_factors) or TIER1_HYPERPARAMETERS["num_factors"]
     num_epochs = parse_int(num_epochs)
@@ -800,7 +800,7 @@ def tier2search(
         split_train_test,
     )
 
-    from hyperparameter_search import (
+    from games.hyperparameter_search import (
         TrialConfig,
         compare_trials,
         write_comparison_report,
