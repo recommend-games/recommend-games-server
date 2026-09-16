@@ -3,8 +3,8 @@ Harness for comparing `board_game_recommender.dnn.train()` configurations
 against a held-out power-user split.
 
 Generic over both the config varied and the metric optimised, so the same
-`run_trial`/`compare_trials` machinery covers a single-config epoch scout as
-well as a multi-config comparison.
+`run_trial`/`compare_trials` machinery covers a single-config epoch
+calibration as well as a multi-config comparison.
 """
 
 from __future__ import annotations

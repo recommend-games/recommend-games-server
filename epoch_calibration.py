@@ -1,8 +1,9 @@
 """
-Epoch-count scouting and caching for trainbgg (#429).
+Epoch-count calibration and caching for trainbgg (#429).
 
-Scouts one config's epoch count via hyperparameter_search's run_trial, then
-caches it so a full-dataset production run doesn't repeat that every build.
+Calibrates one config's epoch count via hyperparameter_search's run_trial,
+then caches it so a full-dataset production run doesn't repeat that every
+build.
 """
 
 from __future__ import annotations
@@ -23,8 +24,8 @@ LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
-class ScoutConfig:
-    """The knobs a scout run and the production `trainbgg` run must share."""
+class CalibrationConfig:
+    """The knobs a calibration run and the production `trainbgg` run must share."""
 
     num_factors: int
     batch_size: int
@@ -43,7 +44,7 @@ class ScoutConfig:
 
 
 def load_cache(cache_path: str | os.PathLike[str]) -> dict[str, Any] | None:
-    """Read the cached scout result, or None if there isn't one yet."""
+    """Read the cached calibration result, or None if there isn't one yet."""
     path = Path(cache_path)
     if not path.exists():
         return None
@@ -52,12 +53,15 @@ def load_cache(cache_path: str | os.PathLike[str]) -> dict[str, Any] | None:
 
 
 def cache_is_stale(cache: dict[str, Any], max_age_days: float, now: datetime) -> bool:
-    scouted_at = datetime.fromisoformat(cache["scouted_at"])
-    return now - scouted_at > timedelta(days=max_age_days)
+    calibrated_at = datetime.fromisoformat(cache["calibrated_at"])
+    return now - calibrated_at > timedelta(days=max_age_days)
 
 
-def run_scout(ratings_file: str | os.PathLike[str], config: ScoutConfig) -> TrialResult:
-    """Scout `config`'s epoch count against the held-out power-user split."""
+def run_calibration(
+    ratings_file: str | os.PathLike[str],
+    config: CalibrationConfig,
+) -> TrialResult:
+    """Calibrate `config`'s epoch count against the held-out power-user split."""
 
     import polars as pl
     from board_game_recommender.evaluation import (
@@ -87,7 +91,7 @@ def run_scout(ratings_file: str | os.PathLike[str], config: ScoutConfig) -> Tria
     )
 
     trial_config = TrialConfig(
-        name="epoch_scout",
+        name="epoch_calibration",
         train_kwargs={
             "num_factors": config.num_factors,
             "batch_size": config.batch_size,
@@ -110,7 +114,7 @@ def run_scout(ratings_file: str | os.PathLike[str], config: ScoutConfig) -> Tria
     )
 
     LOGGER.info(
-        "Scouted %d epochs: %s@%d=%.4f  ECS@%d=%.1f",
+        "Calibrated %d epochs: %s@%d=%.4f  ECS@%d=%.1f",
         result.best_epoch,
         config.metric,
         config.k,
@@ -122,10 +126,10 @@ def run_scout(ratings_file: str | os.PathLike[str], config: ScoutConfig) -> Tria
     return result
 
 
-def resolve_num_epochs(
+def calibrate_num_epochs(
     ratings_file: str | os.PathLike[str],
     cache_path: str | os.PathLike[str],
-    config: ScoutConfig,
+    config: CalibrationConfig,
     *,
     max_age_days: float,
     force: bool,
@@ -136,17 +140,17 @@ def resolve_num_epochs(
     cache = None if force else load_cache(cache_path)
     if cache is not None and not cache_is_stale(cache, max_age_days, now):
         LOGGER.info(
-            "Reusing cached epoch count %d (scouted %s)",
+            "Reusing cached epoch count %d (calibrated %s)",
             cache["num_epochs"],
-            cache["scouted_at"],
+            cache["calibrated_at"],
         )
         return cache["num_epochs"]
 
-    result = run_scout(ratings_file, config)
+    result = run_calibration(ratings_file, config)
 
     cache_entry = {
         "num_epochs": result.best_epoch,
-        "scouted_at": now.isoformat(),
+        "calibrated_at": now.isoformat(),
         "metric": config.metric,
         "k": config.k,
         "best_value": result.best_value,
@@ -168,6 +172,6 @@ def resolve_num_epochs(
     with path.open("w", encoding="utf-8") as file:
         json.dump(cache_entry, file, indent=2, sort_keys=True)
         file.write("\n")
-    LOGGER.info("Cached scouted epoch count %d to <%s>", result.best_epoch, path)
+    LOGGER.info("Cached calibrated epoch count %d to <%s>", result.best_epoch, path)
 
     return result.best_epoch

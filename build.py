@@ -101,9 +101,9 @@ RECOMMENDER_DIR = os.path.abspath(
 SCRAPED_DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "board-game-data"))
 # Outside DATA_DIR, which cleandata wipes every build.
 MODEL_ARCHIVE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "model-archive"))
-EPOCH_SCOUT_CACHE_PATH = os.path.join(MODELS_DIR, "epoch_scout_cache.json")
+EPOCH_CALIBRATION_CACHE_PATH = os.path.join(MODELS_DIR, "epoch_calibration_cache.json")
 
-# Tier 2 (#428) defaults, shared by trainbgg and epochscout below.
+# Tier 2 (#428) defaults, shared by trainbgg and epochcalibrate below.
 TIER2_LEARNING_RATE = 1e-3
 TIER2_LR_STEP_SIZE = None
 TIER2_LR_GAMMA = 0.5
@@ -573,10 +573,10 @@ TIER1_HYPERPARAMETERS = {
 
 
 @task()
-def epochscout(
+def epochcalibrate(
     c,
     ratings_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem.jl"),
-    cache_path=EPOCH_SCOUT_CACHE_PATH,
+    cache_path=EPOCH_CALIBRATION_CACHE_PATH,
     num_factors=TIER1_HYPERPARAMETERS["num_factors"],
     batch_size=TIER1_HYPERPARAMETERS["batch_size"],
     learning_rate=TIER2_LEARNING_RATE,
@@ -592,11 +592,11 @@ def epochscout(
     max_epochs=1000,
     seed=None,
 ):
-    """Force a fresh epoch scout and refresh the cache `trainbgg` reads."""
+    """Force a fresh epoch calibration and refresh the cache `trainbgg` reads."""
 
-    from epoch_scout import ScoutConfig, resolve_num_epochs
+    from epoch_calibration import CalibrationConfig, calibrate_num_epochs
 
-    config = ScoutConfig(
+    config = CalibrationConfig(
         num_factors=parse_int(num_factors) or TIER1_HYPERPARAMETERS["num_factors"],
         batch_size=parse_int(batch_size) or TIER1_HYPERPARAMETERS["batch_size"],
         learning_rate=parse_float(learning_rate) or TIER2_LEARNING_RATE,
@@ -612,7 +612,7 @@ def epochscout(
         max_epochs=parse_int(max_epochs) or 1000,
         seed=parse_int(seed),
     )
-    num_epochs = resolve_num_epochs(
+    num_epochs = calibrate_num_epochs(
         ratings_file,
         cache_path,
         config,
@@ -620,7 +620,7 @@ def epochscout(
         force=True,
         now=django.utils.timezone.now(),
     )
-    LOGGER.info("Scouted epoch count: %d", num_epochs)
+    LOGGER.info("Calibrated epoch count: %d", num_epochs)
 
 
 @task()
@@ -636,16 +636,16 @@ def trainbgg(
     lr_step_size=TIER2_LR_STEP_SIZE,
     lr_gamma=TIER2_LR_GAMMA,
     lr_decay_gamma=TIER2_LR_DECAY_GAMMA,
-    epoch_scout_cache=EPOCH_SCOUT_CACHE_PATH,
-    epoch_scout_max_age_days=7,
-    force_scout=False,
-    scout_power_users=200,
-    scout_test_rows=100,
-    scout_metric="ndcg",
-    scout_k=25,
-    scout_patience=30,
-    scout_eval_every=2,
-    scout_max_epochs=1000,
+    epoch_calibration_cache=EPOCH_CALIBRATION_CACHE_PATH,
+    epoch_calibration_max_age_days=7,
+    force_calibration=False,
+    calibration_power_users=200,
+    calibration_test_rows=100,
+    calibration_metric="ndcg",
+    calibration_k=25,
+    calibration_patience=30,
+    calibration_eval_every=2,
+    calibration_max_epochs=1000,
     seed=None,
 ):
     """train BoardGameGeek recommender model"""
@@ -656,7 +656,7 @@ def trainbgg(
     from board_game_recommender.dnn import train, write_training_metadata
     from torch import optim
 
-    from epoch_scout import ScoutConfig, resolve_num_epochs
+    from epoch_calibration import CalibrationConfig, calibrate_num_epochs
 
     num_factors = parse_int(num_factors) or TIER1_HYPERPARAMETERS["num_factors"]
     num_epochs = parse_int(num_epochs)
@@ -671,31 +671,31 @@ def trainbgg(
         msg = "Set at most one of lr_step_size or lr_decay_gamma."
         raise ValueError(msg)
 
-    # An explicit --num-epochs always wins over the cached/scouted value (#429).
-    epoch_count_scouted = num_epochs is None
-    if epoch_count_scouted:
-        scout_config = ScoutConfig(
+    # An explicit --num-epochs always wins over the cached/calibrated value (#429).
+    epoch_count_calibrated = num_epochs is None
+    if epoch_count_calibrated:
+        calibration_config = CalibrationConfig(
             num_factors=num_factors,
             batch_size=batch_size,
             learning_rate=learning_rate,
             lr_step_size=lr_step_size,
             lr_gamma=lr_gamma,
             lr_decay_gamma=lr_decay_gamma,
-            power_users=parse_int(scout_power_users) or 200,
-            test_rows=parse_int(scout_test_rows) or 100,
-            metric=scout_metric,
-            k=parse_int(scout_k) or 25,
-            patience=parse_int(scout_patience) or 30,
-            eval_every=parse_int(scout_eval_every) or 2,
-            max_epochs=parse_int(scout_max_epochs) or 1000,
+            power_users=parse_int(calibration_power_users) or 200,
+            test_rows=parse_int(calibration_test_rows) or 100,
+            metric=calibration_metric,
+            k=parse_int(calibration_k) or 25,
+            patience=parse_int(calibration_patience) or 30,
+            eval_every=parse_int(calibration_eval_every) or 2,
+            max_epochs=parse_int(calibration_max_epochs) or 1000,
             seed=seed,
         )
-        num_epochs = resolve_num_epochs(
+        num_epochs = calibrate_num_epochs(
             ratings_file,
-            epoch_scout_cache,
-            scout_config,
-            max_age_days=parse_int(epoch_scout_max_age_days) or 7,
-            force=parse_bool(force_scout),
+            epoch_calibration_cache,
+            calibration_config,
+            max_age_days=parse_int(epoch_calibration_max_age_days) or 7,
+            force=parse_bool(force_calibration),
             now=django.utils.timezone.now(),
         )
 
@@ -716,7 +716,7 @@ def trainbgg(
     )
     LOGGER.info("Loaded %d ratings", len(ratings))
 
-    # Always trains on the full dataset, never the scout's held-out split.
+    # Always trains on the full dataset, never the calibration run's held-out split.
     if lr_step_size:
         lr_scheduler_factory = functools.partial(
             optim.lr_scheduler.StepLR, step_size=lr_step_size, gamma=lr_gamma
@@ -763,8 +763,8 @@ def trainbgg(
             "seed": seed,
         },
     )
-    if epoch_count_scouted:
-        metadata["epoch_scout"] = {"cache_path": str(epoch_scout_cache)}
+    if epoch_count_calibrated:
+        metadata["epoch_calibration"] = {"cache_path": str(epoch_calibration_cache)}
 
     timestamp = django.utils.timezone.now().strftime(DATE_FORMAT_COMPACT)
     archive_path = os.path.join(archive_dir, f"{timestamp}.npz")
