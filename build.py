@@ -34,6 +34,7 @@ from contextlib import contextmanager
 from datetime import UTC
 from functools import lru_cache
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import django
 from dotenv import load_dotenv
@@ -41,6 +42,9 @@ from git import Repo
 from invoke import task
 from pytility import arg_to_iter, parse_bool, parse_date, parse_float, parse_int
 from snaptime import snap
+
+if TYPE_CHECKING:
+    import polars as pl
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -186,6 +190,38 @@ def _git_provenance(repo_path: str) -> dict[str, object] | None:
     except Exception:
         LOGGER.exception("Unable to determine Git provenance for <%s>", repo_path)
         return None
+
+
+def _ratings_provenance(
+    ratings_file: str | os.PathLike[str],
+    ratings: pl.DataFrame,
+) -> dict[str, object]:
+    """
+    Row count/size/mtime, not just git SHA: `gitupdate` commits
+    `SCRAPED_DATA_DIR` after training runs, so the SHA alone can predate
+    the data used.
+    """
+    ratings_stat = os.stat(ratings_file)
+    return {
+        "path": str(ratings_file),
+        "row_count": len(ratings),
+        "size_bytes": ratings_stat.st_size,
+        "modified": ratings_stat.st_mtime,
+        "git": _git_provenance(SCRAPED_DATA_DIR),
+    }
+
+
+def _training_provenance(
+    ratings_file: str | os.PathLike[str],
+    ratings: pl.DataFrame,
+    hyperparameters: dict[str, object],
+) -> dict[str, object]:
+    from board_game_recommender.dnn import training_metadata
+
+    metadata = training_metadata(hyperparameters=hyperparameters)
+    metadata["recommend_games_server_git"] = _git_provenance(BASE_DIR)
+    metadata["ratings_data"] = _ratings_provenance(ratings_file, ratings)
+    return metadata
 
 
 @task()
@@ -517,30 +553,38 @@ def mergeall(
     """Merge all sites and items."""
 
 
+# Held constant across production training and every tier2search candidate,
+# which varies only learning_rate/LR schedule.
+TIER1_HYPERPARAMETERS = {
+    "num_factors": 32,
+    "batch_size": 1 << 16,
+    "regularization": 1e-9,
+    "linear_regularization": 1e-9,
+    "ranking_regularization": 0.25,
+    "num_sampled_negative_examples": 4,
+}
+
+
 @task()
 def trainbgg(
     c,
     ratings_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem.jl"),
     out_path_light=os.path.join(RECOMMENDER_DIR, ".bgg.light.npz"),
     archive_dir=MODEL_ARCHIVE_DIR,
-    num_factors=32,
+    num_factors=TIER1_HYPERPARAMETERS["num_factors"],
     num_epochs=300,
-    batch_size=1 << 16,
+    batch_size=TIER1_HYPERPARAMETERS["batch_size"],
     learning_rate=1e-3,
     seed=None,
 ):
     """train BoardGameGeek recommender model"""
 
     import polars as pl
-    from board_game_recommender.dnn import (
-        train,
-        training_metadata,
-        write_training_metadata,
-    )
+    from board_game_recommender.dnn import train, write_training_metadata
 
-    num_factors = parse_int(num_factors) or 32
+    num_factors = parse_int(num_factors) or TIER1_HYPERPARAMETERS["num_factors"]
     num_epochs = parse_int(num_epochs) or 300
-    batch_size = parse_int(batch_size) or (1 << 16)
+    batch_size = parse_int(batch_size) or TIER1_HYPERPARAMETERS["batch_size"]
     learning_rate = parse_float(learning_rate) or 1e-3
     seed = parse_int(seed)
 
@@ -567,6 +611,12 @@ def trainbgg(
         num_epochs=num_epochs,
         batch_size=batch_size,
         learning_rate=learning_rate,
+        regularization=TIER1_HYPERPARAMETERS["regularization"],
+        linear_regularization=TIER1_HYPERPARAMETERS["linear_regularization"],
+        ranking_regularization=TIER1_HYPERPARAMETERS["ranking_regularization"],
+        num_sampled_negative_examples=TIER1_HYPERPARAMETERS[
+            "num_sampled_negative_examples"
+        ],
         seed=seed,
     )
 
@@ -575,7 +625,9 @@ def trainbgg(
     os.makedirs(os.path.dirname(out_path_light), exist_ok=True)
     result.to_collaborative_filtering_data().to_npz(out_path_light)
 
-    metadata = training_metadata(
+    metadata = _training_provenance(
+        ratings_file,
+        ratings,
         hyperparameters={
             "num_factors": num_factors,
             "num_epochs": num_epochs,
@@ -585,17 +637,6 @@ def trainbgg(
             "seed": seed,
         },
     )
-    metadata["recommend_games_server_git"] = _git_provenance(BASE_DIR)
-    ratings_stat = os.stat(ratings_file)
-    metadata["ratings_data"] = {
-        "path": str(ratings_file),
-        "row_count": len(ratings),
-        "size_bytes": ratings_stat.st_size,
-        "modified": ratings_stat.st_mtime,
-        # gitupdate commits this file only after trainbgg runs, so this SHA
-        # predates it -- row_count/size/modified are the real fingerprint.
-        "git": _git_provenance(SCRAPED_DATA_DIR),
-    }
 
     timestamp = django.utils.timezone.now().strftime(DATE_FORMAT_COMPACT)
     archive_path = os.path.join(archive_dir, f"{timestamp}.npz")
@@ -605,6 +646,144 @@ def trainbgg(
     write_training_metadata(archive_path, metadata)
 
     LOGGER.info("Done training.")
+
+
+@task()
+def tier2search(
+    c,
+    ratings_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem.jl"),
+    out_dir=os.path.join(MODELS_DIR, "hp_search"),
+    power_users=200,
+    test_rows=100,
+    metric="ndcg",
+    k=25,
+    patience=30,
+    eval_every=2,
+    max_epochs=1000,
+    seed=None,
+):
+    """Compare trainbgg's optimizer/LR candidates on nDCG@25, ECS@25 as a degeneracy check."""
+
+    import time
+
+    import polars as pl
+    from board_game_recommender.evaluation import (
+        recommender_test_data_from_frame,
+        split_train_test,
+    )
+
+    from hyperparameter_search import (
+        TrialConfig,
+        compare_trials,
+        write_comparison_report,
+    )
+
+    power_users = parse_int(power_users) or 200
+    test_rows = parse_int(test_rows) or 100
+    k = parse_int(k) or 25
+    patience = parse_int(patience) or 30
+    eval_every = parse_int(eval_every) or 2
+    max_epochs = parse_int(max_epochs) or 1000
+    # Nanosecond resolution: second resolution risks two invocations
+    # scripted back-to-back landing on the same seed.
+    seed = parse_int(seed) if seed is not None else time.time_ns()
+
+    LOGGER.info("Using seed %d", seed)
+    LOGGER.info("Loading ratings from <%s>...", ratings_file)
+    ratings = pl.read_ndjson(
+        ratings_file,
+        schema={
+            "bgg_user_name": pl.String,
+            "bgg_id": pl.Int64,
+            "bgg_user_rating": pl.Float64,
+        },
+    )
+    LOGGER.info("Loaded %d ratings", len(ratings))
+
+    train_data, test_data_raw = split_train_test(
+        ratings,
+        threshold_power_users=power_users,
+        num_test_rows=test_rows,
+        seed=seed,
+    )
+    test_data = recommender_test_data_from_frame(
+        test_data_raw,
+        ratings_per_user=test_rows,
+    )
+
+    configs = [
+        TrialConfig(
+            name="flat_adam_1e-3",
+            train_kwargs={**TIER1_HYPERPARAMETERS, "learning_rate": 1e-3},
+        ),
+        # Gammas anchored to flat_adam_1e-3's ~265-epoch horizon: leaves
+        # 50%/10% of the start LR by epoch 265, well above the near-zero LR
+        # that killed the earlier step=5/step=10 schedules.
+        TrialConfig(
+            name="adam_decay_1e-3_exp_gamma0.9974",
+            train_kwargs={**TIER1_HYPERPARAMETERS, "learning_rate": 1e-3},
+            lr_decay_gamma=0.9974,
+        ),
+        TrialConfig(
+            name="adam_decay_1e-3_exp_gamma0.9913",
+            train_kwargs={**TIER1_HYPERPARAMETERS, "learning_rate": 1e-3},
+            lr_decay_gamma=0.9913,
+        ),
+    ]
+
+    results = compare_trials(
+        train_data,
+        test_data,
+        configs,
+        metric=metric,
+        k=k,
+        patience=patience,
+        eval_every=eval_every,
+        max_epochs=max_epochs,
+        seed=seed,
+    )
+
+    LOGGER.info(
+        "Winner: %s (%s@%d=%.4f)",
+        results[0].name,
+        metric,
+        k,
+        results[0].best_value,
+    )
+    for result in results:
+        LOGGER.info(
+            "  %-30s %s@%d=%.4f  nDCG_exp@%d=%.4f  RMSE=%.4f  ECS@%d=%.1f  "
+            "coverage@%d=%.4f  novelty@%d=%.4f  best_epoch=%s  stopped=%s",
+            result.name,
+            metric,
+            k,
+            result.best_value,
+            k,
+            result.metrics["ndcg_exp"][k],
+            result.metrics["rmse"],
+            k,
+            result.metrics["effective_catalog_size"][k],
+            k,
+            result.metrics["catalog_coverage"][k],
+            k,
+            result.metrics["novelty"][k],
+            result.best_epoch,
+            result.stopped,
+        )
+
+    # Everything else already lives on TrialResult; only what has no
+    # per-trial home goes here, merged into each trial's record on write.
+    provenance = {
+        "recommend_games_server_git": _git_provenance(BASE_DIR),
+        "ratings_data": _ratings_provenance(ratings_file, ratings),
+        "power_users": power_users,
+        "test_rows": test_rows,
+    }
+
+    out_path = Path(out_dir) / django.utils.timezone.now().strftime(
+        f"tier2_{DATE_FORMAT_COMPACT}.json"
+    )
+    write_comparison_report(results, out_path, provenance=provenance)
 
 
 def _save_rg_ranking(
