@@ -30,13 +30,14 @@ class TrialConfig:
     """
     Plain fields, not a `lr_scheduler_factory` callable, for the LR
     schedule: callables can't round-trip through `write_comparison_report`'s
-    `json.dump`.
+    `json.dump`. At most one of `lr_step_size` or `lr_decay_gamma` may be set.
     """
 
     name: str
     train_kwargs: dict[str, Any] = field(default_factory=dict)
     lr_step_size: int | None = None
     lr_gamma: float = 0.5
+    lr_decay_gamma: float | None = None
 
 
 @dataclass(frozen=True)
@@ -50,6 +51,7 @@ class TrialResult:
     train_kwargs: dict[str, Any]
     lr_step_size: int | None
     lr_gamma: float | None
+    lr_decay_gamma: float | None
     metric: str
     k: int
     patience: int
@@ -99,15 +101,26 @@ def run_trial(
         eval_every=eval_every,
     )
 
-    lr_scheduler_factory = (
-        functools.partial(
+    if config.lr_step_size and config.lr_decay_gamma:
+        msg = (
+            f"Trial {config.name!r} sets both lr_step_size and "
+            "lr_decay_gamma -- pick one LR schedule."
+        )
+        raise ValueError(msg)
+
+    if config.lr_step_size:
+        lr_scheduler_factory = functools.partial(
             optim.lr_scheduler.StepLR,
             step_size=config.lr_step_size,
             gamma=config.lr_gamma,
         )
-        if config.lr_step_size
-        else None
-    )
+    elif config.lr_decay_gamma:
+        lr_scheduler_factory = functools.partial(
+            optim.lr_scheduler.ExponentialLR,
+            gamma=config.lr_decay_gamma,
+        )
+    else:
+        lr_scheduler_factory = None
 
     LOGGER.info("Running trial %r: %s", config.name, config.train_kwargs)
     start = time.monotonic()
@@ -151,6 +164,7 @@ def run_trial(
         train_kwargs=dict(config.train_kwargs),
         lr_step_size=config.lr_step_size,
         lr_gamma=config.lr_gamma if config.lr_step_size else None,
+        lr_decay_gamma=config.lr_decay_gamma,
         metric=metric,
         k=k,
         patience=patience,

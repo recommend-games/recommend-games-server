@@ -657,12 +657,14 @@ def tier2search(
     test_rows=100,
     metric="ndcg",
     k=25,
-    patience=10,
-    eval_every=5,
+    patience=30,
+    eval_every=2,
     max_epochs=1000,
-    seed=428,
+    seed=None,
 ):
     """Compare trainbgg's optimizer/LR candidates on nDCG@25, ECS@25 as a degeneracy check."""
+
+    import time
 
     import polars as pl
     from board_game_recommender.evaluation import (
@@ -679,11 +681,14 @@ def tier2search(
     power_users = parse_int(power_users) or 200
     test_rows = parse_int(test_rows) or 100
     k = parse_int(k) or 25
-    patience = parse_int(patience) or 10
-    eval_every = parse_int(eval_every) or 5
+    patience = parse_int(patience) or 30
+    eval_every = parse_int(eval_every) or 2
     max_epochs = parse_int(max_epochs) or 1000
-    seed = parse_int(seed)
+    # Nanosecond resolution: second resolution risks two invocations
+    # scripted back-to-back landing on the same seed.
+    seed = parse_int(seed) if seed is not None else time.time_ns()
 
+    LOGGER.info("Using seed %d", seed)
     LOGGER.info("Loading ratings from <%s>...", ratings_file)
     ratings = pl.read_ndjson(
         ratings_file,
@@ -711,19 +716,18 @@ def tier2search(
             name="flat_adam_1e-3",
             train_kwargs={**TIER1_HYPERPARAMETERS, "learning_rate": 1e-3},
         ),
-        # Step size must be comparable to flat_adam_1e-3's ~265-epoch
-        # convergence horizon, or decay zeroes the LR before it can compete.
+        # Gammas anchored to flat_adam_1e-3's ~265-epoch horizon: leaves
+        # 50%/10% of the start LR by epoch 265, well above the near-zero LR
+        # that killed the earlier step=5/step=10 schedules.
         TrialConfig(
-            name="adam_decay_1e-3_step100_gamma0.5",
+            name="adam_decay_1e-3_exp_gamma0.9974",
             train_kwargs={**TIER1_HYPERPARAMETERS, "learning_rate": 1e-3},
-            lr_step_size=100,
-            lr_gamma=0.5,
+            lr_decay_gamma=0.9974,
         ),
         TrialConfig(
-            name="adam_decay_1e-3_step150_gamma0.5",
+            name="adam_decay_1e-3_exp_gamma0.9913",
             train_kwargs={**TIER1_HYPERPARAMETERS, "learning_rate": 1e-3},
-            lr_step_size=150,
-            lr_gamma=0.5,
+            lr_decay_gamma=0.9913,
         ),
     ]
 
