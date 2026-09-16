@@ -577,6 +577,8 @@ def epochcalibrate(
     c,
     ratings_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem.jl"),
     cache_path=EPOCH_CALIBRATION_CACHE_PATH,
+    max_age_days=7,
+    force=False,
     num_factors=TIER1_HYPERPARAMETERS["num_factors"],
     batch_size=TIER1_HYPERPARAMETERS["batch_size"],
     learning_rate=TIER2_LEARNING_RATE,
@@ -592,17 +594,26 @@ def epochcalibrate(
     max_epochs=1000,
     seed=None,
 ):
-    """Force a fresh epoch calibration and refresh the cache `trainbgg` reads."""
+    """
+    Resolve trainbgg's epoch count (#429): reuse the cache unless it's
+    missing, older than max_age_days, or force=True.
+    """
 
     from games.epoch_calibration import CalibrationConfig, calibrate_num_epochs
+
+    lr_step_size = parse_int(lr_step_size)
+    lr_decay_gamma = parse_float(lr_decay_gamma)
+    if lr_step_size and lr_decay_gamma:
+        msg = "Set at most one of lr_step_size or lr_decay_gamma."
+        raise ValueError(msg)
 
     config = CalibrationConfig(
         num_factors=parse_int(num_factors) or TIER1_HYPERPARAMETERS["num_factors"],
         batch_size=parse_int(batch_size) or TIER1_HYPERPARAMETERS["batch_size"],
         learning_rate=parse_float(learning_rate) or TIER2_LEARNING_RATE,
-        lr_step_size=parse_int(lr_step_size),
+        lr_step_size=lr_step_size,
         lr_gamma=parse_float(lr_gamma) or TIER2_LR_GAMMA,
-        lr_decay_gamma=parse_float(lr_decay_gamma),
+        lr_decay_gamma=lr_decay_gamma,
         power_users=parse_int(power_users) or 200,
         test_rows=parse_int(test_rows) or 100,
         metric=metric,
@@ -616,11 +627,12 @@ def epochcalibrate(
         ratings_file,
         cache_path,
         config,
-        max_age_days=0,
-        force=True,
+        max_age_days=parse_int(max_age_days) or 7,
+        force=parse_bool(force),
         now=django.utils.timezone.now(),
     )
     LOGGER.info("Calibrated epoch count: %d", num_epochs)
+    return num_epochs
 
 
 @task()
@@ -639,13 +651,6 @@ def trainbgg(
     epoch_calibration_cache=EPOCH_CALIBRATION_CACHE_PATH,
     epoch_calibration_max_age_days=7,
     force_calibration=False,
-    calibration_power_users=200,
-    calibration_test_rows=100,
-    calibration_metric="ndcg",
-    calibration_k=25,
-    calibration_patience=30,
-    calibration_eval_every=2,
-    calibration_max_epochs=1000,
     seed=None,
 ):
     """train BoardGameGeek recommender model"""
@@ -655,8 +660,6 @@ def trainbgg(
     import polars as pl
     from board_game_recommender.dnn import train, write_training_metadata
     from torch import optim
-
-    from games.epoch_calibration import CalibrationConfig, calibrate_num_epochs
 
     num_factors = parse_int(num_factors) or TIER1_HYPERPARAMETERS["num_factors"]
     num_epochs = parse_int(num_epochs)
@@ -671,32 +674,23 @@ def trainbgg(
         msg = "Set at most one of lr_step_size or lr_decay_gamma."
         raise ValueError(msg)
 
-    # An explicit --num-epochs always wins over the cached/calibrated value (#429).
+    # An explicit --num-epochs always wins and skips calibration entirely
+    # (#429) -- epochcalibrate only runs to fill in a number we don't have.
     epoch_count_calibrated = num_epochs is None
     if epoch_count_calibrated:
-        calibration_config = CalibrationConfig(
+        num_epochs = epochcalibrate(
+            c,
+            ratings_file=ratings_file,
+            cache_path=epoch_calibration_cache,
+            max_age_days=epoch_calibration_max_age_days,
+            force=force_calibration,
             num_factors=num_factors,
             batch_size=batch_size,
             learning_rate=learning_rate,
             lr_step_size=lr_step_size,
             lr_gamma=lr_gamma,
             lr_decay_gamma=lr_decay_gamma,
-            power_users=parse_int(calibration_power_users) or 200,
-            test_rows=parse_int(calibration_test_rows) or 100,
-            metric=calibration_metric,
-            k=parse_int(calibration_k) or 25,
-            patience=parse_int(calibration_patience) or 30,
-            eval_every=parse_int(calibration_eval_every) or 2,
-            max_epochs=parse_int(calibration_max_epochs) or 1000,
             seed=seed,
-        )
-        num_epochs = calibrate_num_epochs(
-            ratings_file,
-            epoch_calibration_cache,
-            calibration_config,
-            max_age_days=parse_int(epoch_calibration_max_age_days) or 7,
-            force=parse_bool(force_calibration),
-            now=django.utils.timezone.now(),
         )
 
     LOGGER.info(
