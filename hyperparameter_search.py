@@ -41,12 +41,22 @@ class TrialConfig:
 
 @dataclass(frozen=True)
 class TrialResult:
+    """
+    Self-contained: every field needed to know exactly how this one trial
+    was run and evaluated, independent of any sibling trial or report.
+    """
+
     name: str
     train_kwargs: dict[str, Any]
     lr_step_size: int | None
     lr_gamma: float | None
     metric: str
     k: int
+    patience: int
+    eval_every: int
+    max_epochs: int
+    seed: int | None
+    library_version: str
     stopped: bool
     best_epoch: int | None
     best_value: float | None
@@ -74,6 +84,7 @@ def run_trial(
     anyway; set `max_epochs` generously.
     """
     import functools
+    import importlib.metadata
 
     from board_game_recommender.dnn import early_stopping_callback, train
     from board_game_recommender.evaluation import calculate_metrics
@@ -142,6 +153,11 @@ def run_trial(
         lr_gamma=config.lr_gamma if config.lr_step_size else None,
         metric=metric,
         k=k,
+        patience=patience,
+        eval_every=eval_every,
+        max_epochs=max_epochs,
+        seed=seed,
+        library_version=importlib.metadata.version("board-game-recommender"),
         stopped=state.stopped,
         best_epoch=state.best_epoch,
         best_value=state.best_value,
@@ -194,12 +210,19 @@ def _sort_key(result: TrialResult) -> float:
 def write_comparison_report(
     results: list[TrialResult],
     path: str | os.PathLike[str],
+    provenance: dict[str, Any] | None = None,
 ) -> Path:
-    """Write `results` as JSON. Use a path outside `DATA_DIR`, which `cleandata` wipes."""
+    """
+    Write `results` as JSON, `provenance` (git SHA, ratings fingerprint, ...)
+    merged into every trial so each stands alone -- extracting a single
+    trial's record still tells the whole story. Use a path outside
+    `DATA_DIR`, which `cleandata` wipes.
+    """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
+    trials = [{**asdict(r), **(provenance or {})} for r in results]
     with path.open("w", encoding="utf-8") as file:
-        json.dump([asdict(r) for r in results], file, indent=2, sort_keys=True)
+        json.dump(trials, file, indent=2, sort_keys=True)
         file.write("\n")
     LOGGER.info("Wrote comparison report for %d trial(s) to <%s>", len(results), path)
     return path
