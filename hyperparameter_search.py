@@ -30,23 +30,35 @@ class TrialConfig:
     """
     Plain fields, not a `lr_scheduler_factory` callable, for the LR
     schedule: callables can't round-trip through `write_comparison_report`'s
-    `json.dump`.
+    `json.dump`. At most one of `lr_step_size` or `lr_decay_gamma` may be set.
     """
 
     name: str
     train_kwargs: dict[str, Any] = field(default_factory=dict)
     lr_step_size: int | None = None
     lr_gamma: float = 0.5
+    lr_decay_gamma: float | None = None
 
 
 @dataclass(frozen=True)
 class TrialResult:
+    """
+    Self-contained: every field needed to know exactly how this one trial
+    was run and evaluated, independent of any sibling trial or report.
+    """
+
     name: str
     train_kwargs: dict[str, Any]
     lr_step_size: int | None
     lr_gamma: float | None
+    lr_decay_gamma: float | None
     metric: str
     k: int
+    patience: int
+    eval_every: int
+    max_epochs: int
+    seed: int | None
+    library_version: str
     stopped: bool
     best_epoch: int | None
     best_value: float | None
@@ -74,6 +86,7 @@ def run_trial(
     anyway; set `max_epochs` generously.
     """
     import functools
+    import importlib.metadata
 
     from board_game_recommender.dnn import early_stopping_callback, train
     from board_game_recommender.evaluation import calculate_metrics
@@ -88,15 +101,26 @@ def run_trial(
         eval_every=eval_every,
     )
 
-    lr_scheduler_factory = (
-        functools.partial(
+    if config.lr_step_size and config.lr_decay_gamma:
+        msg = (
+            f"Trial {config.name!r} sets both lr_step_size and "
+            "lr_decay_gamma -- pick one LR schedule."
+        )
+        raise ValueError(msg)
+
+    if config.lr_step_size:
+        lr_scheduler_factory = functools.partial(
             optim.lr_scheduler.StepLR,
             step_size=config.lr_step_size,
             gamma=config.lr_gamma,
         )
-        if config.lr_step_size
-        else None
-    )
+    elif config.lr_decay_gamma:
+        lr_scheduler_factory = functools.partial(
+            optim.lr_scheduler.ExponentialLR,
+            gamma=config.lr_decay_gamma,
+        )
+    else:
+        lr_scheduler_factory = None
 
     LOGGER.info("Running trial %r: %s", config.name, config.train_kwargs)
     start = time.monotonic()
@@ -140,8 +164,14 @@ def run_trial(
         train_kwargs=dict(config.train_kwargs),
         lr_step_size=config.lr_step_size,
         lr_gamma=config.lr_gamma if config.lr_step_size else None,
+        lr_decay_gamma=config.lr_decay_gamma,
         metric=metric,
         k=k,
+        patience=patience,
+        eval_every=eval_every,
+        max_epochs=max_epochs,
+        seed=seed,
+        library_version=importlib.metadata.version("board-game-recommender"),
         stopped=state.stopped,
         best_epoch=state.best_epoch,
         best_value=state.best_value,
@@ -194,12 +224,19 @@ def _sort_key(result: TrialResult) -> float:
 def write_comparison_report(
     results: list[TrialResult],
     path: str | os.PathLike[str],
+    provenance: dict[str, Any] | None = None,
 ) -> Path:
-    """Write `results` as JSON. Use a path outside `DATA_DIR`, which `cleandata` wipes."""
+    """
+    Write `results` as JSON, `provenance` (git SHA, ratings fingerprint, ...)
+    merged into every trial so each stands alone -- extracting a single
+    trial's record still tells the whole story. Use a path outside
+    `DATA_DIR`, which `cleandata` wipes.
+    """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
+    trials = [{**asdict(r), **(provenance or {})} for r in results]
     with path.open("w", encoding="utf-8") as file:
-        json.dump([asdict(r) for r in results], file, indent=2, sort_keys=True)
+        json.dump(trials, file, indent=2, sort_keys=True)
         file.write("\n")
     LOGGER.info("Wrote comparison report for %d trial(s) to <%s>", len(results), path)
     return path

@@ -31,6 +31,7 @@ class ScoutConfig:
     learning_rate: float
     lr_step_size: int | None
     lr_gamma: float
+    lr_decay_gamma: float | None
     power_users: int
     test_rows: int
     metric: str
@@ -94,6 +95,7 @@ def run_scout(ratings_file: str | os.PathLike[str], config: ScoutConfig) -> Tria
         },
         lr_step_size=config.lr_step_size,
         lr_gamma=config.lr_gamma,
+        lr_decay_gamma=config.lr_decay_gamma,
     )
     result = run_trial(
         train_data,
@@ -155,6 +157,7 @@ def resolve_num_epochs(
             "learning_rate": config.learning_rate,
             "lr_step_size": config.lr_step_size,
             "lr_gamma": config.lr_gamma if config.lr_step_size else None,
+            "lr_decay_gamma": config.lr_decay_gamma,
             "power_users": config.power_users,
             "test_rows": config.test_rows,
             "seed": config.seed,
