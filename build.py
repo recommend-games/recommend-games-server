@@ -101,6 +101,13 @@ RECOMMENDER_DIR = os.path.abspath(
 SCRAPED_DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "board-game-data"))
 # Outside DATA_DIR, which cleandata wipes every build.
 MODEL_ARCHIVE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "model-archive"))
+EPOCH_CALIBRATION_CACHE_PATH = os.path.join(MODELS_DIR, "epoch_calibration_cache.json")
+
+# Tier 2 (#428) defaults, shared by trainbgg and epochcalibrate below.
+TIER2_LEARNING_RATE = 1e-3
+TIER2_LR_STEP_SIZE = None
+TIER2_LR_GAMMA = 0.5
+TIER2_LR_DECAY_GAMMA = None
 
 DATE_FORMAT_DASH = "%Y-%m-%dT%H-%M-%S"
 DATE_FORMAT_COMPACT = "%Y%m%d-%H%M%S"
@@ -566,27 +573,125 @@ TIER1_HYPERPARAMETERS = {
 
 
 @task()
+def epochcalibrate(
+    c,
+    ratings_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem.jl"),
+    cache_path=EPOCH_CALIBRATION_CACHE_PATH,
+    max_age_days=7,
+    force=False,
+    num_factors=TIER1_HYPERPARAMETERS["num_factors"],
+    batch_size=TIER1_HYPERPARAMETERS["batch_size"],
+    learning_rate=TIER2_LEARNING_RATE,
+    lr_step_size=TIER2_LR_STEP_SIZE,
+    lr_gamma=TIER2_LR_GAMMA,
+    lr_decay_gamma=TIER2_LR_DECAY_GAMMA,
+    power_users=200,
+    test_rows=100,
+    metric="ndcg",
+    k=25,
+    patience=30,
+    eval_every=2,
+    max_epochs=1000,
+    seed=None,
+):
+    """
+    Resolve trainbgg's epoch count (#429): reuse the cache unless it's
+    missing, older than max_age_days, or force=True.
+    """
+
+    from games.epoch_calibration import CalibrationConfig, calibrate_num_epochs
+
+    lr_step_size = parse_int(lr_step_size)
+    lr_decay_gamma = parse_float(lr_decay_gamma)
+    if lr_step_size and lr_decay_gamma:
+        msg = "Set at most one of lr_step_size or lr_decay_gamma."
+        raise ValueError(msg)
+
+    config = CalibrationConfig(
+        num_factors=parse_int(num_factors) or TIER1_HYPERPARAMETERS["num_factors"],
+        batch_size=parse_int(batch_size) or TIER1_HYPERPARAMETERS["batch_size"],
+        learning_rate=parse_float(learning_rate) or TIER2_LEARNING_RATE,
+        lr_step_size=lr_step_size,
+        lr_gamma=parse_float(lr_gamma) or TIER2_LR_GAMMA,
+        lr_decay_gamma=lr_decay_gamma,
+        power_users=parse_int(power_users) or 200,
+        test_rows=parse_int(test_rows) or 100,
+        metric=metric,
+        k=parse_int(k) or 25,
+        patience=parse_int(patience) or 30,
+        eval_every=parse_int(eval_every) or 2,
+        max_epochs=parse_int(max_epochs) or 1000,
+        seed=parse_int(seed),
+    )
+    num_epochs = calibrate_num_epochs(
+        ratings_file,
+        cache_path,
+        config,
+        max_age_days=parse_int(max_age_days) or 7,
+        force=parse_bool(force),
+        now=django.utils.timezone.now(),
+    )
+    LOGGER.info("Calibrated epoch count: %d", num_epochs)
+    return num_epochs
+
+
+@task()
 def trainbgg(
     c,
     ratings_file=os.path.join(SCRAPED_DATA_DIR, "scraped", "bgg_RatingItem.jl"),
     out_path_light=os.path.join(RECOMMENDER_DIR, ".bgg.light.npz"),
     archive_dir=MODEL_ARCHIVE_DIR,
     num_factors=TIER1_HYPERPARAMETERS["num_factors"],
-    num_epochs=300,
+    num_epochs=None,
     batch_size=TIER1_HYPERPARAMETERS["batch_size"],
-    learning_rate=1e-3,
+    learning_rate=TIER2_LEARNING_RATE,
+    lr_step_size=TIER2_LR_STEP_SIZE,
+    lr_gamma=TIER2_LR_GAMMA,
+    lr_decay_gamma=TIER2_LR_DECAY_GAMMA,
+    epoch_calibration_cache=EPOCH_CALIBRATION_CACHE_PATH,
+    epoch_calibration_max_age_days=7,
+    force_calibration=False,
     seed=None,
 ):
     """train BoardGameGeek recommender model"""
 
+    import functools
+
     import polars as pl
     from board_game_recommender.dnn import train, write_training_metadata
+    from torch import optim
 
     num_factors = parse_int(num_factors) or TIER1_HYPERPARAMETERS["num_factors"]
-    num_epochs = parse_int(num_epochs) or 300
+    num_epochs = parse_int(num_epochs)
     batch_size = parse_int(batch_size) or TIER1_HYPERPARAMETERS["batch_size"]
-    learning_rate = parse_float(learning_rate) or 1e-3
+    learning_rate = parse_float(learning_rate) or TIER2_LEARNING_RATE
+    lr_step_size = parse_int(lr_step_size)
+    lr_gamma = parse_float(lr_gamma) or TIER2_LR_GAMMA
+    lr_decay_gamma = parse_float(lr_decay_gamma)
     seed = parse_int(seed)
+
+    if lr_step_size and lr_decay_gamma:
+        msg = "Set at most one of lr_step_size or lr_decay_gamma."
+        raise ValueError(msg)
+
+    # An explicit --num-epochs always wins and skips calibration entirely
+    # (#429) -- epochcalibrate only runs to fill in a number we don't have.
+    epoch_count_calibrated = num_epochs is None
+    if epoch_count_calibrated:
+        num_epochs = epochcalibrate(
+            c,
+            ratings_file=ratings_file,
+            cache_path=epoch_calibration_cache,
+            max_age_days=epoch_calibration_max_age_days,
+            force=force_calibration,
+            num_factors=num_factors,
+            batch_size=batch_size,
+            learning_rate=learning_rate,
+            lr_step_size=lr_step_size,
+            lr_gamma=lr_gamma,
+            lr_decay_gamma=lr_decay_gamma,
+            seed=seed,
+        )
 
     LOGGER.info(
         "Training recommender model from ratings <%s> with %d factors for %d epochs...",
@@ -605,12 +710,24 @@ def trainbgg(
     )
     LOGGER.info("Loaded %d ratings", len(ratings))
 
+    # Always trains on the full dataset, never the calibration run's held-out split.
+    if lr_step_size:
+        lr_scheduler_factory = functools.partial(
+            optim.lr_scheduler.StepLR, step_size=lr_step_size, gamma=lr_gamma
+        )
+    elif lr_decay_gamma:
+        lr_scheduler_factory = functools.partial(
+            optim.lr_scheduler.ExponentialLR, gamma=lr_decay_gamma
+        )
+    else:
+        lr_scheduler_factory = None
     result = train(
         ratings,
         num_factors=num_factors,
         num_epochs=num_epochs,
         batch_size=batch_size,
         learning_rate=learning_rate,
+        lr_scheduler_factory=lr_scheduler_factory,
         regularization=TIER1_HYPERPARAMETERS["regularization"],
         linear_regularization=TIER1_HYPERPARAMETERS["linear_regularization"],
         ranking_regularization=TIER1_HYPERPARAMETERS["ranking_regularization"],
@@ -633,10 +750,15 @@ def trainbgg(
             "num_epochs": num_epochs,
             "batch_size": batch_size,
             "learning_rate": learning_rate,
+            "lr_step_size": lr_step_size,
+            "lr_gamma": lr_gamma if lr_step_size else None,
+            "lr_decay_gamma": lr_decay_gamma,
             "unobserved_rating_value": result.unobserved_rating_value,
             "seed": seed,
         },
     )
+    if epoch_count_calibrated:
+        metadata["epoch_calibration"] = {"cache_path": str(epoch_calibration_cache)}
 
     timestamp = django.utils.timezone.now().strftime(DATE_FORMAT_COMPACT)
     archive_path = os.path.join(archive_dir, f"{timestamp}.npz")
@@ -672,7 +794,7 @@ def tier2search(
         split_train_test,
     )
 
-    from hyperparameter_search import (
+    from games.hyperparameter_search import (
         TrialConfig,
         compare_trials,
         write_comparison_report,
