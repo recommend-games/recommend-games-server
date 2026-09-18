@@ -10,7 +10,7 @@ requires-python = ">=3.14"
 # Runtime dependencies: everything the Docker image needs to serve requests,
 # and nothing else. The build pipeline lives in the "build" group below.
 dependencies = [
-    "board-game-recommender>=4.5.0,<5.0.0",
+    "board-game-recommender>=4.6.0,<5.0.0",
     "django>=6.0,<7.0",
     "django-api-proxy",
     "django-extensions",
@@ -30,7 +30,7 @@ dependencies = [
 # Building the database, training the recommender, releasing the image.
 # Runs on the developer machine only -- never installed into the image.
 build = [
-    "board-game-recommender[torch]>=4.5.0,<5.0.0",
+    "board-game-recommender[torch]>=4.6.0,<5.0.0",
     "board-game-merger>=1.0.0,<2.0.0",
     "spiel-des-jahres[kennerspiel]>=0.7.0",
     # spiel-des-jahres 0.7.0 passes ColumnTransformer(force_int_remainder_cols=),
