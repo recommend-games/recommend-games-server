@@ -540,7 +540,9 @@ class GameViewSet(PermissionsModelViewSet):
             .values_list("bgg_id", flat=True)
         )
         # We can only recommend games known to the recommender
-        include_ids &= recommender.rated_games
+        include_ids = frozenset(
+            game_id for game_id in include_ids if game_id in recommender.rated_games
+        )
         # Remove all excluded games
         return include_ids - exclude_ids
 
@@ -653,7 +655,11 @@ class GameViewSet(PermissionsModelViewSet):
         exclude_compilations: bool = True,
         exclude_clusters: bool = False,
     ) -> pl.DataFrame | tuple[()]:
-        like = frozenset(arg_to_iter(like)) & recommender.rated_games
+        like = frozenset(
+            game_id
+            for game_id in arg_to_iter(like)
+            if game_id in recommender.rated_games
+        )
         if not like:
             raise NotFound("Unable to create recommendations without games")
 
