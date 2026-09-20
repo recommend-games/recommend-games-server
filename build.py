@@ -1010,7 +1010,7 @@ def savebggrankings(
     # trainbgg may have just rewritten this file in the same process, and
     # load_recommender is lru_cache'd -- drop the cache so we read from disk.
     load_recommender.cache_clear()
-    recommender = load_recommender(recommender_path)
+    recommender = load_recommender(recommender_path, mmap=False)
     if recommender is None:
         raise ValueError(f"Unable to load recommender from <{recommender_path}>")
 

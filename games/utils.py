@@ -42,21 +42,22 @@ def load_recommender(path, *, mmap=False):
     if not path:
         return None
 
-    try:
-        from board_game_recommender import LightGamesRecommender
+    eager_users = ()
+    if mmap:
+        try:
+            from games.models import Collection
 
-        from games.models import Collection
-
-        # filldb only stores collections for premium users
-        eager_users = (
-            tuple(
+            # filldb only stores collections for premium users
+            eager_users = tuple(
                 Collection.objects.order_by()
                 .values_list("user_id", flat=True)
                 .distinct()
             )
-            if mmap
-            else ()
-        )
+        except Exception:
+            LOGGER.exception("unable to find the users to load eagerly")
+
+    try:
+        from board_game_recommender import LightGamesRecommender
 
         LOGGER.info("Trying to load <LightGamesRecommender> from <%s>", path)
         return LightGamesRecommender.from_npz(
