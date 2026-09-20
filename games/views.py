@@ -706,7 +706,7 @@ class GameViewSet(PermissionsModelViewSet):
             return self.list(request)
 
         path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
-        recommender = load_recommender(path=path_light)
+        recommender = load_recommender(path=path_light, mmap=True)
 
         if recommender is None:
             return self.list(request)
@@ -823,7 +823,7 @@ class GameViewSet(PermissionsModelViewSet):
             )
 
         path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
-        recommender = load_recommender(path=path_light)
+        recommender = load_recommender(path=path_light, mmap=True)
 
         if recommender is None:
             return Response(
@@ -897,7 +897,7 @@ class GameViewSet(PermissionsModelViewSet):
         """Find games similar to this game."""
 
         path_light = getattr(settings, "LIGHT_RECOMMENDER_PATH", None)
-        recommender = load_recommender(path=path_light)
+        recommender = load_recommender(path=path_light, mmap=True)
 
         if recommender is None:
             raise NotFound(f"cannot find similar games to <{pk}>")
