@@ -191,15 +191,15 @@ wheels = [
 
 [[package]]
 name = "board-game-recommender"
-version = "4.6.0"
+version = "4.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
     { name = "polars" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c5/00/e610fdb98e14481560d371480f380822560821ba8e5488bc61bfde64f7d0/board_game_recommender-4.6.0.tar.gz", hash = "sha256:5fa0f1e0973f6cb31f8c7c848a4bb6012992fad5690e6704fc1f418200399949", size = 23175, upload-time = "2026-09-18T20:56:02.55Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/44/fa/1301ac53f3893fa70021a8a1416e69288f1bbe3f93e20e931931b400504c/board_game_recommender-4.7.0.tar.gz", hash = "sha256:5edc4ac949aee0ebf44f060957d51c01d975895f0b526d73ba2068bc4c6e4e75", size = 27486, upload-time = "2026-09-20T19:33:25.765Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/29/cd/149119a6b89866192af39de33886a5c075718279398f47c4dbdc388a435c/board_game_recommender-4.6.0-py3-none-any.whl", hash = "sha256:df95c4542e5679d6dfc9ca4cb6954e06f3d37bf2230585a6ab63e1bb5fe598fe", size = 23853, upload-time = "2026-09-18T20:56:03.635Z" },
+    { url = "https://files.pythonhosted.org/packages/e4/9e/136bfd8bd09f5e52b877d636feda63ce146f68aea695e1465594b0a1df2e/board_game_recommender-4.7.0-py3-none-any.whl", hash = "sha256:1d44fcaf7b3eeda0a4fc6145416a04b8d0875cda345140c9f81e399a3074bd64", size = 28283, upload-time = "2026-09-20T19:33:27.034Z" },
 ]
 
 [package.optional-dependencies]
@@ -1929,7 +1929,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "board-game-recommender", specifier = ">=4.6.0,<5.0.0" },
+    { name = "board-game-recommender", specifier = ">=4.7.0,<5.0.0" },
     { name = "django", specifier = ">=6.0,<7.0" },
     { name = "django-api-proxy" },
     { name = "django-extensions" },
@@ -1948,7 +1948,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 build = [
     { name = "board-game-merger", specifier = ">=1.0.0,<2.0.0" },
-    { name = "board-game-recommender", extras = ["torch"], specifier = ">=4.6.0,<5.0.0" },
+    { name = "board-game-recommender", extras = ["torch"], specifier = ">=4.7.0,<5.0.0" },
     { name = "csvkit" },
     { name = "gitpython" },
     { name = "invoke", specifier = ">=2.0.0" },
