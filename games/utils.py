@@ -35,18 +35,36 @@ def serialize_date(date, tzinfo=None):
     return parsed.strftime("%Y-%m-%dT%T%z") if parsed else str(date) if date else None
 
 
-@lru_cache(maxsize=8)
-def load_recommender(path):
+@lru_cache(maxsize=1)
+def load_recommender(path, *, mmap=False):
     """load recommender from given path"""
 
     if not path:
         return None
 
+    eager_users = ()
+    if mmap:
+        try:
+            from games.models import Collection
+
+            # filldb only stores collections for premium users
+            eager_users = tuple(
+                Collection.objects.order_by()
+                .values_list("user_id", flat=True)
+                .distinct()
+            )
+        except Exception:
+            LOGGER.exception("unable to find the users to load eagerly")
+
     try:
         from board_game_recommender import LightGamesRecommender
 
         LOGGER.info("Trying to load <LightGamesRecommender> from <%s>", path)
-        return LightGamesRecommender.from_npz(path)
+        return LightGamesRecommender.from_npz(
+            path,
+            mmap=mmap,
+            eager_users=eager_users,
+        )
 
     except Exception:
         LOGGER.exception("unable to load recommender model from <%s>", path)
