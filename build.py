@@ -1501,7 +1501,15 @@ def buildserver(c, images=None, tags=None):
 
     LOGGER.info("Building Docker image with tags %s...", all_tags)
 
-    command = ["docker", "build", "--platform", "linux/amd64"]
+    # Heroku's registry rejects manifest lists, so skip attestation manifests
+    command = [
+        "docker",
+        "build",
+        "--platform",
+        "linux/amd64",
+        "--provenance=false",
+        "--sbom=false",
+    ]
     for tag in all_tags:
         command.extend(("--tag", tag))
     command.append(".")
